@@ -1,0 +1,55 @@
+# FT-0084 — HR campaign UI (draft/start/matrix/progress/AI retry)
+Status: Draft (2026-03-03)
+
+## User value
+HR управляет кампанией: создаёт, настраивает матрицу, запускает, мониторит прогресс, перезапускает AI обработку.
+
+## Deliverables
+- Кампании: list/detail; start/stop/end.
+- Матрица: generateSuggested + edit до lock.
+- Прогресс заполнения: кто что submit’нул.
+- Кнопка “retry AI”.
+
+## Context (SSoT links)
+- [Campaign lifecycle](../../../../../spec/domain/campaign-lifecycle.md): статусы и запреты. Читать, чтобы UI правильно блокировал действия и показывал статусы.
+- [Assignments & matrix](../../../../../spec/domain/assignments-and-matrix.md): edit до lock и правила генерации. Читать, чтобы UI не предлагал “недопустимые” действия.
+- [GS5 Lock semantics](../../../../../spec/testing/scenarios/gs5-lock-semantics.md): lock на draft save. Читать, чтобы UI проверял именно agreed freeze-правило.
+- [AI processing](../../../../../spec/ai/ai-processing.md): retry AI и статусы. Читать, чтобы UI корректно инициировал запуск и отображал ошибки.
+- [Architecture guardrails](../../../../../spec/engineering/architecture-guardrails.md): UI тонкий поверх typed client. Читать, чтобы бизнес-правила не переносились в компоненты.
+
+## Acceptance (auto, Playwright)
+### Setup
+- Seed: `S4_campaign_draft`
+
+### Action
+1) Создать/открыть кампанию.
+2) Сгенерировать матрицу, отредактировать.
+3) Стартовать кампанию.
+4) Сделать draft save в анкете (любой rater) → lock.
+5) Попробовать изменить матрицу/веса из HR UI.
+
+### Assert
+- UI блокирует запрещённые действия.
+- Backend возвращает typed error `code=campaign_locked`.
+
+## Implementation plan (target repo)
+- Screens:
+  - Campaign list/detail: таблица кампаний, страница кампании с вкладками (participants/matrix/progress).
+  - Actions: start/stop/end вызывают соответствующие ops.
+  - Matrix: вызвать `matrix.generateSuggested`, показать diff и позволить ручной edit до lock (`matrix.set`).
+  - Progress: список назначений/анкет со статусами (нужен read op, возможно отдельная операция позже).
+  - AI retry: кнопка вызывает `ai.runForCampaign` (или отдельный `ai.retryForCampaign`, если введём).
+- Тонкие моменты:
+  - После lock (draft save) UI должен:
+    - скрыть/заблокировать элементы редактирования матрицы/весов,
+    - корректно обработать typed error `campaign_locked` (на случай гонок).
+
+## Tests
+- Playwright: HR создаёт/открывает кампанию → generate matrix → start → lock trigger (draft save) → попытка изменить матрицу → ожидание блокировки/ошибки.
+
+## Memory bank updates
+- Если добавляем новые HR экраны/флоу — обновить: [UI sitemap & flows](../../../../../spec/ui/sitemap-and-flows.md) — SSoT. Читать, чтобы UI не “убегал” от плана.
+
+## Verification (must)
+- Automated test: Playwright HR flow (draft → matrix generate/edit → start → lock → попытка изменить matrix/weights).
+- Must run: Playwright e2e (GS1 minimal) + lock semantics UI assertion (можно как часть GS1).
