@@ -7,6 +7,18 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:migrate": "tsx src/scripts/migrate.ts",
+    "db:health": "tsx src/scripts/health.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.44.5",
+    "pg": "8.16.3"
+  },
+  "devDependencies": {
+    "@types/pg": "8.15.5",
+    "drizzle-kit": "0.31.5",
+    "dotenv": "17.2.3",
+    "tsx": "4.20.6"
   }
 }

@@ -7,7 +7,9 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "format": "pnpm -r format"
+    "format": "pnpm -r format",
+    "db:migrate": "pnpm --filter @feedback-360/db db:migrate",
+    "db:health": "pnpm --filter @feedback-360/db db:health"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

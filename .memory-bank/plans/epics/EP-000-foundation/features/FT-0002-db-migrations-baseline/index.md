@@ -1,5 +1,5 @@
 # FT-0002 — DB migrations baseline
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## User value
 Команда развивает схему БД через миграции, может поднять окружение для интеграционных тестов и воспроизведения сценариев.
@@ -46,3 +46,26 @@ Status: Draft (2026-03-03)
 ## Verification (must)
 - Automated test: `packages/db/test/ft-0002-migrations-health.test.ts` (integration) повторяет “migrate + health”.
 - Must run: тест/скрипт, который применяет миграции и делает health query (например `SELECT 1`), чтобы это было зелёным в CI.
+
+## Implementation result (2026-03-04)
+- В `packages/db` добавлены:
+  - Drizzle schema (`src/schema/*`) для baseline таблиц под `S1_company_min`/`S2_org_basic`.
+  - SQL migration baseline: `drizzle/0000_ft0002_baseline.sql`.
+  - Drizzle config: `drizzle.config.ts`.
+  - DB runtime helpers: `src/db.ts`, `src/migrations.ts`.
+  - CLI scripts: `src/scripts/migrate.ts`, `src/scripts/health.ts`.
+- Добавлены команды:
+  1) root: `pnpm db:migrate`, `pnpm db:health`
+  2) package: `pnpm --filter @feedback-360/db db:migrate|db:health`
+- Добавлен integration test: `packages/db/src/migrations/ft-0002-migrations-health.test.ts`:
+  - при наличии `DATABASE_URL` реально выполняет migrations + health,
+  - без `DATABASE_URL` корректно скипается.
+- Добавлен `.env.example` с `DATABASE_URL`.
+
+## Verification notes
+- Зелёный прогон выполнен:
+  1) `pnpm -r lint`
+  2) `pnpm -r typecheck`
+  3) `pnpm -r test`
+- `pnpm db:migrate` и `pnpm db:health` отрабатывают с корректной ошибкой при отсутствии `DATABASE_URL`.
+- Полный live-run `db:migrate + db:health` на поднятом Postgres не выполнен в этой сессии, потому что Docker daemon недоступен (`Cannot connect to the Docker daemon ...`).
