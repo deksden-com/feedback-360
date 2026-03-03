@@ -29,3 +29,12 @@ Status: Draft (2026-03-03)
 ## Seeds as contract for tests
 - Seed scenario — часть тестового контракта: он фиксирует “стандартное состояние”.
 - Тесты не хардкодят ids: они используют JSON-вывод `seed` (mapping key → id).
+
+## Commit message convention (traceability)
+Для изменений по roadmap/эпикам/фичам в commit message обязательно добавляем тег:
+1) `[...]` с id фичи, если коммит закрывает или существенно двигает фичу: `[FT-XXXX]`.
+2) `[...]` с id эпика, если изменение относится к эпику в целом: `[EP-XXX]`.
+
+Примеры:
+- `feat: complete foundation workspace scaffold [FT-0001]`
+- `docs: refine epic sequencing and acceptance matrix [EP-004]`
