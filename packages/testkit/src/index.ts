@@ -1,0 +1,1 @@
+export const testkitReady = true;

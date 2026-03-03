@@ -1,5 +1,5 @@
 # FT-0001 — Workspace scaffold + tooling
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-03)
 
 ## User value
 Разработчики и агенты могут одинаково запускать форматирование/линт/тесты и получать предсказуемый результат.
@@ -56,3 +56,14 @@ Status: Draft (2026-03-03)
 ## Verification (must)
 - Automated test: добавить smoke-тесты запуска (и/или “meta” тест) так, чтобы это проверялось в CI (см. `FT-0001` Acceptance).
 - Must run: `pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test` (и CI job делает то же самое).
+
+## Implementation result (2026-03-03)
+- Созданы `pnpm-workspace.yaml`, корневой `package.json`, корневой `biome.json`.
+- Создан каркас `apps/web` и `packages/{config,core,api-contract,client,cli,db,testkit}` с рабочими `lint/format/typecheck/test` scripts.
+- Добавлены базовые TS-конфиги в `packages/config` и smoke-тесты в каждом workspace пакете.
+- Добавлены Playwright scaffold-файлы в `apps/web/playwright`.
+- Добавлен CI workflow `.github/workflows/ci.yml` с шагами `pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`.
+- Проверка выполнена успешно локально командами:
+  1) `pnpm -r lint`
+  2) `pnpm -r typecheck`
+  3) `pnpm -r test`

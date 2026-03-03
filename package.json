@@ -1,0 +1,19 @@
+{
+  "name": "feedback-360",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.5.0",
+  "scripts": {
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "format": "pnpm -r format"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@playwright/test": "1.54.2",
+    "@types/node": "22.13.8",
+    "typescript": "5.8.2",
+    "vitest": "3.2.4"
+  }
+}
