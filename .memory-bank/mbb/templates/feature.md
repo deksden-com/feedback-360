@@ -22,6 +22,15 @@ Status: Template
 ### Context (SSoT links)
 Аннотированные ссылки на SSoT документы, которые нужны для реализации (domain/security/testing/engineering).
 
+### Project grounding (mandatory before coding)
+Перед реализацией фичи агент фиксирует минимальный контекст, который он обязан прочитать:
+- [ ] FT-документ фичи целиком (value/deliverables/scenario/tests/docs updates).
+- [ ] Связанные SSoT документы из `Context (SSoT links)`.
+- [ ] [Operation catalog](../../spec/client-api/operation-catalog.md) — чтобы не добавлять “скрытые” ops/обходы.
+- [ ] [CLI command catalog](../../spec/cli/command-catalog.md) — чтобы сохранить 1:1 mapping command→operation.
+- [ ] [Traceability](../../spec/testing/traceability.md) + seed doc для выбранного сценария — чтобы acceptance был воспроизводимым.
+- [ ] Затрагиваемые слои/файлы по [Repo structure](../../spec/project/repo-structure.md) и [Architecture guardrails](../../spec/engineering/architecture-guardrails.md) — чтобы не нарушить границы слоёв.
+
 ### Implementation plan
 План реализации “по слоям” с целевыми путями (contract/core/db/cli/tests) и тонкими моментами.
 

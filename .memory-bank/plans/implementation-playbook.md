@@ -16,12 +16,14 @@ Status: Draft (2026-03-03)
 - [Documentation standards](../spec/engineering/documentation-standards.md): правила меморибанка и аннотированных ссылок. Читать, чтобы документация оставалась SSoT и не расползалась.
 
 ## 0) Перед началом фичи: собрать контекст
+`Project grounding` обязателен и фиксируется в FT-документе (см. шаблон фичи).
 1) Открыть FT-документ фичи: acceptance (Setup/Action/Assert), ops, seeds.
 2) Открыть связанные SSoT документы из `## Context` в FT (domain/security/notifications/...).
 3) Проверить каталоги:
    - [Operation catalog](../spec/client-api/operation-catalog.md): SSoT списка операций. Читать, чтобы не добавлять “скрытые” вызовы.
    - [CLI command catalog](../spec/cli/command-catalog.md): 1:1 команда → операция. Читать, чтобы CLI не содержал доменной логики.
    - [Traceability](../spec/testing/traceability.md): инвариант → тест → seed. Читать, чтобы не потерять ключевые требования.
+4) Зафиксировать в FT, какие именно документы прочитаны и какие слои/файлы будут затронуты (contract/core/db/client/cli/tests/docs).
 
 ## 1) Contract: операция, DTO, ошибки (SSoT)
 Target files (примерно, будем уточнять после scaffold):

@@ -16,15 +16,16 @@ Status: Draft (2026-03-03)
 
 ## Feature DoD (Definition of Done)
 Фича считается сделанной, когда:
-1) описан контракт/операция (если нужен),
-2) реализован core use-case + политики,
-3) добавлены миграции/таблицы (если нужно),
-4) добавлена/обновлена CLI команда (human + `--json`),
-5) добавлен(ы) автотест(ы) + seed scenario (если нужен),
-6) прогнаны code checks (`lint` + `typecheck` + `test`, и `build` где применимо),
-7) после реализации фичи прогнаны обязательные acceptance/GS сценарии (см. verification matrix) и записаны evidence,
-8) в FT-документе заполнены `Quality checks evidence` и `Acceptance evidence`,
-9) обновлены документы SSoT в `.memory-bank/spec/*` (если фича меняет правила).
+1) выполнен и зафиксирован `Project grounding` (см. шаблон фичи),
+2) описан контракт/операция (если нужен),
+3) реализован core use-case + политики,
+4) добавлены миграции/таблицы (если нужно),
+5) добавлена/обновлена CLI команда (human + `--json`),
+6) добавлен(ы) автотест(ы) + seed scenario (если нужен),
+7) прогнаны code checks (`lint` + `typecheck` + `test`, и `build` где применимо),
+8) после реализации фичи прогнаны обязательные acceptance/GS сценарии (см. verification matrix) и записаны evidence,
+9) в FT-документе заполнены `Quality checks evidence` и `Acceptance evidence`,
+10) обновлены документы SSoT в `.memory-bank/spec/*` (если фича меняет правила).
 
 Ссылки (аннотированные):
 - [Engineering standards](../spec/engineering/index.md) — стандарты кодирования/архитектурных границ/тестов/документации. Читать, чтобы DoD фичи выполнялся единообразно.
