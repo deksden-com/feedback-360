@@ -1,17 +1,18 @@
 import { describe, expect, it } from "vitest";
 
+import { hasDatabaseUrl } from "../connection-string";
 import { applyMigrations, runHealthCheck } from "../migrations";
 
-const hasDatabaseUrl = Boolean(process.env.DATABASE_URL);
+const hasUrl = hasDatabaseUrl();
 
 describe("FT-0002 migrate + health", () => {
-  it.runIf(hasDatabaseUrl)("applies migrations and runs select-1 health query", async () => {
+  it.runIf(hasUrl)("applies migrations and runs select-1 health query", async () => {
     await applyMigrations();
     await runHealthCheck();
     expect(true).toBe(true);
   });
 
-  it.skipIf(hasDatabaseUrl)("skips integration run when DATABASE_URL is absent", () => {
-    expect(process.env.DATABASE_URL).toBeUndefined();
+  it.skipIf(hasUrl)("skips integration run when database URL is absent", () => {
+    expect(hasDatabaseUrl()).toBe(false);
   });
 });

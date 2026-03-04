@@ -29,6 +29,7 @@ Status: Draft (2026-03-04)
 - Sentry DSN/build credentials are configured.
 
 ## DB / migrations checklist
+- Перед запуском DB-команд убедиться, что выставлен `SUPABASE_DB_POOLER_URL` (preferred) или `DATABASE_URL` (fallback).
 - Before release:
   - `pnpm db:migrate`
   - `pnpm db:health`

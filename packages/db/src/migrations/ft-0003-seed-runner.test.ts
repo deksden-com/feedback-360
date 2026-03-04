@@ -1,13 +1,14 @@
 import { sql } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
+import { hasDatabaseUrl } from "../connection-string";
 import { createDb, createPool } from "../db";
 import { runSeedScenario } from "../seeds";
 
-const hasDatabaseUrl = Boolean(process.env.DATABASE_URL);
+const hasUrl = hasDatabaseUrl();
 
 describe("FT-0003 seed runner + handles", () => {
-  it.runIf(hasDatabaseUrl)(
+  it.runIf(hasUrl)(
     "creates S1 and S2 seed scenarios with expected handles and counts",
     async () => {
       const s1 = await runSeedScenario({ scenario: "S1_company_min" });
@@ -37,9 +38,10 @@ describe("FT-0003 seed runner + handles", () => {
         await pool.end();
       }
     },
+    30_000,
   );
 
-  it.skipIf(hasDatabaseUrl)("skips integration run when DATABASE_URL is absent", () => {
-    expect(process.env.DATABASE_URL).toBeUndefined();
+  it.skipIf(hasUrl)("skips integration run when database URL is absent", () => {
+    expect(hasDatabaseUrl()).toBe(false);
   });
 });

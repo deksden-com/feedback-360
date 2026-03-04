@@ -7,6 +7,9 @@ export default defineConfig({
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/feedback360",
+    url:
+      process.env.SUPABASE_DB_POOLER_URL ??
+      process.env.DATABASE_URL ??
+      "postgres://postgres:postgres@localhost:5432/feedback360",
   },
 });

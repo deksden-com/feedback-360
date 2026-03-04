@@ -39,7 +39,8 @@ Status: Draft (2026-03-04)
   - `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`
   - `SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
-  - `DATABASE_URL`
+  - `SUPABASE_DB_POOLER_URL` (preferred for cloud scripts/migrations)
+  - `DATABASE_URL` (optional fallback for local Postgres)
 - Email:
   - `RESEND_API_KEY`
   - `EMAIL_FROM`
@@ -62,3 +63,7 @@ Status: Draft (2026-03-04)
 - Promote only `develop -> main`, never partial cherry-picks from feature branches into `main`.
 - Before promotion: run smoke on beta and ensure monitoring is healthy.
 - Keep auth/email/sentry settings symmetric between beta and prod unless explicitly documented.
+
+## DB connection policy
+- Для команд DB (`db:migrate`, `db:health`, integration tests) используем `SUPABASE_DB_POOLER_URL` как основной путь к Supabase cloud.
+- `DATABASE_URL` оставляем fallback для локального Postgres и dev-окружений.

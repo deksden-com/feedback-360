@@ -58,14 +58,23 @@ Status: Completed (2026-03-04)
   1) root: `pnpm db:migrate`, `pnpm db:health`
   2) package: `pnpm --filter @feedback-360/db db:migrate|db:health`
 - Добавлен integration test: `packages/db/src/migrations/ft-0002-migrations-health.test.ts`:
-  - при наличии `DATABASE_URL` реально выполняет migrations + health,
-  - без `DATABASE_URL` корректно скипается.
-- Добавлен `.env.example` с `DATABASE_URL`.
+  - при наличии `SUPABASE_DB_POOLER_URL` (или `DATABASE_URL`) реально выполняет migrations + health,
+  - без DB URL корректно скипается.
+- Добавлен `.env.example` с `DATABASE_URL` и подсказкой по `SUPABASE_DB_POOLER_URL`.
 
 ## Verification notes
 - Зелёный прогон выполнен:
   1) `pnpm -r lint`
   2) `pnpm -r typecheck`
   3) `pnpm -r test`
-- `pnpm db:migrate` и `pnpm db:health` отрабатывают с корректной ошибкой при отсутствии `DATABASE_URL`.
-- Полный live-run `db:migrate + db:health` на поднятом Postgres не выполнен в этой сессии, потому что Docker daemon недоступен (`Cannot connect to the Docker daemon ...`).
+- `pnpm db:migrate` и `pnpm db:health` отрабатывают с корректной ошибкой при отсутствии `SUPABASE_DB_POOLER_URL` и `DATABASE_URL`.
+
+## Acceptance evidence (2026-03-04)
+- Проверка на реальном Supabase beta (через pooler):
+  1) `pnpm db:health` → `DB health-check passed.`
+  2) `pnpm db:migrate` → `Migrations applied successfully.`
+- Integration acceptance:
+  - `pnpm --filter @feedback-360/db test` → `src/migrations/ft-0002-migrations-health.test.ts` passed.
+- Для Supabase cloud зафиксирован pooler-first policy:
+  - `SUPABASE_DB_POOLER_URL` — основной URL,
+  - `DATABASE_URL` — fallback.
