@@ -75,6 +75,7 @@ import {
   parseMatrixSetOutput,
   parseModelVersionCreateInput,
   parseModelVersionCreateOutput,
+  parseOperationContext,
   parseOperationResult,
   parseOrgDepartmentMoveInput,
   parseOrgDepartmentMoveOutput,
@@ -206,6 +207,8 @@ export type Feedback360Client = {
     input: QuestionnaireSubmitInput,
     context?: OperationContext,
   ): Promise<OperationResult<QuestionnaireSubmitOutput>>;
+  setActiveContext(context: OperationContext): OperationResult<OperationContext>;
+  getActiveContext(): OperationContext;
   setActiveCompany(companyId: string): OperationResult<ClientSetActiveCompanyOutput>;
   getActiveCompany(): string | undefined;
   invokeOperation<Output>(params: InvokeOperationParams<Output>): Promise<OperationResult<Output>>;
@@ -241,20 +244,16 @@ export const createHttpTransport = (options: CreateHttpTransportOptions): Operat
 };
 
 export const createClient = (transport: OperationTransport): Feedback360Client => {
-  let activeCompanyId: string | undefined;
+  let activeContext: OperationContext = {};
 
-  const withActiveCompany = (context?: OperationContext): OperationContext => {
-    if (!activeCompanyId) {
-      return context ?? {};
-    }
-
-    if (context?.companyId) {
-      return context;
+  const withActiveContext = (context?: OperationContext): OperationContext => {
+    if (!context) {
+      return { ...activeContext };
     }
 
     return {
-      ...(context ?? {}),
-      companyId: activeCompanyId,
+      ...activeContext,
+      ...context,
     };
   };
 
@@ -269,7 +268,7 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
       request = parseDispatchOperationInput({
         operation,
         input,
-        context: withActiveCompany(context),
+        context: withActiveContext(context),
       });
     } catch (error) {
       return errorResult(errorFromUnknown(error, "invalid_input", "Invalid operation request."));
@@ -685,10 +684,32 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
       });
     },
 
+    setActiveContext: (context) => {
+      try {
+        const parsedContext = parseOperationContext(context);
+        activeContext = {
+          ...activeContext,
+          ...parsedContext,
+        };
+        return okResult({ ...activeContext });
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid active context payload."),
+        );
+      }
+    },
+
+    getActiveContext: () => {
+      return { ...activeContext };
+    },
+
     setActiveCompany: (companyId) => {
       try {
         const parsedInput = parseClientSetActiveCompanyInput({ companyId });
-        activeCompanyId = parsedInput.companyId;
+        activeContext = {
+          ...activeContext,
+          companyId: parsedInput.companyId,
+        };
         return okResult(parseClientSetActiveCompanyOutput(parsedInput));
       } catch (error) {
         return errorResult(
@@ -698,7 +719,7 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
     },
 
     getActiveCompany: () => {
-      return activeCompanyId;
+      return activeContext.companyId;
     },
 
     invokeOperation,

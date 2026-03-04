@@ -34,24 +34,46 @@ describe("FT-0012 active company context", () => {
     expect(transportCalls).toBe(0);
   });
 
-  it("propagates active company context equally for HTTP and in-proc", async () => {
-    const inprocRequests: Array<{ context?: { companyId?: string } }> = [];
+  it("propagates active company and actor context equally for HTTP and in-proc", async () => {
+    const inprocRequests: Array<{
+      context?: {
+        companyId?: string;
+        role?: "hr_admin" | "hr_reader" | "manager" | "employee";
+        userId?: string;
+      };
+    }> = [];
     const baseInprocTransport = createInprocTransport();
     const inprocTransport: OperationTransport = {
       invoke: async (request) => {
-        inprocRequests.push({ context: { companyId: request.context?.companyId } });
+        inprocRequests.push({
+          context: {
+            companyId: request.context?.companyId,
+            role: request.context?.role,
+            userId: request.context?.userId,
+          },
+        });
         return baseInprocTransport.invoke(request);
       },
     };
 
-    const httpRequests: Array<{ context?: { companyId?: string } }> = [];
+    const httpRequests: Array<{
+      context?: {
+        companyId?: string;
+        role?: "hr_admin" | "hr_reader" | "manager" | "employee";
+        userId?: string;
+      };
+    }> = [];
     const httpTransport = createHttpTransport({
       baseUrl: "https://feedback-360.local",
       fetchFn: async (_url, init) => {
         const body = JSON.parse(String(init?.body ?? "{}")) as {
           operation: string;
           input: unknown;
-          context?: { companyId?: string };
+          context?: {
+            companyId?: string;
+            role?: "hr_admin" | "hr_reader" | "manager" | "employee";
+            userId?: string;
+          };
         };
         httpRequests.push({ context: body.context });
 
@@ -71,11 +93,23 @@ describe("FT-0012 active company context", () => {
 
     inprocClient.setActiveCompany("company-active");
     httpClient.setActiveCompany("company-active");
+    inprocClient.setActiveContext({
+      role: "hr_admin",
+      userId: "user-main",
+    });
+    httpClient.setActiveContext({
+      role: "hr_admin",
+      userId: "user-main",
+    });
 
     await inprocClient.systemPing();
     await httpClient.systemPing();
 
     expect(inprocRequests[0]?.context?.companyId).toBe("company-active");
+    expect(inprocRequests[0]?.context?.role).toBe("hr_admin");
+    expect(inprocRequests[0]?.context?.userId).toBe("user-main");
     expect(httpRequests[0]?.context?.companyId).toBe("company-active");
+    expect(httpRequests[0]?.context?.role).toBe("hr_admin");
+    expect(httpRequests[0]?.context?.userId).toBe("user-main");
   });
 });

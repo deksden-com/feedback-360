@@ -14,7 +14,8 @@ Status: Draft (2026-03-03)
 - `ping [--json]`
 - `seed --scenario <name> [--variant <name>] [--json]`
 - `company create ...`
-- `company use <company_id>`
+- `company use <company_id> [--role <role>] [--user-id <id>]`
+- `company context`
 - `employee upsert ...`
 - `org department create|move ...`
 - `org set-manager ...`

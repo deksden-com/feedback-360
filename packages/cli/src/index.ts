@@ -5,12 +5,14 @@ import { pathToFileURL } from "node:url";
 import { Command } from "commander";
 
 import {
+  type MembershipRole,
   type OperationError,
   type OperationResult,
   type QuestionnaireStatus,
   type SeedScenario,
   createOperationError,
   errorFromUnknown,
+  membershipRoles,
 } from "@feedback-360/api-contract";
 import { createInprocClient } from "@feedback-360/client";
 
@@ -22,6 +24,12 @@ type SeedCommandOptions = {
 
 type JsonFlagOptions = {
   json?: boolean;
+};
+
+type CompanyUseOptions = {
+  json?: boolean;
+  role?: string;
+  userId?: string;
 };
 
 type QuestionnaireListOptions = {
@@ -106,6 +114,8 @@ type EmployeeUpsertOptions = {
 
 type CliState = {
   activeCompanyId?: string;
+  activeRole?: MembershipRole;
+  activeUserId?: string;
 };
 
 const cliStateFilePath = join(homedir(), ".feedback360", "cli-state.json");
@@ -113,12 +123,29 @@ const cliStateFilePath = join(homedir(), ".feedback360", "cli-state.json");
 const loadCliState = async (): Promise<CliState> => {
   try {
     const rawState = await readFile(cliStateFilePath, "utf8");
-    const parsedState = JSON.parse(rawState) as { activeCompanyId?: unknown };
+    const parsedState = JSON.parse(rawState) as {
+      activeCompanyId?: unknown;
+      activeRole?: unknown;
+      activeUserId?: unknown;
+    };
+    const state: CliState = {};
+
     if (typeof parsedState.activeCompanyId === "string") {
-      return { activeCompanyId: parsedState.activeCompanyId };
+      state.activeCompanyId = parsedState.activeCompanyId;
     }
 
-    return {};
+    if (
+      typeof parsedState.activeRole === "string" &&
+      membershipRoles.includes(parsedState.activeRole as MembershipRole)
+    ) {
+      state.activeRole = parsedState.activeRole as MembershipRole;
+    }
+
+    if (typeof parsedState.activeUserId === "string") {
+      state.activeUserId = parsedState.activeUserId;
+    }
+
+    return state;
   } catch {
     return {};
   }
@@ -191,6 +218,25 @@ const getClientWithActiveCompany = async (asJson?: boolean) => {
   if (!setResult.ok) {
     emitError(setResult.error, asJson);
     return null;
+  }
+
+  const contextPayload = {
+    ...(state.activeRole ? { role: state.activeRole } : {}),
+    ...(state.activeUserId ? { userId: state.activeUserId } : {}),
+  };
+  const setActiveContextMaybe = (
+    client as {
+      setActiveContext?: (
+        context: Partial<{ role: MembershipRole; userId: string }>,
+      ) => OperationResult<unknown>;
+    }
+  ).setActiveContext;
+  if (setActiveContextMaybe && Object.keys(contextPayload).length > 0) {
+    const contextResult = setActiveContextMaybe(contextPayload);
+    if (!contextResult.ok) {
+      emitError(contextResult.error, asJson);
+      return null;
+    }
   }
 
   return client;
@@ -445,6 +491,15 @@ const parseBooleanOption = (value: string, fieldName: string): boolean => {
   throw new Error(`${fieldName} must be either true or false.`);
 };
 
+const parseMembershipRoleOption = (value: string): MembershipRole => {
+  const normalized = value.trim();
+  if (membershipRoles.includes(normalized as MembershipRole)) {
+    return normalized as MembershipRole;
+  }
+
+  throw new Error(`--role must be one of: ${membershipRoles.join(", ")}`);
+};
+
 const normalizeLegacySeedArgs = (argv: string[]): string[] => {
   const normalizedArgv = [...argv];
   if (normalizedArgv[2] === "--") {
@@ -486,7 +541,7 @@ export const runCli = async (argv: string[]): Promise<void> => {
       `
 Examples:
   pnpm seed --scenario S1_company_min
-  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- company use <company_id>
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- company use <company_id> --role hr_admin --user-id <user_id>
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- model version create --name "Q1 Model" --kind indicators --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign create --name "Q1 Campaign" --model-version <model_version_id> --start-at 2026-02-01T09:00:00.000Z --end-at 2026-02-28T18:00:00.000Z --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign set-model <campaign_id> <model_version_id> --json
@@ -535,21 +590,69 @@ Examples:
 
   companyCommand
     .command("use")
-    .description("Set active company in local CLI state.")
+    .description("Set active company and optional actor context in local CLI state.")
     .argument("<company_id>", "Company identifier.")
+    .option(
+      "--role <role>",
+      `Active membership role for subsequent commands (${membershipRoles.join(" | ")}).`,
+    )
+    .option("--user-id <userId>", "Active user id for context propagation.")
     .option("--json", "Output machine-readable JSON.")
-    .action(async (companyId: string, options: JsonFlagOptions) => {
+    .action(async (companyId: string, options: CompanyUseOptions) => {
       try {
         const client = createInprocClient();
         const result = client.setActiveCompany(companyId);
 
-        if (!emitResult(result, options.json)) {
+        if (!result.ok) {
+          emitError(result.error, options.json);
           return;
         }
 
-        await saveCliState({ activeCompanyId: companyId });
+        const previousState = await loadCliState();
+
+        let activeRole = previousState.activeRole;
+        if (options.role) {
+          try {
+            activeRole = parseMembershipRoleOption(options.role);
+          } catch (error: unknown) {
+            emitError(
+              errorFromUnknown(error, "invalid_input", "Invalid --role value."),
+              options.json,
+            );
+            return;
+          }
+        }
+
+        const activeUserId = options.userId ?? previousState.activeUserId;
+        const nextState: CliState = {
+          activeCompanyId: companyId,
+          ...(activeRole ? { activeRole } : {}),
+          ...(activeUserId ? { activeUserId } : {}),
+        };
+        await saveCliState(nextState);
+
+        if (options.json) {
+          console.log(
+            JSON.stringify(
+              {
+                ok: true,
+                data: {
+                  companyId,
+                  ...(activeRole ? { role: activeRole } : {}),
+                  ...(activeUserId ? { userId: activeUserId } : {}),
+                },
+              },
+              null,
+              2,
+            ),
+          );
+          return;
+        }
+
         if (!options.json) {
-          console.log(`Active company: ${companyId}`);
+          console.log(
+            `Active company: ${companyId}${activeRole ? `, role=${activeRole}` : ""}${activeUserId ? `, userId=${activeUserId}` : ""}`,
+          );
         }
       } catch (error: unknown) {
         emitError(
@@ -557,6 +660,36 @@ Examples:
           options.json,
         );
       }
+    });
+
+  companyCommand
+    .command("context")
+    .description("Show active company and actor context from local CLI state.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: JsonFlagOptions) => {
+      const state = await loadCliState();
+      if (options.json) {
+        console.log(
+          JSON.stringify(
+            {
+              ok: true,
+              data: state,
+            },
+            null,
+            2,
+          ),
+        );
+        return;
+      }
+
+      if (!state.activeCompanyId) {
+        console.log("No active company context is set.");
+        return;
+      }
+
+      console.log(
+        `Active company: ${state.activeCompanyId}${state.activeRole ? `, role=${state.activeRole}` : ""}${state.activeUserId ? `, userId=${state.activeUserId}` : ""}`,
+      );
     });
 
   const employeeCommand = program.command("employee").description("Employee directory operations.");

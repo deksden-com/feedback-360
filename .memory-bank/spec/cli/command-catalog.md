@@ -24,9 +24,14 @@ Status: Draft (2026-03-03)
   - roles: hr_admin
   - idempotency: optional
 
-- command: `company use <company_id> [--json]`
-  - op: `client.setActiveCompany` (client-local)
+- command: `company use <company_id> [--role <role>] [--user-id <id>] [--json]`
+  - op: `client.setActiveCompany` + `client.setActiveContext` (client-local)
   - roles: any authenticated (has membership)
+  - idempotency: yes
+
+- command: `company context [--json]`
+  - op: `client.getActiveContext` (client-local)
+  - roles: any authenticated
   - idempotency: yes
 
 - command: `membership list [--json]` (future)
