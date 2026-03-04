@@ -72,6 +72,7 @@ export const knownOperations = [
   "campaign.participants.add",
   "campaign.participants.remove",
   "campaign.progress.get",
+  "results.getHrView",
   "employee.upsert",
   "employee.listActive",
   "org.department.move",
@@ -349,6 +350,56 @@ export type CampaignProgressGetOutput = {
   pendingBySubject: CampaignProgressPendingGroupItem[];
 };
 
+export const resultsGroupKeys = ["manager", "peers", "subordinates", "self"] as const;
+export type ResultsGroupKey = (typeof resultsGroupKeys)[number];
+
+export type ResultsGetHrViewInput = {
+  campaignId: string;
+  subjectEmployeeId: string;
+};
+
+export type ResultsHrViewRaterScore = {
+  raterEmployeeId: string;
+  group: ResultsGroupKey;
+  competencyId: string;
+  score?: number;
+  validIndicatorCount: number;
+  totalIndicatorCount: number;
+};
+
+export type ResultsHrViewCompetencyScore = {
+  competencyId: string;
+  competencyName: string;
+  groupId: string;
+  groupName: string;
+  managerScore?: number;
+  managerRaters: number;
+  peersScore?: number;
+  peersRaters: number;
+  subordinatesScore?: number;
+  subordinatesRaters: number;
+  selfScore?: number;
+  selfRaters: number;
+};
+
+export type ResultsHrViewGroupOverall = {
+  manager?: number;
+  peers?: number;
+  subordinates?: number;
+  self?: number;
+};
+
+export type ResultsGetHrViewOutput = {
+  campaignId: string;
+  companyId: string;
+  subjectEmployeeId: string;
+  modelVersionId: string;
+  modelKind: "indicators";
+  competencyScores: ResultsHrViewCompetencyScore[];
+  raterScores: ResultsHrViewRaterScore[];
+  groupOverall: ResultsHrViewGroupOverall;
+};
+
 export type CampaignParticipantsAddFromDepartmentsInput = {
   campaignId: string;
   departmentIds: string[];
@@ -555,6 +606,10 @@ const isPendingQuestionnaireStatus = (
   value: string,
 ): value is CampaignProgressPendingItem["status"] => {
   return value === "not_started" || value === "in_progress";
+};
+
+const isResultsGroupKey = (value: string): value is ResultsGroupKey => {
+  return resultsGroupKeys.includes(value as ResultsGroupKey);
 };
 
 export const isKnownOperation = (value: string): value is KnownOperation => {
@@ -1663,6 +1718,235 @@ export const parseCampaignProgressGetOutput = (value: unknown): CampaignProgress
       record.pendingBySubject,
       "campaign.progress.get output.pendingBySubject",
     ).map(parseCampaignProgressPendingGroupItem),
+  };
+};
+
+export const parseResultsGetHrViewInput = (value: unknown): ResultsGetHrViewInput => {
+  const record = ensureObject(value, "results.getHrView input");
+  ensureAllowedKeys(record, ["campaignId", "subjectEmployeeId"], "results.getHrView input");
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "results.getHrView input"),
+    subjectEmployeeId: ensureStringField(record, "subjectEmployeeId", "results.getHrView input"),
+  };
+};
+
+const parseOptionalNumberField = (
+  record: Record<string, unknown>,
+  field: string,
+  fieldName: string,
+): number | undefined => {
+  const value = record[field];
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    throw new Error(`${fieldName}.${field} must be a number when provided.`);
+  }
+  return value;
+};
+
+const parseResultsHrViewRaterScore = (value: unknown): ResultsHrViewRaterScore => {
+  const record = ensureObject(value, "results.getHrView output.raterScores[]");
+  ensureAllowedKeys(
+    record,
+    [
+      "raterEmployeeId",
+      "group",
+      "competencyId",
+      "score",
+      "validIndicatorCount",
+      "totalIndicatorCount",
+    ],
+    "results.getHrView output.raterScores[]",
+  );
+
+  const group = ensureStringField(record, "group", "results.getHrView output.raterScores[]");
+  if (!isResultsGroupKey(group)) {
+    throw new Error(
+      `results.getHrView output.raterScores[].group must be one of: ${resultsGroupKeys.join(", ")}`,
+    );
+  }
+
+  const score = parseOptionalNumberField(record, "score", "results.getHrView output.raterScores[]");
+
+  return {
+    raterEmployeeId: ensureStringField(
+      record,
+      "raterEmployeeId",
+      "results.getHrView output.raterScores[]",
+    ),
+    group,
+    competencyId: ensureStringField(
+      record,
+      "competencyId",
+      "results.getHrView output.raterScores[]",
+    ),
+    ...(score !== undefined ? { score } : {}),
+    validIndicatorCount: ensureNumberField(
+      record,
+      "validIndicatorCount",
+      "results.getHrView output.raterScores[]",
+    ),
+    totalIndicatorCount: ensureNumberField(
+      record,
+      "totalIndicatorCount",
+      "results.getHrView output.raterScores[]",
+    ),
+  };
+};
+
+const parseResultsHrViewCompetencyScore = (value: unknown): ResultsHrViewCompetencyScore => {
+  const record = ensureObject(value, "results.getHrView output.competencyScores[]");
+  ensureAllowedKeys(
+    record,
+    [
+      "competencyId",
+      "competencyName",
+      "groupId",
+      "groupName",
+      "managerScore",
+      "managerRaters",
+      "peersScore",
+      "peersRaters",
+      "subordinatesScore",
+      "subordinatesRaters",
+      "selfScore",
+      "selfRaters",
+    ],
+    "results.getHrView output.competencyScores[]",
+  );
+
+  const managerScore = parseOptionalNumberField(
+    record,
+    "managerScore",
+    "results.getHrView output.competencyScores[]",
+  );
+  const peersScore = parseOptionalNumberField(
+    record,
+    "peersScore",
+    "results.getHrView output.competencyScores[]",
+  );
+  const subordinatesScore = parseOptionalNumberField(
+    record,
+    "subordinatesScore",
+    "results.getHrView output.competencyScores[]",
+  );
+  const selfScore = parseOptionalNumberField(
+    record,
+    "selfScore",
+    "results.getHrView output.competencyScores[]",
+  );
+
+  return {
+    competencyId: ensureStringField(
+      record,
+      "competencyId",
+      "results.getHrView output.competencyScores[]",
+    ),
+    competencyName: ensureStringField(
+      record,
+      "competencyName",
+      "results.getHrView output.competencyScores[]",
+    ),
+    groupId: ensureStringField(record, "groupId", "results.getHrView output.competencyScores[]"),
+    groupName: ensureStringField(
+      record,
+      "groupName",
+      "results.getHrView output.competencyScores[]",
+    ),
+    ...(managerScore !== undefined ? { managerScore } : {}),
+    managerRaters: ensureNumberField(
+      record,
+      "managerRaters",
+      "results.getHrView output.competencyScores[]",
+    ),
+    ...(peersScore !== undefined ? { peersScore } : {}),
+    peersRaters: ensureNumberField(
+      record,
+      "peersRaters",
+      "results.getHrView output.competencyScores[]",
+    ),
+    ...(subordinatesScore !== undefined ? { subordinatesScore } : {}),
+    subordinatesRaters: ensureNumberField(
+      record,
+      "subordinatesRaters",
+      "results.getHrView output.competencyScores[]",
+    ),
+    ...(selfScore !== undefined ? { selfScore } : {}),
+    selfRaters: ensureNumberField(
+      record,
+      "selfRaters",
+      "results.getHrView output.competencyScores[]",
+    ),
+  };
+};
+
+const parseResultsHrViewGroupOverall = (value: unknown): ResultsHrViewGroupOverall => {
+  const record = ensureObject(value, "results.getHrView output.groupOverall");
+  ensureAllowedKeys(
+    record,
+    ["manager", "peers", "subordinates", "self"],
+    "results.getHrView output.groupOverall",
+  );
+
+  const manager = parseOptionalNumberField(
+    record,
+    "manager",
+    "results.getHrView output.groupOverall",
+  );
+  const peers = parseOptionalNumberField(record, "peers", "results.getHrView output.groupOverall");
+  const subordinates = parseOptionalNumberField(
+    record,
+    "subordinates",
+    "results.getHrView output.groupOverall",
+  );
+  const self = parseOptionalNumberField(record, "self", "results.getHrView output.groupOverall");
+
+  return {
+    ...(manager !== undefined ? { manager } : {}),
+    ...(peers !== undefined ? { peers } : {}),
+    ...(subordinates !== undefined ? { subordinates } : {}),
+    ...(self !== undefined ? { self } : {}),
+  };
+};
+
+export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOutput => {
+  const record = ensureObject(value, "results.getHrView output");
+  ensureAllowedKeys(
+    record,
+    [
+      "campaignId",
+      "companyId",
+      "subjectEmployeeId",
+      "modelVersionId",
+      "modelKind",
+      "competencyScores",
+      "raterScores",
+      "groupOverall",
+    ],
+    "results.getHrView output",
+  );
+
+  const modelKind = ensureStringField(record, "modelKind", "results.getHrView output");
+  if (modelKind !== "indicators") {
+    throw new Error('results.getHrView output.modelKind must be "indicators".');
+  }
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "results.getHrView output"),
+    companyId: ensureStringField(record, "companyId", "results.getHrView output"),
+    subjectEmployeeId: ensureStringField(record, "subjectEmployeeId", "results.getHrView output"),
+    modelVersionId: ensureStringField(record, "modelVersionId", "results.getHrView output"),
+    modelKind: "indicators",
+    competencyScores: ensureArray(
+      record.competencyScores,
+      "results.getHrView output.competencyScores",
+    ).map(parseResultsHrViewCompetencyScore),
+    raterScores: ensureArray(record.raterScores, "results.getHrView output.raterScores").map(
+      parseResultsHrViewRaterScore,
+    ),
+    groupOverall: parseResultsHrViewGroupOverall(record.groupOverall),
   };
 };
 

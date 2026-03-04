@@ -1,5 +1,5 @@
 # EP-005 — Results + anonymity + weights
-Status: Draft (2026-03-03)
+Status: Active (2026-03-04)
 
 ## Goal
 Считать результаты корректно и безопасно (threshold=3, per-competency threshold, merge/hide, weights normalization).
@@ -14,8 +14,8 @@ Status: Draft (2026-03-03)
 ## Progress report (evidence-based)
 - `as_of`: 2026-03-04
 - `total_features`: 5
-- `completed_features`: 0
-- `evidence_confirmed_features`: 0
+- `completed_features`: 1
+- `evidence_confirmed_features`: 1
 - verification link:
   - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-005. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
 

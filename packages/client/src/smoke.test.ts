@@ -22,6 +22,7 @@ describe("client package", () => {
     expect(typeof client.questionnaireListAssigned).toBe("function");
     expect(typeof client.questionnaireSaveDraft).toBe("function");
     expect(typeof client.questionnaireSubmit).toBe("function");
+    expect(typeof client.resultsGetHrView).toBe("function");
     expect(typeof client.setActiveCompany).toBe("function");
     expect(typeof client.invokeOperation).toBe("function");
   });
