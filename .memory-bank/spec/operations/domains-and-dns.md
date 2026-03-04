@@ -43,6 +43,13 @@ Resend использует поддомен `send.go360go.ru` для MAIL FROM.
 - Name: `_dmarc`
 - Value: `v=DMARC1; p=none;`
 
+## SimpleLogin: domain verification (go360go.ru)
+Источник: верификационная TXT запись SimpleLogin (для включения custom domain aliases).
+
+- Type: `TXT`
+- Name: `@`
+- Value: `sl-verification=huyfnasbfreflxnkwipwryqcjzbqcz`
+
 ## Verification (must)
 После того как NS реально делегируются на Vercel:
 1) `vercel domains inspect go360go.ru` показывает зелёные NS (`ns1.vercel-dns.com`, `ns2.vercel-dns.com`).

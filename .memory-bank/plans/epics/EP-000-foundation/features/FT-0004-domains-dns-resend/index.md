@@ -38,6 +38,8 @@ Status: In progress (2026-03-04)
 
 Operator note (2026-03-04): записи уже добавлены в Vercel DNS, ожидаем завершение делегирования NS и проверку домена в Resend.
 
+Operator note (2026-03-04): добавлена TXT верификация SimpleLogin для `go360go.ru` (custom domain aliases).
+
 ### Assert
 - `vercel dns list go360go.ru` содержит записи.
 - В Resend домен = Verified/Authenticated.
