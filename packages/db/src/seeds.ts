@@ -1,0 +1,556 @@
+import {
+  type SeedRunInput,
+  type SeedRunOutput,
+  parseSeedRunInput,
+  parseSeedRunOutput,
+} from "@feedback-360/api-contract";
+import { sql } from "drizzle-orm";
+
+import { createDb, createPool } from "./db";
+import {
+  companies,
+  companyMemberships,
+  departments,
+  employeeDepartmentHistory,
+  employeeManagerHistory,
+  employeePositions,
+  employeeUserLinks,
+  employees,
+} from "./schema";
+
+const seededAt = new Date("2026-01-01T09:00:00.000Z");
+
+const ids = {
+  companyMain: "10000000-0000-4000-8000-000000000001",
+  membershipHrAdmin: "11000000-0000-4000-8000-000000000001",
+  membershipCeo: "11000000-0000-4000-8000-000000000002",
+  membershipHeadA: "11000000-0000-4000-8000-000000000003",
+  membershipHeadB: "11000000-0000-4000-8000-000000000004",
+  membershipStaffA1: "11000000-0000-4000-8000-000000000005",
+  membershipStaffA2: "11000000-0000-4000-8000-000000000006",
+  membershipStaffB1: "11000000-0000-4000-8000-000000000007",
+  employeeHrAdmin: "12000000-0000-4000-8000-000000000001",
+  employeeCeo: "12000000-0000-4000-8000-000000000002",
+  employeeHeadA: "12000000-0000-4000-8000-000000000003",
+  employeeHeadB: "12000000-0000-4000-8000-000000000004",
+  employeeStaffA1: "12000000-0000-4000-8000-000000000005",
+  employeeStaffA2: "12000000-0000-4000-8000-000000000006",
+  employeeStaffB1: "12000000-0000-4000-8000-000000000007",
+  employeeLinkHrAdmin: "13000000-0000-4000-8000-000000000001",
+  employeeLinkCeo: "13000000-0000-4000-8000-000000000002",
+  employeeLinkHeadA: "13000000-0000-4000-8000-000000000003",
+  employeeLinkHeadB: "13000000-0000-4000-8000-000000000004",
+  employeeLinkStaffA1: "13000000-0000-4000-8000-000000000005",
+  employeeLinkStaffA2: "13000000-0000-4000-8000-000000000006",
+  employeeLinkStaffB1: "13000000-0000-4000-8000-000000000007",
+  departmentRoot: "14000000-0000-4000-8000-000000000001",
+  departmentA: "14000000-0000-4000-8000-000000000002",
+  departmentB: "14000000-0000-4000-8000-000000000003",
+  departmentHistoryHrAdmin: "15000000-0000-4000-8000-000000000001",
+  departmentHistoryCeo: "15000000-0000-4000-8000-000000000002",
+  departmentHistoryHeadA: "15000000-0000-4000-8000-000000000003",
+  departmentHistoryHeadB: "15000000-0000-4000-8000-000000000004",
+  departmentHistoryStaffA1: "15000000-0000-4000-8000-000000000005",
+  departmentHistoryStaffA2: "15000000-0000-4000-8000-000000000006",
+  departmentHistoryStaffB1: "15000000-0000-4000-8000-000000000007",
+  managerHistoryHeadA: "16000000-0000-4000-8000-000000000001",
+  managerHistoryHeadB: "16000000-0000-4000-8000-000000000002",
+  managerHistoryStaffA1: "16000000-0000-4000-8000-000000000003",
+  managerHistoryStaffA2: "16000000-0000-4000-8000-000000000004",
+  managerHistoryStaffB1: "16000000-0000-4000-8000-000000000005",
+  positionHrAdmin: "17000000-0000-4000-8000-000000000001",
+  positionCeo: "17000000-0000-4000-8000-000000000002",
+  positionHeadA: "17000000-0000-4000-8000-000000000003",
+  positionHeadB: "17000000-0000-4000-8000-000000000004",
+  positionStaffA1: "17000000-0000-4000-8000-000000000005",
+  positionStaffA2: "17000000-0000-4000-8000-000000000006",
+  positionStaffB1: "17000000-0000-4000-8000-000000000007",
+  userHrAdmin: "18000000-0000-4000-8000-000000000001",
+  userCeo: "18000000-0000-4000-8000-000000000002",
+  userHeadA: "18000000-0000-4000-8000-000000000003",
+  userHeadB: "18000000-0000-4000-8000-000000000004",
+  userStaffA1: "18000000-0000-4000-8000-000000000005",
+  userStaffA2: "18000000-0000-4000-8000-000000000006",
+  userStaffB1: "18000000-0000-4000-8000-000000000007",
+} as const;
+
+const truncateSql = sql.raw(`
+  truncate table
+    employee_positions,
+    employee_manager_history,
+    employee_department_history,
+    employee_user_links,
+    company_memberships,
+    departments,
+    employees,
+    companies
+  restart identity cascade
+`);
+
+const resetDatabase = async (db: ReturnType<typeof createDb>): Promise<void> => {
+  await db.execute(truncateSql);
+};
+
+const buildS1Handles = (): Record<string, string> => {
+  return {
+    "company.main": ids.companyMain,
+    "employee.hr_admin": ids.employeeHrAdmin,
+    "membership.hr_admin@company.main": ids.membershipHrAdmin,
+    "user.hr_admin": ids.userHrAdmin,
+  };
+};
+
+const insertS1 = async (db: ReturnType<typeof createDb>): Promise<Record<string, string>> => {
+  await db.insert(companies).values({
+    id: ids.companyMain,
+    name: "Acme 360",
+    timezone: "Europe/Kaliningrad",
+    createdAt: seededAt,
+    updatedAt: seededAt,
+  });
+
+  await db.insert(employees).values({
+    id: ids.employeeHrAdmin,
+    companyId: ids.companyMain,
+    email: "hr.admin@acme.example",
+    firstName: "HR",
+    lastName: "Admin",
+    phone: "+10000000001",
+    isActive: true,
+    createdAt: seededAt,
+    updatedAt: seededAt,
+  });
+
+  await db.insert(companyMemberships).values({
+    id: ids.membershipHrAdmin,
+    companyId: ids.companyMain,
+    userId: ids.userHrAdmin,
+    role: "hr_admin",
+    createdAt: seededAt,
+  });
+
+  await db.insert(employeeUserLinks).values({
+    id: ids.employeeLinkHrAdmin,
+    companyId: ids.companyMain,
+    employeeId: ids.employeeHrAdmin,
+    userId: ids.userHrAdmin,
+    createdAt: seededAt,
+  });
+
+  await db.insert(employeePositions).values({
+    id: ids.positionHrAdmin,
+    employeeId: ids.employeeHrAdmin,
+    title: "HR Admin",
+    level: 8,
+    startAt: seededAt,
+    createdAt: seededAt,
+  });
+
+  return buildS1Handles();
+};
+
+const buildS2Handles = (): Record<string, string> => {
+  return {
+    ...buildS1Handles(),
+    "department.root": ids.departmentRoot,
+    "department.a": ids.departmentA,
+    "department.b": ids.departmentB,
+    "employee.ceo": ids.employeeCeo,
+    "employee.head_a": ids.employeeHeadA,
+    "employee.head_b": ids.employeeHeadB,
+    "employee.staff_a1": ids.employeeStaffA1,
+    "employee.staff_a2": ids.employeeStaffA2,
+    "employee.staff_b1": ids.employeeStaffB1,
+    "user.ceo": ids.userCeo,
+    "user.head_a": ids.userHeadA,
+    "user.head_b": ids.userHeadB,
+    "user.staff_a1": ids.userStaffA1,
+    "user.staff_a2": ids.userStaffA2,
+    "user.staff_b1": ids.userStaffB1,
+  };
+};
+
+const insertS2 = async (db: ReturnType<typeof createDb>): Promise<Record<string, string>> => {
+  await insertS1(db);
+
+  await db.insert(departments).values([
+    {
+      id: ids.departmentRoot,
+      companyId: ids.companyMain,
+      parentId: null,
+      name: "Headquarters",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+    {
+      id: ids.departmentA,
+      companyId: ids.companyMain,
+      parentId: ids.departmentRoot,
+      name: "Dept A",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+    {
+      id: ids.departmentB,
+      companyId: ids.companyMain,
+      parentId: ids.departmentRoot,
+      name: "Dept B",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+  ]);
+
+  await db.insert(employees).values([
+    {
+      id: ids.employeeCeo,
+      companyId: ids.companyMain,
+      email: "ceo@acme.example",
+      firstName: "Ivan",
+      lastName: "CEO",
+      phone: "+10000000002",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+    {
+      id: ids.employeeHeadA,
+      companyId: ids.companyMain,
+      email: "head.a@acme.example",
+      firstName: "Anna",
+      lastName: "HeadA",
+      phone: "+10000000003",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+    {
+      id: ids.employeeHeadB,
+      companyId: ids.companyMain,
+      email: "head.b@acme.example",
+      firstName: "Boris",
+      lastName: "HeadB",
+      phone: "+10000000004",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+    {
+      id: ids.employeeStaffA1,
+      companyId: ids.companyMain,
+      email: "staff.a1@acme.example",
+      firstName: "Sasha",
+      lastName: "StaffA1",
+      phone: "+10000000005",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+    {
+      id: ids.employeeStaffA2,
+      companyId: ids.companyMain,
+      email: "staff.a2@acme.example",
+      firstName: "Olga",
+      lastName: "StaffA2",
+      phone: "+10000000006",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+    {
+      id: ids.employeeStaffB1,
+      companyId: ids.companyMain,
+      email: "staff.b1@acme.example",
+      firstName: "Petr",
+      lastName: "StaffB1",
+      phone: "+10000000007",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+  ]);
+
+  await db.insert(companyMemberships).values([
+    {
+      id: ids.membershipCeo,
+      companyId: ids.companyMain,
+      userId: ids.userCeo,
+      role: "manager",
+      createdAt: seededAt,
+    },
+    {
+      id: ids.membershipHeadA,
+      companyId: ids.companyMain,
+      userId: ids.userHeadA,
+      role: "manager",
+      createdAt: seededAt,
+    },
+    {
+      id: ids.membershipHeadB,
+      companyId: ids.companyMain,
+      userId: ids.userHeadB,
+      role: "manager",
+      createdAt: seededAt,
+    },
+    {
+      id: ids.membershipStaffA1,
+      companyId: ids.companyMain,
+      userId: ids.userStaffA1,
+      role: "employee",
+      createdAt: seededAt,
+    },
+    {
+      id: ids.membershipStaffA2,
+      companyId: ids.companyMain,
+      userId: ids.userStaffA2,
+      role: "employee",
+      createdAt: seededAt,
+    },
+    {
+      id: ids.membershipStaffB1,
+      companyId: ids.companyMain,
+      userId: ids.userStaffB1,
+      role: "employee",
+      createdAt: seededAt,
+    },
+  ]);
+
+  await db.insert(employeeUserLinks).values([
+    {
+      id: ids.employeeLinkCeo,
+      companyId: ids.companyMain,
+      employeeId: ids.employeeCeo,
+      userId: ids.userCeo,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.employeeLinkHeadA,
+      companyId: ids.companyMain,
+      employeeId: ids.employeeHeadA,
+      userId: ids.userHeadA,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.employeeLinkHeadB,
+      companyId: ids.companyMain,
+      employeeId: ids.employeeHeadB,
+      userId: ids.userHeadB,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.employeeLinkStaffA1,
+      companyId: ids.companyMain,
+      employeeId: ids.employeeStaffA1,
+      userId: ids.userStaffA1,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.employeeLinkStaffA2,
+      companyId: ids.companyMain,
+      employeeId: ids.employeeStaffA2,
+      userId: ids.userStaffA2,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.employeeLinkStaffB1,
+      companyId: ids.companyMain,
+      employeeId: ids.employeeStaffB1,
+      userId: ids.userStaffB1,
+      createdAt: seededAt,
+    },
+  ]);
+
+  await db.insert(employeeDepartmentHistory).values([
+    {
+      id: ids.departmentHistoryHrAdmin,
+      employeeId: ids.employeeHrAdmin,
+      departmentId: ids.departmentRoot,
+      startAt: seededAt,
+      endAt: null,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.departmentHistoryCeo,
+      employeeId: ids.employeeCeo,
+      departmentId: ids.departmentRoot,
+      startAt: seededAt,
+      endAt: null,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.departmentHistoryHeadA,
+      employeeId: ids.employeeHeadA,
+      departmentId: ids.departmentA,
+      startAt: seededAt,
+      endAt: null,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.departmentHistoryHeadB,
+      employeeId: ids.employeeHeadB,
+      departmentId: ids.departmentB,
+      startAt: seededAt,
+      endAt: null,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.departmentHistoryStaffA1,
+      employeeId: ids.employeeStaffA1,
+      departmentId: ids.departmentA,
+      startAt: seededAt,
+      endAt: null,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.departmentHistoryStaffA2,
+      employeeId: ids.employeeStaffA2,
+      departmentId: ids.departmentA,
+      startAt: seededAt,
+      endAt: null,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.departmentHistoryStaffB1,
+      employeeId: ids.employeeStaffB1,
+      departmentId: ids.departmentB,
+      startAt: seededAt,
+      endAt: null,
+      createdAt: seededAt,
+    },
+  ]);
+
+  await db.insert(employeeManagerHistory).values([
+    {
+      id: ids.managerHistoryHeadA,
+      employeeId: ids.employeeHeadA,
+      managerEmployeeId: ids.employeeCeo,
+      startAt: seededAt,
+      endAt: null,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.managerHistoryHeadB,
+      employeeId: ids.employeeHeadB,
+      managerEmployeeId: ids.employeeCeo,
+      startAt: seededAt,
+      endAt: null,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.managerHistoryStaffA1,
+      employeeId: ids.employeeStaffA1,
+      managerEmployeeId: ids.employeeHeadA,
+      startAt: seededAt,
+      endAt: null,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.managerHistoryStaffA2,
+      employeeId: ids.employeeStaffA2,
+      managerEmployeeId: ids.employeeHeadA,
+      startAt: seededAt,
+      endAt: null,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.managerHistoryStaffB1,
+      employeeId: ids.employeeStaffB1,
+      managerEmployeeId: ids.employeeHeadB,
+      startAt: seededAt,
+      endAt: null,
+      createdAt: seededAt,
+    },
+  ]);
+
+  await db.insert(employeePositions).values([
+    {
+      id: ids.positionCeo,
+      employeeId: ids.employeeCeo,
+      title: "CEO",
+      level: 10,
+      startAt: seededAt,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.positionHeadA,
+      employeeId: ids.employeeHeadA,
+      title: "Head of Dept A",
+      level: 8,
+      startAt: seededAt,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.positionHeadB,
+      employeeId: ids.employeeHeadB,
+      title: "Head of Dept B",
+      level: 8,
+      startAt: seededAt,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.positionStaffA1,
+      employeeId: ids.employeeStaffA1,
+      title: "Engineer A1",
+      level: 6,
+      startAt: seededAt,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.positionStaffA2,
+      employeeId: ids.employeeStaffA2,
+      title: "Engineer A2",
+      level: 6,
+      startAt: seededAt,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.positionStaffB1,
+      employeeId: ids.employeeStaffB1,
+      title: "Engineer B1",
+      level: 6,
+      startAt: seededAt,
+      createdAt: seededAt,
+    },
+  ]);
+
+  return buildS2Handles();
+};
+
+export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutput> => {
+  const parsed = parseSeedRunInput(input);
+
+  if (parsed.variant) {
+    throw new Error(`Unsupported seed variant for ${parsed.scenario}: ${parsed.variant}`);
+  }
+
+  const pool = createPool();
+
+  try {
+    const db = createDb(pool);
+    await resetDatabase(db);
+
+    let handles: Record<string, string>;
+    switch (parsed.scenario) {
+      case "S0_empty":
+        handles = {};
+        break;
+      case "S1_company_min":
+        handles = await insertS1(db);
+        break;
+      case "S2_org_basic":
+        handles = await insertS2(db);
+        break;
+      default:
+        throw new Error(`Unsupported seed scenario: ${parsed.scenario}`);
+    }
+
+    return parseSeedRunOutput({
+      scenario: parsed.scenario,
+      handles,
+    });
+  } finally {
+    await pool.end();
+  }
+};

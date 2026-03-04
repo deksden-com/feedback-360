@@ -9,7 +9,8 @@
     "test": "pnpm -r test",
     "format": "pnpm -r format",
     "db:migrate": "pnpm --filter @feedback-360/db db:migrate",
-    "db:health": "pnpm --filter @feedback-360/db db:health"
+    "db:health": "pnpm --filter @feedback-360/db db:health",
+    "seed": "pnpm --filter @feedback-360/cli cli --"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

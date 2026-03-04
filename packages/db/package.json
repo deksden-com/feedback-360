@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "exports": "./src/index.ts",
   "scripts": {
     "lint": "biome check .",
     "format": "biome format --write .",
@@ -12,6 +13,7 @@
     "db:health": "tsx src/scripts/health.ts"
   },
   "dependencies": {
+    "@feedback-360/api-contract": "workspace:*",
     "drizzle-orm": "0.44.5",
     "pg": "8.16.3"
   },

@@ -3,10 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "exports": "./src/index.ts",
   "scripts": {
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "cli": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@feedback-360/api-contract": "workspace:*",
+    "@feedback-360/client": "workspace:*",
+    "commander": "14.0.1"
+  },
+  "devDependencies": {
+    "tsx": "4.20.6"
   }
 }
