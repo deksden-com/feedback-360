@@ -67,6 +67,10 @@ type CampaignCreateOptions = {
   timezone?: string;
 };
 
+type CampaignTransitionOptions = {
+  json?: boolean;
+};
+
 type AiRunOptions = {
   json?: boolean;
 };
@@ -320,6 +324,16 @@ const formatCampaignCreateHuman = (data: {
   return `Campaign created: id=${data.campaignId}, company=${data.companyId}, modelVersion=${data.modelVersionId}, name=${data.name}, status=${data.status}, startAt=${data.startAt}, endAt=${data.endAt}, timezone=${data.timezone}`;
 };
 
+const formatCampaignTransitionHuman = (data: {
+  campaignId: string;
+  previousStatus: string;
+  status: string;
+  changed: boolean;
+  updatedAt: string;
+}): string => {
+  return `Campaign status updated: id=${data.campaignId}, previous=${data.previousStatus}, status=${data.status}, changed=${data.changed}, updatedAt=${data.updatedAt}`;
+};
+
 const buildDefaultModelPayload = (name: string, kind: "indicators" | "levels") => {
   if (kind === "levels") {
     return {
@@ -422,6 +436,8 @@ Examples:
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- company use <company_id>
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- model version create --name "Q1 Model" --kind indicators --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign create --name "Q1 Campaign" --model-version <model_version_id> --start-at 2026-02-01T09:00:00.000Z --end-at 2026-02-28T18:00:00.000Z --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign start <campaign_id> --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign stop <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign snapshot list --campaign <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants add-departments <campaign_id> --from-departments <department_id>...
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- ai run <campaign_id> --json
@@ -699,6 +715,69 @@ Examples:
 
       if (!options.json && result.ok) {
         console.log(formatCampaignCreateHuman(result.data));
+      }
+    });
+
+  campaignCommand
+    .command("start")
+    .description("Start campaign (`draft -> started`).")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (campaignId: string, options: CampaignTransitionOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.campaignStart({ campaignId });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatCampaignTransitionHuman(result.data));
+      }
+    });
+
+  campaignCommand
+    .command("stop")
+    .description("Stop campaign early (`started -> ended`).")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (campaignId: string, options: CampaignTransitionOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.campaignStop({ campaignId });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatCampaignTransitionHuman(result.data));
+      }
+    });
+
+  campaignCommand
+    .command("end")
+    .description("End campaign (`started -> ended`) helper for manual admin/ops flow.")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (campaignId: string, options: CampaignTransitionOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.campaignEnd({ campaignId });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatCampaignTransitionHuman(result.data));
       }
     });
 

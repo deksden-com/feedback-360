@@ -120,7 +120,10 @@ Status: Draft (2026-03-03)
   - Must add test: `packages/cli/src/ft-0041-model-campaign-cli.test.ts`
   - Must run: модель создаётся и используется кампанией; невалидные веса модели отвергаются `invalid_input`.
 - FT-0042
+  - Must add test: `packages/core/src/ft/ft-0042-campaign-lifecycle-no-db.test.ts`
   - Must add test: `packages/core/src/ft/ft-0042-campaign-lifecycle.test.ts`
+  - Must add test: `packages/client/src/ft-0042-campaign-lifecycle-client.test.ts`
+  - Must add test: `packages/cli/src/ft-0042-campaign-lifecycle-cli.test.ts`
   - Must run: переходы status + idempotency/ошибки.
 - FT-0043
   - Must add test: `packages/core/src/ft/ft-0043-started-immutability.test.ts`
@@ -137,6 +140,7 @@ Status: Draft (2026-03-03)
 
 ### EP-004 execution evidence (2026-03-04)
 - FT-0041: what=competency model versions + campaign create vertical slice (`model.version.create`, `campaign.create`); where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0041-models-no-db.test.ts src/ft/ft-0041-models.test.ts`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0041-model-campaign-client.test.ts`, `pnpm --filter @feedback-360/cli exec vitest run src/ft-0041-model-campaign-cli.test.ts`; quality_gate=passed; acceptance_gate=passed (HR creates model version and linked draft campaign; invalid weights -> `invalid_input`; DB integration subtests skipped without DB URL); result=passed.
+- FT-0042: what=campaign lifecycle transitions (`campaign.start`, `campaign.stop`, `campaign.end`) with idempotent repeats; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0042-campaign-lifecycle-no-db.test.ts src/ft/ft-0042-campaign-lifecycle.test.ts`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0042-campaign-lifecycle-client.test.ts`, `pnpm --filter @feedback-360/cli exec vitest run src/ft-0042-campaign-lifecycle-cli.test.ts`; quality_gate=passed; acceptance_gate=passed (draft->started and started->ended transitions, repeats no-op in target status, invalid reverse transition -> `invalid_transition`, non-HR role -> `forbidden`; DB integration subtests skipped without DB URL); result=passed.
 
 ## EP-005 Results + anonymity + weights
 - FT-0051

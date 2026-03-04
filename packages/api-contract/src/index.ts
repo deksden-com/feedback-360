@@ -63,6 +63,9 @@ export const knownOperations = [
   "company.updateProfile",
   "model.version.create",
   "campaign.create",
+  "campaign.start",
+  "campaign.stop",
+  "campaign.end",
   "employee.upsert",
   "employee.listActive",
   "org.department.move",
@@ -154,6 +157,29 @@ export type CampaignCreateOutput = {
   endAt: string;
   timezone: string;
   createdAt: string;
+};
+
+export const campaignLifecycleStatuses = [
+  "draft",
+  "started",
+  "ended",
+  "processing_ai",
+  "ai_failed",
+  "completed",
+] as const;
+
+export type CampaignLifecycleStatus = (typeof campaignLifecycleStatuses)[number];
+
+export type CampaignTransitionInput = {
+  campaignId: string;
+};
+
+export type CampaignTransitionOutput = {
+  campaignId: string;
+  previousStatus: CampaignLifecycleStatus;
+  status: CampaignLifecycleStatus;
+  changed: boolean;
+  updatedAt: string;
 };
 
 export type EmployeeUpsertInput = {
@@ -687,6 +713,24 @@ const parseModelKind = (value: unknown, fieldName: string): "indicators" | "leve
   throw new Error(`${fieldName} must be one of: indicators, levels.`);
 };
 
+const parseCampaignLifecycleStatus = (
+  value: unknown,
+  fieldName: string,
+): CampaignLifecycleStatus => {
+  if (
+    value === "draft" ||
+    value === "started" ||
+    value === "ended" ||
+    value === "processing_ai" ||
+    value === "ai_failed" ||
+    value === "completed"
+  ) {
+    return value;
+  }
+
+  throw new Error(`${fieldName} must be one of: ${campaignLifecycleStatuses.join(", ")}.`);
+};
+
 const parseModelIndicatorInput = (value: unknown): ModelIndicatorInput => {
   const record = ensureObject(
     value,
@@ -892,6 +936,35 @@ export const parseCampaignCreateOutput = (value: unknown): CampaignCreateOutput 
     endAt: ensureStringField(record, "endAt", "campaign.create output"),
     timezone: ensureStringField(record, "timezone", "campaign.create output"),
     createdAt: ensureStringField(record, "createdAt", "campaign.create output"),
+  };
+};
+
+export const parseCampaignTransitionInput = (value: unknown): CampaignTransitionInput => {
+  const record = ensureObject(value, "campaign transition input");
+  ensureAllowedKeys(record, ["campaignId"], "campaign transition input");
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign transition input"),
+  };
+};
+
+export const parseCampaignTransitionOutput = (value: unknown): CampaignTransitionOutput => {
+  const record = ensureObject(value, "campaign transition output");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "previousStatus", "status", "changed", "updatedAt"],
+    "campaign transition output",
+  );
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign transition output"),
+    previousStatus: parseCampaignLifecycleStatus(
+      record.previousStatus,
+      "campaign transition output.previousStatus",
+    ),
+    status: parseCampaignLifecycleStatus(record.status, "campaign transition output.status"),
+    changed: ensureBooleanField(record, "changed", "campaign transition output"),
+    updatedAt: ensureStringField(record, "updatedAt", "campaign transition output"),
   };
 };
 

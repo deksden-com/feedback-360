@@ -1,5 +1,5 @@
 # FT-0042 — Campaign lifecycle (create/start/stop/end)
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## User value
 HR управляет жизненным циклом кампании; статусы отражают реальный процесс и служат основанием для запретов.
@@ -58,5 +58,27 @@ HR управляет жизненным циклом кампании; стат
 - Если уточняем idempotency/коды ошибок переходов — обновить: [Campaign lifecycle](../../../../../spec/domain/campaign-lifecycle.md) — SSoT переходов. Читать, чтобы сценарии GS6/GS5 ссылались на единые правила.
 
 ## Verification (must)
-- Automated test: `packages/core/test/ft/ft-0042-campaign-lifecycle.test.ts` (unit+integration) проверяет допустимые переходы и idempotency.
+- Automated tests:
+  - `packages/core/src/ft/ft-0042-campaign-lifecycle-no-db.test.ts`
+  - `packages/core/src/ft/ft-0042-campaign-lifecycle.test.ts`
+  - `packages/client/src/ft-0042-campaign-lifecycle-client.test.ts`
+  - `packages/cli/src/ft-0042-campaign-lifecycle-cli.test.ts`
 - Must run: `pnpm -r test` и smoke сценарий start/stop/end на seed `S4_campaign_draft`.
+
+## Project grounding (2026-03-04)
+- [Campaign lifecycle](../../../../../spec/domain/campaign-lifecycle.md): статусы, допустимые переходы и idempotency правила для start/stop/end.
+- [Operation catalog](../../../../../spec/client-api/operation-catalog.md): операции `campaign.start`, `campaign.stop`, `campaign.end` и роль HR Admin.
+- [CLI command catalog](../../../../../spec/cli/command-catalog.md): 1:1 маппинг lifecycle команд на typed client API.
+- [GS6 Started immutability](../../../../../spec/testing/scenarios/gs6-started-immutability.md): зависимый сценарий, который опирается на корректный переход в `started`.
+
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` → passed.
+- `pnpm -r typecheck` → passed.
+- `pnpm -r test` → passed.
+- Build: N/A (изменения в packages/core/client/cli/db без нового build-gate).
+
+## Acceptance evidence (2026-03-04)
+- `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0042-campaign-lifecycle-no-db.test.ts src/ft/ft-0042-campaign-lifecycle.test.ts` → passed (`integration subtest skipped` без `SUPABASE_DB_POOLER_URL`/`DATABASE_URL`).
+- `pnpm --filter @feedback-360/client exec vitest run src/ft-0042-campaign-lifecycle-client.test.ts` → passed.
+- `pnpm --filter @feedback-360/cli exec vitest run src/ft-0042-campaign-lifecycle-cli.test.ts` → passed.
+- Проверено по intent: `campaign.start` и `campaign.stop/end` поддерживают идемпотентные повторы в целевом статусе; недопустимые переходы дают `invalid_transition`; не-HR роли получают `forbidden`.

@@ -18,6 +18,16 @@ Status: Draft (2026-03-03)
 - `processing_ai -> ai_failed`: исчерпаны ретраи/получена ошибка.
 - `ai_failed -> processing_ai`: HR Admin запускает retry.
 
+## Transition idempotency (MVP)
+- `campaign.start`:
+  - `draft -> started` (изменение),
+  - `started -> started` (идемпотентный no-op),
+  - из других статусов — `invalid_transition`.
+- `campaign.stop` / `campaign.end`:
+  - `started -> ended` (изменение),
+  - `ended -> ended` (идемпотентный no-op),
+  - из других статусов — `invalid_transition`.
+
 ## Freeze (lock) rule
 MVP-правило: **первый `draft save` в любой анкете** фиксирует `campaign.locked_at`.
 

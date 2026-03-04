@@ -25,6 +25,28 @@ export type CreateCampaignOutput = {
   createdAt: string;
 };
 
+type CampaignLifecycleStatus =
+  | "draft"
+  | "started"
+  | "ended"
+  | "processing_ai"
+  | "ai_failed"
+  | "completed";
+
+type TransitionCampaignStatusInput = {
+  companyId: string;
+  campaignId: string;
+  targetStatus: "started" | "ended";
+};
+
+export type TransitionCampaignStatusOutput = {
+  campaignId: string;
+  previousStatus: CampaignLifecycleStatus;
+  status: CampaignLifecycleStatus;
+  changed: boolean;
+  updatedAt: string;
+};
+
 const parseTimestamp = (value: string, fieldName: string): Date => {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
@@ -34,6 +56,128 @@ const parseTimestamp = (value: string, fieldName: string): Date => {
     );
   }
   return parsed;
+};
+
+const ensureCampaignLifecycleStatus = (value: string): CampaignLifecycleStatus => {
+  if (
+    value === "draft" ||
+    value === "started" ||
+    value === "ended" ||
+    value === "processing_ai" ||
+    value === "ai_failed" ||
+    value === "completed"
+  ) {
+    return value;
+  }
+
+  throw createOperationError("invalid_input", "Unsupported campaign status.", {
+    status: value,
+  });
+};
+
+const transitionCampaignStatus = async (
+  input: TransitionCampaignStatusInput,
+): Promise<TransitionCampaignStatusOutput> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+
+    return await db.transaction(async (tx) => {
+      const campaignRows = await tx
+        .select({
+          campaignId: campaigns.id,
+          companyId: campaigns.companyId,
+          status: campaigns.status,
+        })
+        .from(campaigns)
+        .where(and(eq(campaigns.id, input.campaignId), eq(campaigns.companyId, input.companyId)))
+        .limit(1);
+
+      const campaign = campaignRows[0];
+      if (!campaign) {
+        throw createOperationError("not_found", "Campaign not found in active company.", {
+          campaignId: input.campaignId,
+          companyId: input.companyId,
+        });
+      }
+
+      const previousStatus = ensureCampaignLifecycleStatus(campaign.status);
+      const now = new Date();
+
+      if (input.targetStatus === "started") {
+        if (previousStatus === "started") {
+          return {
+            campaignId: input.campaignId,
+            previousStatus,
+            status: "started",
+            changed: false,
+            updatedAt: now.toISOString(),
+          };
+        }
+
+        if (previousStatus !== "draft") {
+          throw createOperationError(
+            "invalid_transition",
+            "Campaign can be started only from draft.",
+            {
+              campaignId: input.campaignId,
+              status: previousStatus,
+            },
+          );
+        }
+      }
+
+      if (input.targetStatus === "ended") {
+        if (previousStatus === "ended") {
+          return {
+            campaignId: input.campaignId,
+            previousStatus,
+            status: "ended",
+            changed: false,
+            updatedAt: now.toISOString(),
+          };
+        }
+
+        if (previousStatus !== "started") {
+          throw createOperationError(
+            "invalid_transition",
+            "Campaign can be ended only from started.",
+            {
+              campaignId: input.campaignId,
+              status: previousStatus,
+            },
+          );
+        }
+      }
+
+      const updatedRows = await tx
+        .update(campaigns)
+        .set({
+          status: input.targetStatus,
+          updatedAt: now,
+        })
+        .where(eq(campaigns.id, input.campaignId))
+        .returning({
+          status: campaigns.status,
+          updatedAt: campaigns.updatedAt,
+        });
+
+      const updated = updatedRows[0];
+      if (!updated) {
+        throw createOperationError("invalid_transition", "Failed to update campaign status.");
+      }
+
+      return {
+        campaignId: input.campaignId,
+        previousStatus,
+        status: ensureCampaignLifecycleStatus(updated.status),
+        changed: true,
+        updatedAt: updated.updatedAt.toISOString(),
+      };
+    });
+  } finally {
+    await pool.end();
+  }
 };
 
 export const createCampaign = async (input: CreateCampaignInput): Promise<CreateCampaignOutput> => {
@@ -128,4 +272,37 @@ export const createCampaign = async (input: CreateCampaignInput): Promise<Create
   } finally {
     await pool.end();
   }
+};
+
+export const startCampaign = async (input: {
+  companyId: string;
+  campaignId: string;
+}): Promise<TransitionCampaignStatusOutput> => {
+  return transitionCampaignStatus({
+    companyId: input.companyId,
+    campaignId: input.campaignId,
+    targetStatus: "started",
+  });
+};
+
+export const stopCampaign = async (input: {
+  companyId: string;
+  campaignId: string;
+}): Promise<TransitionCampaignStatusOutput> => {
+  return transitionCampaignStatus({
+    companyId: input.companyId,
+    campaignId: input.campaignId,
+    targetStatus: "ended",
+  });
+};
+
+export const endCampaign = async (input: {
+  companyId: string;
+  campaignId: string;
+}): Promise<TransitionCampaignStatusOutput> => {
+  return transitionCampaignStatus({
+    companyId: input.companyId,
+    campaignId: input.campaignId,
+    targetStatus: "ended",
+  });
 };

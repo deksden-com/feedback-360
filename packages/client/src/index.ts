@@ -7,6 +7,8 @@ import {
   type CampaignParticipantsAddFromDepartmentsOutput,
   type CampaignSnapshotListInput,
   type CampaignSnapshotListOutput,
+  type CampaignTransitionInput,
+  type CampaignTransitionOutput,
   type ClientSetActiveCompanyOutput,
   type DispatchOperationInput,
   type EmployeeListActiveInput,
@@ -44,6 +46,8 @@ import {
   parseCampaignParticipantsAddFromDepartmentsOutput,
   parseCampaignSnapshotListInput,
   parseCampaignSnapshotListOutput,
+  parseCampaignTransitionInput,
+  parseCampaignTransitionOutput,
   parseClientSetActiveCompanyInput,
   parseClientSetActiveCompanyOutput,
   parseDispatchOperationInput,
@@ -110,6 +114,18 @@ export type Feedback360Client = {
     input: CampaignCreateInput,
     context?: OperationContext,
   ): Promise<OperationResult<CampaignCreateOutput>>;
+  campaignStart(
+    input: CampaignTransitionInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignTransitionOutput>>;
+  campaignStop(
+    input: CampaignTransitionInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignTransitionOutput>>;
+  campaignEnd(
+    input: CampaignTransitionInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignTransitionOutput>>;
   employeeUpsert(
     input: EmployeeUpsertInput,
     context?: OperationContext,
@@ -290,6 +306,56 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseCampaignCreateOutput,
+      });
+    },
+
+    campaignStart: async (input, context) => {
+      let parsedInput: CampaignTransitionInput;
+      try {
+        parsedInput = parseCampaignTransitionInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid campaignStart input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "campaign.start",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignTransitionOutput,
+      });
+    },
+
+    campaignStop: async (input, context) => {
+      let parsedInput: CampaignTransitionInput;
+      try {
+        parsedInput = parseCampaignTransitionInput(input);
+      } catch (error) {
+        return errorResult(errorFromUnknown(error, "invalid_input", "Invalid campaignStop input."));
+      }
+
+      return invokeOperation({
+        operation: "campaign.stop",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignTransitionOutput,
+      });
+    },
+
+    campaignEnd: async (input, context) => {
+      let parsedInput: CampaignTransitionInput;
+      try {
+        parsedInput = parseCampaignTransitionInput(input);
+      } catch (error) {
+        return errorResult(errorFromUnknown(error, "invalid_input", "Invalid campaignEnd input."));
+      }
+
+      return invokeOperation({
+        operation: "campaign.end",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignTransitionOutput,
       });
     },
 

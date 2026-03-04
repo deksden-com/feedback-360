@@ -7,6 +7,8 @@ import {
   type CampaignParticipantsAddFromDepartmentsOutput,
   type CampaignSnapshotListInput,
   type CampaignSnapshotListOutput,
+  type CampaignTransitionInput,
+  type CampaignTransitionOutput,
   type CompanyUpdateProfileInput,
   type CompanyUpdateProfileOutput,
   type DispatchOperationInput,
@@ -43,6 +45,8 @@ import {
   parseCampaignParticipantsAddFromDepartmentsOutput,
   parseCampaignSnapshotListInput,
   parseCampaignSnapshotListOutput,
+  parseCampaignTransitionInput,
+  parseCampaignTransitionOutput,
   parseCompanyUpdateProfileInput,
   parseCompanyUpdateProfileOutput,
   parseDispatchOperationInput,
@@ -71,6 +75,7 @@ import {
   addCampaignParticipantsFromDepartments,
   createCampaign,
   createModelVersion,
+  endCampaign,
   generateSuggestedMatrix,
   listActiveEmployees,
   listAssignedQuestionnaires,
@@ -79,6 +84,8 @@ import {
   runAiForCampaign,
   saveQuestionnaireDraft,
   setEmployeeManager,
+  startCampaign,
+  stopCampaign,
   submitQuestionnaire,
   upsertEmployee,
 } from "@feedback-360/db";
@@ -222,6 +229,108 @@ const runCampaignCreate = async (
     return okResult(parseCampaignCreateOutput(output));
   } catch (error) {
     return errorResult(errorFromUnknown(error, "invalid_input", "Failed to create campaign."));
+  }
+};
+
+const runCampaignStart = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignTransitionOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can start campaigns.", {
+        operation: "campaign.start",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignTransitionInput;
+  try {
+    parsedInput = parseCampaignTransitionInput(request.input);
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Invalid campaign.start input."));
+  }
+
+  try {
+    const output = await startCampaign({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+    });
+    return okResult(parseCampaignTransitionOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to start campaign."));
+  }
+};
+
+const runCampaignStop = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignTransitionOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can stop campaigns.", {
+        operation: "campaign.stop",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignTransitionInput;
+  try {
+    parsedInput = parseCampaignTransitionInput(request.input);
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Invalid campaign.stop input."));
+  }
+
+  try {
+    const output = await stopCampaign({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+    });
+    return okResult(parseCampaignTransitionOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to stop campaign."));
+  }
+};
+
+const runCampaignEnd = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignTransitionOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can end campaigns.", {
+        operation: "campaign.end",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignTransitionInput;
+  try {
+    parsedInput = parseCampaignTransitionInput(request.input);
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Invalid campaign.end input."));
+  }
+
+  try {
+    const output = await endCampaign({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+    });
+    return okResult(parseCampaignTransitionOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to end campaign."));
   }
 };
 
@@ -654,6 +763,7 @@ export const dispatchOperation = (
     | CompanyUpdateProfileOutput
     | EmployeeUpsertOutput
     | EmployeeListActiveOutput
+    | CampaignTransitionOutput
     | OrgDepartmentMoveOutput
     | OrgManagerSetOutput
     | CampaignSnapshotListOutput
@@ -695,6 +805,12 @@ export const dispatchOperation = (
       return runModelVersionCreate(parsedRequest);
     case "campaign.create":
       return runCampaignCreate(parsedRequest);
+    case "campaign.start":
+      return runCampaignStart(parsedRequest);
+    case "campaign.stop":
+      return runCampaignStop(parsedRequest);
+    case "campaign.end":
+      return runCampaignEnd(parsedRequest);
     case "employee.upsert":
       return runEmployeeUpsert(parsedRequest);
     case "employee.listActive":
