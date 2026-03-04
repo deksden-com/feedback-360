@@ -25,7 +25,8 @@ Status: Draft (2026-03-03)
 7) прогнаны code checks (`lint` + `typecheck` + `test`, и `build` где применимо),
 8) после реализации фичи прогнаны обязательные acceptance/GS сценарии (см. verification matrix) и записаны evidence,
 9) в FT-документе заполнены `Quality checks evidence` и `Acceptance evidence`,
-10) обновлены документы SSoT в `.memory-bank/spec/*` (если фича меняет правила).
+10) для runtime/deploy/integration изменений зафиксированы CI/CD evidence (GitHub run + Vercel deployment + итоговый статус),
+11) обновлены документы SSoT в `.memory-bank/spec/*` (если фича меняет правила).
 
 Ссылки (аннотированные):
 - [Engineering standards](../spec/engineering/index.md) — стандарты кодирования/архитектурных границ/тестов/документации. Читать, чтобы DoD фичи выполнялся единообразно.

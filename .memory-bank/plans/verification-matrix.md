@@ -30,6 +30,11 @@ Status: Draft (2026-03-03)
 - `result`: passed/failed + важные детали (например, “against Supabase beta pooler”, “HMAC replay covered”).
 - `artifacts` (optional): ссылки на скриншоты/видео/логи, если это повышает проверяемость (особенно UI/внешние панели).
 
+Дополнение для runtime/deploy/integration фич (mandatory):
+- `ci_run`: ссылка на GitHub Actions run (или commit check-runs).
+- `deploy`: ссылка на Vercel deployment (`Ready`) для затронутого окружения.
+- Если был fail перед фиксом: короткий `root_cause` и ссылка на успешный rerun/redeploy.
+
 Связанные правила:
 - PR/commit traceability и обязательность evidence определены в:
   - [Git flow](../spec/operations/git-flow.md) — правила тегов `[FT-*]/[EP-*]`, обязательных ссылок и pre-merge проверок. Читать, чтобы evidence в matrix всегда был привязан к конкретному PR/фиче.
