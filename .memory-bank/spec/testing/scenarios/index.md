@@ -14,5 +14,5 @@ Status: Draft (2026-03-03)
 - [GS9 Levels rules (planned)](gs9-levels.md): mode/distribution + UNSURE + tie. Читать, чтобы levels работали “по отрасли”.
 - [GS10 RLS smoke (planned)](gs10-rls.md): deny-by-default + service role. Читать, чтобы multi-tenant был защищён на уровне БД.
 - [GS11 Matrix autogen (planned)](gs11-matrix-autogen.md): автогенерация по подразделениям и иерархии. Читать, чтобы матрица не была “рандомной”.
-- [GS12 Campaign progress (planned)](gs12-campaign-progress.md): HR видит ход заполнения анкет. Читать, чтобы “прогресс кампании” был измеримым и пригодным для reminders.
+- [GS12 Campaign progress](gs12-campaign-progress.md): HR видит ход заполнения анкет. Читать, чтобы “прогресс кампании” был измеримым и пригодным для reminders.
 - [GS13 Campaign invites (planned)](gs13-campaign-invites.md): invite письма при старте кампании через outbox без дублей. Читать, чтобы onboarding сотрудников был автоматизирован и идемпотентен.

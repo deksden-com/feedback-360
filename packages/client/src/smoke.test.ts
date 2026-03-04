@@ -16,6 +16,7 @@ describe("client package", () => {
     expect(typeof client.orgDepartmentMove).toBe("function");
     expect(typeof client.orgManagerSet).toBe("function");
     expect(typeof client.campaignSnapshotList).toBe("function");
+    expect(typeof client.campaignProgressGet).toBe("function");
     expect(typeof client.campaignParticipantsAddFromDepartments).toBe("function");
     expect(typeof client.matrixGenerateSuggested).toBe("function");
     expect(typeof client.questionnaireListAssigned).toBe("function");

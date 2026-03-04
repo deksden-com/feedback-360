@@ -92,6 +92,8 @@ const ids = {
   campaignA: "19000000-0000-4000-8000-000000000010",
   campaignB: "19000000-0000-4000-8000-000000000011",
   questionnaireMain: "20000000-0000-4000-8000-000000000001",
+  questionnaireMainInProgress: "20000000-0000-4000-8000-000000000002",
+  questionnaireMainSubmitted: "20000000-0000-4000-8000-000000000003",
   questionnaireCompanyA: "20000000-0000-4000-8000-000000000010",
   questionnaireCompanyB: "20000000-0000-4000-8000-000000000011",
 } as const;
@@ -392,6 +394,15 @@ const buildS5Handles = (): Record<string, string> => {
     ...buildS2Handles(),
     "campaign.main": ids.campaignMain,
     "questionnaire.main": ids.questionnaireMain,
+  };
+};
+
+const buildS7Handles = (): Record<string, string> => {
+  return {
+    ...buildS5Handles(),
+    "questionnaire.main_not_started": ids.questionnaireMain,
+    "questionnaire.main_in_progress": ids.questionnaireMainInProgress,
+    "questionnaire.main_submitted": ids.questionnaireMainSubmitted,
   };
 };
 
@@ -808,6 +819,61 @@ const insertS8 = async (db: ReturnType<typeof createDb>): Promise<Record<string,
   return buildS8Handles();
 };
 
+const insertS7 = async (db: ReturnType<typeof createDb>): Promise<Record<string, string>> => {
+  await insertS5(db);
+
+  const firstDraftAtInProgress = new Date("2026-01-11T10:00:00.000Z");
+  const firstDraftAtSubmitted = new Date("2026-01-11T12:00:00.000Z");
+  const submittedAt = new Date("2026-01-12T09:00:00.000Z");
+
+  await db.insert(questionnaires).values([
+    {
+      id: ids.questionnaireMainInProgress,
+      companyId: ids.companyMain,
+      campaignId: ids.campaignMain,
+      subjectEmployeeId: ids.employeeStaffA2,
+      raterEmployeeId: ids.employeeHeadA,
+      status: "in_progress",
+      draftPayload: {
+        answers: {
+          leadership: 4,
+        },
+      },
+      firstDraftAt: firstDraftAtInProgress,
+      submittedAt: null,
+      createdAt: firstDraftAtInProgress,
+      updatedAt: firstDraftAtInProgress,
+    },
+    {
+      id: ids.questionnaireMainSubmitted,
+      companyId: ids.companyMain,
+      campaignId: ids.campaignMain,
+      subjectEmployeeId: ids.employeeStaffB1,
+      raterEmployeeId: ids.employeeHeadB,
+      status: "submitted",
+      draftPayload: {
+        answers: {
+          leadership: 5,
+        },
+      },
+      firstDraftAt: firstDraftAtSubmitted,
+      submittedAt,
+      createdAt: firstDraftAtSubmitted,
+      updatedAt: submittedAt,
+    },
+  ]);
+
+  await db
+    .update(campaigns)
+    .set({
+      lockedAt: firstDraftAtInProgress,
+      updatedAt: firstDraftAtInProgress,
+    })
+    .where(eq(campaigns.id, ids.campaignMain));
+
+  return buildS7Handles();
+};
+
 const insertS4 = async (
   db: ReturnType<typeof createDb>,
   options?: { variant?: string },
@@ -874,6 +940,9 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
         break;
       case "S5_campaign_started_no_answers":
         handles = await insertS5(db);
+        break;
+      case "S7_campaign_started_some_submitted":
+        handles = await insertS7(db);
         break;
       case "S8_campaign_ended":
         handles = await insertS8(db);

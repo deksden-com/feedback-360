@@ -7,6 +7,8 @@ import {
   type CampaignParticipantsAddFromDepartmentsOutput,
   type CampaignParticipantsMutationInput,
   type CampaignParticipantsMutationOutput,
+  type CampaignProgressGetInput,
+  type CampaignProgressGetOutput,
   type CampaignSetModelVersionInput,
   type CampaignSetModelVersionOutput,
   type CampaignSnapshotListInput,
@@ -53,6 +55,8 @@ import {
   parseCampaignParticipantsAddFromDepartmentsOutput,
   parseCampaignParticipantsMutationInput,
   parseCampaignParticipantsMutationOutput,
+  parseCampaignProgressGetInput,
+  parseCampaignProgressGetOutput,
   parseCampaignSetModelVersionInput,
   parseCampaignSetModelVersionOutput,
   parseCampaignSnapshotListInput,
@@ -94,6 +98,7 @@ import {
   createModelVersion,
   endCampaign,
   generateSuggestedMatrix,
+  getCampaignProgress,
   listActiveEmployees,
   listAssignedQuestionnaires,
   listCampaignEmployeeSnapshots,
@@ -699,6 +704,44 @@ const runCampaignSnapshotList = async (
   }
 };
 
+const runCampaignProgressGet = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignProgressGetOutput>> => {
+  if (!hasRole(request, ["hr_admin", "hr_reader"])) {
+    return errorResult(
+      createOperationError("forbidden", "Current role cannot view campaign progress.", {
+        operation: "campaign.progress.get",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignProgressGetInput;
+  try {
+    parsedInput = parseCampaignProgressGetInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid campaign.progress.get input."),
+    );
+  }
+
+  try {
+    const output = await getCampaignProgress({
+      campaignId: parsedInput.campaignId,
+      companyId: companyIdOrError,
+    });
+    return okResult(parseCampaignProgressGetOutput(output));
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Failed to load campaign progress."),
+    );
+  }
+};
+
 const runCampaignParticipantsAddFromDepartments = async (
   request: DispatchOperationInput,
 ): Promise<OperationResult<CampaignParticipantsAddFromDepartmentsOutput>> => {
@@ -978,6 +1021,7 @@ export const dispatchOperation = (
     | CampaignSetModelVersionOutput
     | CampaignWeightsSetOutput
     | CampaignParticipantsMutationOutput
+    | CampaignProgressGetOutput
     | CampaignTransitionOutput
     | OrgDepartmentMoveOutput
     | OrgManagerSetOutput
@@ -1045,6 +1089,8 @@ export const dispatchOperation = (
       return runOrgManagerSet(parsedRequest);
     case "campaign.snapshot.list":
       return runCampaignSnapshotList(parsedRequest);
+    case "campaign.progress.get":
+      return runCampaignProgressGet(parsedRequest);
     case "campaign.participants.addFromDepartments":
       return runCampaignParticipantsAddFromDepartments(parsedRequest);
     case "matrix.generateSuggested":

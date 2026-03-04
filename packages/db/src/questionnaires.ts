@@ -1,4 +1,9 @@
-import { type QuestionnaireStatus, createOperationError } from "@feedback-360/api-contract";
+import {
+  type CampaignProgressGetOutput,
+  type CampaignProgressPendingItem,
+  type QuestionnaireStatus,
+  createOperationError,
+} from "@feedback-360/api-contract";
 import { and, eq } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
@@ -11,6 +16,7 @@ type QuestionnaireDbRow = {
   subjectEmployeeId: string;
   raterEmployeeId: string;
   status: string;
+  firstDraftAt: Date | null;
   submittedAt: Date | null;
   draftPayload: Record<string, unknown>;
   campaignStatus: string;
@@ -37,6 +43,7 @@ const mapQuestionnaireRow = (row: QuestionnaireDbRow) => {
     subjectEmployeeId: row.subjectEmployeeId,
     raterEmployeeId: row.raterEmployeeId,
     status: ensureQuestionnaireStatus(row.status),
+    ...(row.firstDraftAt ? { firstDraftAt: row.firstDraftAt.toISOString() } : {}),
     ...(row.submittedAt ? { submittedAt: row.submittedAt.toISOString() } : {}),
   };
 };
@@ -58,6 +65,7 @@ const getQuestionnaireRow = async (
       subjectEmployeeId: questionnaires.subjectEmployeeId,
       raterEmployeeId: questionnaires.raterEmployeeId,
       status: questionnaires.status,
+      firstDraftAt: questionnaires.firstDraftAt,
       submittedAt: questionnaires.submittedAt,
       draftPayload: questionnaires.draftPayload,
       campaignStatus: campaigns.status,
@@ -232,6 +240,7 @@ export const saveQuestionnaireDraft = async (
         .set({
           status: "in_progress",
           draftPayload: input.draft,
+          ...(row.firstDraftAt ? {} : { firstDraftAt: now }),
           updatedAt: now,
         })
         .where(eq(questionnaires.id, row.questionnaireId));
@@ -320,6 +329,129 @@ export const submitQuestionnaire = async (
         wasAlreadySubmitted: false,
       };
     });
+  } finally {
+    await pool.end();
+  }
+};
+
+export type GetCampaignProgressInput = {
+  campaignId: string;
+  companyId: string;
+};
+
+const sortPendingGroups = (groups: Map<string, number>) => {
+  return Array.from(groups.entries())
+    .map(([employeeId, pendingCount]) => ({
+      employeeId,
+      pendingCount,
+    }))
+    .sort((left, right) => {
+      if (right.pendingCount !== left.pendingCount) {
+        return right.pendingCount - left.pendingCount;
+      }
+
+      return left.employeeId.localeCompare(right.employeeId);
+    });
+};
+
+export const getCampaignProgress = async (
+  input: GetCampaignProgressInput,
+): Promise<CampaignProgressGetOutput> => {
+  const pool = createPool();
+
+  try {
+    const db = createDb(pool);
+
+    const campaignRows = await db
+      .select({
+        campaignId: campaigns.id,
+        companyId: campaigns.companyId,
+        lockedAt: campaigns.lockedAt,
+      })
+      .from(campaigns)
+      .where(and(eq(campaigns.id, input.campaignId), eq(campaigns.companyId, input.companyId)))
+      .limit(1);
+
+    const campaign = campaignRows[0];
+    if (!campaign) {
+      throw createOperationError("not_found", "Campaign not found in active company.", {
+        campaignId: input.campaignId,
+        companyId: input.companyId,
+      });
+    }
+
+    const rows = await db
+      .select({
+        questionnaireId: questionnaires.id,
+        campaignId: questionnaires.campaignId,
+        companyId: questionnaires.companyId,
+        subjectEmployeeId: questionnaires.subjectEmployeeId,
+        raterEmployeeId: questionnaires.raterEmployeeId,
+        status: questionnaires.status,
+        firstDraftAt: questionnaires.firstDraftAt,
+        submittedAt: questionnaires.submittedAt,
+      })
+      .from(questionnaires)
+      .where(
+        and(
+          eq(questionnaires.campaignId, campaign.campaignId),
+          eq(questionnaires.companyId, campaign.companyId),
+        ),
+      )
+      .orderBy(questionnaires.createdAt);
+
+    const statusCounts = {
+      notStarted: 0,
+      inProgress: 0,
+      submitted: 0,
+    };
+    const pendingQuestionnaires: CampaignProgressPendingItem[] = [];
+    const pendingByRater = new Map<string, number>();
+    const pendingBySubject = new Map<string, number>();
+
+    for (const row of rows) {
+      const status = ensureQuestionnaireStatus(row.status);
+
+      if (status === "not_started") {
+        statusCounts.notStarted += 1;
+      } else if (status === "in_progress") {
+        statusCounts.inProgress += 1;
+      } else {
+        statusCounts.submitted += 1;
+      }
+
+      if (status === "submitted") {
+        continue;
+      }
+
+      pendingQuestionnaires.push({
+        questionnaireId: row.questionnaireId,
+        campaignId: row.campaignId,
+        companyId: row.companyId,
+        subjectEmployeeId: row.subjectEmployeeId,
+        raterEmployeeId: row.raterEmployeeId,
+        status,
+        ...(row.firstDraftAt ? { firstDraftAt: row.firstDraftAt.toISOString() } : {}),
+        ...(row.submittedAt ? { submittedAt: row.submittedAt.toISOString() } : {}),
+      });
+
+      pendingByRater.set(row.raterEmployeeId, (pendingByRater.get(row.raterEmployeeId) ?? 0) + 1);
+      pendingBySubject.set(
+        row.subjectEmployeeId,
+        (pendingBySubject.get(row.subjectEmployeeId) ?? 0) + 1,
+      );
+    }
+
+    return {
+      campaignId: campaign.campaignId,
+      companyId: campaign.companyId,
+      totalQuestionnaires: rows.length,
+      statusCounts,
+      ...(campaign.lockedAt ? { campaignLockedAt: campaign.lockedAt.toISOString() } : {}),
+      pendingQuestionnaires,
+      pendingByRater: sortPendingGroups(pendingByRater),
+      pendingBySubject: sortPendingGroups(pendingBySubject),
+    };
   } finally {
     await pool.end();
   }

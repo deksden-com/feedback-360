@@ -362,6 +362,7 @@ export const questionnaires = pgTable(
       .references(() => employees.id, { onDelete: "cascade" }),
     status: text("status").notNull().default("not_started"),
     draftPayload: jsonb("draft_payload").notNull().default({}),
+    firstDraftAt: timestamp("first_draft_at", { withTimezone: true }),
     submittedAt: timestamp("submitted_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

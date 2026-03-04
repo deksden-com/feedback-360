@@ -1,24 +1,31 @@
 # Seed S7_campaign_started_some_submitted
-Status: Draft (2026-03-03)
+Status: Active (2026-03-04)
 
 ## Purpose
-Submitted ответы для тестов агрегаций/анонимности.
+Started кампания с частично заполненными анкетами для progress/анонимности/агрегаций.
 
 ## Requires
 - `S5_campaign_started_no_answers`
 
 ## Creates
-- несколько submitted questionnaires по группам peers/subordinates/manager/self
+- 3 анкеты в `campaign.main`:
+  - `questionnaire.main_not_started` (`not_started`),
+  - `questionnaire.main_in_progress` (`in_progress`, есть `firstDraftAt`),
+  - `questionnaire.main_submitted` (`submitted`, есть `firstDraftAt` и `submittedAt`).
+- `campaign.lockedAt` установлен.
 
-## Handles (examples)
+## Handles
 - `company.main`
 - `campaign.main`
-- `employee.subject_main`
-- `employee.rater_manager`
-- `employee.rater_peer_1`, `employee.rater_peer_2`, `employee.rater_peer_3`
-- `employee.rater_sub_1`, `employee.rater_sub_2`, `employee.rater_sub_3`
+- `questionnaire.main`
+- `questionnaire.main_not_started`
+- `questionnaire.main_in_progress`
+- `questionnaire.main_submitted`
+- `employee.head_a` (pending rater x2)
+- `employee.staff_a1`, `employee.staff_a2` (pending subjects)
 
 ## Variants (edge cases)
+- Текущая реализация variant не поддерживает; кейсы ниже запланированы под EP-005.
 - `peers2`:
   - peers оценщиков ровно 2 (для hide/merge threshold тестов).
   - Используется в GS2/FT-0052.
@@ -36,3 +43,7 @@ Submitted ответы для тестов агрегаций/анонимнос
 
 ## Notes
 - Для per-competency threshold важно, чтобы варианты содержали кейс `n_valid < 3` на одной компетенции при том, что группа в целом проходит порог.
+- Для FT-0046 deterministic ожидания:
+  - `statusCounts = { notStarted: 1, inProgress: 1, submitted: 1 }`,
+  - `pendingQuestionnaires = 2`,
+  - `pendingByRater[0].pendingCount = 2` (head_a).

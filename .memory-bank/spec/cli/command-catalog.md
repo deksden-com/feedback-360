@@ -121,6 +121,7 @@ Status: Draft (2026-03-03)
   - op: `campaign.progress.get`
   - roles: hr_admin/hr_reader
   - idempotency: yes
+  - output: `statusCounts + pendingQuestionnaires + pendingByRater + pendingBySubject`
 
 - command: `campaign snapshot list --campaign <campaign_id>`
   - op: `campaign.snapshot.list`

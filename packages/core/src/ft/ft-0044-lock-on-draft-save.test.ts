@@ -89,8 +89,11 @@ describe("FT-0044 lock on first draft save", () => {
       });
       expect(saveDraft.ok).toBe(true);
       if (saveDraft.ok && "campaignLockedAt" in saveDraft.data) {
-        expect(typeof saveDraft.data.campaignLockedAt).toBe("string");
-        expect(saveDraft.data.campaignLockedAt.length).toBeGreaterThan(0);
+        expect(saveDraft.data.campaignLockedAt).toBeDefined();
+        if (saveDraft.data.campaignLockedAt) {
+          expect(typeof saveDraft.data.campaignLockedAt).toBe("string");
+          expect(saveDraft.data.campaignLockedAt.length).toBeGreaterThan(0);
+        }
       }
 
       const afterLockWeights = await dispatchOperation({

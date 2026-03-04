@@ -330,6 +330,63 @@ const formatCampaignSnapshotsHuman = (data: {
   return lines.join("\n");
 };
 
+const formatCampaignProgressHuman = (data: {
+  campaignId: string;
+  totalQuestionnaires: number;
+  statusCounts: {
+    notStarted: number;
+    inProgress: number;
+    submitted: number;
+  };
+  campaignLockedAt?: string;
+  pendingQuestionnaires: Array<{
+    questionnaireId: string;
+    status: "not_started" | "in_progress";
+    subjectEmployeeId: string;
+    raterEmployeeId: string;
+    firstDraftAt?: string;
+  }>;
+  pendingByRater: Array<{
+    employeeId: string;
+    pendingCount: number;
+  }>;
+  pendingBySubject: Array<{
+    employeeId: string;
+    pendingCount: number;
+  }>;
+}): string => {
+  const lines = [
+    `Campaign progress: campaign=${data.campaignId}, total=${data.totalQuestionnaires}, not_started=${data.statusCounts.notStarted}, in_progress=${data.statusCounts.inProgress}, submitted=${data.statusCounts.submitted}${data.campaignLockedAt ? `, lockedAt=${data.campaignLockedAt}` : ""}`,
+  ];
+
+  if (data.pendingQuestionnaires.length === 0) {
+    lines.push("Pending questionnaires: 0");
+  } else {
+    lines.push(`Pending questionnaires: ${data.pendingQuestionnaires.length}`);
+    for (const item of data.pendingQuestionnaires) {
+      lines.push(
+        `- ${item.questionnaireId}: status=${item.status}, subject=${item.subjectEmployeeId}, rater=${item.raterEmployeeId}${item.firstDraftAt ? `, firstDraftAt=${item.firstDraftAt}` : ""}`,
+      );
+    }
+  }
+
+  if (data.pendingByRater.length > 0) {
+    lines.push("Pending by rater:");
+    for (const item of data.pendingByRater) {
+      lines.push(`- employee=${item.employeeId}, pending=${item.pendingCount}`);
+    }
+  }
+
+  if (data.pendingBySubject.length > 0) {
+    lines.push("Pending by subject:");
+    for (const item of data.pendingBySubject) {
+      lines.push(`- employee=${item.employeeId}, pending=${item.pendingCount}`);
+    }
+  }
+
+  return lines.join("\n");
+};
+
 const formatMatrixSuggestionsHuman = (data: {
   generatedAssignments: Array<{
     subjectEmployeeId: string;
@@ -550,6 +607,7 @@ Examples:
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants remove <campaign_id> <employee_id>... --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign start <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign stop <campaign_id> --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign progress <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign snapshot list --campaign <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants add-departments <campaign_id> --from-departments <department_id>...
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- matrix set <campaign_id> --assignments-json '[{"subjectEmployeeId":"<id>","raterEmployeeId":"<id>","raterRole":"manager"}]' --json
@@ -563,7 +621,7 @@ Examples:
     .description("Run deterministic database seed scenarios.")
     .requiredOption(
       "--scenario <scenario>",
-      "Seed scenario name (S0_empty | S1_company_min | S1_multi_tenant_min | S2_org_basic | S4_campaign_draft | S5_campaign_started_no_answers | S8_campaign_ended).",
+      "Seed scenario name (S0_empty | S1_company_min | S1_multi_tenant_min | S2_org_basic | S4_campaign_draft | S5_campaign_started_no_answers | S7_campaign_started_some_submitted | S8_campaign_ended).",
     )
     .option("--variant <variant>", "Optional seed variant (currently not supported).")
     .option("--json", "Output machine-readable JSON.")
@@ -1156,6 +1214,27 @@ Examples:
         console.log(
           `Participants added: campaign=${result.data.campaignId}, added=${result.data.addedEmployeeIds.length}, total=${result.data.totalParticipants}`,
         );
+      }
+    });
+
+  campaignCommand
+    .command("progress")
+    .description("Show campaign questionnaire progress for HR (counts + pending lists).")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (campaignId: string, options: CampaignTransitionOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.campaignProgressGet({ campaignId });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatCampaignProgressHuman(result.data));
       }
     });
 

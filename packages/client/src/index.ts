@@ -7,6 +7,8 @@ import {
   type CampaignParticipantsAddFromDepartmentsOutput,
   type CampaignParticipantsMutationInput,
   type CampaignParticipantsMutationOutput,
+  type CampaignProgressGetInput,
+  type CampaignProgressGetOutput,
   type CampaignSetModelVersionInput,
   type CampaignSetModelVersionOutput,
   type CampaignSnapshotListInput,
@@ -54,6 +56,8 @@ import {
   parseCampaignParticipantsAddFromDepartmentsOutput,
   parseCampaignParticipantsMutationInput,
   parseCampaignParticipantsMutationOutput,
+  parseCampaignProgressGetInput,
+  parseCampaignProgressGetOutput,
   parseCampaignSetModelVersionInput,
   parseCampaignSetModelVersionOutput,
   parseCampaignSnapshotListInput,
@@ -179,6 +183,10 @@ export type Feedback360Client = {
     input: CampaignSnapshotListInput,
     context?: OperationContext,
   ): Promise<OperationResult<CampaignSnapshotListOutput>>;
+  campaignProgressGet(
+    input: CampaignProgressGetInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignProgressGetOutput>>;
   campaignParticipantsAddFromDepartments(
     input: CampaignParticipantsAddFromDepartmentsInput,
     context?: OperationContext,
@@ -553,6 +561,24 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseCampaignSnapshotListOutput,
+      });
+    },
+
+    campaignProgressGet: async (input, context) => {
+      let parsedInput: CampaignProgressGetInput;
+      try {
+        parsedInput = parseCampaignProgressGetInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid campaignProgressGet input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "campaign.progress.get",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignProgressGetOutput,
       });
     },
 

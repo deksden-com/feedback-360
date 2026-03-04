@@ -22,3 +22,8 @@ Status: Draft (2026-03-03)
 - `completed`
 
 любые `draft save`/`submit` запрещены (read-only, доменная ошибка `campaign_ended_readonly`).
+
+## Campaign progress projection (HR)
+- Операция: `campaign.progress.get` (roles: `hr_admin`, `hr_reader`).
+- Возвращает агрегаты `not_started/in_progress/submitted` и pending-списки (`pendingQuestionnaires`, `pendingByRater`, `pendingBySubject`).
+- Для pending анкет поддерживаются timestamps `firstDraftAt` (когда уже есть) и `submittedAt` (если есть в записи).

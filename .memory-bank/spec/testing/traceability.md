@@ -101,5 +101,5 @@ Status: Draft (2026-03-03)
 ## Campaign progress
 - Invariant: HR видит прогресс заполнения анкет (кто not_started/in_progress/submitted), чтобы управлять напоминаниями.
   - Spec SSoT: `../domain/questionnaires.md`, `../security/rbac.md`
-  - Tests: GS12 (planned)
+  - Tests: GS12 (implemented, FT-0046)
   - Seeds: `S7_campaign_started_some_submitted`

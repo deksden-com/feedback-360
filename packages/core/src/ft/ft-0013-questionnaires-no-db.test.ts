@@ -167,7 +167,7 @@ describe("FT-0013 questionnaire ops (no-db acceptance)", () => {
     });
 
     expect(saveDraft.ok).toBe(true);
-    if (saveDraft.ok && "campaignLockedAt" in saveDraft.data) {
+    if (saveDraft.ok && "campaignLockedAt" in saveDraft.data && "status" in saveDraft.data) {
       expect(saveDraft.data.status).toBe("in_progress");
       expect(saveDraft.data.campaignLockedAt).toBe("2026-01-10T10:00:00.000Z");
     }
