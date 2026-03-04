@@ -51,8 +51,8 @@ Status: Draft (2026-03-03)
 
 - Invariant: anonymity threshold=3 для peers/subordinates; manager всегда персонально; self вес 0.
   - Spec SSoT: `../domain/anonymity-policy.md`, `../domain/calculations.md`
-  - Tests: GS2 + GS1
-  - Seeds: `S7_campaign_started_some_submitted`
+  - Tests: GS2 (implemented in FT-0052 acceptance on `results.getHrView`) + GS1
+  - Seeds: `S7_campaign_started_some_submitted --variant peers2`
 
 - Invariant: open text сотруднику/руководителю — только AI-processed/summary; HR видит raw (включая HR reader).
   - Spec SSoT: `../domain/results-visibility.md`, `../domain/anonymity-policy.md`, `../operations/data-retention-privacy.md`

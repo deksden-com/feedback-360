@@ -1,20 +1,22 @@
 # GS2 — Small group anonymity
-Status: Draft (2026-03-03)
+Status: Active (2026-03-05)
 
 ## Setup
 - Seed: `S7_campaign_started_some_submitted --variant peers2`
 - Policy: `small_group_policy = hide` (default) и отдельный прогон для `merge_to_other`.
 
 ## Action
-1) Compute/view results for subject.
+1) `results hr --campaign <id> --subject <id> --json` (default `small_group_policy=hide`).
+2) `results hr --campaign <id> --subject <id> --small-group-policy merge_to_other --json`.
 
 ## Assertions
-- peers блок скрыт (hide) или слит в `other` (merge), согласно policy.
-- Вес peers перераспределён по правилам нормализации.
-- Open text peers не показывается при `n_valid < 3`.
+- `hide`: `groupVisibility.peers=subordinates=hidden`.
+- `merge_to_other`: `groupVisibility.peers=subordinates=merged`, `groupVisibility.other=shown` (если merged `n>=3`).
+- Per-competency threshold: для компетенции с `n_valid < 3` у merged группы `otherVisibility=hidden`.
 
 ## Client API ops (v1)
 - `results.getMyDashboard` / `results.getTeamDashboard` / `results.getHrView` (в зависимости от роли)
 
 ## CLI example (optional)
-- `results my` / `results team` / `results hr` — выбрать в зависимости от роли, ожидая корректное скрытие/слияние группы и пересчёт весов.
+- `results hr --campaign <campaign_id> --subject <employee_id> --json`
+- `results hr --campaign <campaign_id> --subject <employee_id> --small-group-policy merge_to_other --json`

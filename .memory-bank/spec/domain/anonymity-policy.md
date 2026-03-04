@@ -28,7 +28,13 @@ Threshold применяется:
 - `hide` (default): скрываем проблемную группу/строку.
 - `merge_to_other`: сливаем peers + subordinates в `other` и применяем threshold к объединённой группе.
 
+MVP implementation note (FT-0052):
+- `results.getHrView` возвращает явные flags:
+  - `groupVisibility.{peers,subordinates}` = `shown|hidden|merged`,
+  - `groupVisibility.other` = `shown|hidden` (только при merge policy),
+  - per-competency visibility (`peersVisibility`, `subordinatesVisibility`, `otherVisibility`).
+- Эти flags — SSoT для UI/CLI отображения анонимности и merge semantics.
+
 ## Open text
 - Employee/Manager видят **только AI-агрегированный текст** (summary/processed), и только если выполняется threshold для соответствующей группы.
 - HR роли видят raw-комментарии без анонимизации (MVP решение: HR Reader тоже видит raw).
-

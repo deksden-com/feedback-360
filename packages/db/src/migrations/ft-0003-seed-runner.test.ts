@@ -154,8 +154,39 @@ describe("FT-0003 seed runner + handles", () => {
       } finally {
         await poolAfterS7NaHeavy.end();
       }
+
+      const s7Peers2 = await runSeedScenario({
+        scenario: "S7_campaign_started_some_submitted",
+        variant: "peers2",
+      });
+      expect(s7Peers2.handles["employee.rater_subordinate_1"]).toBeDefined();
+      expect(s7Peers2.handles["competency.secondary"]).toBeDefined();
+      expect(s7Peers2.handles["questionnaire.subject_subordinate_1"]).toBeDefined();
+
+      const poolAfterS7Peers2 = createPool();
+      try {
+        const db = createDb(poolAfterS7Peers2);
+        const counts = await db.execute(sql`
+          select
+            (select count(*) from questionnaires where status = 'submitted') as submitted_count,
+            (select count(*) from campaign_assignments) as assignments_count,
+            (select count(*) from competency_indicators) as indicators_count,
+            (
+              select count(*)
+              from campaign_assignments
+              where rater_role = 'peer'
+            ) as peer_assignments_count
+        `);
+
+        expect(Number(counts.rows[0]?.submitted_count)).toBe(4);
+        expect(Number(counts.rows[0]?.assignments_count)).toBe(4);
+        expect(Number(counts.rows[0]?.indicators_count)).toBe(2);
+        expect(Number(counts.rows[0]?.peer_assignments_count)).toBe(2);
+      } finally {
+        await poolAfterS7Peers2.end();
+      }
     },
-    60_000,
+    120_000,
   );
 
   it.skipIf(hasUrl)("skips integration run when database URL is absent", () => {
