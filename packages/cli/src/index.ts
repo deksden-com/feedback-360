@@ -40,6 +40,17 @@ type CampaignSnapshotListOptions = {
   campaign: string;
 };
 
+type CampaignParticipantsAddDepartmentsOptions = {
+  json?: boolean;
+  fromDepartments: string[];
+  includeSelf?: string;
+};
+
+type MatrixGenerateOptions = {
+  json?: boolean;
+  fromDepartments?: string[];
+};
+
 type EmployeeUpsertOptions = {
   json?: boolean;
   email?: string;
@@ -229,6 +240,28 @@ const formatCampaignSnapshotsHuman = (data: {
   return lines.join("\n");
 };
 
+const formatMatrixSuggestionsHuman = (data: {
+  generatedAssignments: Array<{
+    subjectEmployeeId: string;
+    raterEmployeeId: string;
+    raterRole: string;
+  }>;
+  totalAssignments: number;
+}): string => {
+  if (data.generatedAssignments.length === 0) {
+    return "No suggested assignments generated.";
+  }
+
+  const lines = [`Suggested assignments: ${data.totalAssignments}`];
+  for (const item of data.generatedAssignments) {
+    lines.push(
+      `- subject=${item.subjectEmployeeId}, rater=${item.raterEmployeeId}, role=${item.raterRole}`,
+    );
+  }
+
+  return lines.join("\n");
+};
+
 const parseBooleanOption = (value: string, fieldName: string): boolean => {
   const normalized = value.trim().toLowerCase();
   if (normalized === "true") {
@@ -258,6 +291,7 @@ const normalizeLegacySeedArgs = (argv: string[]): string[] => {
     "employee",
     "org",
     "campaign",
+    "matrix",
     "questionnaire",
   ]);
   if (!knownTopLevelCommands.has(firstArgument) && firstArgument.startsWith("--")) {
@@ -281,6 +315,7 @@ Examples:
   pnpm seed --scenario S1_company_min
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- company use <company_id>
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign snapshot list --campaign <campaign_id> --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants add-departments <campaign_id> --from-departments <department_id>...
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- questionnaire list --campaign <campaign_id> --json
 `,
     );
@@ -290,7 +325,7 @@ Examples:
     .description("Run deterministic database seed scenarios.")
     .requiredOption(
       "--scenario <scenario>",
-      "Seed scenario name (S0_empty | S1_company_min | S1_multi_tenant_min | S2_org_basic | S5_campaign_started_no_answers).",
+      "Seed scenario name (S0_empty | S1_company_min | S1_multi_tenant_min | S2_org_basic | S4_campaign_draft | S5_campaign_started_no_answers).",
     )
     .option("--variant <variant>", "Optional seed variant (currently not supported).")
     .option("--json", "Output machine-readable JSON.")
@@ -474,6 +509,56 @@ Examples:
 
   const campaignCommand = program.command("campaign").description("Campaign operations.");
 
+  const campaignParticipantsCommand = campaignCommand
+    .command("participants")
+    .description("Campaign participants operations.");
+
+  campaignParticipantsCommand
+    .command("add-departments")
+    .description("Add participants from selected departments (with descendants) in draft campaign.")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .requiredOption(
+      "--from-departments <department_ids...>",
+      "Root department identifiers to include (descendants included).",
+    )
+    .option("--include-self <true|false>", "Set includeSelf for added participants.", "true")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (campaignId: string, options: CampaignParticipantsAddDepartmentsOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      let includeSelf: boolean | undefined;
+      try {
+        includeSelf =
+          options.includeSelf !== undefined
+            ? parseBooleanOption(options.includeSelf, "--include-self")
+            : undefined;
+      } catch (error: unknown) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Invalid --include-self value."),
+          options.json,
+        );
+        return;
+      }
+
+      const result = await client.campaignParticipantsAddFromDepartments({
+        campaignId,
+        departmentIds: options.fromDepartments,
+        ...(includeSelf !== undefined ? { includeSelf } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(
+          `Participants added: campaign=${result.data.campaignId}, added=${result.data.addedEmployeeIds.length}, total=${result.data.totalParticipants}`,
+        );
+      }
+    });
+
   campaignCommand
     .command("snapshot")
     .description("Campaign snapshot operations.")
@@ -496,6 +581,36 @@ Examples:
 
       if (!options.json && result.ok) {
         console.log(formatCampaignSnapshotsHuman(result.data));
+      }
+    });
+
+  const matrixCommand = program.command("matrix").description("Rater matrix operations.");
+
+  matrixCommand
+    .command("generate")
+    .description("Generate suggested matrix assignments from participants and org structure.")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .option(
+      "--from-departments <department_ids...>",
+      "Optional department filter for subject set (with descendants).",
+    )
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (campaignId: string, options: MatrixGenerateOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.matrixGenerateSuggested({
+        campaignId,
+        ...(options.fromDepartments ? { departmentIds: options.fromDepartments } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatMatrixSuggestionsHuman(result.data));
       }
     });
 

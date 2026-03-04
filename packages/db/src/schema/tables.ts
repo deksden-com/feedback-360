@@ -168,6 +168,57 @@ export const campaignEmployeeSnapshots = pgTable(
   ],
 );
 
+export const campaignParticipants = pgTable(
+  "campaign_participants",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    employeeId: uuid("employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    includeSelf: boolean("include_self").notNull().default(true),
+    source: text("source").notNull().default("auto"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique("uq_campaign_participant_campaign_employee").on(table.campaignId, table.employeeId),
+  ],
+);
+
+export const campaignAssignments = pgTable(
+  "campaign_assignments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    subjectEmployeeId: uuid("subject_employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    raterEmployeeId: uuid("rater_employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    raterRole: text("rater_role").notNull(),
+    source: text("source").notNull().default("auto"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique("uq_campaign_assignment_campaign_subject_rater").on(
+      table.campaignId,
+      table.subjectEmployeeId,
+      table.raterEmployeeId,
+    ),
+  ],
+);
+
 export const questionnaires = pgTable(
   "questionnaires",
   {

@@ -1,5 +1,5 @@
 # GS11 — Matrix autogeneration from org snapshot (planned)
-Status: Draft (2026-03-03)
+Status: Baseline Implemented (2026-03-04)
 
 ## Setup
 - Seed: `S4_campaign_draft --variant no_participants --json` (handles company/campaign/departments/employees/model).

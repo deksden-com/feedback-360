@@ -102,12 +102,15 @@ Status: Draft (2026-03-03)
   - Must add test: `packages/cli/src/ft-0032-campaign-snapshot-cli.test.ts`
   - Must run: GS8.
 - FT-0033
-  - Must add test: `packages/core/test/ft/ft-0033-matrix-autogen.test.ts`
+  - Must add test: `packages/core/src/ft/ft-0033-matrix-autogen-no-db.test.ts`
+  - Must add test: `packages/core/src/ft/ft-0033-matrix-autogen.test.ts`
+  - Must add test: `packages/cli/src/ft-0033-matrix-cli.test.ts`
   - Must run: GS11.
 
 ### EP-003 execution evidence (2026-03-04)
 - FT-0031: what=org history ops (`org.department.move`, `org.manager.set`) + employee soft deactivate/list-active filtering; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0031-org-history-no-db.test.ts src/ft/ft-0031-org-history.test.ts`, `pnpm --filter @feedback-360/cli exec vitest run src/ft-0031-org-cli.test.ts`; quality_gate=passed; acceptance_gate=passed (history intervals + active list filtering; DB integration subtest skipped без `SUPABASE_DB_POOLER_URL`/`DATABASE_URL`); result=passed.
 - FT-0032: what=campaign snapshot immutability after campaign start; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0032-snapshot-no-db.test.ts src/ft/ft-0032-snapshot.test.ts`, `pnpm --filter @feedback-360/cli exec vitest run src/ft-0032-campaign-snapshot-cli.test.ts`; quality_gate=passed; acceptance_gate=passed (snapshot unchanged after live org updates; DB integration subtest skipped без `SUPABASE_DB_POOLER_URL`/`DATABASE_URL`); result=passed.
+- FT-0033: what=participants add-from-departments + matrix autogeneration rules; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0033-matrix-autogen-no-db.test.ts src/ft/ft-0033-matrix-autogen.test.ts`, `pnpm --filter @feedback-360/cli exec vitest run src/ft-0033-matrix-cli.test.ts`; quality_gate=passed; acceptance_gate=passed (heads are peers, department staff mapped to correct managers, add-departments idempotent baseline covered; DB integration subtest skipped без `SUPABASE_DB_POOLER_URL`/`DATABASE_URL`); result=passed.
 
 ## EP-004 Models + campaigns + questionnaires
 - FT-0041

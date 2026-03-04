@@ -1,4 +1,6 @@
 import {
+  type CampaignParticipantsAddFromDepartmentsInput,
+  type CampaignParticipantsAddFromDepartmentsOutput,
   type CampaignSnapshotListInput,
   type CampaignSnapshotListOutput,
   type CompanyUpdateProfileInput,
@@ -8,6 +10,8 @@ import {
   type EmployeeListActiveOutput,
   type EmployeeUpsertInput,
   type EmployeeUpsertOutput,
+  type MatrixGenerateSuggestedInput,
+  type MatrixGenerateSuggestedOutput,
   type OperationResult,
   type OrgDepartmentMoveInput,
   type OrgDepartmentMoveOutput,
@@ -25,6 +29,8 @@ import {
   errorResult,
   isKnownOperation,
   okResult,
+  parseCampaignParticipantsAddFromDepartmentsInput,
+  parseCampaignParticipantsAddFromDepartmentsOutput,
   parseCampaignSnapshotListInput,
   parseCampaignSnapshotListOutput,
   parseCompanyUpdateProfileInput,
@@ -34,6 +40,8 @@ import {
   parseEmployeeListActiveOutput,
   parseEmployeeUpsertInput,
   parseEmployeeUpsertOutput,
+  parseMatrixGenerateSuggestedInput,
+  parseMatrixGenerateSuggestedOutput,
   parseOrgDepartmentMoveInput,
   parseOrgDepartmentMoveOutput,
   parseOrgManagerSetInput,
@@ -48,6 +56,8 @@ import {
   parseSystemPingOutput,
 } from "@feedback-360/api-contract";
 import {
+  addCampaignParticipantsFromDepartments,
+  generateSuggestedMatrix,
   listActiveEmployees,
   listAssignedQuestionnaires,
   listCampaignEmployeeSnapshots,
@@ -318,6 +328,89 @@ const runCampaignSnapshotList = async (
   }
 };
 
+const runCampaignParticipantsAddFromDepartments = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignParticipantsAddFromDepartmentsOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can add campaign participants.", {
+        operation: "campaign.participants.addFromDepartments",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignParticipantsAddFromDepartmentsInput;
+  try {
+    parsedInput = parseCampaignParticipantsAddFromDepartmentsInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(
+        error,
+        "invalid_input",
+        "Invalid campaign.participants.addFromDepartments input.",
+      ),
+    );
+  }
+
+  try {
+    const output = await addCampaignParticipantsFromDepartments({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+      departmentIds: parsedInput.departmentIds,
+      includeSelf: parsedInput.includeSelf,
+    });
+    return okResult(parseCampaignParticipantsAddFromDepartmentsOutput(output));
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Failed to add participants from departments."),
+    );
+  }
+};
+
+const runMatrixGenerateSuggested = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<MatrixGenerateSuggestedOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can generate matrix suggestions.", {
+        operation: "matrix.generateSuggested",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: MatrixGenerateSuggestedInput;
+  try {
+    parsedInput = parseMatrixGenerateSuggestedInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid matrix.generateSuggested input."),
+    );
+  }
+
+  try {
+    const output = await generateSuggestedMatrix({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+      departmentIds: parsedInput.departmentIds,
+    });
+    return okResult(parseMatrixGenerateSuggestedOutput(output));
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Failed to generate matrix suggestions."),
+    );
+  }
+};
+
 const runQuestionnaireListAssigned = async (
   request: DispatchOperationInput,
 ): Promise<OperationResult<QuestionnaireListAssignedOutput>> => {
@@ -443,6 +536,8 @@ export const dispatchOperation = (
     | OrgDepartmentMoveOutput
     | OrgManagerSetOutput
     | CampaignSnapshotListOutput
+    | CampaignParticipantsAddFromDepartmentsOutput
+    | MatrixGenerateSuggestedOutput
     | QuestionnaireListAssignedOutput
     | QuestionnaireSaveDraftOutput
     | QuestionnaireSubmitOutput
@@ -482,6 +577,10 @@ export const dispatchOperation = (
       return runOrgManagerSet(parsedRequest);
     case "campaign.snapshot.list":
       return runCampaignSnapshotList(parsedRequest);
+    case "campaign.participants.addFromDepartments":
+      return runCampaignParticipantsAddFromDepartments(parsedRequest);
+    case "matrix.generateSuggested":
+      return runMatrixGenerateSuggested(parsedRequest);
     case "questionnaire.listAssigned":
       return runQuestionnaireListAssigned(parsedRequest);
     case "questionnaire.saveDraft":

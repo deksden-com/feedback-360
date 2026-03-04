@@ -38,6 +38,28 @@ describe("FT-0003 seed runner + handles", () => {
         await poolAfterS2.end();
       }
 
+      const s4 = await runSeedScenario({
+        scenario: "S4_campaign_draft",
+        variant: "no_participants",
+      });
+      expect(s4.handles["campaign.main"]).toBeDefined();
+      expect(s4.handles["department.a"]).toBeDefined();
+
+      const poolAfterS4 = createPool();
+      try {
+        const db = createDb(poolAfterS4);
+        const counts = await db.execute(sql`
+        select
+          (select count(*) from campaigns) as campaigns_count,
+          (select count(*) from campaign_participants) as participants_count
+      `);
+
+        expect(Number(counts.rows[0]?.campaigns_count)).toBe(1);
+        expect(Number(counts.rows[0]?.participants_count)).toBe(0);
+      } finally {
+        await poolAfterS4.end();
+      }
+
       const s1MultiTenant = await runSeedScenario({ scenario: "S1_multi_tenant_min" });
       expect(s1MultiTenant.handles["company.a"]).toBeDefined();
       expect(s1MultiTenant.handles["company.b"]).toBeDefined();

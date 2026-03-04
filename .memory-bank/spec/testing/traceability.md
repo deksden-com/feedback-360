@@ -95,7 +95,7 @@ Status: Draft (2026-03-03)
 ## Assignments autogeneration
 - Invariant: автогенерация матрицы учитывает выбранные подразделения и иерархию; руководители одного уровня — peers.
   - Spec SSoT: `../domain/assignments-and-matrix.md`, `../domain/org-structure.md`
-  - Tests: GS11 (planned)
+  - Tests: GS11 (baseline implemented in FT-0033)
   - Seeds: `S4_campaign_draft --variant no_participants` (preferred), либо композиция `S2_org_basic` + `S3_model_indicators`
 
 ## Campaign progress

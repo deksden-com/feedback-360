@@ -98,6 +98,8 @@ const ids = {
 
 const truncateSql = sql.raw(`
   truncate table
+    campaign_assignments,
+    campaign_participants,
     campaign_employee_snapshots,
     questionnaires,
     campaigns,
@@ -383,6 +385,13 @@ const buildS5Handles = (): Record<string, string> => {
     ...buildS2Handles(),
     "campaign.main": ids.campaignMain,
     "questionnaire.main": ids.questionnaireMain,
+  };
+};
+
+const buildS4Handles = (): Record<string, string> => {
+  return {
+    ...buildS2Handles(),
+    "campaign.main": ids.campaignMain,
   };
 };
 
@@ -774,10 +783,42 @@ const insertS5 = async (db: ReturnType<typeof createDb>): Promise<Record<string,
   return buildS5Handles();
 };
 
+const insertS4 = async (
+  db: ReturnType<typeof createDb>,
+  options?: { variant?: string },
+): Promise<Record<string, string>> => {
+  await insertS2(db);
+
+  const campaignStartAt = new Date("2026-01-15T09:00:00.000Z");
+  const campaignEndAt = new Date("2026-01-30T18:00:00.000Z");
+
+  await db.insert(campaigns).values({
+    id: ids.campaignMain,
+    companyId: ids.companyMain,
+    name: "Q1 Draft Campaign",
+    status: "draft",
+    timezone: "Europe/Kaliningrad",
+    startAt: campaignStartAt,
+    endAt: campaignEndAt,
+    lockedAt: null,
+    createdAt: seededAt,
+    updatedAt: seededAt,
+  });
+
+  if (options?.variant && options.variant !== "no_participants") {
+    throw new Error(`Unsupported variant for S4_campaign_draft: ${options.variant}`);
+  }
+
+  return buildS4Handles();
+};
+
 export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutput> => {
   const parsed = parseSeedRunInput(input);
 
-  if (parsed.variant) {
+  if (
+    parsed.variant &&
+    !(parsed.scenario === "S4_campaign_draft" && parsed.variant === "no_participants")
+  ) {
     throw new Error(`Unsupported seed variant for ${parsed.scenario}: ${parsed.variant}`);
   }
 
@@ -800,6 +841,11 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
         break;
       case "S2_org_basic":
         handles = await insertS2(db);
+        break;
+      case "S4_campaign_draft":
+        handles = await insertS4(db, {
+          variant: parsed.variant,
+        });
         break;
       case "S5_campaign_started_no_answers":
         handles = await insertS5(db);

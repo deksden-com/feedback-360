@@ -1,5 +1,5 @@
 # EP-003 — Org structure + snapshots
-Status: In Progress (2026-03-04)
+Status: Completed (2026-03-04)
 
 ## Goal
 Ввести оргструктуру и снапшоты на старт кампании, чтобы матрица и история были консистентны.
@@ -14,8 +14,8 @@ Status: In Progress (2026-03-04)
 ## Progress report (evidence-based)
 - `as_of`: 2026-03-04
 - `total_features`: 3
-- `completed_features`: 2
-- `evidence_confirmed_features`: 2
+- `completed_features`: 3
+- `evidence_confirmed_features`: 3
 - verification link:
   - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-003. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
 

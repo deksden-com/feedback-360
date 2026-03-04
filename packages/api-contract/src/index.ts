@@ -3,6 +3,7 @@ export const seedScenarios = [
   "S1_company_min",
   "S1_multi_tenant_min",
   "S2_org_basic",
+  "S4_campaign_draft",
   "S5_campaign_started_no_answers",
 ] as const;
 
@@ -64,6 +65,8 @@ export const knownOperations = [
   "org.department.move",
   "org.manager.set",
   "campaign.snapshot.list",
+  "campaign.participants.addFromDepartments",
+  "matrix.generateSuggested",
   "client.setActiveCompany",
   "questionnaire.listAssigned",
   "questionnaire.saveDraft",
@@ -169,6 +172,35 @@ export type CampaignSnapshotListItem = {
 
 export type CampaignSnapshotListOutput = {
   items: CampaignSnapshotListItem[];
+};
+
+export type CampaignParticipantsAddFromDepartmentsInput = {
+  campaignId: string;
+  departmentIds: string[];
+  includeSelf?: boolean;
+};
+
+export type CampaignParticipantsAddFromDepartmentsOutput = {
+  campaignId: string;
+  addedEmployeeIds: string[];
+  totalParticipants: number;
+};
+
+export type MatrixGeneratedAssignment = {
+  subjectEmployeeId: string;
+  raterEmployeeId: string;
+  raterRole: "manager" | "peer" | "subordinate" | "self";
+};
+
+export type MatrixGenerateSuggestedInput = {
+  campaignId: string;
+  departmentIds?: string[];
+};
+
+export type MatrixGenerateSuggestedOutput = {
+  campaignId: string;
+  generatedAssignments: MatrixGeneratedAssignment[];
+  totalAssignments: number;
 };
 
 export type ClientSetActiveCompanyInput = {
@@ -287,6 +319,19 @@ const ensureBooleanField = (
   const fieldValue = value[field];
   if (typeof fieldValue !== "boolean") {
     throw new Error(`${fieldName}.${field} must be a boolean.`);
+  }
+
+  return fieldValue;
+};
+
+const ensureNumberField = (
+  value: Record<string, unknown>,
+  field: string,
+  fieldName: string,
+): number => {
+  const fieldValue = value[field];
+  if (typeof fieldValue !== "number" || Number.isNaN(fieldValue)) {
+    throw new Error(`${fieldName}.${field} must be a number.`);
   }
 
   return fieldValue;
@@ -849,6 +894,163 @@ export const parseCampaignSnapshotListOutput = (value: unknown): CampaignSnapsho
   return {
     items: ensureArray(record.items, "campaign.snapshot.list output.items").map(
       parseCampaignSnapshotListItem,
+    ),
+  };
+};
+
+const matrixRaterRoles = ["manager", "peer", "subordinate", "self"] as const;
+const isMatrixRaterRole = (value: string): value is MatrixGeneratedAssignment["raterRole"] => {
+  return matrixRaterRoles.includes(value as (typeof matrixRaterRoles)[number]);
+};
+
+const parseMatrixGeneratedAssignment = (value: unknown): MatrixGeneratedAssignment => {
+  const record = ensureObject(value, "matrix.generateSuggested output.generatedAssignments[]");
+  ensureAllowedKeys(
+    record,
+    ["subjectEmployeeId", "raterEmployeeId", "raterRole"],
+    "matrix.generateSuggested output.generatedAssignments[]",
+  );
+
+  const raterRole = ensureStringField(
+    record,
+    "raterRole",
+    "matrix.generateSuggested output.generatedAssignments[]",
+  );
+  if (!isMatrixRaterRole(raterRole)) {
+    throw new Error(
+      `matrix.generateSuggested output.generatedAssignments[].raterRole must be one of: ${matrixRaterRoles.join(", ")}`,
+    );
+  }
+
+  return {
+    subjectEmployeeId: ensureStringField(
+      record,
+      "subjectEmployeeId",
+      "matrix.generateSuggested output.generatedAssignments[]",
+    ),
+    raterEmployeeId: ensureStringField(
+      record,
+      "raterEmployeeId",
+      "matrix.generateSuggested output.generatedAssignments[]",
+    ),
+    raterRole,
+  };
+};
+
+export const parseCampaignParticipantsAddFromDepartmentsInput = (
+  value: unknown,
+): CampaignParticipantsAddFromDepartmentsInput => {
+  const record = ensureObject(value, "campaign.participants.addFromDepartments input");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "departmentIds", "includeSelf"],
+    "campaign.participants.addFromDepartments input",
+  );
+
+  const includeSelf = record.includeSelf;
+  if (includeSelf !== undefined && typeof includeSelf !== "boolean") {
+    throw new Error(
+      "campaign.participants.addFromDepartments input.includeSelf must be boolean when provided.",
+    );
+  }
+
+  const departmentIds = ensureArray(
+    record.departmentIds,
+    "campaign.participants.addFromDepartments input.departmentIds",
+  ).map((item) =>
+    ensureStringField(
+      { value: item },
+      "value",
+      "campaign.participants.addFromDepartments input.departmentIds[]",
+    ),
+  );
+
+  return {
+    campaignId: ensureStringField(
+      record,
+      "campaignId",
+      "campaign.participants.addFromDepartments input",
+    ),
+    departmentIds,
+    ...(typeof includeSelf === "boolean" ? { includeSelf } : {}),
+  };
+};
+
+export const parseCampaignParticipantsAddFromDepartmentsOutput = (
+  value: unknown,
+): CampaignParticipantsAddFromDepartmentsOutput => {
+  const record = ensureObject(value, "campaign.participants.addFromDepartments output");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "addedEmployeeIds", "totalParticipants"],
+    "campaign.participants.addFromDepartments output",
+  );
+
+  return {
+    campaignId: ensureStringField(
+      record,
+      "campaignId",
+      "campaign.participants.addFromDepartments output",
+    ),
+    addedEmployeeIds: ensureArray(
+      record.addedEmployeeIds,
+      "campaign.participants.addFromDepartments output.addedEmployeeIds",
+    ).map((item) =>
+      ensureStringField(
+        { value: item },
+        "value",
+        "campaign.participants.addFromDepartments output.addedEmployeeIds[]",
+      ),
+    ),
+    totalParticipants: ensureNumberField(
+      record,
+      "totalParticipants",
+      "campaign.participants.addFromDepartments output",
+    ),
+  };
+};
+
+export const parseMatrixGenerateSuggestedInput = (value: unknown): MatrixGenerateSuggestedInput => {
+  const record = ensureObject(value, "matrix.generateSuggested input");
+  ensureAllowedKeys(record, ["campaignId", "departmentIds"], "matrix.generateSuggested input");
+
+  const departmentIdsValue = record.departmentIds;
+  let departmentIds: string[] | undefined;
+  if (departmentIdsValue !== undefined) {
+    departmentIds = ensureArray(
+      departmentIdsValue,
+      "matrix.generateSuggested input.departmentIds",
+    ).map((item) =>
+      ensureStringField({ value: item }, "value", "matrix.generateSuggested input.departmentIds[]"),
+    );
+  }
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "matrix.generateSuggested input"),
+    ...(departmentIds ? { departmentIds } : {}),
+  };
+};
+
+export const parseMatrixGenerateSuggestedOutput = (
+  value: unknown,
+): MatrixGenerateSuggestedOutput => {
+  const record = ensureObject(value, "matrix.generateSuggested output");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "generatedAssignments", "totalAssignments"],
+    "matrix.generateSuggested output",
+  );
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "matrix.generateSuggested output"),
+    generatedAssignments: ensureArray(
+      record.generatedAssignments,
+      "matrix.generateSuggested output.generatedAssignments",
+    ).map(parseMatrixGeneratedAssignment),
+    totalAssignments: ensureNumberField(
+      record,
+      "totalAssignments",
+      "matrix.generateSuggested output",
     ),
   };
 };

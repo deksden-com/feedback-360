@@ -1,4 +1,6 @@
 import {
+  type CampaignParticipantsAddFromDepartmentsInput,
+  type CampaignParticipantsAddFromDepartmentsOutput,
   type CampaignSnapshotListInput,
   type CampaignSnapshotListOutput,
   type ClientSetActiveCompanyOutput,
@@ -7,6 +9,8 @@ import {
   type EmployeeListActiveOutput,
   type EmployeeUpsertInput,
   type EmployeeUpsertOutput,
+  type MatrixGenerateSuggestedInput,
+  type MatrixGenerateSuggestedOutput,
   type OperationContext,
   type OperationResult,
   type OrgDepartmentMoveInput,
@@ -26,6 +30,8 @@ import {
   errorFromUnknown,
   errorResult,
   okResult,
+  parseCampaignParticipantsAddFromDepartmentsInput,
+  parseCampaignParticipantsAddFromDepartmentsOutput,
   parseCampaignSnapshotListInput,
   parseCampaignSnapshotListOutput,
   parseClientSetActiveCompanyInput,
@@ -35,6 +41,8 @@ import {
   parseEmployeeListActiveOutput,
   parseEmployeeUpsertInput,
   parseEmployeeUpsertOutput,
+  parseMatrixGenerateSuggestedInput,
+  parseMatrixGenerateSuggestedOutput,
   parseOperationResult,
   parseOrgDepartmentMoveInput,
   parseOrgDepartmentMoveOutput,
@@ -102,6 +110,14 @@ export type Feedback360Client = {
     input: CampaignSnapshotListInput,
     context?: OperationContext,
   ): Promise<OperationResult<CampaignSnapshotListOutput>>;
+  campaignParticipantsAddFromDepartments(
+    input: CampaignParticipantsAddFromDepartmentsInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignParticipantsAddFromDepartmentsOutput>>;
+  matrixGenerateSuggested(
+    input: MatrixGenerateSuggestedInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<MatrixGenerateSuggestedOutput>>;
   questionnaireListAssigned(
     input: QuestionnaireListAssignedInput,
     context?: OperationContext,
@@ -304,6 +320,46 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseCampaignSnapshotListOutput,
+      });
+    },
+
+    campaignParticipantsAddFromDepartments: async (input, context) => {
+      let parsedInput: CampaignParticipantsAddFromDepartmentsInput;
+      try {
+        parsedInput = parseCampaignParticipantsAddFromDepartmentsInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(
+            error,
+            "invalid_input",
+            "Invalid campaignParticipantsAddFromDepartments input.",
+          ),
+        );
+      }
+
+      return invokeOperation({
+        operation: "campaign.participants.addFromDepartments",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignParticipantsAddFromDepartmentsOutput,
+      });
+    },
+
+    matrixGenerateSuggested: async (input, context) => {
+      let parsedInput: MatrixGenerateSuggestedInput;
+      try {
+        parsedInput = parseMatrixGenerateSuggestedInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid matrixGenerateSuggested input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "matrix.generateSuggested",
+        input: parsedInput,
+        context,
+        parseOutput: parseMatrixGenerateSuggestedOutput,
       });
     },
 

@@ -1,5 +1,5 @@
 # FT-0033 — Matrix autogeneration (from selected departments)
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## User value
 HR выбирает подразделения, а система предлагает матрицу оценщиков, корректно учитывая иерархию и peers между руководителями одного уровня.
@@ -68,5 +68,27 @@ Seed: `S4_campaign_draft --variant no_participants --json` → handles: `company
   - [CLI command catalog](../../../../../spec/cli/command-catalog.md): 1:1 команды. Читать, чтобы acceptance сценарии были выполнимы через CLI.
 
 ## Verification (must)
-- Automated test: `packages/core/test/ft/ft-0033-matrix-autogen.test.ts` (integration) повторяет Acceptance (add-departments + generate) и проверяет peers/manager правила.
-- Must run: GS11 должен быть зелёным.
+- Automated tests:
+  - `packages/core/src/ft/ft-0033-matrix-autogen-no-db.test.ts`
+  - `packages/core/src/ft/ft-0033-matrix-autogen.test.ts`
+  - `packages/cli/src/ft-0033-matrix-cli.test.ts`
+- Must run: `pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, targeted FT-0033 acceptance tests.
+
+## Project grounding (2026-03-04)
+- [Assignments & matrix](../../../../../spec/domain/assignments-and-matrix.md): целевые правила manager/peer/subordinate/self и lock-ограничения.
+- [Org structure](../../../../../spec/domain/org-structure.md): direct-manager и отделы как источник автогенерации.
+- [Campaign lifecycle](../../../../../spec/domain/campaign-lifecycle.md): ограничения для draft/started и freeze по `locked_at`.
+- [GS11 Matrix autogen](../../../../../spec/testing/scenarios/gs11-matrix-autogen.md): acceptance intent и CLI поток.
+- [Operation catalog](../../../../../spec/client-api/operation-catalog.md): согласование ops + RBAC.
+- [CLI command catalog](../../../../../spec/cli/command-catalog.md): команды 1:1 к ops.
+
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` → passed.
+- `pnpm -r typecheck` → passed.
+- `pnpm -r test` → passed.
+- Build: N/A (изменения только в `packages/*`, отдельного build-gate для FT-0033 нет).
+
+## Acceptance evidence (2026-03-04)
+- `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0033-matrix-autogen-no-db.test.ts src/ft/ft-0033-matrix-autogen.test.ts` → passed (`ft-0033-matrix-autogen.test.ts`: integration subtest skipped без `SUPABASE_DB_POOLER_URL`/`DATABASE_URL`).
+- `pnpm --filter @feedback-360/cli exec vitest run src/ft-0033-matrix-cli.test.ts` → passed.
+- Проверено по acceptance intent: `head_a` и `head_b` получают `peer` друг на друга; `staff_a1 -> manager=head_a`, `staff_b1 -> manager=head_b`.
