@@ -71,6 +71,14 @@ type CampaignTransitionOptions = {
   json?: boolean;
 };
 
+type CampaignSetModelOptions = {
+  json?: boolean;
+};
+
+type CampaignParticipantsMutationOptions = {
+  json?: boolean;
+};
+
 type AiRunOptions = {
   json?: boolean;
 };
@@ -334,6 +342,23 @@ const formatCampaignTransitionHuman = (data: {
   return `Campaign status updated: id=${data.campaignId}, previous=${data.previousStatus}, status=${data.status}, changed=${data.changed}, updatedAt=${data.updatedAt}`;
 };
 
+const formatCampaignSetModelHuman = (data: {
+  campaignId: string;
+  modelVersionId: string;
+  changed: boolean;
+  updatedAt: string;
+}): string => {
+  return `Campaign model updated: campaign=${data.campaignId}, modelVersion=${data.modelVersionId}, changed=${data.changed}, updatedAt=${data.updatedAt}`;
+};
+
+const formatCampaignParticipantsMutationHuman = (data: {
+  campaignId: string;
+  changedEmployeeIds: string[];
+  totalParticipants: number;
+}): string => {
+  return `Campaign participants updated: campaign=${data.campaignId}, changed=${data.changedEmployeeIds.length}, total=${data.totalParticipants}`;
+};
+
 const buildDefaultModelPayload = (name: string, kind: "indicators" | "levels") => {
   if (kind === "levels") {
     return {
@@ -436,6 +461,9 @@ Examples:
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- company use <company_id>
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- model version create --name "Q1 Model" --kind indicators --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign create --name "Q1 Campaign" --model-version <model_version_id> --start-at 2026-02-01T09:00:00.000Z --end-at 2026-02-28T18:00:00.000Z --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign set-model <campaign_id> <model_version_id> --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants add <campaign_id> <employee_id>... --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants remove <campaign_id> <employee_id>... --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign start <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign stop <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign snapshot list --campaign <campaign_id> --json
@@ -719,6 +747,33 @@ Examples:
     });
 
   campaignCommand
+    .command("set-model")
+    .description("Set campaign model version (`draft` only).")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .argument("<model_version_id>", "Model version identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(
+      async (campaignId: string, modelVersionId: string, options: CampaignSetModelOptions) => {
+        const client = await getClientWithActiveCompany(options.json);
+        if (!client) {
+          return;
+        }
+
+        const result = await client.campaignSetModelVersion({
+          campaignId,
+          modelVersionId,
+        });
+        if (!emitResult(result, options.json)) {
+          return;
+        }
+
+        if (!options.json && result.ok) {
+          console.log(formatCampaignSetModelHuman(result.data));
+        }
+      },
+    );
+
+  campaignCommand
     .command("start")
     .description("Start campaign (`draft -> started`).")
     .argument("<campaign_id>", "Campaign identifier.")
@@ -784,6 +839,68 @@ Examples:
   const campaignParticipantsCommand = campaignCommand
     .command("participants")
     .description("Campaign participants operations.");
+
+  campaignParticipantsCommand
+    .command("add")
+    .description("Add employees to campaign participants (`draft` only).")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .argument("<employee_ids...>", "Employee identifiers.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(
+      async (
+        campaignId: string,
+        employeeIds: string[],
+        options: CampaignParticipantsMutationOptions,
+      ) => {
+        const client = await getClientWithActiveCompany(options.json);
+        if (!client) {
+          return;
+        }
+
+        const result = await client.campaignParticipantsAdd({
+          campaignId,
+          employeeIds,
+        });
+        if (!emitResult(result, options.json)) {
+          return;
+        }
+
+        if (!options.json && result.ok) {
+          console.log(formatCampaignParticipantsMutationHuman(result.data));
+        }
+      },
+    );
+
+  campaignParticipantsCommand
+    .command("remove")
+    .description("Remove employees from campaign participants (`draft` only).")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .argument("<employee_ids...>", "Employee identifiers.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(
+      async (
+        campaignId: string,
+        employeeIds: string[],
+        options: CampaignParticipantsMutationOptions,
+      ) => {
+        const client = await getClientWithActiveCompany(options.json);
+        if (!client) {
+          return;
+        }
+
+        const result = await client.campaignParticipantsRemove({
+          campaignId,
+          employeeIds,
+        });
+        if (!emitResult(result, options.json)) {
+          return;
+        }
+
+        if (!options.json && result.ok) {
+          console.log(formatCampaignParticipantsMutationHuman(result.data));
+        }
+      },
+    );
 
   campaignParticipantsCommand
     .command("add-departments")

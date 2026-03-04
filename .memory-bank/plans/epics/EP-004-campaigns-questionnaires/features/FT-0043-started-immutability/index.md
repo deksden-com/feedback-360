@@ -1,5 +1,5 @@
 # FT-0043 — Started immutability (model + participants)
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## User value
 После старта нельзя “подкручивать правила”: модель и состав участников фиксируются.
@@ -54,5 +54,27 @@ Status: Draft (2026-03-03)
 - При выборе имени error code обновить: [Error model](../../../../../spec/client-api/errors.md) — SSoT коды. Читать, чтобы acceptance сценарии проверяли точный `code`.
 
 ## Verification (must)
-- Automated test: `packages/core/test/ft/ft-0043-started-immutability.test.ts` (integration) повторяет GS6: до start можно, после start — typed error и no partial writes.
+- Automated tests:
+  - `packages/core/src/ft/ft-0043-started-immutability-no-db.test.ts`
+  - `packages/core/src/ft/ft-0043-started-immutability.test.ts`
+  - `packages/client/src/ft-0043-started-immutability-client.test.ts`
+  - `packages/cli/src/ft-0043-started-immutability-cli.test.ts`
 - Must run: GS6 должен быть зелёным.
+
+## Project grounding (2026-03-04)
+- [Campaign lifecycle](../../../../../spec/domain/campaign-lifecycle.md): правило immutability после `started` и связка с переходами lifecycle.
+- [Operation catalog](../../../../../spec/client-api/operation-catalog.md): контракт операций `campaign.setModelVersion` и `campaign.participants.add/remove`.
+- [CLI command catalog](../../../../../spec/cli/command-catalog.md): команды `campaign set-model` и `campaign participants add/remove` как thin client обертки.
+- [GS6 Started immutability](../../../../../spec/testing/scenarios/gs6-started-immutability.md): intent сценария и ожидаемые доменные ошибки.
+
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` → passed.
+- `pnpm -r typecheck` → passed.
+- `pnpm -r test` → passed.
+- Build: N/A (изменения в packages/core/db/client/cli без нового build-gate).
+
+## Acceptance evidence (2026-03-04)
+- `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0043-started-immutability-no-db.test.ts src/ft/ft-0043-started-immutability.test.ts` → passed (`integration subtest skipped` без `SUPABASE_DB_POOLER_URL`/`DATABASE_URL`).
+- `pnpm --filter @feedback-360/client exec vitest run src/ft-0043-started-immutability-client.test.ts` → passed.
+- `pnpm --filter @feedback-360/cli exec vitest run src/ft-0043-started-immutability-cli.test.ts` → passed.
+- Проверено по intent: до `campaign.start` операции `campaign.setModelVersion` и `campaign.participants.add/remove` работают; после старта возвращают `campaign_started_immutable` без частичных изменений.

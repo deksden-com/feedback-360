@@ -26,6 +26,18 @@ type AddParticipantsFromDepartmentsOutput = {
   totalParticipants: number;
 };
 
+type MutateCampaignParticipantsInput = {
+  companyId: string;
+  campaignId: string;
+  employeeIds: string[];
+};
+
+type MutateCampaignParticipantsOutput = {
+  campaignId: string;
+  changedEmployeeIds: string[];
+  totalParticipants: number;
+};
+
 type MatrixGenerateSuggestedInput = {
   companyId: string;
   campaignId: string;
@@ -86,6 +98,21 @@ const throwIfCampaignLocked = (campaign: CampaignState): void => {
       campaignId: campaign.campaignId,
       lockedAt: campaign.lockedAt.toISOString(),
     });
+  }
+};
+
+const ensureCampaignParticipantsMutable = (campaign: CampaignState): void => {
+  throwIfCampaignLocked(campaign);
+
+  if (campaign.status !== "draft") {
+    throw createOperationError(
+      "campaign_started_immutable",
+      "Participants can be changed only while campaign is in draft.",
+      {
+        campaignId: campaign.campaignId,
+        status: campaign.status,
+      },
+    );
   }
 };
 
@@ -248,18 +275,7 @@ export const addCampaignParticipantsFromDepartments = async (
     const db = createDb(pool);
     return await db.transaction(async (tx) => {
       const campaign = await getCampaignState(tx, input.companyId, input.campaignId);
-      throwIfCampaignLocked(campaign);
-
-      if (campaign.status !== "draft") {
-        throw createOperationError(
-          "campaign_started_immutable",
-          "Participants can be changed only while campaign is in draft.",
-          {
-            campaignId: input.campaignId,
-            status: campaign.status,
-          },
-        );
-      }
+      ensureCampaignParticipantsMutable(campaign);
 
       const expandedDepartmentIds = await getDescendantDepartmentIds(
         tx,
@@ -346,6 +362,166 @@ export const addCampaignParticipantsFromDepartments = async (
         campaignId: input.campaignId,
         addedEmployeeIds,
         totalParticipants: Number(participantsCountRows[0]?.total ?? 0),
+      };
+    });
+  } finally {
+    await pool.end();
+  }
+};
+
+export const addCampaignParticipants = async (
+  input: MutateCampaignParticipantsInput,
+): Promise<MutateCampaignParticipantsOutput> => {
+  if (input.employeeIds.length === 0) {
+    throw createOperationError("invalid_input", "employeeIds must not be empty.");
+  }
+
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    return await db.transaction(async (tx) => {
+      const campaign = await getCampaignState(tx, input.companyId, input.campaignId);
+      ensureCampaignParticipantsMutable(campaign);
+
+      const requestedEmployeeIds = [
+        ...new Set(input.employeeIds.map((employeeId) => employeeId.trim())),
+      ]
+        .filter((employeeId) => employeeId.length > 0)
+        .sort((left, right) => left.localeCompare(right));
+      if (requestedEmployeeIds.length === 0) {
+        throw createOperationError(
+          "invalid_input",
+          "employeeIds must contain non-empty identifiers.",
+        );
+      }
+
+      const employeeRows = await tx
+        .select({
+          employeeId: employees.id,
+        })
+        .from(employees)
+        .where(
+          and(
+            eq(employees.companyId, input.companyId),
+            inArray(employees.id, requestedEmployeeIds),
+            eq(employees.isActive, true),
+            isNull(employees.deletedAt),
+          ),
+        );
+
+      const allowedEmployeeIds = new Set(employeeRows.map((row) => row.employeeId));
+      const missingEmployeeIds = requestedEmployeeIds.filter(
+        (employeeId) => !allowedEmployeeIds.has(employeeId),
+      );
+      if (missingEmployeeIds.length > 0) {
+        throw createOperationError(
+          "not_found",
+          "Some employees are unavailable for participation.",
+          {
+            campaignId: input.campaignId,
+            employeeIds: missingEmployeeIds,
+          },
+        );
+      }
+
+      const insertedRows = await tx
+        .insert(campaignParticipants)
+        .values(
+          requestedEmployeeIds.map((employeeId) => ({
+            companyId: input.companyId,
+            campaignId: input.campaignId,
+            employeeId,
+            includeSelf: true,
+            source: "manual",
+          })),
+        )
+        .onConflictDoNothing()
+        .returning({
+          employeeId: campaignParticipants.employeeId,
+        });
+
+      const totalRows = await tx
+        .select({
+          total: sql<number>`count(*)::int`,
+        })
+        .from(campaignParticipants)
+        .where(
+          and(
+            eq(campaignParticipants.companyId, input.companyId),
+            eq(campaignParticipants.campaignId, input.campaignId),
+          ),
+        );
+
+      return {
+        campaignId: input.campaignId,
+        changedEmployeeIds: insertedRows
+          .map((row) => row.employeeId)
+          .sort((left, right) => left.localeCompare(right)),
+        totalParticipants: totalRows[0]?.total ?? 0,
+      };
+    });
+  } finally {
+    await pool.end();
+  }
+};
+
+export const removeCampaignParticipants = async (
+  input: MutateCampaignParticipantsInput,
+): Promise<MutateCampaignParticipantsOutput> => {
+  if (input.employeeIds.length === 0) {
+    throw createOperationError("invalid_input", "employeeIds must not be empty.");
+  }
+
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    return await db.transaction(async (tx) => {
+      const campaign = await getCampaignState(tx, input.companyId, input.campaignId);
+      ensureCampaignParticipantsMutable(campaign);
+
+      const requestedEmployeeIds = [
+        ...new Set(input.employeeIds.map((employeeId) => employeeId.trim())),
+      ]
+        .filter((employeeId) => employeeId.length > 0)
+        .sort((left, right) => left.localeCompare(right));
+      if (requestedEmployeeIds.length === 0) {
+        throw createOperationError(
+          "invalid_input",
+          "employeeIds must contain non-empty identifiers.",
+        );
+      }
+
+      const deletedRows = await tx
+        .delete(campaignParticipants)
+        .where(
+          and(
+            eq(campaignParticipants.companyId, input.companyId),
+            eq(campaignParticipants.campaignId, input.campaignId),
+            inArray(campaignParticipants.employeeId, requestedEmployeeIds),
+          ),
+        )
+        .returning({
+          employeeId: campaignParticipants.employeeId,
+        });
+
+      const totalRows = await tx
+        .select({
+          total: sql<number>`count(*)::int`,
+        })
+        .from(campaignParticipants)
+        .where(
+          and(
+            eq(campaignParticipants.companyId, input.companyId),
+            eq(campaignParticipants.campaignId, input.campaignId),
+          ),
+        );
+
+      return {
+        campaignId: input.campaignId,
+        changedEmployeeIds: deletedRows
+          .map((row) => row.employeeId)
+          .sort((left, right) => left.localeCompare(right)),
+        totalParticipants: totalRows[0]?.total ?? 0,
       };
     });
   } finally {

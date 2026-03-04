@@ -5,6 +5,10 @@ import {
   type CampaignCreateOutput,
   type CampaignParticipantsAddFromDepartmentsInput,
   type CampaignParticipantsAddFromDepartmentsOutput,
+  type CampaignParticipantsMutationInput,
+  type CampaignParticipantsMutationOutput,
+  type CampaignSetModelVersionInput,
+  type CampaignSetModelVersionOutput,
   type CampaignSnapshotListInput,
   type CampaignSnapshotListOutput,
   type CampaignTransitionInput,
@@ -43,6 +47,10 @@ import {
   parseCampaignCreateOutput,
   parseCampaignParticipantsAddFromDepartmentsInput,
   parseCampaignParticipantsAddFromDepartmentsOutput,
+  parseCampaignParticipantsMutationInput,
+  parseCampaignParticipantsMutationOutput,
+  parseCampaignSetModelVersionInput,
+  parseCampaignSetModelVersionOutput,
   parseCampaignSnapshotListInput,
   parseCampaignSnapshotListOutput,
   parseCampaignTransitionInput,
@@ -72,6 +80,7 @@ import {
   parseSystemPingOutput,
 } from "@feedback-360/api-contract";
 import {
+  addCampaignParticipants,
   addCampaignParticipantsFromDepartments,
   createCampaign,
   createModelVersion,
@@ -81,8 +90,10 @@ import {
   listAssignedQuestionnaires,
   listCampaignEmployeeSnapshots,
   moveEmployeeDepartment,
+  removeCampaignParticipants,
   runAiForCampaign,
   saveQuestionnaireDraft,
+  setCampaignModelVersion,
   setEmployeeManager,
   startCampaign,
   stopCampaign,
@@ -331,6 +342,123 @@ const runCampaignEnd = async (
     return okResult(parseCampaignTransitionOutput(output));
   } catch (error) {
     return errorResult(errorFromUnknown(error, "invalid_input", "Failed to end campaign."));
+  }
+};
+
+const runCampaignSetModelVersion = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignSetModelVersionOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can change campaign model version.", {
+        operation: "campaign.setModelVersion",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignSetModelVersionInput;
+  try {
+    parsedInput = parseCampaignSetModelVersionInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid campaign.setModelVersion input."),
+    );
+  }
+
+  try {
+    const output = await setCampaignModelVersion({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+      modelVersionId: parsedInput.modelVersionId,
+    });
+    return okResult(parseCampaignSetModelVersionOutput(output));
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Failed to set campaign model version."),
+    );
+  }
+};
+
+const runCampaignParticipantsAdd = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignParticipantsMutationOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can add campaign participants.", {
+        operation: "campaign.participants.add",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignParticipantsMutationInput;
+  try {
+    parsedInput = parseCampaignParticipantsMutationInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid campaign.participants.add input."),
+    );
+  }
+
+  try {
+    const output = await addCampaignParticipants({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+      employeeIds: parsedInput.employeeIds,
+    });
+    return okResult(parseCampaignParticipantsMutationOutput(output));
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Failed to add campaign participants."),
+    );
+  }
+};
+
+const runCampaignParticipantsRemove = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignParticipantsMutationOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can remove campaign participants.", {
+        operation: "campaign.participants.remove",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignParticipantsMutationInput;
+  try {
+    parsedInput = parseCampaignParticipantsMutationInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid campaign.participants.remove input."),
+    );
+  }
+
+  try {
+    const output = await removeCampaignParticipants({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+      employeeIds: parsedInput.employeeIds,
+    });
+    return okResult(parseCampaignParticipantsMutationOutput(output));
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Failed to remove campaign participants."),
+    );
   }
 };
 
@@ -763,6 +891,8 @@ export const dispatchOperation = (
     | CompanyUpdateProfileOutput
     | EmployeeUpsertOutput
     | EmployeeListActiveOutput
+    | CampaignSetModelVersionOutput
+    | CampaignParticipantsMutationOutput
     | CampaignTransitionOutput
     | OrgDepartmentMoveOutput
     | OrgManagerSetOutput
@@ -811,6 +941,12 @@ export const dispatchOperation = (
       return runCampaignStop(parsedRequest);
     case "campaign.end":
       return runCampaignEnd(parsedRequest);
+    case "campaign.setModelVersion":
+      return runCampaignSetModelVersion(parsedRequest);
+    case "campaign.participants.add":
+      return runCampaignParticipantsAdd(parsedRequest);
+    case "campaign.participants.remove":
+      return runCampaignParticipantsRemove(parsedRequest);
     case "employee.upsert":
       return runEmployeeUpsert(parsedRequest);
     case "employee.listActive":

@@ -66,6 +66,9 @@ export const knownOperations = [
   "campaign.start",
   "campaign.stop",
   "campaign.end",
+  "campaign.setModelVersion",
+  "campaign.participants.add",
+  "campaign.participants.remove",
   "employee.upsert",
   "employee.listActive",
   "org.department.move",
@@ -180,6 +183,29 @@ export type CampaignTransitionOutput = {
   status: CampaignLifecycleStatus;
   changed: boolean;
   updatedAt: string;
+};
+
+export type CampaignSetModelVersionInput = {
+  campaignId: string;
+  modelVersionId: string;
+};
+
+export type CampaignSetModelVersionOutput = {
+  campaignId: string;
+  modelVersionId: string;
+  changed: boolean;
+  updatedAt: string;
+};
+
+export type CampaignParticipantsMutationInput = {
+  campaignId: string;
+  employeeIds: string[];
+};
+
+export type CampaignParticipantsMutationOutput = {
+  campaignId: string;
+  changedEmployeeIds: string[];
+  totalParticipants: number;
 };
 
 export type EmployeeUpsertInput = {
@@ -965,6 +991,90 @@ export const parseCampaignTransitionOutput = (value: unknown): CampaignTransitio
     status: parseCampaignLifecycleStatus(record.status, "campaign transition output.status"),
     changed: ensureBooleanField(record, "changed", "campaign transition output"),
     updatedAt: ensureStringField(record, "updatedAt", "campaign transition output"),
+  };
+};
+
+export const parseCampaignSetModelVersionInput = (value: unknown): CampaignSetModelVersionInput => {
+  const record = ensureObject(value, "campaign.setModelVersion input");
+  ensureAllowedKeys(record, ["campaignId", "modelVersionId"], "campaign.setModelVersion input");
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.setModelVersion input"),
+    modelVersionId: ensureStringField(record, "modelVersionId", "campaign.setModelVersion input"),
+  };
+};
+
+export const parseCampaignSetModelVersionOutput = (
+  value: unknown,
+): CampaignSetModelVersionOutput => {
+  const record = ensureObject(value, "campaign.setModelVersion output");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "modelVersionId", "changed", "updatedAt"],
+    "campaign.setModelVersion output",
+  );
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.setModelVersion output"),
+    modelVersionId: ensureStringField(record, "modelVersionId", "campaign.setModelVersion output"),
+    changed: ensureBooleanField(record, "changed", "campaign.setModelVersion output"),
+    updatedAt: ensureStringField(record, "updatedAt", "campaign.setModelVersion output"),
+  };
+};
+
+export const parseCampaignParticipantsMutationInput = (
+  value: unknown,
+): CampaignParticipantsMutationInput => {
+  const record = ensureObject(value, "campaign participants mutation input");
+  ensureAllowedKeys(record, ["campaignId", "employeeIds"], "campaign participants mutation input");
+
+  const employeeIds = ensureArray(
+    record.employeeIds,
+    "campaign participants mutation input.employeeIds",
+  );
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign participants mutation input"),
+    employeeIds: employeeIds.map((employeeId) => {
+      if (typeof employeeId !== "string" || employeeId.trim().length === 0) {
+        throw new Error(
+          "campaign participants mutation input.employeeIds[] must be non-empty strings.",
+        );
+      }
+
+      return employeeId.trim();
+    }),
+  };
+};
+
+export const parseCampaignParticipantsMutationOutput = (
+  value: unknown,
+): CampaignParticipantsMutationOutput => {
+  const record = ensureObject(value, "campaign participants mutation output");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "changedEmployeeIds", "totalParticipants"],
+    "campaign participants mutation output",
+  );
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign participants mutation output"),
+    changedEmployeeIds: ensureArray(
+      record.changedEmployeeIds,
+      "campaign participants mutation output.changedEmployeeIds",
+    ).map((employeeId) => {
+      if (typeof employeeId !== "string" || employeeId.trim().length === 0) {
+        throw new Error(
+          "campaign participants mutation output.changedEmployeeIds[] must be non-empty strings.",
+        );
+      }
+
+      return employeeId.trim();
+    }),
+    totalParticipants: ensureNumberField(
+      record,
+      "totalParticipants",
+      "campaign participants mutation output",
+    ),
   };
 };
 

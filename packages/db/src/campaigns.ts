@@ -47,6 +47,13 @@ export type TransitionCampaignStatusOutput = {
   updatedAt: string;
 };
 
+export type CampaignSetModelVersionOutput = {
+  campaignId: string;
+  modelVersionId: string;
+  changed: boolean;
+  updatedAt: string;
+};
+
 const parseTimestamp = (value: string, fieldName: string): Date => {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
@@ -305,4 +312,104 @@ export const endCampaign = async (input: {
     campaignId: input.campaignId,
     targetStatus: "ended",
   });
+};
+
+export const setCampaignModelVersion = async (input: {
+  companyId: string;
+  campaignId: string;
+  modelVersionId: string;
+}): Promise<CampaignSetModelVersionOutput> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+
+    return await db.transaction(async (tx) => {
+      const campaignRows = await tx
+        .select({
+          campaignId: campaigns.id,
+          companyId: campaigns.companyId,
+          status: campaigns.status,
+          modelVersionId: campaigns.modelVersionId,
+        })
+        .from(campaigns)
+        .where(and(eq(campaigns.id, input.campaignId), eq(campaigns.companyId, input.companyId)))
+        .limit(1);
+
+      const campaign = campaignRows[0];
+      if (!campaign) {
+        throw createOperationError("not_found", "Campaign not found in active company.", {
+          campaignId: input.campaignId,
+          companyId: input.companyId,
+        });
+      }
+
+      if (campaign.status !== "draft") {
+        throw createOperationError(
+          "campaign_started_immutable",
+          "Campaign model version can be changed only in draft status.",
+          {
+            campaignId: input.campaignId,
+            status: campaign.status,
+          },
+        );
+      }
+
+      const modelRows = await tx
+        .select({
+          modelVersionId: competencyModelVersions.id,
+        })
+        .from(competencyModelVersions)
+        .where(
+          and(
+            eq(competencyModelVersions.id, input.modelVersionId),
+            eq(competencyModelVersions.companyId, input.companyId),
+          ),
+        )
+        .limit(1);
+
+      if (!modelRows[0]) {
+        throw createOperationError("not_found", "Model version not found in active company.", {
+          modelVersionId: input.modelVersionId,
+          companyId: input.companyId,
+        });
+      }
+
+      const previousModelVersionId = campaign.modelVersionId;
+      const now = new Date();
+      if (previousModelVersionId === input.modelVersionId) {
+        return {
+          campaignId: input.campaignId,
+          modelVersionId: input.modelVersionId,
+          changed: false,
+          updatedAt: now.toISOString(),
+        };
+      }
+
+      const updatedRows = await tx
+        .update(campaigns)
+        .set({
+          modelVersionId: input.modelVersionId,
+          updatedAt: now,
+        })
+        .where(eq(campaigns.id, input.campaignId))
+        .returning({
+          modelVersionId: campaigns.modelVersionId,
+          updatedAt: campaigns.updatedAt,
+        });
+
+      const updated = updatedRows[0];
+      if (!updated?.modelVersionId) {
+        throw createOperationError("invalid_transition", "Failed to set campaign model version.");
+      }
+
+      return {
+        campaignId: input.campaignId,
+        modelVersionId: updated.modelVersionId,
+        changed: true,
+        updatedAt: updated.updatedAt.toISOString(),
+      };
+    });
+  } finally {
+    await pool.end();
+  }
 };

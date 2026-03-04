@@ -5,6 +5,10 @@ import {
   type CampaignCreateOutput,
   type CampaignParticipantsAddFromDepartmentsInput,
   type CampaignParticipantsAddFromDepartmentsOutput,
+  type CampaignParticipantsMutationInput,
+  type CampaignParticipantsMutationOutput,
+  type CampaignSetModelVersionInput,
+  type CampaignSetModelVersionOutput,
   type CampaignSnapshotListInput,
   type CampaignSnapshotListOutput,
   type CampaignTransitionInput,
@@ -44,6 +48,10 @@ import {
   parseCampaignCreateOutput,
   parseCampaignParticipantsAddFromDepartmentsInput,
   parseCampaignParticipantsAddFromDepartmentsOutput,
+  parseCampaignParticipantsMutationInput,
+  parseCampaignParticipantsMutationOutput,
+  parseCampaignSetModelVersionInput,
+  parseCampaignSetModelVersionOutput,
   parseCampaignSnapshotListInput,
   parseCampaignSnapshotListOutput,
   parseCampaignTransitionInput,
@@ -114,6 +122,18 @@ export type Feedback360Client = {
     input: CampaignCreateInput,
     context?: OperationContext,
   ): Promise<OperationResult<CampaignCreateOutput>>;
+  campaignSetModelVersion(
+    input: CampaignSetModelVersionInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignSetModelVersionOutput>>;
+  campaignParticipantsAdd(
+    input: CampaignParticipantsMutationInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignParticipantsMutationOutput>>;
+  campaignParticipantsRemove(
+    input: CampaignParticipantsMutationInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignParticipantsMutationOutput>>;
   campaignStart(
     input: CampaignTransitionInput,
     context?: OperationContext,
@@ -306,6 +326,60 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseCampaignCreateOutput,
+      });
+    },
+
+    campaignSetModelVersion: async (input, context) => {
+      let parsedInput: CampaignSetModelVersionInput;
+      try {
+        parsedInput = parseCampaignSetModelVersionInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid campaignSetModelVersion input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "campaign.setModelVersion",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignSetModelVersionOutput,
+      });
+    },
+
+    campaignParticipantsAdd: async (input, context) => {
+      let parsedInput: CampaignParticipantsMutationInput;
+      try {
+        parsedInput = parseCampaignParticipantsMutationInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid campaignParticipantsAdd input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "campaign.participants.add",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignParticipantsMutationOutput,
+      });
+    },
+
+    campaignParticipantsRemove: async (input, context) => {
+      let parsedInput: CampaignParticipantsMutationInput;
+      try {
+        parsedInput = parseCampaignParticipantsMutationInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid campaignParticipantsRemove input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "campaign.participants.remove",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignParticipantsMutationOutput,
       });
     },
 
