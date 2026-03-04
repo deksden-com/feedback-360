@@ -147,7 +147,10 @@ describe("FT-0013 questionnaire ops (no-db acceptance)", () => {
 
     expect(listNotStarted.ok).toBe(true);
     if (listNotStarted.ok && "items" in listNotStarted.data) {
-      expect(listNotStarted.data.items[0]?.questionnaireId).toBe("q-main");
+      const firstQuestionnaireId = listNotStarted.data.items
+        .map((item) => ("questionnaireId" in item ? item.questionnaireId : undefined))
+        .find((value): value is string => typeof value === "string");
+      expect(firstQuestionnaireId).toBe("q-main");
     }
 
     const saveDraft = await dispatchOperation({
@@ -194,7 +197,10 @@ describe("FT-0013 questionnaire ops (no-db acceptance)", () => {
 
     expect(listSubmitted.ok).toBe(true);
     if (listSubmitted.ok && "items" in listSubmitted.data) {
-      expect(listSubmitted.data.items[0]?.status).toBe("submitted");
+      const firstQuestionnaireStatus = listSubmitted.data.items
+        .map((item) => ("status" in item ? item.status : undefined))
+        .find((value) => value !== undefined);
+      expect(firstQuestionnaireStatus).toBe("submitted");
     }
 
     const submitAgain = await dispatchOperation({

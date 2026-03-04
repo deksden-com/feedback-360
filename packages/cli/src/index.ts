@@ -35,6 +35,15 @@ type QuestionnaireSaveDraftOptions = {
   draftJson?: string;
 };
 
+type EmployeeUpsertOptions = {
+  json?: boolean;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  isActive?: string;
+};
+
 type CliState = {
   activeCompanyId?: string;
 };
@@ -169,6 +178,41 @@ const formatQuestionnaireListHuman = (data: {
   return lines.join("\n");
 };
 
+const formatEmployeeListHuman = (data: {
+  items: Array<{
+    employeeId: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    isActive: boolean;
+  }>;
+}): string => {
+  if (data.items.length === 0) {
+    return "No active employees found.";
+  }
+
+  const lines = [`Active employees: ${data.items.length}`];
+  for (const item of data.items) {
+    lines.push(
+      `- ${item.employeeId}: email=${item.email}, name=${item.firstName ?? ""} ${item.lastName ?? ""}, isActive=${item.isActive}`,
+    );
+  }
+
+  return lines.join("\n");
+};
+
+const parseBooleanOption = (value: string, fieldName: string): boolean => {
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "true") {
+    return true;
+  }
+  if (normalized === "false") {
+    return false;
+  }
+
+  throw new Error(`${fieldName} must be either true or false.`);
+};
+
 const normalizeLegacySeedArgs = (argv: string[]): string[] => {
   const normalizedArgv = [...argv];
   if (normalizedArgv[2] === "--") {
@@ -180,7 +224,7 @@ const normalizeLegacySeedArgs = (argv: string[]): string[] => {
     return normalizedArgv;
   }
 
-  const knownTopLevelCommands = new Set(["seed", "company", "questionnaire"]);
+  const knownTopLevelCommands = new Set(["seed", "company", "employee", "org", "questionnaire"]);
   if (!knownTopLevelCommands.has(firstArgument) && firstArgument.startsWith("--")) {
     normalizedArgv.splice(2, 0, "seed");
   }
@@ -257,6 +301,137 @@ Examples:
         emitError(
           errorFromUnknown(error, "invalid_input", "Failed to set active company."),
           options.json,
+        );
+      }
+    });
+
+  const employeeCommand = program.command("employee").description("Employee directory operations.");
+
+  employeeCommand
+    .command("upsert")
+    .description("Create/update employee record (supports soft deactivate via --is-active false).")
+    .argument("<employee_id>", "Employee identifier.")
+    .option("--email <email>", "Employee email.")
+    .option("--first-name <firstName>", "Employee first name.")
+    .option("--last-name <lastName>", "Employee last name.")
+    .option("--phone <phone>", "Employee phone.")
+    .option("--is-active <true|false>", "Set employee active state.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (employeeId: string, options: EmployeeUpsertOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      let isActive: boolean | undefined;
+      try {
+        isActive = options.isActive
+          ? parseBooleanOption(options.isActive, "--is-active")
+          : undefined;
+      } catch (error: unknown) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Invalid --is-active value."),
+          options.json,
+        );
+        return;
+      }
+
+      const result = await client.employeeUpsert({
+        employeeId,
+        email: options.email,
+        firstName: options.firstName,
+        lastName: options.lastName,
+        phone: options.phone,
+        ...(isActive !== undefined ? { isActive } : {}),
+      });
+
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(
+          `Employee upserted: employee=${result.data.employeeId}, company=${result.data.companyId}, isActive=${result.data.isActive}, created=${result.data.created}`,
+        );
+      }
+    });
+
+  employeeCommand
+    .command("list-active")
+    .description("List active employees in active company.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: JsonFlagOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.employeeListActive();
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatEmployeeListHuman(result.data));
+      }
+    });
+
+  const orgCommand = program.command("org").description("Organization structure operations.");
+
+  const orgDepartmentCommand = orgCommand
+    .command("department")
+    .description("Department hierarchy operations.");
+
+  orgDepartmentCommand
+    .command("move")
+    .description("Move employee to another department and close/open history intervals.")
+    .argument("<employee_id>", "Employee identifier.")
+    .requiredOption("--to <department_id>", "Target department identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (employeeId: string, options: { to: string; json?: boolean }) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.orgDepartmentMove({
+        employeeId,
+        toDepartmentId: options.to,
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(
+          `Department moved: employee=${result.data.employeeId}, previous=${result.data.previousDepartmentId ?? "-"}, current=${result.data.departmentId}, changed=${result.data.changed}`,
+        );
+      }
+    });
+
+  orgCommand
+    .command("set-manager")
+    .description("Set employee direct manager and close/open manager history intervals.")
+    .argument("<employee_id>", "Employee identifier.")
+    .requiredOption("--manager <manager_employee_id>", "Manager employee identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (employeeId: string, options: { manager: string; json?: boolean }) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.orgManagerSet({
+        employeeId,
+        managerEmployeeId: options.manager,
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(
+          `Manager set: employee=${result.data.employeeId}, previous=${result.data.previousManagerEmployeeId ?? "-"}, current=${result.data.managerEmployeeId}, changed=${result.data.changed}`,
         );
       }
     });

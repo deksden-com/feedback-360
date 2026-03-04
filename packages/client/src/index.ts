@@ -1,8 +1,16 @@
 import {
   type ClientSetActiveCompanyOutput,
   type DispatchOperationInput,
+  type EmployeeListActiveInput,
+  type EmployeeListActiveOutput,
+  type EmployeeUpsertInput,
+  type EmployeeUpsertOutput,
   type OperationContext,
   type OperationResult,
+  type OrgDepartmentMoveInput,
+  type OrgDepartmentMoveOutput,
+  type OrgManagerSetInput,
+  type OrgManagerSetOutput,
   type QuestionnaireListAssignedInput,
   type QuestionnaireListAssignedOutput,
   type QuestionnaireSaveDraftInput,
@@ -19,7 +27,15 @@ import {
   parseClientSetActiveCompanyInput,
   parseClientSetActiveCompanyOutput,
   parseDispatchOperationInput,
+  parseEmployeeListActiveInput,
+  parseEmployeeListActiveOutput,
+  parseEmployeeUpsertInput,
+  parseEmployeeUpsertOutput,
   parseOperationResult,
+  parseOrgDepartmentMoveInput,
+  parseOrgDepartmentMoveOutput,
+  parseOrgManagerSetInput,
+  parseOrgManagerSetOutput,
   parseQuestionnaireListAssignedInput,
   parseQuestionnaireListAssignedOutput,
   parseQuestionnaireSaveDraftInput,
@@ -62,6 +78,22 @@ type InvokeOperationParams<Output> = {
 export type Feedback360Client = {
   seedRun(input: SeedRunInput): Promise<SeedRunOutput>;
   systemPing(context?: OperationContext): Promise<OperationResult<SystemPingOutput>>;
+  employeeUpsert(
+    input: EmployeeUpsertInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<EmployeeUpsertOutput>>;
+  employeeListActive(
+    input?: EmployeeListActiveInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<EmployeeListActiveOutput>>;
+  orgDepartmentMove(
+    input: OrgDepartmentMoveInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<OrgDepartmentMoveOutput>>;
+  orgManagerSet(
+    input: OrgManagerSetInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<OrgManagerSetOutput>>;
   questionnaireListAssigned(
     input: QuestionnaireListAssignedInput,
     context?: OperationContext,
@@ -174,6 +206,78 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: {},
         context,
         parseOutput: parseSystemPingOutput,
+      });
+    },
+
+    employeeUpsert: async (input, context) => {
+      let parsedInput: EmployeeUpsertInput;
+      try {
+        parsedInput = parseEmployeeUpsertInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid employeeUpsert input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "employee.upsert",
+        input: parsedInput,
+        context,
+        parseOutput: parseEmployeeUpsertOutput,
+      });
+    },
+
+    employeeListActive: async (input, context) => {
+      let parsedInput: EmployeeListActiveInput;
+      try {
+        parsedInput = parseEmployeeListActiveInput(input ?? {});
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid employeeListActive input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "employee.listActive",
+        input: parsedInput,
+        context,
+        parseOutput: parseEmployeeListActiveOutput,
+      });
+    },
+
+    orgDepartmentMove: async (input, context) => {
+      let parsedInput: OrgDepartmentMoveInput;
+      try {
+        parsedInput = parseOrgDepartmentMoveInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid orgDepartmentMove input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "org.department.move",
+        input: parsedInput,
+        context,
+        parseOutput: parseOrgDepartmentMoveOutput,
+      });
+    },
+
+    orgManagerSet: async (input, context) => {
+      let parsedInput: OrgManagerSetInput;
+      try {
+        parsedInput = parseOrgManagerSetInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid orgManagerSet input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "org.manager.set",
+        input: parsedInput,
+        context,
+        parseOutput: parseOrgManagerSetOutput,
       });
     },
 

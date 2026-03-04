@@ -35,9 +35,10 @@ describe("FT-0013 questionnaire ops", () => {
 
       expect(listNotStarted.ok).toBe(true);
       if (listNotStarted.ok && "items" in listNotStarted.data) {
-        expect(
-          listNotStarted.data.items.some((item) => item.questionnaireId === questionnaireId),
-        ).toBe(true);
+        const questionnaireIds = listNotStarted.data.items
+          .map((item) => ("questionnaireId" in item ? item.questionnaireId : undefined))
+          .filter((value): value is string => typeof value === "string");
+        expect(questionnaireIds.includes(String(questionnaireId))).toBe(true);
       }
 
       const savedDraft = await dispatchOperation({
@@ -82,9 +83,10 @@ describe("FT-0013 questionnaire ops", () => {
 
       expect(listSubmitted.ok).toBe(true);
       if (listSubmitted.ok && "items" in listSubmitted.data) {
-        expect(
-          listSubmitted.data.items.some((item) => item.questionnaireId === questionnaireId),
-        ).toBe(true);
+        const questionnaireIds = listSubmitted.data.items
+          .map((item) => ("questionnaireId" in item ? item.questionnaireId : undefined))
+          .filter((value): value is string => typeof value === "string");
+        expect(questionnaireIds.includes(String(questionnaireId))).toBe(true);
       }
 
       const submittedAgain = await dispatchOperation({

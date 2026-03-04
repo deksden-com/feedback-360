@@ -40,6 +40,11 @@ Status: Draft (2026-03-03)
   - roles: hr_admin
   - idempotency: yes (natural key)
 
+- command: `employee list-active [--json]`
+  - op: `employee.listActive`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
 - command: `org department create ...`
   - op: `org.department.create`
   - roles: hr_admin

@@ -39,6 +39,10 @@ Status: Draft (2026-03-03)
   - roles: hr_admin
   - idempotent: yes (by natural key)
   - cli: `employee upsert`
+- `employee.listActive`
+  - roles: hr_admin, hr_reader
+  - idempotent: yes
+  - cli: `employee list-active`
 - `org.department.create`
   - roles: hr_admin
   - idempotent: optional

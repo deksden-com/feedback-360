@@ -59,6 +59,10 @@ export const knownOperations = [
   "seed.run",
   "system.ping",
   "company.updateProfile",
+  "employee.upsert",
+  "employee.listActive",
+  "org.department.move",
+  "org.manager.set",
   "client.setActiveCompany",
   "questionnaire.listAssigned",
   "questionnaire.saveDraft",
@@ -81,6 +85,66 @@ export type CompanyUpdateProfileOutput = {
   companyId: string;
   name: string;
   updatedAt: string;
+};
+
+export type EmployeeUpsertInput = {
+  employeeId: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  isActive?: boolean;
+};
+
+export type EmployeeUpsertOutput = {
+  employeeId: string;
+  companyId: string;
+  isActive: boolean;
+  deletedAt?: string;
+  updatedAt: string;
+  created: boolean;
+};
+
+export type EmployeeListActiveInput = {
+  companyId?: string;
+};
+
+export type EmployeeListActiveItem = {
+  employeeId: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  isActive: boolean;
+};
+
+export type EmployeeListActiveOutput = {
+  items: EmployeeListActiveItem[];
+};
+
+export type OrgDepartmentMoveInput = {
+  employeeId: string;
+  toDepartmentId: string;
+};
+
+export type OrgDepartmentMoveOutput = {
+  employeeId: string;
+  previousDepartmentId?: string;
+  departmentId: string;
+  changed: boolean;
+  effectiveAt: string;
+};
+
+export type OrgManagerSetInput = {
+  employeeId: string;
+  managerEmployeeId: string;
+};
+
+export type OrgManagerSetOutput = {
+  employeeId: string;
+  previousManagerEmployeeId?: string;
+  managerEmployeeId: string;
+  changed: boolean;
+  effectiveAt: string;
 };
 
 export type ClientSetActiveCompanyInput = {
@@ -189,6 +253,19 @@ const ensureStringField = (
   }
 
   return fieldValue.trim();
+};
+
+const ensureBooleanField = (
+  value: Record<string, unknown>,
+  field: string,
+  fieldName: string,
+): boolean => {
+  const fieldValue = value[field];
+  if (typeof fieldValue !== "boolean") {
+    throw new Error(`${fieldName}.${field} must be a boolean.`);
+  }
+
+  return fieldValue;
 };
 
 const isSeedScenario = (value: string): value is SeedScenario => {
@@ -452,6 +529,212 @@ export const parseCompanyUpdateProfileOutput = (value: unknown): CompanyUpdatePr
     companyId: ensureStringField(record, "companyId", "company.updateProfile output"),
     name: ensureStringField(record, "name", "company.updateProfile output"),
     updatedAt: ensureStringField(record, "updatedAt", "company.updateProfile output"),
+  };
+};
+
+export const parseEmployeeUpsertInput = (value: unknown): EmployeeUpsertInput => {
+  const record = ensureObject(value, "employee.upsert input");
+  ensureAllowedKeys(
+    record,
+    ["employeeId", "email", "firstName", "lastName", "phone", "isActive"],
+    "employee.upsert input",
+  );
+
+  const input: EmployeeUpsertInput = {
+    employeeId: ensureStringField(record, "employeeId", "employee.upsert input"),
+  };
+
+  const email = record.email;
+  if (email !== undefined) {
+    if (typeof email !== "string" || email.trim().length === 0) {
+      throw new Error("employee.upsert input.email must be a non-empty string when provided.");
+    }
+    input.email = email.trim();
+  }
+
+  const firstName = record.firstName;
+  if (firstName !== undefined) {
+    if (typeof firstName !== "string" || firstName.trim().length === 0) {
+      throw new Error("employee.upsert input.firstName must be a non-empty string when provided.");
+    }
+    input.firstName = firstName.trim();
+  }
+
+  const lastName = record.lastName;
+  if (lastName !== undefined) {
+    if (typeof lastName !== "string" || lastName.trim().length === 0) {
+      throw new Error("employee.upsert input.lastName must be a non-empty string when provided.");
+    }
+    input.lastName = lastName.trim();
+  }
+
+  const phone = record.phone;
+  if (phone !== undefined) {
+    if (typeof phone !== "string" || phone.trim().length === 0) {
+      throw new Error("employee.upsert input.phone must be a non-empty string when provided.");
+    }
+    input.phone = phone.trim();
+  }
+
+  const isActive = record.isActive;
+  if (isActive !== undefined) {
+    if (typeof isActive !== "boolean") {
+      throw new Error("employee.upsert input.isActive must be boolean when provided.");
+    }
+    input.isActive = isActive;
+  }
+
+  return input;
+};
+
+export const parseEmployeeUpsertOutput = (value: unknown): EmployeeUpsertOutput => {
+  const record = ensureObject(value, "employee.upsert output");
+  ensureAllowedKeys(
+    record,
+    ["employeeId", "companyId", "isActive", "deletedAt", "updatedAt", "created"],
+    "employee.upsert output",
+  );
+
+  const deletedAt = record.deletedAt;
+  if (deletedAt !== undefined && deletedAt !== null && typeof deletedAt !== "string") {
+    throw new Error("employee.upsert output.deletedAt must be a string when provided.");
+  }
+
+  return {
+    employeeId: ensureStringField(record, "employeeId", "employee.upsert output"),
+    companyId: ensureStringField(record, "companyId", "employee.upsert output"),
+    isActive: ensureBooleanField(record, "isActive", "employee.upsert output"),
+    ...(typeof deletedAt === "string" ? { deletedAt } : {}),
+    updatedAt: ensureStringField(record, "updatedAt", "employee.upsert output"),
+    created: ensureBooleanField(record, "created", "employee.upsert output"),
+  };
+};
+
+const parseEmployeeListActiveItem = (value: unknown): EmployeeListActiveItem => {
+  const record = ensureObject(value, "employee.listActive output.items[]");
+  ensureAllowedKeys(
+    record,
+    ["employeeId", "email", "firstName", "lastName", "isActive"],
+    "employee.listActive output.items[]",
+  );
+
+  const firstName = record.firstName;
+  if (firstName !== undefined && firstName !== null && typeof firstName !== "string") {
+    throw new Error("employee.listActive output.items[].firstName must be a string when provided.");
+  }
+
+  const lastName = record.lastName;
+  if (lastName !== undefined && lastName !== null && typeof lastName !== "string") {
+    throw new Error("employee.listActive output.items[].lastName must be a string when provided.");
+  }
+
+  return {
+    employeeId: ensureStringField(record, "employeeId", "employee.listActive output.items[]"),
+    email: ensureStringField(record, "email", "employee.listActive output.items[]"),
+    ...(typeof firstName === "string" ? { firstName } : {}),
+    ...(typeof lastName === "string" ? { lastName } : {}),
+    isActive: ensureBooleanField(record, "isActive", "employee.listActive output.items[]"),
+  };
+};
+
+export const parseEmployeeListActiveInput = (value: unknown): EmployeeListActiveInput => {
+  const record = ensureObject(value, "employee.listActive input");
+  ensureAllowedKeys(record, ["companyId"], "employee.listActive input");
+
+  const companyId = record.companyId;
+  if (companyId !== undefined && typeof companyId !== "string") {
+    throw new Error("employee.listActive input.companyId must be a string when provided.");
+  }
+
+  return {
+    ...(typeof companyId === "string" ? { companyId: companyId.trim() } : {}),
+  };
+};
+
+export const parseEmployeeListActiveOutput = (value: unknown): EmployeeListActiveOutput => {
+  const record = ensureObject(value, "employee.listActive output");
+  ensureAllowedKeys(record, ["items"], "employee.listActive output");
+
+  return {
+    items: ensureArray(record.items, "employee.listActive output.items").map(
+      parseEmployeeListActiveItem,
+    ),
+  };
+};
+
+export const parseOrgDepartmentMoveInput = (value: unknown): OrgDepartmentMoveInput => {
+  const record = ensureObject(value, "org.department.move input");
+  ensureAllowedKeys(record, ["employeeId", "toDepartmentId"], "org.department.move input");
+
+  return {
+    employeeId: ensureStringField(record, "employeeId", "org.department.move input"),
+    toDepartmentId: ensureStringField(record, "toDepartmentId", "org.department.move input"),
+  };
+};
+
+export const parseOrgDepartmentMoveOutput = (value: unknown): OrgDepartmentMoveOutput => {
+  const record = ensureObject(value, "org.department.move output");
+  ensureAllowedKeys(
+    record,
+    ["employeeId", "previousDepartmentId", "departmentId", "changed", "effectiveAt"],
+    "org.department.move output",
+  );
+
+  const previousDepartmentId = record.previousDepartmentId;
+  if (
+    previousDepartmentId !== undefined &&
+    previousDepartmentId !== null &&
+    typeof previousDepartmentId !== "string"
+  ) {
+    throw new Error(
+      "org.department.move output.previousDepartmentId must be a string when provided.",
+    );
+  }
+
+  return {
+    employeeId: ensureStringField(record, "employeeId", "org.department.move output"),
+    ...(typeof previousDepartmentId === "string" ? { previousDepartmentId } : {}),
+    departmentId: ensureStringField(record, "departmentId", "org.department.move output"),
+    changed: ensureBooleanField(record, "changed", "org.department.move output"),
+    effectiveAt: ensureStringField(record, "effectiveAt", "org.department.move output"),
+  };
+};
+
+export const parseOrgManagerSetInput = (value: unknown): OrgManagerSetInput => {
+  const record = ensureObject(value, "org.manager.set input");
+  ensureAllowedKeys(record, ["employeeId", "managerEmployeeId"], "org.manager.set input");
+
+  return {
+    employeeId: ensureStringField(record, "employeeId", "org.manager.set input"),
+    managerEmployeeId: ensureStringField(record, "managerEmployeeId", "org.manager.set input"),
+  };
+};
+
+export const parseOrgManagerSetOutput = (value: unknown): OrgManagerSetOutput => {
+  const record = ensureObject(value, "org.manager.set output");
+  ensureAllowedKeys(
+    record,
+    ["employeeId", "previousManagerEmployeeId", "managerEmployeeId", "changed", "effectiveAt"],
+    "org.manager.set output",
+  );
+
+  const previousManagerEmployeeId = record.previousManagerEmployeeId;
+  if (
+    previousManagerEmployeeId !== undefined &&
+    previousManagerEmployeeId !== null &&
+    typeof previousManagerEmployeeId !== "string"
+  ) {
+    throw new Error(
+      "org.manager.set output.previousManagerEmployeeId must be a string when provided.",
+    );
+  }
+
+  return {
+    employeeId: ensureStringField(record, "employeeId", "org.manager.set output"),
+    ...(typeof previousManagerEmployeeId === "string" ? { previousManagerEmployeeId } : {}),
+    managerEmployeeId: ensureStringField(record, "managerEmployeeId", "org.manager.set output"),
+    changed: ensureBooleanField(record, "changed", "org.manager.set output"),
+    effectiveAt: ensureStringField(record, "effectiveAt", "org.manager.set output"),
   };
 };
 

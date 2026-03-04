@@ -38,8 +38,11 @@ describe("FT-0022 RBAC enforcement", () => {
 
     expect(listResult.ok).toBe(true);
     if (listResult.ok && "items" in listResult.data) {
+      const firstQuestionnaireId = listResult.data.items
+        .map((item) => ("questionnaireId" in item ? item.questionnaireId : undefined))
+        .find((value): value is string => typeof value === "string");
       expect(listResult.data.items.length).toBeGreaterThan(0);
-      expect(listResult.data.items[0]?.questionnaireId).toBe(questionnaireId);
+      expect(firstQuestionnaireId).toBe(questionnaireId);
     }
 
     const saveDraftResult = await dispatchOperation({
