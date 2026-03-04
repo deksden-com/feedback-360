@@ -53,19 +53,38 @@ Status: Draft (2026-03-04)
 
 ### Mandatory checks before merge to `develop`
 - CI: `pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test` (или эквивалентный набор в CI).
+- GitHub checks: для HEAD-коммита PR все required checks в репозитории должны быть `success` (минимум workflow `ci.yml` / job `checks`).
+- Vercel deploy check: preview deployment для PR (или branch deployment для `develop`) должен быть `Ready`.
 - Acceptance: после реализации каждой затронутой FT отдельно прогоняется её `Acceptance (auto)` сценарий; в PR должны быть зелёными все такие сценарии.
 - Golden scenarios: если фича участвует в GS* — соответствующие GS должны быть зелёными (см. verification matrix).
+
+### Mandatory checks before merge to `main`
+- Все пункты из merge в `develop` уже должны быть выполнены.
+- Staging gate: последний deployment `go360go-beta` (ветка `develop`) должен быть `Ready`, smoke-check на `beta.go360go.ru` пройден.
+- Production promotion gate: после merge `develop -> main` deployment `go360go-prod` должен стать `Ready`, smoke-check на `go360go.ru` пройден.
 
 ### Mandatory evidence (recorded)
 После того как проверки зелёные, доказательства фиксируем в SSoT:
 - [Verification matrix](../../plans/verification-matrix.md) (раздел evidence по соответствующему EP),
 - и добавляем ссылку на этот evidence в PR description (чтобы “почему считаем done” было проверяемо).
+- Для runtime/deploy изменений в evidence дополнительно фиксируем:
+  - ссылку на GitHub Actions run (CI),
+  - ссылку на Vercel deployment (beta/prod),
+  - итоговый статус (`success/ready`) и, если была деградация, краткий root cause + что исправили.
 
 ## Rules
 - Прямые коммиты в `main` запрещены; только PR из `develop`.
 - Merge в `develop/main` только через PR (никаких “быстрых” push).
+- Для `develop` и `main` включаем branch protection (required status checks + запрет force-push/delete branch).
 - Деплой-конфигурация и env vars синхронизируются по документу:
   - [Deployment architecture](deployment-architecture.md) — соответствие окружений и внешних сервисов. Читать, чтобы не смешивать beta/prod секреты.
+
+## Check failure reaction (mandatory)
+Если любой required check в GitHub или Vercel не зелёный:
+1. merge/release блокируется;
+2. фиксируем первичный root cause (в PR или FT evidence);
+3. вносим исправление и повторно запускаем проверки;
+4. только после `success/ready` обновляем evidence и продолжаем promotion.
 
 ## Rollback
 - Если проблема на beta: откат merge в `develop` (revert PR) и автоматический redeploy beta.

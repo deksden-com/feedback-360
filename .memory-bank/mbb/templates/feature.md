@@ -77,3 +77,14 @@ Status: Template
 - Commands/tests run: …
 - Result: …
 - Artifacts (optional): скриншоты/логи/ссылки на CI run; если есть скриншоты — что именно подтверждает каждый.
+
+### CI/CD evidence (mandatory for runtime/deploy/integration changes)
+- GitHub:
+  - CI run URL / commit check-runs URL
+  - Status: `success|failed`
+- Vercel:
+  - Deployment URL (`preview|beta|prod`)
+  - Status: `Ready|Error`
+- If failed before fix:
+  - Root cause (1-2 строки)
+  - Link to successful rerun/redeploy

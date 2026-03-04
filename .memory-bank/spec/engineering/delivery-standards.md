@@ -16,11 +16,16 @@ Status: Draft (2026-03-04)
 4) В feature doc есть блок `Quality checks evidence (YYYY-MM-DD)` с результатами `lint/typecheck/test` (+ `build`, где применимо).
 5) В feature doc есть блок `Acceptance evidence (YYYY-MM-DD)` с командами/результатами приемочного сценария и связанных GS.
 6) В verification matrix добавлен/обновлён execution evidence по соответствующему EP.
+7) Для runtime/deploy/integration-инфраструктурных изменений зафиксированы CI/CD доказательства:
+   - ссылка на GitHub Actions run (или check-runs commit),
+   - ссылка на Vercel deployment (preview/beta/prod),
+   - итоговый статус (`success/ready`) и root-cause заметка, если был fail.
 
 Если хотя бы один пункт не выполнен — фича не переводится в `Completed`.
 
 Примечание для infra/docs-only фич:
 - Если фича не вносит изменений в исполняемый код (например, DNS/операционные артефакты), в `Quality checks evidence` допускается `N/A` с кратким обоснованием.
+- Для docs-only фич без runtime изменений CI/CD evidence можно отмечать как `N/A` с обоснованием.
 
 ## Epic progress reporting (mandatory)
 - В каждом epic-документе должен быть блок `## Progress report (evidence-based)`.
