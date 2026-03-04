@@ -49,3 +49,5 @@ Resend использует поддомен `send.go360go.ru` для MAIL FROM.
 2) `vercel dns list go360go.ru` содержит записи DKIM/SPF/DMARC выше.
 3) В Resend домен `go360go.ru` переходит в состояние Verified/Authenticated.
 
+## Change log (operator notes)
+- 2026-03-04: DNS записи Resend добавлены в Vercel DNS (ожидаем завершение делегирования NS).

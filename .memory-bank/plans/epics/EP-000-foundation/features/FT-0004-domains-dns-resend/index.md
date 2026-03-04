@@ -36,6 +36,8 @@ Status: In progress (2026-03-04)
   - `vercel dns add go360go.ru send TXT 'v=spf1 include:amazonses.com ~all'`
   - `vercel dns add go360go.ru _dmarc TXT 'v=DMARC1; p=none;'`
 
+Operator note (2026-03-04): записи уже добавлены в Vercel DNS, ожидаем завершение делегирования NS и проверку домена в Resend.
+
 ### Assert
 - `vercel dns list go360go.ru` содержит записи.
 - В Resend домен = Verified/Authenticated.
@@ -45,4 +47,3 @@ Status: In progress (2026-03-04)
 
 ## Docs updates (SSoT)
 - Уже выполнено в deliverables этого slice.
-
