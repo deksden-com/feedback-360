@@ -40,6 +40,7 @@ Operator note (2026-03-04): записи уже добавлены в Vercel DNS
 
 Operator note (2026-03-04): добавлена TXT верификация SimpleLogin для `go360go.ru` (custom domain aliases).
 Operator note (2026-03-04): добавлены MX/CNAME DKIM SimpleLogin и обновлён DMARC на `p=quarantine; ...`.
+Operator note (2026-03-04): добавлен SPF SimpleLogin на `@`.
 
 ### Assert
 - `vercel dns list go360go.ru` содержит записи.

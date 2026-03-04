@@ -84,6 +84,15 @@ Resend использует поддомен `send.go360go.ru` для MAIL FROM.
 - Name: `_dmarc`
 - Value: `v=DMARC1; p=quarantine; pct=100; adkim=s; aspf=s`
 
+### SPF (root)
+SimpleLogin также просит SPF запись на корень домена.
+
+⚠️ На одном и том же имени (`@`) должен быть ровно один TXT вида `v=spf1 ...`. Если в будущем на `@` появится ещё один отправитель, SPF нужно расширять одной строкой (добавлять `include:`), а не заводить второй SPF TXT.
+
+- Type: `TXT`
+- Name: `@`
+- Value: `v=spf1 include:simplelogin.co ~all`
+
 ## Verification (must)
 После того как NS реально делегируются на Vercel:
 1) `vercel domains inspect go360go.ru` показывает зелёные NS (`ns1.vercel-dns.com`, `ns2.vercel-dns.com`).
@@ -94,3 +103,4 @@ Resend использует поддомен `send.go360go.ru` для MAIL FROM.
 ## Change log (operator notes)
 - 2026-03-04: DNS записи Resend добавлены в Vercel DNS (ожидаем завершение делегирования NS).
 - 2026-03-04: DNS записи SimpleLogin (MX/CNAME DKIM) добавлены в Vercel DNS; DMARC обновлён на `p=quarantine` со strict alignment.
+- 2026-03-04: Добавлен SPF SimpleLogin на `@`.
