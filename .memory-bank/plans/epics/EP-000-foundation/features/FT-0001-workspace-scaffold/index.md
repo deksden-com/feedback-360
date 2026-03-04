@@ -68,6 +68,12 @@ Status: Completed (2026-03-03)
   2) `pnpm -r typecheck`
   3) `pnpm -r test`
 
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` — passed.
+- `pnpm -r typecheck` — passed.
+- `pnpm -r test` — passed.
+- `build` — N/A (в рамках FT-0001 проверяли базовый tooling/scaffold; build-smoke выделен в FT-0005).
+
 ## Acceptance evidence (2026-03-04)
 - Прогон `pnpm -r lint` завершён успешно для всех workspace пакетов.
 - Прогон `pnpm -r typecheck` завершён успешно для всех workspace пакетов.

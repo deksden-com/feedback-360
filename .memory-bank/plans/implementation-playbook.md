@@ -96,15 +96,28 @@ Checklist:
 - Использовать seeds из каталога и **handles** вместо “id=1”.
 - Если нужен edge case — добавить seed **variant** (см. ниже), а не “ручные апдейты” в тесте.
 
-## 7.1) Verification (must) — как закрываем фичу
-Перед тем как считать FT “готовой”, обязательно:
+## 7.1) Code checks (must) — отдельный quality gate
+Перед выполнением приемочного сценария FT обязательно:
+1) Убедиться, что добавлены/обновлены тесты по policy проекта.
+2) Прогнать quality checks:
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `build` для затронутых частей, где есть сборка.
+3) Если quality checks не зелёные — фича не переходит к acceptance gate.
+
+## 7.2) Acceptance verification (must) — как закрываем фичу
+Перед тем как считать FT “готовой”, обязательно (после 7.1):
 1) Реализовать automated test, который повторяет `## Acceptance (auto)` из FT-документа:
    - для большинства фич это Vitest integration/unit тест (см. [Testing standards](../spec/engineering/testing-standards.md): где класть FT/GS тесты и как их называть). Читать, чтобы тесты были запускаемыми ИИ-агентом по соглашению.
 2) Если фича участвует в golden сценарии GS*, обеспечить автоматическую проверку этого GS:
    - либо через Vitest (без UI),
    - либо через Playwright (если нужен UI).
-3) Запустить “всё” (`pnpm -r test`) и убедиться, что фича не нарушила соседние инварианты.
+3) Отдельно прогнать приемочный сценарий текущей фичи (по её FT-документу), а затем обязательные GS.
 4) Записать execution evidence в [Verification matrix](verification-matrix.md) и положить ссылку на evidence в PR (правила PR/evidence — в [Git flow](../spec/operations/git-flow.md)).
+5) Обновить сам FT-документ:
+   - заполнить `Quality checks evidence (YYYY-MM-DD)`,
+   - заполнить `Acceptance evidence (YYYY-MM-DD)`.
 
 ## 8) Seed variants (детерминированно)
 Рекомендуемый контракт:

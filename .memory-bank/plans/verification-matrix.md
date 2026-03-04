@@ -19,11 +19,14 @@ Status: Draft (2026-03-03)
 Правило: для каждого PR, который закрывает/двигает FT/EP, в этом документе обновляем evidence:
 - добавляем/обновляем секцию `### EP-XXX execution evidence (YYYY-MM-DD)` в нужном эпике,
 - на каждую затронутую фичу — строка вида `- FT-XXXX: ...`.
+- синхронизируем evidence с FT-документом: в фиче должны быть заполнены блоки `Quality checks evidence` и `Acceptance evidence`.
 
 Минимальный состав evidence (в одной строке, через `;` допустимо):
 - `what`: какие FT/GS/acceptance закрывали,
 - `where`: где гоняли (CI/local/beta) + при необходимости ссылка на CI run / Vercel preview,
 - `how`: команды/сценарии (что именно запускали),
+- `quality_gate`: результаты `lint/typecheck/test` (+ `build`, где применимо),
+- `acceptance_gate`: результаты `Acceptance (auto)` по FT и обязательных GS,
 - `result`: passed/failed + важные детали (например, “against Supabase beta pooler”, “HMAC replay covered”).
 - `artifacts` (optional): ссылки на скриншоты/видео/логи, если это повышает проверяемость (особенно UI/внешние панели).
 
@@ -43,12 +46,12 @@ Status: Draft (2026-03-03)
   - Must run: `seed.run` для `S1_company_min`/`S2_org_basic` (и variants smoke).
 
 ### EP-000 execution evidence (2026-03-04)
-- FT-0001: `pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test` — passed.
-- FT-0002: `pnpm db:health`, `pnpm db:migrate`, `packages/db` integration tests — passed against Supabase beta pooler.
-- FT-0003: `pnpm seed --scenario S1_company_min --json` и `S2_org_basic` — passed (valid handles JSON).
-- FT-0004: `vercel dns ls go360go.ru` + Resend API `GET /domains` — records present, domain status `verified`.
-- FT-0005: `next dev` + `GET /api/health` (HTTP 200), `next build` — passed.
-- FT-0006: Sentry env build passed; intentional API error produced `Captured error event` in SDK debug logs.
+- FT-0001: what=workspace scaffold checks; where=local; how=`pnpm -r lint && pnpm -r typecheck && pnpm -r test`; quality_gate=passed; acceptance_gate=passed (FT-0001 acceptance); result=passed.
+- FT-0002: what=db migrations baseline; where=local+Supabase beta pooler; how=`pnpm db:health`, `pnpm db:migrate`, `pnpm --filter @feedback-360/db test`; quality_gate=passed (`lint/typecheck/test`); acceptance_gate=passed (migrate+health+integration); result=passed.
+- FT-0003: what=seed runner handles; where=local; how=`pnpm seed --scenario S1_company_min --json`, `pnpm seed --scenario S2_org_basic --json`, `pnpm --filter @feedback-360/db test`; quality_gate=passed (`lint/typecheck/test`); acceptance_gate=passed (valid handles JSON + integration); result=passed.
+- FT-0004: what=domains/dns/resend setup; where=Vercel DNS + Resend; how=`vercel dns ls go360go.ru`, `GET /domains` Resend API; quality_gate=N/A (infra/docs-only); acceptance_gate=passed (records present + domain verified); result=passed.
+- FT-0005: what=web app scaffold; where=local; how=`next dev`, `GET /api/health`, `pnpm --filter @feedback-360/web build`; quality_gate=passed (`lint/typecheck/test` workspace gate); acceptance_gate=passed (health endpoint + build smoke); result=passed.
+- FT-0006: what=Sentry integration; where=local (beta env config); how=`pnpm --filter @feedback-360/web build` with Sentry env + intentional API error route; quality_gate=passed (`lint/typecheck/test` workspace gate); acceptance_gate=passed (event captured in SDK logs); result=passed.
 
 ## EP-001 Core + Contract + Client + CLI-first
 - FT-0011

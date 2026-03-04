@@ -21,3 +21,12 @@ Status: Draft (2026-03-03)
 - Human-readable по умолчанию, `--json` — стабильная машиночитаемая схема.
 - При `--json` никаких “человеческих” сообщений в полях данных (только отдельное поле `message`, если нужно).
 
+## Post-coding quality gate (mandatory)
+- Любое изменение кода завершаем проверками качества: `lint` + `typecheck` + `test`.
+- Если затронуты части, где есть сборка (например Next.js app/package с `build`), дополнительно прогоняем `build`.
+- Эти проверки **не заменяют** приемочный сценарий фичи: acceptance прогоняется отдельно после реализации FT.
+- Тесты пишем и обновляем по policy проекта (уровни unit/integration/contract/e2e).
+
+Ссылки (аннотированные):
+- [Testing standards](testing-standards.md) — уровни тестов, правила размещения FT/GS тестов и completion gate. Читать, чтобы писать тесты в согласованном формате и закрывать фичи только после проверок.
+- [Delivery standards](delivery-standards.md) — дисциплина закрытия фич (traceability, code checks, acceptance evidence). Читать, чтобы статус `Completed` всегда был подтверждён артефактами.

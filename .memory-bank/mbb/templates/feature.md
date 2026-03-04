@@ -54,6 +54,15 @@ Status: Template
 ### Docs updates (SSoT)
 Какие документы в `.memory-bank/spec/*` и `.memory-bank/adr/*` должны быть обновлены.
 
+### Quality checks evidence (after implementation)
+- Date: `YYYY-MM-DD`
+- Checks run:
+  - `pnpm -r lint`
+  - `pnpm -r typecheck`
+  - `pnpm -r test`
+  - `build` (если применимо)
+- Result: passed/failed + краткий комментарий (что именно проверялось).
+
 ### Acceptance evidence (after implementation)
 - Date: `YYYY-MM-DD`
 - Commands/tests run: …

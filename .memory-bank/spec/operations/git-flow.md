@@ -53,7 +53,7 @@ Status: Draft (2026-03-04)
 
 ### Mandatory checks before merge to `develop`
 - CI: `pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test` (или эквивалентный набор в CI).
-- Acceptance: должны быть зелёными “Acceptance (auto)” сценарии для всех FT, которые затрагивает PR.
+- Acceptance: после реализации каждой затронутой FT отдельно прогоняется её `Acceptance (auto)` сценарий; в PR должны быть зелёными все такие сценарии.
 - Golden scenarios: если фича участвует в GS* — соответствующие GS должны быть зелёными (см. verification matrix).
 
 ### Mandatory evidence (recorded)

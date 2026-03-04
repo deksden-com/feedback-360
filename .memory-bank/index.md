@@ -7,9 +7,9 @@
 - [Coding style](spec/engineering/coding-style.md): правила кодирования (TS/Node/Next), формат ошибок, соглашения по CLI output. Читать перед началом разработки, чтобы изменения были единообразны.
 - [Architecture guardrails](spec/engineering/architecture-guardrails.md): границы core/client/web и правила слоёв+vertical slices. Читать перед кодом, чтобы не утащить бизнес-логику в UI/CLI.
 - [Implementation playbook](plans/implementation-playbook.md): пошаговый чеклист реализации фичи (contract→core→db→cli→tests→docs). Читать как рабочую инструкцию полного цикла разработки.
-- [Testing standards](spec/engineering/testing-standards.md): уровни тестов и правила acceptance/GS покрытий. Читать перед проверкой фичи, чтобы запускать правильные тесты.
-- [Verification matrix](plans/verification-matrix.md): обязательные проверки по FT/GS и формат evidence. Читать перед закрытием фичи, чтобы фиксировать подтверждение готовности.
-- [Delivery standards](spec/engineering/delivery-standards.md): единый процесс закрытия фич (traceability, acceptance gate, evidence). Читать перед merge, чтобы `Completed` был подтверждён проверками.
+- [Testing standards](spec/engineering/testing-standards.md): уровни тестов и правило двух гейтов (quality checks + acceptance/GS). Читать перед проверкой фичи, чтобы запускать проверки в правильной последовательности.
+- [Verification matrix](plans/verification-matrix.md): обязательные проверки по FT/GS и формат evidence. Читать перед закрытием фичи, чтобы фиксировать подтверждение готовности по каждому сценарию.
+- [Delivery standards](spec/engineering/delivery-standards.md): единый процесс закрытия фич (traceability, quality gate, acceptance gate, evidence). Читать перед merge, чтобы `Completed` был подтверждён всеми обязательными проверками.
 - [Git flow](spec/operations/git-flow.md): ветки, naming, commit/PR traceability (`[FT-*]/[EP-*]`) и обязательные проверки/evidence. Читать до создания ветки и PR, чтобы вести работу по стандарту.
 - [Deployment architecture](spec/operations/deployment-architecture.md): карта beta/prod окружений и обязательные env vars/интеграции. Читать перед deploy, чтобы не смешивать конфигурации окружений.
 - [Runbook](spec/operations/runbook.md): релизный и операционный чеклист (env/migrations/smoke/incident). Читать перед выкладкой, чтобы пройти деплой без пропусков.

@@ -2,7 +2,7 @@
 Status: Draft (2026-03-04)
 
 ## Purpose
-Закрепить обязательную дисциплину закрытия фич: traceability в git, запуск приемочных проверок и фиксация доказательств в memory bank.
+Закрепить обязательную дисциплину закрытия фич: traceability в git, отдельный code-quality gate, отдельный acceptance gate и фиксация доказательств в memory bank.
 
 ## SSoT map (where each rule lives)
 - [Git flow](../operations/git-flow.md) — SSoT по веткам, commit convention (`[FT-*]`/`[EP-*]`), PR-правилам и обязательным ссылкам на EP/FT документы. Читать перед созданием ветки/PR, чтобы изменения были трассируемыми.
@@ -11,18 +11,23 @@ Status: Draft (2026-03-04)
 
 ## Mandatory closure checklist (applies to every FT)
 1) Коммиты и PR оформлены по traceability-правилам (`[FT-*]`/`[EP-*]`, ссылки на EP/FT документы).
-2) Прогнаны acceptance-сценарии и обязательные тесты для фичи (по verification matrix).
-3) В feature doc есть блок `Acceptance evidence (YYYY-MM-DD)` с командами/результатами.
-4) В verification matrix добавлен/обновлён execution evidence по соответствующему EP.
+2) Прогнаны code-quality проверки: `pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test` (+ `build`, где применимо).
+3) После реализации фичи отдельно прогнан её `Acceptance (auto)` сценарий и обязательные GS (по verification matrix).
+4) В feature doc есть блок `Quality checks evidence (YYYY-MM-DD)` с результатами `lint/typecheck/test` (+ `build`, где применимо).
+5) В feature doc есть блок `Acceptance evidence (YYYY-MM-DD)` с командами/результатами приемочного сценария и связанных GS.
+6) В verification matrix добавлен/обновлён execution evidence по соответствующему EP.
 
 Если хотя бы один пункт не выполнен — фича не переводится в `Completed`.
+
+Примечание для infra/docs-only фич:
+- Если фича не вносит изменений в исполняемый код (например, DNS/операционные артефакты), в `Quality checks evidence` допускается `N/A` с кратким обоснованием.
 
 ## Epic progress reporting (mandatory)
 - В каждом epic-документе должен быть блок `## Progress report (evidence-based)`.
 - В блоке фиксируем минимум:
   - `total_features` (сколько FT в эпике),
   - `completed_features` (сколько FT имеют статус `Completed`),
-  - `evidence_confirmed_features` (сколько FT имеют `Acceptance evidence` и запись в verification matrix),
+  - `evidence_confirmed_features` (сколько FT имеют `Quality checks evidence`, `Acceptance evidence` и запись в verification matrix),
   - дата обновления отчёта.
 - В отчёте должна быть ссылка на:
   - [Verification matrix](../../plans/verification-matrix.md) — секция execution evidence по этому эпику. Читать, чтобы аудит готовности проверялся по одному SSoT-источнику.

@@ -26,6 +26,12 @@ Status: Completed (2026-03-04)
 - CI: `lint`, `typecheck`, `test` зелёные.
 - Ops check: событие появляется в Sentry после тестовой генерации ошибки.
 
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` — passed (workspace gate, коммитный набор EP-000).
+- `pnpm -r typecheck` — passed (workspace gate, коммитный набор EP-000).
+- `pnpm -r test` — passed (workspace gate, коммитный набор EP-000).
+- `pnpm --filter @feedback-360/web build` (с Sentry env) — passed.
+
 ## Acceptance evidence (2026-03-04)
 - Build with Sentry env:
   - `SENTRY_DSN/NEXT_PUBLIC_SENTRY_DSN/SENTRY_ENVIRONMENT=beta pnpm --filter @feedback-360/web build` → build completed successfully.

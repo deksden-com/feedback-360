@@ -25,6 +25,12 @@ Status: Completed (2026-03-04)
 - Automated test: smoke checks в CI по web package.
 - Manual ops check: health endpoint доступен после деплоя beta/prod.
 
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` — passed (workspace gate, коммитный набор EP-000).
+- `pnpm -r typecheck` — passed (workspace gate, коммитный набор EP-000).
+- `pnpm -r test` — passed (workspace gate, коммитный набор EP-000).
+- `pnpm --filter @feedback-360/web build` — passed.
+
 ## Acceptance evidence (2026-03-04)
 - Local runtime check:
   - `pnpm --filter @feedback-360/web exec next dev --hostname 127.0.0.1 --port 4010`

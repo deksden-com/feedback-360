@@ -54,6 +54,9 @@ Operator note (2026-03-04): домен `go360go.ru` в Resend = Verified/Authent
 ## Docs updates (SSoT)
 - Уже выполнено в deliverables этого slice.
 
+## Quality checks evidence (2026-03-04)
+- `N/A` — infra/docs-only slice (DNS/домен/операционные настройки), изменений исполняемого кода не было.
+
 ## Acceptance evidence (2026-03-04)
 - `vercel dns ls go360go.ru` подтверждает наличие записей:
   - `resend._domainkey TXT`

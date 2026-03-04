@@ -69,6 +69,12 @@ Status: Completed (2026-03-04)
   3) `pnpm -r test`
 - `pnpm db:migrate` и `pnpm db:health` отрабатывают с корректной ошибкой при отсутствии `SUPABASE_DB_POOLER_URL` и `DATABASE_URL`.
 
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` — passed.
+- `pnpm -r typecheck` — passed.
+- `pnpm -r test` — passed.
+- `build` — N/A (для данного slice ключевой gate: миграции/health/integration, отдельной сборки пакета не требовалось).
+
 ## Acceptance evidence (2026-03-04)
 - Проверка на реальном Supabase beta (через pooler):
   1) `pnpm db:health` → `DB health-check passed.`

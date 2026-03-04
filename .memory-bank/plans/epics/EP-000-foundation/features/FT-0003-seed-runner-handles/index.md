@@ -65,6 +65,12 @@ Status: Completed (2026-03-04)
 - Добавлена root-команда: `pnpm seed --scenario <Sx> [--json]`.
 - Добавлен integration тест: `packages/db/src/migrations/ft-0003-seed-runner.test.ts`.
 
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` — passed.
+- `pnpm -r typecheck` — passed.
+- `pnpm -r test` — passed.
+- `build` — N/A (для slice выполнялся runtime/integration gate через seed CLI + db tests).
+
 ## Acceptance evidence (2026-03-04)
 - CLI run:
   1) `pnpm seed --scenario S1_company_min --json` → валидный JSON с `scenario=S1_company_min` и handles (`company.main`, `employee.hr_admin`, `user.hr_admin`).

@@ -8,7 +8,10 @@ Status: Draft (2026-03-03)
 - E2E: Playwright golden flows (минимум, только критичное).
 
 ## Completion rule
-- Фича не считается закрытой, пока acceptance-сценарий и обязательные тесты не прогнаны и не зафиксированы в evidence.
+- Фича не считается закрытой, пока не пройдены **два независимых гейта**:
+  1) code-quality checks (`lint` + `typecheck` + `test`, и `build` там, где это применимо),
+  2) приемочный сценарий фичи (`Acceptance (auto)` в FT-документе) после реализации конкретной фичи.
+- Оба гейта обязательны для каждого FT; прохождение только одного из них не является завершением фичи.
 - Детальные правила фиксации evidence и traceability:
   - [Delivery standards](delivery-standards.md) — commit/PR требования, acceptance gate и обязательный формат evidence. Читать, чтобы тестовые прогоны были не “на словах”, а проверяемыми артефактами.
 
@@ -23,8 +26,19 @@ Status: Draft (2026-03-03)
   - Если сценарий требует UI — `apps/web/playwright/gsX-*.spec.ts`.
   - Если UI не нужен — можно держать GS как integration test на ops (Vitest) в `packages/core/test/gs/gsX-*.test.ts`.
 - Запуск:
-  - “всё”: `pnpm -r test`
-  - “одну фичу/сценарий”: через фильтр Vitest по имени файла/теста (конкретную команду фиксируем в package scripts после scaffold).
+- “всё”: `pnpm -r test`
+- “одну фичу/сценарий”: через фильтр Vitest по имени файла/теста (конкретную команду фиксируем в package scripts после scaffold).
+
+## Mandatory checks sequence (per FT)
+1) Реализовать код фичи и добавить/обновить тесты по policy уровня.
+2) Запустить code-quality checks (`lint` + `typecheck` + `test`; при необходимости `build`).
+3) Отдельно прогнать приемочный сценарий фичи (`Acceptance (auto)`), затем связанные GS (если указаны в verification matrix).
+4) Зафиксировать evidence обоих этапов:
+   - в feature doc: `Quality checks evidence` и `Acceptance evidence`,
+   - в verification matrix: `quality_gate` и `acceptance_gate`.
+
+Примечание:
+- Для infra/docs-only фич, где нет кодовых изменений, `Quality checks evidence` допускается как `N/A` с обоснованием; acceptance/evidence при этом остаются обязательными.
 
 ## Seeds
 Seeds — часть тестового контракта:

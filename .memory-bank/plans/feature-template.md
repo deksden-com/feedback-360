@@ -7,6 +7,7 @@ SSoT шаблон фичи (vertical slice) живёт в:
 Почему так:
 - один каноничный шаблон → меньше дублей,
 - требования к traceability (`[FT-*]/[EP-*]`, ссылки, evidence) подтягиваются из SSoT (см. [Git flow](../spec/operations/git-flow.md) и [Verification matrix](verification-matrix.md)).
+- шаблон включает два раздельных блока доказательств: `Quality checks evidence` и `Acceptance evidence`.
 
 Ссылки (аннотированные):
 - [Implementation playbook](implementation-playbook.md) — чеклист “FT → код”. Читать, чтобы план был исполнимым и вертикальным.
