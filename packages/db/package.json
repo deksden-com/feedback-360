@@ -15,12 +15,12 @@
   "dependencies": {
     "@feedback-360/api-contract": "workspace:*",
     "drizzle-orm": "0.44.5",
+    "dotenv": "17.2.3",
     "pg": "8.16.3"
   },
   "devDependencies": {
     "@types/pg": "8.15.5",
     "drizzle-kit": "0.31.5",
-    "dotenv": "17.2.3",
     "tsx": "4.20.6"
   }
 }

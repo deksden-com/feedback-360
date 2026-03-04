@@ -39,6 +39,8 @@ Status: Draft (2026-03-04)
   - `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`
   - `SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
+  - `SUPABASE_BETA_DB_POOLER_URL` (operator/local convenience)
+  - `SUPABASE_PROD_DB_POOLER_URL` (operator/local convenience)
   - `SUPABASE_DB_POOLER_URL` (preferred for cloud scripts/migrations)
   - `DATABASE_URL` (optional fallback for local Postgres)
 - Email:

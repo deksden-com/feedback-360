@@ -101,6 +101,9 @@ importers:
       '@feedback-360/api-contract':
         specifier: workspace:*
         version: link:../api-contract
+      dotenv:
+        specifier: 17.2.3
+        version: 17.2.3
       drizzle-orm:
         specifier: 0.44.5
         version: 0.44.5(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)
@@ -111,9 +114,6 @@ importers:
       '@types/pg':
         specifier: 8.15.5
         version: 8.15.5
-      dotenv:
-        specifier: 17.2.3
-        version: 17.2.3
       drizzle-kit:
         specifier: 0.31.5
         version: 0.31.5

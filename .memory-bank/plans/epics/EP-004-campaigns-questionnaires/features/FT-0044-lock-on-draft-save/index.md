@@ -77,7 +77,8 @@ Status: Completed (2026-03-04)
 - Build: N/A (изменения в packages/core/db/client/cli).
 
 ## Acceptance evidence (2026-03-04)
-- `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0044-lock-on-draft-save-no-db.test.ts src/ft/ft-0044-lock-on-draft-save.test.ts` → passed (`integration subtest skipped` без `SUPABASE_DB_POOLER_URL`/`DATABASE_URL`).
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0044-lock-on-draft-save-no-db.test.ts src/ft/ft-0044-lock-on-draft-save.test.ts` → passed (реальный integration run на Supabase beta pooler, без skip).
+- Дополнительно прогнан GS5 intent на реальной БД через core dispatch с ролями (`hr_admin`/`employee`): до lock `campaign.weights.set`/`matrix.set` успешны, после `questionnaire.saveDraft` обе операции возвращают `campaign_locked`.
 - `pnpm --filter @feedback-360/client exec vitest run src/ft-0044-lock-on-draft-save-client.test.ts` → passed.
 - `pnpm --filter @feedback-360/cli exec vitest run src/ft-0044-lock-on-draft-save-cli.test.ts` → passed.
 - Проверено по intent: до `questionnaire.saveDraft` операции `campaign.weights.set`/`matrix.set` выполняются; после первого draft-save обе операции возвращают `campaign_locked`.

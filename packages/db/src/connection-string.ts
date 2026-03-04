@@ -1,3 +1,9 @@
+import { existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { config as loadDotenv } from "dotenv";
+
 const supabasePoolerHostSuffix = ".pooler.supabase.com";
 
 const isSupabasePoolerHost = (hostname: string): boolean => {
@@ -27,6 +33,27 @@ const normalizeSupabasePoolerConnectionString = (value: string): string => {
 
   return parsedUrl.toString();
 };
+
+const loadEnvIfNeeded = (): void => {
+  if (process.env.SUPABASE_DB_POOLER_URL || process.env.DATABASE_URL) {
+    return;
+  }
+
+  const moduleDir = dirname(fileURLToPath(import.meta.url));
+  const candidates = [resolve(process.cwd(), ".env"), resolve(moduleDir, "../../../.env")];
+
+  for (const path of candidates) {
+    if (!existsSync(path)) {
+      continue;
+    }
+    loadDotenv({ path, override: false });
+    if (process.env.SUPABASE_DB_POOLER_URL || process.env.DATABASE_URL) {
+      return;
+    }
+  }
+};
+
+loadEnvIfNeeded();
 
 export const getDatabaseUrl = (): string => {
   const rawValue = process.env.SUPABASE_DB_POOLER_URL ?? process.env.DATABASE_URL;
