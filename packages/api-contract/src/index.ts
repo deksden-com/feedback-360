@@ -5,6 +5,7 @@ export const seedScenarios = [
   "S2_org_basic",
   "S4_campaign_draft",
   "S5_campaign_started_no_answers",
+  "S7_campaign_started_some_submitted",
   "S8_campaign_ended",
 ] as const;
 
@@ -70,6 +71,7 @@ export const knownOperations = [
   "campaign.weights.set",
   "campaign.participants.add",
   "campaign.participants.remove",
+  "campaign.progress.get",
   "employee.upsert",
   "employee.listActive",
   "org.department.move",
@@ -310,6 +312,43 @@ export type CampaignSnapshotListOutput = {
   items: CampaignSnapshotListItem[];
 };
 
+export type CampaignProgressGetInput = {
+  campaignId: string;
+};
+
+export type CampaignProgressStatusCounts = {
+  notStarted: number;
+  inProgress: number;
+  submitted: number;
+};
+
+export type CampaignProgressPendingItem = {
+  questionnaireId: string;
+  campaignId: string;
+  companyId: string;
+  subjectEmployeeId: string;
+  raterEmployeeId: string;
+  status: "not_started" | "in_progress";
+  firstDraftAt?: string;
+  submittedAt?: string;
+};
+
+export type CampaignProgressPendingGroupItem = {
+  employeeId: string;
+  pendingCount: number;
+};
+
+export type CampaignProgressGetOutput = {
+  campaignId: string;
+  companyId: string;
+  totalQuestionnaires: number;
+  statusCounts: CampaignProgressStatusCounts;
+  campaignLockedAt?: string;
+  pendingQuestionnaires: CampaignProgressPendingItem[];
+  pendingByRater: CampaignProgressPendingGroupItem[];
+  pendingBySubject: CampaignProgressPendingGroupItem[];
+};
+
 export type CampaignParticipantsAddFromDepartmentsInput = {
   campaignId: string;
   departmentIds: string[];
@@ -510,6 +549,12 @@ const isMembershipRole = (value: string): value is MembershipRole => {
 
 const isQuestionnaireStatus = (value: string): value is QuestionnaireStatus => {
   return questionnaireStatuses.includes(value as QuestionnaireStatus);
+};
+
+const isPendingQuestionnaireStatus = (
+  value: string,
+): value is CampaignProgressPendingItem["status"] => {
+  return value === "not_started" || value === "in_progress";
 };
 
 export const isKnownOperation = (value: string): value is KnownOperation => {
@@ -1441,6 +1486,183 @@ export const parseCampaignSnapshotListOutput = (value: unknown): CampaignSnapsho
     items: ensureArray(record.items, "campaign.snapshot.list output.items").map(
       parseCampaignSnapshotListItem,
     ),
+  };
+};
+
+export const parseCampaignProgressGetInput = (value: unknown): CampaignProgressGetInput => {
+  const record = ensureObject(value, "campaign.progress.get input");
+  ensureAllowedKeys(record, ["campaignId"], "campaign.progress.get input");
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.progress.get input"),
+  };
+};
+
+const parseCampaignProgressStatusCounts = (value: unknown): CampaignProgressStatusCounts => {
+  const record = ensureObject(value, "campaign.progress.get output.statusCounts");
+  ensureAllowedKeys(
+    record,
+    ["notStarted", "inProgress", "submitted"],
+    "campaign.progress.get output.statusCounts",
+  );
+
+  return {
+    notStarted: ensureNumberField(
+      record,
+      "notStarted",
+      "campaign.progress.get output.statusCounts",
+    ),
+    inProgress: ensureNumberField(
+      record,
+      "inProgress",
+      "campaign.progress.get output.statusCounts",
+    ),
+    submitted: ensureNumberField(record, "submitted", "campaign.progress.get output.statusCounts"),
+  };
+};
+
+const parseCampaignProgressPendingItem = (value: unknown): CampaignProgressPendingItem => {
+  const record = ensureObject(value, "campaign.progress.get output.pendingQuestionnaires[]");
+  ensureAllowedKeys(
+    record,
+    [
+      "questionnaireId",
+      "campaignId",
+      "companyId",
+      "subjectEmployeeId",
+      "raterEmployeeId",
+      "status",
+      "firstDraftAt",
+      "submittedAt",
+    ],
+    "campaign.progress.get output.pendingQuestionnaires[]",
+  );
+
+  const status = ensureStringField(
+    record,
+    "status",
+    "campaign.progress.get output.pendingQuestionnaires[]",
+  );
+  if (!isPendingQuestionnaireStatus(status)) {
+    throw new Error(
+      'campaign.progress.get output.pendingQuestionnaires[].status must be "not_started" or "in_progress".',
+    );
+  }
+
+  const firstDraftAt = record.firstDraftAt;
+  if (firstDraftAt !== undefined && firstDraftAt !== null && typeof firstDraftAt !== "string") {
+    throw new Error(
+      "campaign.progress.get output.pendingQuestionnaires[].firstDraftAt must be a string when provided.",
+    );
+  }
+
+  const submittedAt = record.submittedAt;
+  if (submittedAt !== undefined && submittedAt !== null && typeof submittedAt !== "string") {
+    throw new Error(
+      "campaign.progress.get output.pendingQuestionnaires[].submittedAt must be a string when provided.",
+    );
+  }
+
+  return {
+    questionnaireId: ensureStringField(
+      record,
+      "questionnaireId",
+      "campaign.progress.get output.pendingQuestionnaires[]",
+    ),
+    campaignId: ensureStringField(
+      record,
+      "campaignId",
+      "campaign.progress.get output.pendingQuestionnaires[]",
+    ),
+    companyId: ensureStringField(
+      record,
+      "companyId",
+      "campaign.progress.get output.pendingQuestionnaires[]",
+    ),
+    subjectEmployeeId: ensureStringField(
+      record,
+      "subjectEmployeeId",
+      "campaign.progress.get output.pendingQuestionnaires[]",
+    ),
+    raterEmployeeId: ensureStringField(
+      record,
+      "raterEmployeeId",
+      "campaign.progress.get output.pendingQuestionnaires[]",
+    ),
+    status,
+    ...(typeof firstDraftAt === "string" ? { firstDraftAt } : {}),
+    ...(typeof submittedAt === "string" ? { submittedAt } : {}),
+  };
+};
+
+const parseCampaignProgressPendingGroupItem = (
+  value: unknown,
+): CampaignProgressPendingGroupItem => {
+  const record = ensureObject(value, "campaign.progress.get output.pendingBy[]");
+  ensureAllowedKeys(
+    record,
+    ["employeeId", "pendingCount"],
+    "campaign.progress.get output.pendingBy[]",
+  );
+
+  return {
+    employeeId: ensureStringField(record, "employeeId", "campaign.progress.get output.pendingBy[]"),
+    pendingCount: ensureNumberField(
+      record,
+      "pendingCount",
+      "campaign.progress.get output.pendingBy[]",
+    ),
+  };
+};
+
+export const parseCampaignProgressGetOutput = (value: unknown): CampaignProgressGetOutput => {
+  const record = ensureObject(value, "campaign.progress.get output");
+  ensureAllowedKeys(
+    record,
+    [
+      "campaignId",
+      "companyId",
+      "totalQuestionnaires",
+      "statusCounts",
+      "campaignLockedAt",
+      "pendingQuestionnaires",
+      "pendingByRater",
+      "pendingBySubject",
+    ],
+    "campaign.progress.get output",
+  );
+
+  const campaignLockedAt = record.campaignLockedAt;
+  if (
+    campaignLockedAt !== undefined &&
+    campaignLockedAt !== null &&
+    typeof campaignLockedAt !== "string"
+  ) {
+    throw new Error("campaign.progress.get output.campaignLockedAt must be a string.");
+  }
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.progress.get output"),
+    companyId: ensureStringField(record, "companyId", "campaign.progress.get output"),
+    totalQuestionnaires: ensureNumberField(
+      record,
+      "totalQuestionnaires",
+      "campaign.progress.get output",
+    ),
+    statusCounts: parseCampaignProgressStatusCounts(record.statusCounts),
+    ...(typeof campaignLockedAt === "string" ? { campaignLockedAt } : {}),
+    pendingQuestionnaires: ensureArray(
+      record.pendingQuestionnaires,
+      "campaign.progress.get output.pendingQuestionnaires",
+    ).map(parseCampaignProgressPendingItem),
+    pendingByRater: ensureArray(
+      record.pendingByRater,
+      "campaign.progress.get output.pendingByRater",
+    ).map(parseCampaignProgressPendingGroupItem),
+    pendingBySubject: ensureArray(
+      record.pendingBySubject,
+      "campaign.progress.get output.pendingBySubject",
+    ).map(parseCampaignProgressPendingGroupItem),
   };
 };
 

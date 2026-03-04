@@ -55,7 +55,7 @@ describe("FT-0013 questionnaire ops", () => {
       });
 
       expect(savedDraft.ok).toBe(true);
-      if (savedDraft.ok && "campaignLockedAt" in savedDraft.data) {
+      if (savedDraft.ok && "campaignLockedAt" in savedDraft.data && "status" in savedDraft.data) {
         expect(savedDraft.data.status).toBe("in_progress");
         expect(typeof savedDraft.data.campaignLockedAt).toBe("string");
       }

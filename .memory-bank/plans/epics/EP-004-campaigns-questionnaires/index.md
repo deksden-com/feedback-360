@@ -1,5 +1,5 @@
 # EP-004 — Models + campaigns + questionnaires
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## Goal
 Сделать “сквозной” процесс оценки без UI: модели → кампания → матрица → анкеты → lock → end.
@@ -16,8 +16,8 @@ Status: Draft (2026-03-03)
 ## Progress report (evidence-based)
 - `as_of`: 2026-03-04
 - `total_features`: 6
-- `completed_features`: 5
-- `evidence_confirmed_features`: 5
+- `completed_features`: 6
+- `evidence_confirmed_features`: 6
 - verification link:
   - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-004. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
 

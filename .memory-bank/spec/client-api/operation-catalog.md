@@ -102,6 +102,7 @@ Status: Draft (2026-03-03)
 - `campaign.progress.get`
   - roles: hr_admin/hr_reader
   - idempotent: yes
+  - output: `totalQuestionnaires`, `statusCounts`, `pendingQuestionnaires`, `pendingByRater`, `pendingBySubject`
   - cli: `campaign progress`
 - `campaign.snapshot.list`
   - roles: hr_admin/hr_reader

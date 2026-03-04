@@ -103,8 +103,34 @@ describe("FT-0003 seed runner + handles", () => {
       } finally {
         await poolAfterS8.end();
       }
+
+      const s7 = await runSeedScenario({ scenario: "S7_campaign_started_some_submitted" });
+      expect(s7.handles["campaign.main"]).toBeDefined();
+      expect(s7.handles["questionnaire.main_not_started"]).toBeDefined();
+      expect(s7.handles["questionnaire.main_in_progress"]).toBeDefined();
+      expect(s7.handles["questionnaire.main_submitted"]).toBeDefined();
+
+      const poolAfterS7 = createPool();
+      try {
+        const db = createDb(poolAfterS7);
+        const statusRows = await db.execute(sql`
+          select status, count(*) as count
+          from questionnaires
+          group by status
+          order by status
+        `);
+
+        const countsByStatus = Object.fromEntries(
+          statusRows.rows.map((row) => [String(row.status), Number(row.count)]),
+        );
+        expect(countsByStatus.not_started).toBe(1);
+        expect(countsByStatus.in_progress).toBe(1);
+        expect(countsByStatus.submitted).toBe(1);
+      } finally {
+        await poolAfterS7.end();
+      }
     },
-    30_000,
+    60_000,
   );
 
   it.skipIf(hasUrl)("skips integration run when database URL is absent", () => {
