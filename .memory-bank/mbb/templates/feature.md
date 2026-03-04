@@ -53,3 +53,9 @@ Status: Template
 
 ### Docs updates (SSoT)
 Какие документы в `.memory-bank/spec/*` и `.memory-bank/adr/*` должны быть обновлены.
+
+### Acceptance evidence (after implementation)
+- Date: `YYYY-MM-DD`
+- Commands/tests run: …
+- Result: …
+- Artifacts (optional): скриншоты/логи/ссылки на CI run; если есть скриншоты — что именно подтверждает каждый.

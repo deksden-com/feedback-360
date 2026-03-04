@@ -62,3 +62,7 @@ UI и CLI вызывают одни и те же операции; тесты м
 - Automated test: `packages/client/test/ft/ft-0012-transport-parity.test.ts` (integration) проверяет parity `system.ping` (HTTP vs in-proc).
 - Automated test: `packages/client/test/ft/ft-0012-active-company-context.test.ts` (unit/integration) проверяет client-local set + parity propagation.
 - Must run: FT-0012 parity тест + `pnpm -r test`.
+
+## Visual evidence guidance
+- Скриншоты опциональны: ключевая проверка фичи должна подтверждаться тестами parity/context.
+- Если прикладываем визуализацию, достаточно 1 скрина/сниппета лога с результатом parity тестов (optional).

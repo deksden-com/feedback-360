@@ -61,3 +61,7 @@ Status: Draft (2026-03-03)
 ## Verification (must)
 - Automated test: `packages/core/test/ft/ft-0011-op-errors.test.ts` (integration) повторяет Acceptance: invalid input → `invalid_input`, RBAC → `forbidden`, `--json` shape.
 - Must run: `pnpm -r test` (и отдельный запуск теста FT-0011 по имени файла/теста).
+
+## Visual evidence guidance
+- Для этой фичи скриншоты не обязательны: основное доказательство — автоматические тесты и JSON/error shape.
+- Если нужно для ревью, можно приложить 1 скрин terminal-вывода `--json` ошибки (optional).

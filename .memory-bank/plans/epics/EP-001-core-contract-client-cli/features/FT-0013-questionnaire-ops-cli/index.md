@@ -77,3 +77,12 @@ Status: Draft (2026-03-03)
 - Must run:
   - `FT-0013` acceptance тест,
   - GS1 (happy path) и GS5 (lock semantics) должны оставаться зелёными, т.к. опираются на list/saveDraft/submit.
+
+## Visual evidence guidance
+- Для этой фичи скриншоты **рекомендуются** (CLI-сценарий многошаговый, есть важные переходы состояния).
+- Минимальный набор:
+  1) `step-01` — `questionnaire list` до сохранения (status `not_started`),
+  2) `step-02` — `save-draft` и подтверждение `locked_at`,
+  3) `step-03` — `submit` + `submitted_at`,
+  4) `step-04` — попытка `save-draft` после submit (typed error).
+- Дополнительно можно приложить human-output `questionnaire list` (без `--json`) как UX-подтверждение.

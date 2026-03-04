@@ -25,6 +25,7 @@ Status: Draft (2026-03-03)
 - `where`: где гоняли (CI/local/beta) + при необходимости ссылка на CI run / Vercel preview,
 - `how`: команды/сценарии (что именно запускали),
 - `result`: passed/failed + важные детали (например, “against Supabase beta pooler”, “HMAC replay covered”).
+- `artifacts` (optional): ссылки на скриншоты/видео/логи, если это повышает проверяемость (особенно UI/внешние панели).
 
 Связанные правила:
 - PR/commit traceability и обязательность evidence определены в:
