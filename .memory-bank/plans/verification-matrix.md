@@ -78,14 +78,16 @@ Status: Draft (2026-03-03)
   - Must add test: `packages/client/src/ft-0021-multi-tenant.test.ts`
   - Must run: GS4 tenant-isolation subset (`client.setActiveCompany` + company-scoped read isolation).
 - FT-0022
-  - Must add test: `packages/core/test/ft/ft-0022-rbac.test.ts`
-  - Must run: GS4.
+  - Must add test: `packages/core/src/ft/ft-0022-rbac-no-db.test.ts`
+  - Must add test: `packages/core/src/ft/ft-0022-rbac.test.ts`
+  - Must run: GS4 RBAC subset (hr_reader read allowed + write forbidden + no partial changes).
 - FT-0023
   - Must add test: `packages/db/test/ft/ft-0023-rls-smoke.test.ts`
   - Must run: GS10.
 
 ### EP-002 execution evidence (2026-03-04)
 - FT-0021: what=identity multi-tenant baseline + active company isolation; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0021-multi-tenant.test.ts`, `pnpm --filter @feedback-360/db exec vitest run src/migrations/ft-0003-seed-runner.test.ts`; quality_gate=passed; acceptance_gate=passed (active company A/B isolation, cross-company read -> `not_found`, `S1_multi_tenant_min` handles validated; DB integration subtest skips when DB URL absent); result=passed.
+- FT-0022: what=RBAC enforcement for hr_reader (read-only); where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0022-rbac-no-db.test.ts`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0022-rbac.test.ts`; quality_gate=passed; acceptance_gate=passed (`questionnaire.listAssigned` allowed, `questionnaire.saveDraft`/`questionnaire.submit`/`company.updateProfile` forbidden, no partial changes; DB integration subtest skips when DB URL absent); result=passed.
 
 ## EP-003 Org structure + snapshots
 - FT-0031

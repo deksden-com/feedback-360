@@ -116,11 +116,11 @@ Status: Draft (2026-03-03)
   - idempotent: yes
   - cli: `questionnaire list`
 - `questionnaire.saveDraft`
-  - roles: employee/manager/hr_*
+  - roles: employee/manager/hr_admin
   - idempotent: yes (by questionnaire+item)
   - cli: `questionnaire save-draft`
 - `questionnaire.submit`
-  - roles: employee/manager/hr_*
+  - roles: employee/manager/hr_admin
   - idempotent: yes (transition)
   - cli: `questionnaire submit`
 

@@ -22,6 +22,10 @@ Status: Draft (2026-03-03)
 - read ops: `results.getHrView` (и прочие list/get)
 - write ops (запрещены для hr_reader): `campaign.weights.set`, `matrix.set`, `campaign.setModelVersion`, …
 
+Текущий покрытый срез (EP-002 FT-0021/FT-0022):
+- read: `questionnaire.listAssigned`
+- write (forbidden для `hr_reader`): `questionnaire.saveDraft`, `questionnaire.submit`, `company.updateProfile`
+
 ## CLI example
 1) `seed --scenario S1_multi_tenant_min --json`
 2) `company use <handles.company.a>`
