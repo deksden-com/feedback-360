@@ -17,6 +17,11 @@ Status: Draft (2026-03-03)
 - Smoke: применить миграции + `pnpm seed --scenario S1_company_min --json`.
 - Golden: GS1 использует seeds из этого эпика.
 
+## Acceptance revalidation (2026-03-04)
+- Все completed фичи `FT-0001..FT-0006` перепроверены по их acceptance-сценариям.
+- Доказательства запусков вынесены в каждую feature-страницу и сводный реестр:
+  - [Verification matrix](../../verification-matrix.md) — секция `EP-000 execution evidence (2026-03-04)`.
+
 ## Memory bank updates (after EP completion)
 - Обновить/подтвердить `spec/project/*` (SSoT по структуре и стеку): [Project specs index](../../../spec/project/index.md) — что внутри и где искать решения. Читать, чтобы “скелет” проекта и реальный scaffold не разошлись.
 - Зафиксировать реальные команды и ограничения seed runner в `spec/testing/*`: [Seed scenarios principles](../../../spec/testing/seed-scenarios.md) — контракт handles/variants. Читать, чтобы тесты не хардкодили id.

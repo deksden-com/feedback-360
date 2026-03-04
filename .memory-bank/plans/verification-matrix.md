@@ -24,6 +24,14 @@ Status: Draft (2026-03-03)
   - Must add test: `packages/db/test/ft-0003-seed-runner.test.ts`
   - Must run: `seed.run` для `S1_company_min`/`S2_org_basic` (и variants smoke).
 
+### EP-000 execution evidence (2026-03-04)
+- FT-0001: `pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test` — passed.
+- FT-0002: `pnpm db:health`, `pnpm db:migrate`, `packages/db` integration tests — passed against Supabase beta pooler.
+- FT-0003: `pnpm seed --scenario S1_company_min --json` и `S2_org_basic` — passed (valid handles JSON).
+- FT-0004: `vercel dns ls go360go.ru` + Resend API `GET /domains` — records present, domain status `verified`.
+- FT-0005: `next dev` + `GET /api/health` (HTTP 200), `next build` — passed.
+- FT-0006: Sentry env build passed; intentional API error produced `Captured error event` in SDK debug logs.
+
 ## EP-001 Core + Contract + Client + CLI-first
 - FT-0011
   - Must add test: `packages/core/test/ft/ft-0011-op-errors.test.ts`
@@ -123,4 +131,3 @@ Status: Draft (2026-03-03)
 - FT-0081..FT-0084
   - Must add test: `apps/web/playwright/gs1-happy-path.spec.ts` (минимальный), плюс точечные UI assertions по ролям.
   - Must run: Playwright flow (GS1) + smoke на company switcher/results visibility.
-

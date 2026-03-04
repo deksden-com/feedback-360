@@ -25,3 +25,11 @@ Status: Completed (2026-03-04)
 ## Verification (must)
 - CI: `lint`, `typecheck`, `test` зелёные.
 - Ops check: событие появляется в Sentry после тестовой генерации ошибки.
+
+## Acceptance evidence (2026-03-04)
+- Build with Sentry env:
+  - `SENTRY_DSN/NEXT_PUBLIC_SENTRY_DSN/SENTRY_ENVIRONMENT=beta pnpm --filter @feedback-360/web build` → build completed successfully.
+- Runtime + capture flow:
+  1) `SENTRY_DEBUG=1 pnpm --filter @feedback-360/web exec next dev --hostname 127.0.0.1 --port 4011`
+  2) `curl http://127.0.0.1:4011/api/sentry-example-api` → HTTP 500 (intentional error route).
+  3) Server logs содержат `Captured error event ...` и `Done flushing events`, что подтверждает отправку события SDK.

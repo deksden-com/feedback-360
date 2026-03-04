@@ -24,3 +24,10 @@ Status: Completed (2026-03-04)
 ## Verification (must)
 - Automated test: smoke checks в CI по web package.
 - Manual ops check: health endpoint доступен после деплоя beta/prod.
+
+## Acceptance evidence (2026-03-04)
+- Local runtime check:
+  - `pnpm --filter @feedback-360/web exec next dev --hostname 127.0.0.1 --port 4010`
+  - `curl http://127.0.0.1:4010/api/health` → `{"ok":true,"appEnv":"unknown"}` (HTTP 200).
+- Build smoke:
+  - `pnpm --filter @feedback-360/web build` завершён успешно.

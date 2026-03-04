@@ -64,3 +64,10 @@ Status: Completed (2026-03-04)
 - Реализован CLI на Commander (`packages/cli`) с human + `--json` форматами.
 - Добавлена root-команда: `pnpm seed --scenario <Sx> [--json]`.
 - Добавлен integration тест: `packages/db/src/migrations/ft-0003-seed-runner.test.ts`.
+
+## Acceptance evidence (2026-03-04)
+- CLI run:
+  1) `pnpm seed --scenario S1_company_min --json` → валидный JSON с `scenario=S1_company_min` и handles (`company.main`, `employee.hr_admin`, `user.hr_admin`).
+  2) `pnpm seed --scenario S2_org_basic --json` → валидный JSON с expected handles (`department.root`, `employee.ceo`, `employee.head_a`, ...).
+- Integration test:
+  - `pnpm --filter @feedback-360/db test` → `src/migrations/ft-0003-seed-runner.test.ts` passed.

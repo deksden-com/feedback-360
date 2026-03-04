@@ -53,3 +53,12 @@ Operator note (2026-03-04): домен `go360go.ru` в Resend = Verified/Authent
 
 ## Docs updates (SSoT)
 - Уже выполнено в deliverables этого slice.
+
+## Acceptance evidence (2026-03-04)
+- `vercel dns ls go360go.ru` подтверждает наличие записей:
+  - `resend._domainkey TXT`
+  - `send MX` + `send TXT` (SES/SPF)
+  - `@ MX` + `@ TXT` + `dkim* CNAME` для SimpleLogin
+  - `_dmarc TXT`
+- Resend API check:
+  - `GET https://api.resend.com/domains` (с `RESEND_BETA_API_KEY`) возвращает `go360go.ru` со статусом `verified`, `capabilities.sending=enabled`.

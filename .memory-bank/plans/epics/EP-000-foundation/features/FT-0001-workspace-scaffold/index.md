@@ -67,3 +67,8 @@ Status: Completed (2026-03-03)
   1) `pnpm -r lint`
   2) `pnpm -r typecheck`
   3) `pnpm -r test`
+
+## Acceptance evidence (2026-03-04)
+- Прогон `pnpm -r lint` завершён успешно для всех workspace пакетов.
+- Прогон `pnpm -r typecheck` завершён успешно для всех workspace пакетов.
+- Прогон `pnpm -r test` завершён успешно; в `packages/db` интеграционные `FT-0002`/`FT-0003` тоже зелёные (с `SUPABASE_DB_POOLER_URL`).
