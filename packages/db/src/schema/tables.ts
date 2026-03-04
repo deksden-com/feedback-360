@@ -120,11 +120,87 @@ export const employeePositions = pgTable("employee_positions", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const competencyModelVersions = pgTable("competency_model_versions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  companyId: uuid("company_id")
+    .notNull()
+    .references(() => companies.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  kind: text("kind").notNull(),
+  version: integer("version").notNull(),
+  status: text("status").notNull().default("published"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const competencyGroups = pgTable("competency_groups", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  companyId: uuid("company_id")
+    .notNull()
+    .references(() => companies.id, { onDelete: "cascade" }),
+  modelVersionId: uuid("model_version_id")
+    .notNull()
+    .references(() => competencyModelVersions.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  weight: integer("weight").notNull(),
+  order: integer("order").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const competencies = pgTable("competencies", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  companyId: uuid("company_id")
+    .notNull()
+    .references(() => companies.id, { onDelete: "cascade" }),
+  modelVersionId: uuid("model_version_id")
+    .notNull()
+    .references(() => competencyModelVersions.id, { onDelete: "cascade" }),
+  groupId: uuid("group_id")
+    .notNull()
+    .references(() => competencyGroups.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  order: integer("order").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const competencyIndicators = pgTable("competency_indicators", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  companyId: uuid("company_id")
+    .notNull()
+    .references(() => companies.id, { onDelete: "cascade" }),
+  competencyId: uuid("competency_id")
+    .notNull()
+    .references(() => competencies.id, { onDelete: "cascade" }),
+  text: text("text").notNull(),
+  order: integer("order").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const competencyLevels = pgTable("competency_levels", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  companyId: uuid("company_id")
+    .notNull()
+    .references(() => companies.id, { onDelete: "cascade" }),
+  competencyId: uuid("competency_id")
+    .notNull()
+    .references(() => competencies.id, { onDelete: "cascade" }),
+  level: integer("level").notNull(),
+  text: text("text").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const campaigns = pgTable("campaigns", {
   id: uuid("id").defaultRandom().primaryKey(),
   companyId: uuid("company_id")
     .notNull()
     .references(() => companies.id, { onDelete: "cascade" }),
+  modelVersionId: uuid("model_version_id").references(() => competencyModelVersions.id, {
+    onDelete: "set null",
+  }),
   name: text("name").notNull(),
   status: text("status").notNull().default("draft"),
   timezone: text("timezone").notNull().default("Europe/Kaliningrad"),

@@ -46,7 +46,7 @@ describe("FT-0011 operation plumbing + typed errors", () => {
     });
 
     expect(result.ok).toBe(true);
-    if (result.ok && "companyId" in result.data) {
+    if (result.ok && "companyId" in result.data && "updatedAt" in result.data) {
       expect("name" in result.data).toBe(true);
       if (!("name" in result.data)) {
         return;

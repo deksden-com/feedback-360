@@ -61,6 +61,8 @@ export const knownOperations = [
   "seed.run",
   "system.ping",
   "company.updateProfile",
+  "model.version.create",
+  "campaign.create",
   "employee.upsert",
   "employee.listActive",
   "org.department.move",
@@ -91,6 +93,67 @@ export type CompanyUpdateProfileOutput = {
   companyId: string;
   name: string;
   updatedAt: string;
+};
+
+export type ModelIndicatorInput = {
+  text: string;
+  order?: number;
+};
+
+export type ModelLevelInput = {
+  level: number;
+  text: string;
+};
+
+export type ModelCompetencyInput = {
+  name: string;
+  indicators?: ModelIndicatorInput[];
+  levels?: ModelLevelInput[];
+};
+
+export type ModelGroupInput = {
+  name: string;
+  weight: number;
+  competencies: ModelCompetencyInput[];
+};
+
+export type ModelVersionCreateInput = {
+  name: string;
+  kind: "indicators" | "levels";
+  groups: ModelGroupInput[];
+};
+
+export type ModelVersionCreateOutput = {
+  modelVersionId: string;
+  companyId: string;
+  name: string;
+  kind: "indicators" | "levels";
+  version: number;
+  createdAt: string;
+  groupCount: number;
+  competencyCount: number;
+  indicatorCount: number;
+  levelCount: number;
+};
+
+export type CampaignCreateInput = {
+  name: string;
+  modelVersionId: string;
+  startAt: string;
+  endAt: string;
+  timezone?: string;
+};
+
+export type CampaignCreateOutput = {
+  campaignId: string;
+  companyId: string;
+  modelVersionId: string;
+  name: string;
+  status: "draft";
+  startAt: string;
+  endAt: string;
+  timezone: string;
+  createdAt: string;
 };
 
 export type EmployeeUpsertInput = {
@@ -613,6 +676,222 @@ export const parseCompanyUpdateProfileOutput = (value: unknown): CompanyUpdatePr
     companyId: ensureStringField(record, "companyId", "company.updateProfile output"),
     name: ensureStringField(record, "name", "company.updateProfile output"),
     updatedAt: ensureStringField(record, "updatedAt", "company.updateProfile output"),
+  };
+};
+
+const parseModelKind = (value: unknown, fieldName: string): "indicators" | "levels" => {
+  if (value === "indicators" || value === "levels") {
+    return value;
+  }
+
+  throw new Error(`${fieldName} must be one of: indicators, levels.`);
+};
+
+const parseModelIndicatorInput = (value: unknown): ModelIndicatorInput => {
+  const record = ensureObject(
+    value,
+    "model.version.create input.groups[].competencies[].indicators[]",
+  );
+  ensureAllowedKeys(
+    record,
+    ["text", "order"],
+    "model.version.create input.groups[].competencies[].indicators[]",
+  );
+
+  const order = record.order;
+  if (order !== undefined && typeof order !== "number") {
+    throw new Error(
+      "model.version.create input.groups[].competencies[].indicators[].order must be a number when provided.",
+    );
+  }
+
+  return {
+    text: ensureStringField(
+      record,
+      "text",
+      "model.version.create input.groups[].competencies[].indicators[]",
+    ),
+    ...(typeof order === "number" ? { order } : {}),
+  };
+};
+
+const parseModelLevelInput = (value: unknown): ModelLevelInput => {
+  const record = ensureObject(value, "model.version.create input.groups[].competencies[].levels[]");
+  ensureAllowedKeys(
+    record,
+    ["level", "text"],
+    "model.version.create input.groups[].competencies[].levels[]",
+  );
+
+  return {
+    level: ensureNumberField(
+      record,
+      "level",
+      "model.version.create input.groups[].competencies[].levels[]",
+    ),
+    text: ensureStringField(
+      record,
+      "text",
+      "model.version.create input.groups[].competencies[].levels[]",
+    ),
+  };
+};
+
+const parseModelCompetencyInput = (value: unknown): ModelCompetencyInput => {
+  const record = ensureObject(value, "model.version.create input.groups[].competencies[]");
+  ensureAllowedKeys(
+    record,
+    ["name", "indicators", "levels"],
+    "model.version.create input.groups[].competencies[]",
+  );
+
+  const indicators = record.indicators;
+  const levels = record.levels;
+
+  let parsedIndicators: ModelIndicatorInput[] | undefined;
+  if (indicators !== undefined) {
+    parsedIndicators = ensureArray(
+      indicators,
+      "model.version.create input.groups[].competencies[].indicators",
+    ).map(parseModelIndicatorInput);
+  }
+
+  let parsedLevels: ModelLevelInput[] | undefined;
+  if (levels !== undefined) {
+    parsedLevels = ensureArray(
+      levels,
+      "model.version.create input.groups[].competencies[].levels",
+    ).map(parseModelLevelInput);
+  }
+
+  return {
+    name: ensureStringField(record, "name", "model.version.create input.groups[].competencies[]"),
+    ...(parsedIndicators ? { indicators: parsedIndicators } : {}),
+    ...(parsedLevels ? { levels: parsedLevels } : {}),
+  };
+};
+
+const parseModelGroupInput = (value: unknown): ModelGroupInput => {
+  const record = ensureObject(value, "model.version.create input.groups[]");
+  ensureAllowedKeys(
+    record,
+    ["name", "weight", "competencies"],
+    "model.version.create input.groups[]",
+  );
+
+  return {
+    name: ensureStringField(record, "name", "model.version.create input.groups[]"),
+    weight: ensureNumberField(record, "weight", "model.version.create input.groups[]"),
+    competencies: ensureArray(
+      record.competencies,
+      "model.version.create input.groups[].competencies",
+    ).map(parseModelCompetencyInput),
+  };
+};
+
+export const parseModelVersionCreateInput = (value: unknown): ModelVersionCreateInput => {
+  const record = ensureObject(value, "model.version.create input");
+  ensureAllowedKeys(record, ["name", "kind", "groups"], "model.version.create input");
+
+  return {
+    name: ensureStringField(record, "name", "model.version.create input"),
+    kind: parseModelKind(record.kind, "model.version.create input.kind"),
+    groups: ensureArray(record.groups, "model.version.create input.groups").map(
+      parseModelGroupInput,
+    ),
+  };
+};
+
+export const parseModelVersionCreateOutput = (value: unknown): ModelVersionCreateOutput => {
+  const record = ensureObject(value, "model.version.create output");
+  ensureAllowedKeys(
+    record,
+    [
+      "modelVersionId",
+      "companyId",
+      "name",
+      "kind",
+      "version",
+      "createdAt",
+      "groupCount",
+      "competencyCount",
+      "indicatorCount",
+      "levelCount",
+    ],
+    "model.version.create output",
+  );
+
+  return {
+    modelVersionId: ensureStringField(record, "modelVersionId", "model.version.create output"),
+    companyId: ensureStringField(record, "companyId", "model.version.create output"),
+    name: ensureStringField(record, "name", "model.version.create output"),
+    kind: parseModelKind(record.kind, "model.version.create output.kind"),
+    version: ensureNumberField(record, "version", "model.version.create output"),
+    createdAt: ensureStringField(record, "createdAt", "model.version.create output"),
+    groupCount: ensureNumberField(record, "groupCount", "model.version.create output"),
+    competencyCount: ensureNumberField(record, "competencyCount", "model.version.create output"),
+    indicatorCount: ensureNumberField(record, "indicatorCount", "model.version.create output"),
+    levelCount: ensureNumberField(record, "levelCount", "model.version.create output"),
+  };
+};
+
+export const parseCampaignCreateInput = (value: unknown): CampaignCreateInput => {
+  const record = ensureObject(value, "campaign.create input");
+  ensureAllowedKeys(
+    record,
+    ["name", "modelVersionId", "startAt", "endAt", "timezone"],
+    "campaign.create input",
+  );
+
+  const timezone = record.timezone;
+  if (timezone !== undefined && typeof timezone !== "string") {
+    throw new Error("campaign.create input.timezone must be a string when provided.");
+  }
+
+  return {
+    name: ensureStringField(record, "name", "campaign.create input"),
+    modelVersionId: ensureStringField(record, "modelVersionId", "campaign.create input"),
+    startAt: ensureStringField(record, "startAt", "campaign.create input"),
+    endAt: ensureStringField(record, "endAt", "campaign.create input"),
+    ...(typeof timezone === "string" && timezone.trim().length > 0
+      ? { timezone: timezone.trim() }
+      : {}),
+  };
+};
+
+export const parseCampaignCreateOutput = (value: unknown): CampaignCreateOutput => {
+  const record = ensureObject(value, "campaign.create output");
+  ensureAllowedKeys(
+    record,
+    [
+      "campaignId",
+      "companyId",
+      "modelVersionId",
+      "name",
+      "status",
+      "startAt",
+      "endAt",
+      "timezone",
+      "createdAt",
+    ],
+    "campaign.create output",
+  );
+
+  const status = ensureStringField(record, "status", "campaign.create output");
+  if (status !== "draft") {
+    throw new Error('campaign.create output.status must be "draft".');
+  }
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.create output"),
+    companyId: ensureStringField(record, "companyId", "campaign.create output"),
+    modelVersionId: ensureStringField(record, "modelVersionId", "campaign.create output"),
+    name: ensureStringField(record, "name", "campaign.create output"),
+    status: "draft",
+    startAt: ensureStringField(record, "startAt", "campaign.create output"),
+    endAt: ensureStringField(record, "endAt", "campaign.create output"),
+    timezone: ensureStringField(record, "timezone", "campaign.create output"),
+    createdAt: ensureStringField(record, "createdAt", "campaign.create output"),
   };
 };
 

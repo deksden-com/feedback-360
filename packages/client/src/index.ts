@@ -1,6 +1,8 @@
 import {
   type AiRunForCampaignInput,
   type AiRunForCampaignOutput,
+  type CampaignCreateInput,
+  type CampaignCreateOutput,
   type CampaignParticipantsAddFromDepartmentsInput,
   type CampaignParticipantsAddFromDepartmentsOutput,
   type CampaignSnapshotListInput,
@@ -13,6 +15,8 @@ import {
   type EmployeeUpsertOutput,
   type MatrixGenerateSuggestedInput,
   type MatrixGenerateSuggestedOutput,
+  type ModelVersionCreateInput,
+  type ModelVersionCreateOutput,
   type OperationContext,
   type OperationResult,
   type OrgDepartmentMoveInput,
@@ -34,6 +38,8 @@ import {
   okResult,
   parseAiRunForCampaignInput,
   parseAiRunForCampaignOutput,
+  parseCampaignCreateInput,
+  parseCampaignCreateOutput,
   parseCampaignParticipantsAddFromDepartmentsInput,
   parseCampaignParticipantsAddFromDepartmentsOutput,
   parseCampaignSnapshotListInput,
@@ -47,6 +53,8 @@ import {
   parseEmployeeUpsertOutput,
   parseMatrixGenerateSuggestedInput,
   parseMatrixGenerateSuggestedOutput,
+  parseModelVersionCreateInput,
+  parseModelVersionCreateOutput,
   parseOperationResult,
   parseOrgDepartmentMoveInput,
   parseOrgDepartmentMoveOutput,
@@ -94,6 +102,14 @@ type InvokeOperationParams<Output> = {
 export type Feedback360Client = {
   seedRun(input: SeedRunInput): Promise<SeedRunOutput>;
   systemPing(context?: OperationContext): Promise<OperationResult<SystemPingOutput>>;
+  modelVersionCreate(
+    input: ModelVersionCreateInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<ModelVersionCreateOutput>>;
+  campaignCreate(
+    input: CampaignCreateInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignCreateOutput>>;
   employeeUpsert(
     input: EmployeeUpsertInput,
     context?: OperationContext,
@@ -238,6 +254,42 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: {},
         context,
         parseOutput: parseSystemPingOutput,
+      });
+    },
+
+    modelVersionCreate: async (input, context) => {
+      let parsedInput: ModelVersionCreateInput;
+      try {
+        parsedInput = parseModelVersionCreateInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid modelVersionCreate input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "model.version.create",
+        input: parsedInput,
+        context,
+        parseOutput: parseModelVersionCreateOutput,
+      });
+    },
+
+    campaignCreate: async (input, context) => {
+      let parsedInput: CampaignCreateInput;
+      try {
+        parsedInput = parseCampaignCreateInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid campaignCreate input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "campaign.create",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignCreateOutput,
       });
     },
 

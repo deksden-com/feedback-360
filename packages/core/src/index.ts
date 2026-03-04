@@ -1,6 +1,8 @@
 import {
   type AiRunForCampaignInput,
   type AiRunForCampaignOutput,
+  type CampaignCreateInput,
+  type CampaignCreateOutput,
   type CampaignParticipantsAddFromDepartmentsInput,
   type CampaignParticipantsAddFromDepartmentsOutput,
   type CampaignSnapshotListInput,
@@ -14,6 +16,8 @@ import {
   type EmployeeUpsertOutput,
   type MatrixGenerateSuggestedInput,
   type MatrixGenerateSuggestedOutput,
+  type ModelVersionCreateInput,
+  type ModelVersionCreateOutput,
   type OperationResult,
   type OrgDepartmentMoveInput,
   type OrgDepartmentMoveOutput,
@@ -33,6 +37,8 @@ import {
   okResult,
   parseAiRunForCampaignInput,
   parseAiRunForCampaignOutput,
+  parseCampaignCreateInput,
+  parseCampaignCreateOutput,
   parseCampaignParticipantsAddFromDepartmentsInput,
   parseCampaignParticipantsAddFromDepartmentsOutput,
   parseCampaignSnapshotListInput,
@@ -46,6 +52,8 @@ import {
   parseEmployeeUpsertOutput,
   parseMatrixGenerateSuggestedInput,
   parseMatrixGenerateSuggestedOutput,
+  parseModelVersionCreateInput,
+  parseModelVersionCreateOutput,
   parseOrgDepartmentMoveInput,
   parseOrgDepartmentMoveOutput,
   parseOrgManagerSetInput,
@@ -61,6 +69,8 @@ import {
 } from "@feedback-360/api-contract";
 import {
   addCampaignParticipantsFromDepartments,
+  createCampaign,
+  createModelVersion,
   generateSuggestedMatrix,
   listActiveEmployees,
   listAssignedQuestionnaires,
@@ -142,6 +152,76 @@ const runCompanyUpdateProfile = (
     return errorResult(
       errorFromUnknown(error, "invalid_input", "Invalid company.updateProfile output payload."),
     );
+  }
+};
+
+const runModelVersionCreate = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<ModelVersionCreateOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can create competency model versions.", {
+        operation: "model.version.create",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: ModelVersionCreateInput;
+  try {
+    parsedInput = parseModelVersionCreateInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid model.version.create input."),
+    );
+  }
+
+  try {
+    const output = await createModelVersion({
+      companyId: companyIdOrError,
+      ...parsedInput,
+    });
+    return okResult(parseModelVersionCreateOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to create model version."));
+  }
+};
+
+const runCampaignCreate = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignCreateOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can create campaigns.", {
+        operation: "campaign.create",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignCreateInput;
+  try {
+    parsedInput = parseCampaignCreateInput(request.input);
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Invalid campaign.create input."));
+  }
+
+  try {
+    const output = await createCampaign({
+      companyId: companyIdOrError,
+      ...parsedInput,
+    });
+    return okResult(parseCampaignCreateOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to create campaign."));
   }
 };
 
@@ -580,6 +660,8 @@ export const dispatchOperation = (
     | CampaignParticipantsAddFromDepartmentsOutput
     | MatrixGenerateSuggestedOutput
     | AiRunForCampaignOutput
+    | ModelVersionCreateOutput
+    | CampaignCreateOutput
     | QuestionnaireListAssignedOutput
     | QuestionnaireSaveDraftOutput
     | QuestionnaireSubmitOutput
@@ -609,6 +691,10 @@ export const dispatchOperation = (
       return Promise.resolve(runSystemPing(parsedRequest.input));
     case "company.updateProfile":
       return Promise.resolve(runCompanyUpdateProfile(parsedRequest));
+    case "model.version.create":
+      return runModelVersionCreate(parsedRequest);
+    case "campaign.create":
+      return runCampaignCreate(parsedRequest);
     case "employee.upsert":
       return runEmployeeUpsert(parsedRequest);
     case "employee.listActive":

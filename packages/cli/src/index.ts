@@ -51,6 +51,22 @@ type MatrixGenerateOptions = {
   fromDepartments?: string[];
 };
 
+type ModelVersionCreateOptions = {
+  json?: boolean;
+  name: string;
+  kind: "indicators" | "levels";
+  payloadJson?: string;
+};
+
+type CampaignCreateOptions = {
+  json?: boolean;
+  name: string;
+  modelVersion: string;
+  startAt: string;
+  endAt: string;
+  timezone?: string;
+};
+
 type AiRunOptions = {
   json?: boolean;
 };
@@ -277,6 +293,79 @@ const formatAiRunHuman = (data: {
   return `AI processing ${data.wasAlreadyCompleted ? "already completed" : "completed"}: campaign=${data.campaignId}, job=${data.aiJobId}, provider=${data.provider}, status=${data.status}, completedAt=${data.completedAt}`;
 };
 
+const formatModelVersionCreateHuman = (data: {
+  modelVersionId: string;
+  companyId: string;
+  name: string;
+  kind: string;
+  version: number;
+  groupCount: number;
+  competencyCount: number;
+  indicatorCount: number;
+  levelCount: number;
+}): string => {
+  return `Model version created: id=${data.modelVersionId}, company=${data.companyId}, name=${data.name}, kind=${data.kind}, version=${data.version}, groups=${data.groupCount}, competencies=${data.competencyCount}, indicators=${data.indicatorCount}, levels=${data.levelCount}`;
+};
+
+const formatCampaignCreateHuman = (data: {
+  campaignId: string;
+  companyId: string;
+  modelVersionId: string;
+  name: string;
+  status: string;
+  startAt: string;
+  endAt: string;
+  timezone: string;
+}): string => {
+  return `Campaign created: id=${data.campaignId}, company=${data.companyId}, modelVersion=${data.modelVersionId}, name=${data.name}, status=${data.status}, startAt=${data.startAt}, endAt=${data.endAt}, timezone=${data.timezone}`;
+};
+
+const buildDefaultModelPayload = (name: string, kind: "indicators" | "levels") => {
+  if (kind === "levels") {
+    return {
+      name,
+      kind,
+      groups: [
+        {
+          name: "Default group",
+          weight: 100,
+          competencies: [
+            {
+              name: "Core competency",
+              levels: [
+                { level: 1, text: "Level 1" },
+                { level: 2, text: "Level 2" },
+                { level: 3, text: "Level 3" },
+                { level: 4, text: "Level 4" },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  return {
+    name,
+    kind,
+    groups: [
+      {
+        name: "Default group",
+        weight: 100,
+        competencies: [
+          {
+            name: "Core competency",
+            indicators: [
+              { text: "Delivers commitments", order: 1 },
+              { text: "Communicates clearly", order: 2 },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+};
+
 const parseBooleanOption = (value: string, fieldName: string): boolean => {
   const normalized = value.trim().toLowerCase();
   if (normalized === "true") {
@@ -303,6 +392,7 @@ const normalizeLegacySeedArgs = (argv: string[]): string[] => {
   const knownTopLevelCommands = new Set([
     "seed",
     "company",
+    "model",
     "employee",
     "org",
     "campaign",
@@ -330,6 +420,8 @@ export const runCli = async (argv: string[]): Promise<void> => {
 Examples:
   pnpm seed --scenario S1_company_min
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- company use <company_id>
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- model version create --name "Q1 Model" --kind indicators --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign create --name "Q1 Campaign" --model-version <model_version_id> --start-at 2026-02-01T09:00:00.000Z --end-at 2026-02-28T18:00:00.000Z --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign snapshot list --campaign <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants add-departments <campaign_id> --from-departments <department_id>...
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- ai run <campaign_id> --json
@@ -466,6 +558,59 @@ Examples:
 
   const orgCommand = program.command("org").description("Organization structure operations.");
 
+  const modelCommand = program.command("model").description("Competency model operations.");
+  const modelVersionCommand = modelCommand
+    .command("version")
+    .description("Competency model version operations.");
+
+  modelVersionCommand
+    .command("create")
+    .description("Create competency model version (indicators/levels).")
+    .requiredOption("--name <name>", "Model version name.")
+    .option("--kind <kind>", "Model kind (indicators | levels).", "indicators")
+    .option(
+      "--payload-json <json>",
+      "Optional full payload JSON (overrides default template generated from --name/--kind).",
+    )
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: ModelVersionCreateOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const kind = options.kind;
+      if (kind !== "indicators" && kind !== "levels") {
+        emitError(
+          createOperationError("invalid_input", "--kind must be indicators or levels."),
+          options.json,
+        );
+        return;
+      }
+
+      let payload: unknown;
+      try {
+        payload = options.payloadJson
+          ? (JSON.parse(options.payloadJson) as unknown)
+          : buildDefaultModelPayload(options.name, kind);
+      } catch (error: unknown) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Invalid --payload-json."),
+          options.json,
+        );
+        return;
+      }
+
+      const result = await client.modelVersionCreate(payload as never);
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatModelVersionCreateHuman(result.data));
+      }
+    });
+
   const orgDepartmentCommand = orgCommand
     .command("department")
     .description("Department hierarchy operations.");
@@ -525,6 +670,37 @@ Examples:
     });
 
   const campaignCommand = program.command("campaign").description("Campaign operations.");
+
+  campaignCommand
+    .command("create")
+    .description("Create draft campaign linked to competency model version.")
+    .requiredOption("--name <name>", "Campaign name.")
+    .requiredOption("--model-version <modelVersionId>", "Competency model version identifier.")
+    .requiredOption("--start-at <startAt>", "Campaign start datetime (ISO).")
+    .requiredOption("--end-at <endAt>", "Campaign end datetime (ISO).")
+    .option("--timezone <timezone>", "Campaign timezone override.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: CampaignCreateOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.campaignCreate({
+        name: options.name,
+        modelVersionId: options.modelVersion,
+        startAt: options.startAt,
+        endAt: options.endAt,
+        ...(options.timezone ? { timezone: options.timezone } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatCampaignCreateHuman(result.data));
+      }
+    });
 
   const campaignParticipantsCommand = campaignCommand
     .command("participants")

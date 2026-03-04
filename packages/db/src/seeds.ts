@@ -100,6 +100,11 @@ const truncateSql = sql.raw(`
   truncate table
     ai_webhook_receipts,
     ai_jobs,
+    competency_levels,
+    competency_indicators,
+    competencies,
+    competency_groups,
+    competency_model_versions,
     campaign_assignments,
     campaign_participants,
     campaign_employee_snapshots,
