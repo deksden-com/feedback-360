@@ -2,7 +2,7 @@ import { createOperationError } from "@feedback-360/api-contract";
 import { and, desc, eq } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
-import { aiJobs, campaigns } from "./schema";
+import { aiJobs, aiWebhookReceipts, campaigns } from "./schema";
 
 const MVP_STUB_PROVIDER = "mvp_stub";
 const MVP_STUB_IDEMPOTENCY_KEY = "mvp_stub_default";
@@ -19,6 +19,22 @@ export type RunAiForCampaignOutput = {
   status: "completed";
   completedAt: string;
   wasAlreadyCompleted: boolean;
+};
+
+export type ApplyAiWebhookResultInput = {
+  campaignId: string;
+  aiJobId: string;
+  idempotencyKey: string;
+  status: "completed" | "failed";
+  payload: Record<string, unknown>;
+  receivedAt?: Date;
+};
+
+export type ApplyAiWebhookResultOutput = {
+  applied: boolean;
+  noOp: boolean;
+  campaignStatus: string;
+  aiJobStatus: string;
 };
 
 const mapAiRunOutput = (
@@ -195,6 +211,115 @@ export const runAiForCampaign = async (
   }
 };
 
+export const applyAiWebhookResult = async (
+  input: ApplyAiWebhookResultInput,
+): Promise<ApplyAiWebhookResultOutput> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    return await db.transaction(async (tx) => {
+      const aiJobRows = await tx
+        .select({
+          aiJobId: aiJobs.id,
+          campaignId: aiJobs.campaignId,
+          companyId: aiJobs.companyId,
+          aiJobStatus: aiJobs.status,
+          campaignStatus: campaigns.status,
+        })
+        .from(aiJobs)
+        .innerJoin(campaigns, eq(campaigns.id, aiJobs.campaignId))
+        .where(and(eq(aiJobs.id, input.aiJobId), eq(aiJobs.campaignId, input.campaignId)))
+        .limit(1);
+
+      const aiJob = aiJobRows[0];
+      if (!aiJob) {
+        throw createOperationError("not_found", "AI job not found for campaign.", {
+          aiJobId: input.aiJobId,
+          campaignId: input.campaignId,
+        });
+      }
+
+      const now = input.receivedAt ?? new Date();
+      const insertedReceipts = await tx
+        .insert(aiWebhookReceipts)
+        .values({
+          companyId: aiJob.companyId,
+          campaignId: aiJob.campaignId,
+          aiJobId: aiJob.aiJobId,
+          idempotencyKey: input.idempotencyKey,
+          payload: input.payload,
+          receivedAt: now,
+          createdAt: now,
+        })
+        .onConflictDoNothing()
+        .returning({
+          receiptId: aiWebhookReceipts.id,
+        });
+
+      const insertedReceipt = insertedReceipts[0];
+      if (!insertedReceipt) {
+        const existingReceipts = await tx
+          .select({
+            campaignId: aiWebhookReceipts.campaignId,
+            aiJobId: aiWebhookReceipts.aiJobId,
+          })
+          .from(aiWebhookReceipts)
+          .where(eq(aiWebhookReceipts.idempotencyKey, input.idempotencyKey))
+          .limit(1);
+
+        const existingReceipt = existingReceipts[0];
+        if (
+          !existingReceipt ||
+          existingReceipt.campaignId !== input.campaignId ||
+          existingReceipt.aiJobId !== input.aiJobId
+        ) {
+          throw createOperationError("invalid_input", "Idempotency key already used.", {
+            idempotencyKey: input.idempotencyKey,
+          });
+        }
+
+        return {
+          applied: false,
+          noOp: true,
+          campaignStatus: aiJob.campaignStatus,
+          aiJobStatus: aiJob.aiJobStatus,
+        };
+      }
+
+      const nextCampaignStatus = input.status === "completed" ? "completed" : "ai_failed";
+      const nextAiJobStatus = input.status === "completed" ? "completed" : "failed";
+
+      await tx
+        .update(aiJobs)
+        .set({
+          status: nextAiJobStatus,
+          completedAt: input.status === "completed" ? now : null,
+          responsePayload: input.status === "completed" ? input.payload : {},
+          errorPayload: input.status === "failed" ? input.payload : null,
+          updatedAt: now,
+        })
+        .where(eq(aiJobs.id, input.aiJobId));
+
+      await tx
+        .update(campaigns)
+        .set({
+          status: nextCampaignStatus,
+          updatedAt: now,
+        })
+        .where(eq(campaigns.id, input.campaignId));
+
+      return {
+        applied: true,
+        noOp: false,
+        campaignStatus: nextCampaignStatus,
+        aiJobStatus: nextAiJobStatus,
+      };
+    });
+  } finally {
+    await pool.end();
+  }
+};
+
 export const getCampaignStatusForDebug = async (campaignId: string): Promise<string> => {
   const pool = createPool();
   try {
@@ -231,6 +356,46 @@ export const listAiJobsForCampaignForDebug = async (campaignId: string): Promise
       .orderBy(aiJobs.createdAt);
 
     return rows.map((row) => row.aiJobId);
+  } finally {
+    await pool.end();
+  }
+};
+
+export const getAiJobStatusForDebug = async (aiJobId: string): Promise<string> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const rows = await db
+      .select({
+        status: aiJobs.status,
+      })
+      .from(aiJobs)
+      .where(eq(aiJobs.id, aiJobId))
+      .limit(1);
+
+    const aiJob = rows[0];
+    if (!aiJob) {
+      throw createOperationError("not_found", "AI job not found.", { aiJobId });
+    }
+
+    return aiJob.status;
+  } finally {
+    await pool.end();
+  }
+};
+
+export const countAiWebhookReceiptsForDebug = async (idempotencyKey: string): Promise<number> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const rows = await db
+      .select({
+        receiptId: aiWebhookReceipts.id,
+      })
+      .from(aiWebhookReceipts)
+      .where(eq(aiWebhookReceipts.idempotencyKey, idempotencyKey));
+
+    return rows.length;
   } finally {
     await pool.end();
   }

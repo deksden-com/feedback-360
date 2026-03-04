@@ -13,6 +13,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@feedback-360/api-contract": "workspace:*",
+    "@feedback-360/db": "workspace:*",
     "@sentry/nextjs": "^10",
     "next": "^15.0.0",
     "react": "^19.0.0",

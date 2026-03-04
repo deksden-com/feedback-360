@@ -21,6 +21,7 @@ Status: Draft (2026-03-04)
 
 ## Environment checklist
 - Vercel env vars are present and mapped to the right environment.
+- `AI_WEBHOOK_SECRET` задан в Vercel env для beta/prod и совпадает с секретом подписи на стороне AI сервиса.
 - Supabase Auth is configured:
   - public signups OFF
   - site URL and redirect URLs set

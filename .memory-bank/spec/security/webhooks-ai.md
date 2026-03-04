@@ -2,7 +2,8 @@
 Status: Draft (2026-03-03)
 
 ## Endpoint
-Webhook принимается на серверной стороне (Next.js route handler).
+Webhook принимается на серверной стороне (Next.js route handler):
+- `POST /api/webhooks/ai`
 
 ## Identity & scoping
 - Webhook всегда относится к конкретной кампании: `campaign_id`.
@@ -16,6 +17,7 @@ MVP профиль:
   - `X-AI-Signature`: `sha256=<hex>`
   - `X-AI-Idempotency-Key`: строка (уникальная для одного результата)
 - Принимаем подпись только в окне clock-skew (например, 5 минут).
+- Секрет подписи задаётся через `AI_WEBHOOK_SECRET` (server-only env var).
 
 ## Idempotency
 - Храним `ai_webhook_receipts` с unique constraint на `idempotency_key`.
@@ -31,3 +33,7 @@ MVP ожидания по ретраям (SSoT):
   - `2xx` только если подпись валидна и обработка идемпотентно применена (или no-op при повторе),
   - `4xx` при невалидной подписи/формате (ретраить бессмысленно),
   - `5xx` при временной ошибке (можно ретраить).
+
+## MVP note
+- В MVP действует `ai.runForCampaign` stub-профиль (FT-0071), поэтому webhook может не использоваться в ежедневном happy path.
+- Endpoint и security-механика реализованы заранее (FT-0072), чтобы переход на real AI callback был без архитектурного долга.

@@ -171,7 +171,8 @@ Status: Draft (2026-03-03)
   - Must add test: `packages/cli/src/ft-0071-ai-cli.test.ts`
   - Must run: idempotent `ai.runForCampaign` + status transition to `completed` (MVP `mvp_stub`) + no duplicate `ai_jobs`.
 - FT-0072
-  - Must add test: `apps/web/test/ft/ft-0072-webhook-security.test.ts` (или equivalent route-handler integration)
+  - Must add test: `apps/web/src/app/api/webhooks/ai/route.test.ts` (route-handler integration)
+  - Must add test: `packages/db/src/ft/ft-0072-ai-webhook.test.ts` (DB idempotency/status integration)
   - Must run: GS3.
 - FT-0073
   - Must add test: `packages/core/test/ft/ft-0073-processed-text-visibility.test.ts`
@@ -179,6 +180,7 @@ Status: Draft (2026-03-03)
 
 ### EP-007 execution evidence (2026-03-04)
 - FT-0071: what=AI run MVP stub (`ai_jobs` + `ai.runForCampaign`) with idempotent completion; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0071-ai-run-no-db.test.ts src/ft/ft-0071-ai-run.test.ts`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0071-ai-client.test.ts`, `pnpm --filter @feedback-360/cli exec vitest run src/ft-0071-ai-cli.test.ts`; quality_gate=passed; acceptance_gate=passed (first run -> completed, second run -> `wasAlreadyCompleted=true`, no duplicate job; DB integration subtest skipped without DB URL); result=passed.
+- FT-0072: what=AI webhook security + idempotency receipts (`POST /api/webhooks/ai`); where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/web exec vitest run src/app/api/webhooks/ai/route.test.ts`, `pnpm --filter @feedback-360/db exec vitest run src/ft/ft-0072-ai-webhook.test.ts`; quality_gate=passed; acceptance_gate=passed (invalid signature -> 401 + no apply, valid payload -> applied, same idempotency key -> 200 no-op + single receipt; DB integration subtest skipped without DB URL); result=passed.
 
 ## EP-008 Minimal UI (thin)
 - FT-0081..FT-0084

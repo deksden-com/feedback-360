@@ -3,7 +3,7 @@ Status: Draft (2026-03-03)
 
 ## Setup
 - Seed: `S8_campaign_ended` (campaign ready for AI)
-- AI job created: status `processing_ai`
+- Подготовить pending AI job: `campaign.status=processing_ai`, `ai_jobs.status=processing` (через setup-helper/fixture).
 
 ## Action
 1) Webhook с неверной подписью.

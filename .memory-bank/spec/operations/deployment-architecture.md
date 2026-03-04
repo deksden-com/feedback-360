@@ -49,6 +49,8 @@ Status: Draft (2026-03-04)
   - `NEXT_PUBLIC_SENTRY_DSN`
   - `SENTRY_ENVIRONMENT`
   - `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` (build-time sourcemaps)
+- AI webhook security:
+  - `AI_WEBHOOK_SECRET` (server-only, shared with AI service signer)
 
 ## Auth and DNS dependencies
 - Supabase Auth for each project must have:

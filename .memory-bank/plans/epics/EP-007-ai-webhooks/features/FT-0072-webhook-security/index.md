@@ -1,11 +1,11 @@
 # FT-0072 — AI webhook security + idempotency
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## User value
 Webhook нельзя подделать; повторы безопасны; ошибки ретраятся корректно.
 
 ## Deliverables
-- Endpoint `ai.webhook.receive`:
+- Endpoint `POST /api/webhooks/ai`:
   - HMAC подпись + timestamp window,
   - receipts table с unique idempotency key,
   - корректный HTTP mapping (4xx/5xx).
@@ -18,7 +18,8 @@ Webhook нельзя подделать; повторы безопасны; ош
 
 ## Acceptance (auto)
 ### Setup
-- Seed: `S8_campaign_ended` + запуск `ai run` → campaign в `processing_ai`, известен `ai_job_id`.
+- Seed: `S8_campaign_ended`.
+- Подготовить `campaign.status=processing_ai` и `ai_jobs(status=processing)` (integration setup).
 
 ### Action (HTTP)
 1) Отправить webhook с невалидной подписью.
@@ -36,7 +37,7 @@ Webhook нельзя подделать; повторы безопасны; ош
 ## Implementation plan (target repo)
 - Endpoint:
   - Next route handler принимает payload + headers:
-    - `X-Timestamp`, `X-Signature`, `X-Idempotency-Key` (или вычисляем).
+    - `X-AI-Timestamp`, `X-AI-Signature`, `X-AI-Idempotency-Key`.
   - Проверки:
     - timestamp в допустимом окне,
     - HMAC подпись валидна,
@@ -59,5 +60,24 @@ Webhook нельзя подделать; повторы безопасны; ош
 - Если меняется формат подписи/headers — обновить: [Webhook security spec](../../../../../spec/security/webhooks-ai.md) — SSoT. Читать, чтобы интеграция не “сломалась молча”.
 
 ## Verification (must)
-- Automated test: `apps/web/test/ft/ft-0072-webhook-security.test.ts` (integration) повторяет Acceptance (bad signature, good payload, idempotent repeat).
+- Automated tests:
+  - `apps/web/src/app/api/webhooks/ai/route.test.ts`
+  - `packages/db/src/ft/ft-0072-ai-webhook.test.ts`
 - Must run: GS3 должен быть зелёным.
+
+## Project grounding (2026-03-04)
+- [Webhook security spec](../../../../../spec/security/webhooks-ai.md): профиль подписи и идемпотентности.
+- [GS3 scenario](../../../../../spec/testing/scenarios/gs3-webhook-security.md): ожидаемое поведение bad-signature/success/retry.
+- [AI processing](../../../../../spec/ai/ai-processing.md): связка webhook результата с переходами `processing_ai -> completed|ai_failed`.
+- [RLS strategy](../../../../../spec/security/rls.md): webhook-обработчик исполняется server-side с service-role контуром.
+
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` → passed.
+- `pnpm -r typecheck` → passed.
+- `pnpm -r test` → passed.
+- Build: N/A (изменения в server route + packages, отдельный build-gate не вводился).
+
+## Acceptance evidence (2026-03-04)
+- `pnpm --filter @feedback-360/web exec vitest run src/app/api/webhooks/ai/route.test.ts` → passed.
+- `pnpm --filter @feedback-360/db exec vitest run src/ft/ft-0072-ai-webhook.test.ts` → passed (`integration subtest skipped` без `SUPABASE_DB_POOLER_URL`/`DATABASE_URL`).
+- Проверено по intent: неверная подпись → `401` и no DB apply; валидный webhook → `200` + applied; повтор с тем же idempotency key → `200` + no-op; receipt хранится в единственном экземпляре.

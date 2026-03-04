@@ -2,6 +2,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  transpilePackages: ["@feedback-360/api-contract", "@feedback-360/db"],
 };
 
 const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;

@@ -98,6 +98,7 @@ const ids = {
 
 const truncateSql = sql.raw(`
   truncate table
+    ai_webhook_receipts,
     ai_jobs,
     campaign_assignments,
     campaign_participants,

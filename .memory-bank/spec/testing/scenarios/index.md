@@ -3,7 +3,7 @@ Status: Draft (2026-03-03)
 
 Цель: описать golden сценарии в виде “пошаговых тест-кейсов”, которые можно автоматизировать через CLI/client API.
 
-- [GS1 Happy path](gs1-happy-path.md): сквозной путь indicators + lock + end + AI webhook. Читать, чтобы покрыть базовую “нить” продукта.
+- [GS1 Happy path](gs1-happy-path.md): сквозной путь indicators + lock + end + AI (MVP stub, webhook в full profile). Читать, чтобы покрыть базовую “нить” продукта.
 - [GS2 Small group anonymity](gs2-small-group-anonymity.md): peers=2 → hide/merge + weight normalization. Читать, чтобы проверить ключевую privacy-грань.
 - [GS3 Webhook security](gs3-webhook-security.md): HMAC + idempotency + retry semantics. Читать, чтобы webhook нельзя было подделать и повторы были безопасны.
 - [GS4 Multi-tenant & RBAC (planned)](gs4-multi-tenant-rbac.md): изоляция компаний и права ролей. Читать, чтобы не открыть доступ “не тем”.

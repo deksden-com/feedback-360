@@ -159,6 +159,27 @@ export const aiJobs = pgTable(
   (table) => [unique("uq_ai_job_campaign_idempotency").on(table.campaignId, table.idempotencyKey)],
 );
 
+export const aiWebhookReceipts = pgTable(
+  "ai_webhook_receipts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    aiJobId: uuid("ai_job_id")
+      .notNull()
+      .references(() => aiJobs.id, { onDelete: "cascade" }),
+    idempotencyKey: text("idempotency_key").notNull(),
+    payload: jsonb("payload").notNull().default({}),
+    receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique("uq_ai_webhook_receipt_idempotency").on(table.idempotencyKey)],
+);
+
 export const campaignEmployeeSnapshots = pgTable(
   "campaign_employee_snapshots",
   {
