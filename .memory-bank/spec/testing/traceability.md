@@ -64,6 +64,11 @@ Status: Draft (2026-03-03)
   - Tests: GS2 (расширить: одна компетенция `n_valid<3`, другая `>=3`)
   - Seeds: `S7_campaign_started_some_submitted` (variants: `peers2`, per-competency `n_valid<3`)
 
+- Invariant: при отсутствии/скрытии групп effective weights пересчитываются (self=0, две группы -> 50/50, одна группа -> 100), и `overallScore` строится по effective weights.
+  - Spec SSoT: `../domain/calculations.md`
+  - Tests: FT-0053 acceptance (`results.getHrView`)
+  - Seeds: `S7_campaign_started_some_submitted --variant no_subordinates` (+ `peers2` merge-case)
+
 - Invariant: levels модель — mode+distribution; tie-break → `mode_level = null`; UNSURE исключаем из агрегаций.
   - Spec SSoT: `../domain/calculations.md`, `../glossary.md`
   - Tests: GS9 (planned, levels)

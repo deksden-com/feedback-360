@@ -3,6 +3,7 @@ import {
   type ResultsGroupKey,
   type ResultsGroupVisibilityState,
   type ResultsHrViewGroupVisibility,
+  type ResultsHrViewGroupWeights,
   type SmallGroupPolicy,
   createOperationError,
 } from "@feedback-360/api-contract";
@@ -101,6 +102,85 @@ const hiddenGroupVisibility = (smallGroupPolicy: SmallGroupPolicy): ResultsGroup
   return smallGroupPolicy === "merge_to_other" ? "merged" : "hidden";
 };
 
+const buildZeroGroupWeights = (): ResultsHrViewGroupWeights => {
+  return {
+    manager: 0,
+    peers: 0,
+    subordinates: 0,
+    self: 0,
+    other: 0,
+  };
+};
+
+const buildEffectiveGroupWeights = (params: {
+  configured: ResultsHrViewGroupWeights;
+  groupVisibility: ResultsHrViewGroupVisibility;
+  groupOverall: ResultsGetHrViewOutput["groupOverall"];
+}): ResultsHrViewGroupWeights => {
+  const { configured, groupVisibility, groupOverall } = params;
+  const effective = buildZeroGroupWeights();
+
+  const managerBase =
+    groupVisibility.manager === "shown" && groupOverall.manager !== undefined
+      ? configured.manager
+      : 0;
+  const peersBase =
+    groupVisibility.peers === "shown" && groupOverall.peers !== undefined ? configured.peers : 0;
+  const subordinatesBase =
+    groupVisibility.subordinates === "shown" && groupOverall.subordinates !== undefined
+      ? configured.subordinates
+      : 0;
+  const otherBase =
+    groupVisibility.other === "shown" && groupOverall.other !== undefined
+      ? (groupVisibility.peers === "merged" ? configured.peers : 0) +
+        (groupVisibility.subordinates === "merged" ? configured.subordinates : 0)
+      : 0;
+
+  const allBaseEntries: Array<{ key: keyof ResultsHrViewGroupWeights; weight: number }> = [
+    { key: "manager", weight: managerBase },
+    { key: "peers", weight: peersBase },
+    { key: "subordinates", weight: subordinatesBase },
+    { key: "other", weight: otherBase },
+  ];
+  const baseEntries: Array<{ key: keyof ResultsHrViewGroupWeights; weight: number }> = [];
+  for (const entry of allBaseEntries) {
+    if (entry.weight > 0) {
+      baseEntries.push(entry);
+    }
+  }
+
+  if (baseEntries.length === 0) {
+    return effective;
+  }
+
+  if (baseEntries.length === 1) {
+    const onlyEntry = baseEntries[0];
+    if (!onlyEntry) {
+      return effective;
+    }
+    effective[onlyEntry.key] = 100;
+    return effective;
+  }
+
+  if (baseEntries.length === 2) {
+    for (const entry of baseEntries) {
+      effective[entry.key] = 50;
+    }
+    return effective;
+  }
+
+  const totalBase = baseEntries.reduce((sum, entry) => sum + entry.weight, 0);
+  if (totalBase <= 0) {
+    return effective;
+  }
+
+  for (const entry of baseEntries) {
+    effective[entry.key] = roundScore((entry.weight / totalBase) * 100);
+  }
+
+  return effective;
+};
+
 export const getResultsHrView = async (
   input: GetResultsHrViewInput,
 ): Promise<ResultsGetHrViewOutput> => {
@@ -116,6 +196,10 @@ export const getResultsHrView = async (
         campaignId: campaigns.id,
         companyId: campaigns.companyId,
         modelVersionId: campaigns.modelVersionId,
+        managerWeight: campaigns.managerWeight,
+        peersWeight: campaigns.peersWeight,
+        subordinatesWeight: campaigns.subordinatesWeight,
+        selfWeight: campaigns.selfWeight,
       })
       .from(campaigns)
       .where(and(eq(campaigns.id, input.campaignId), eq(campaigns.companyId, input.companyId)))
@@ -491,6 +575,37 @@ export const getResultsHrView = async (
       }
     }
 
+    const configuredGroupWeights: ResultsHrViewGroupWeights = {
+      manager: campaign.managerWeight,
+      peers: campaign.peersWeight,
+      subordinates: campaign.subordinatesWeight,
+      self: 0,
+      other: 0,
+    };
+    const effectiveGroupWeights = buildEffectiveGroupWeights({
+      configured: configuredGroupWeights,
+      groupVisibility,
+      groupOverall,
+    });
+
+    const weightedGroups: Array<{ score: number; weight: number }> = [
+      { score: groupOverall.manager ?? Number.NaN, weight: effectiveGroupWeights.manager },
+      { score: groupOverall.peers ?? Number.NaN, weight: effectiveGroupWeights.peers },
+      {
+        score: groupOverall.subordinates ?? Number.NaN,
+        weight: effectiveGroupWeights.subordinates,
+      },
+      { score: groupOverall.other ?? Number.NaN, weight: effectiveGroupWeights.other },
+    ].filter((entry) => entry.weight > 0 && Number.isFinite(entry.score));
+
+    const overallScore =
+      weightedGroups.length > 0
+        ? roundScore(
+            weightedGroups.reduce((sum, entry) => sum + entry.score * entry.weight, 0) /
+              weightedGroups.reduce((sum, entry) => sum + entry.weight, 0),
+          )
+        : undefined;
+
     const sortedRaterScores = [...raterScores].sort((left, right) => {
       if (groupOrder[left.group] !== groupOrder[right.group]) {
         return groupOrder[left.group] - groupOrder[right.group];
@@ -513,6 +628,9 @@ export const getResultsHrView = async (
       competencyScores,
       raterScores: sortedRaterScores,
       groupOverall,
+      configuredGroupWeights,
+      effectiveGroupWeights,
+      ...(overallScore !== undefined ? { overallScore } : {}),
     };
   } finally {
     await pool.end();

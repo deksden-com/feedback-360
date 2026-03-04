@@ -683,7 +683,7 @@ Examples:
     )
     .option(
       "--variant <variant>",
-      "Optional seed variant (S4: no_participants; S7: na_heavy_peer | peers2).",
+      "Optional seed variant (S4: no_participants; S7: na_heavy_peer | peers2 | no_subordinates).",
     )
     .option("--json", "Output machine-readable JSON.")
     .action(async (options: SeedCommandOptions) => {

@@ -31,3 +31,10 @@ Default (MVP recommended):
 - применяем нормализацию на оставшиеся группы (исключая self),
 - при наличии ровно двух групп — распределяем 50/50 (простое правило, понятное HR).
  - если остаётся одна группа — её вес становится 100%.
+- при `merge_to_other`: `other` получает базовый вес как сумма merged-групп, после чего участвует в той же нормализации (правило 50/50 для двух групп сохраняется).
+
+MVP implementation note (FT-0053):
+- `results.getHrView` возвращает:
+  - `configuredGroupWeights` (из кампании, `self` принудительно 0),
+  - `effectiveGroupWeights` (после исключения hidden/absent групп),
+  - `overallScore` как weighted aggregate по `groupOverall` с `effectiveGroupWeights`.

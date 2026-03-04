@@ -170,6 +170,7 @@ Status: Draft (2026-03-03)
   - op: `results.getHrView`
   - roles: hr_admin/hr_reader
   - idempotency: yes
+  - output: `groupVisibility`, per-competency visibility flags, `configuredGroupWeights`, `effectiveGroupWeights`, `overallScore`
 
 ## Notifications
 - command: `reminders generate [--campaign <id>]`

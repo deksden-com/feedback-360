@@ -403,6 +403,14 @@ export type ResultsHrViewGroupOverall = {
   other?: number;
 };
 
+export type ResultsHrViewGroupWeights = {
+  manager: number;
+  peers: number;
+  subordinates: number;
+  self: number;
+  other: number;
+};
+
 export type ResultsHrViewGroupVisibility = {
   manager: "shown";
   peers: ResultsGroupVisibilityState;
@@ -423,6 +431,9 @@ export type ResultsGetHrViewOutput = {
   competencyScores: ResultsHrViewCompetencyScore[];
   raterScores: ResultsHrViewRaterScore[];
   groupOverall: ResultsHrViewGroupOverall;
+  configuredGroupWeights: ResultsHrViewGroupWeights;
+  effectiveGroupWeights: ResultsHrViewGroupWeights;
+  overallScore?: number;
 };
 
 export type CampaignParticipantsAddFromDepartmentsInput = {
@@ -2102,6 +2113,33 @@ const parseResultsHrViewGroupVisibility = (value: unknown): ResultsHrViewGroupVi
   };
 };
 
+const parseResultsHrViewGroupWeights = (value: unknown): ResultsHrViewGroupWeights => {
+  const record = ensureObject(value, "results.getHrView output.groupWeights");
+  ensureAllowedKeys(
+    record,
+    ["manager", "peers", "subordinates", "self", "other"],
+    "results.getHrView output.groupWeights",
+  );
+
+  const manager = ensureNumberField(record, "manager", "results.getHrView output.groupWeights");
+  const peers = ensureNumberField(record, "peers", "results.getHrView output.groupWeights");
+  const subordinates = ensureNumberField(
+    record,
+    "subordinates",
+    "results.getHrView output.groupWeights",
+  );
+  const self = ensureNumberField(record, "self", "results.getHrView output.groupWeights");
+  const other = ensureNumberField(record, "other", "results.getHrView output.groupWeights");
+
+  return {
+    manager,
+    peers,
+    subordinates,
+    self,
+    other,
+  };
+};
+
 export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOutput => {
   const record = ensureObject(value, "results.getHrView output");
   ensureAllowedKeys(
@@ -2118,6 +2156,9 @@ export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOut
       "competencyScores",
       "raterScores",
       "groupOverall",
+      "configuredGroupWeights",
+      "effectiveGroupWeights",
+      "overallScore",
     ],
     "results.getHrView output",
   );
@@ -2147,6 +2188,8 @@ export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOut
     throw new Error("results.getHrView output.anonymityThreshold must be an integer >= 1.");
   }
 
+  const overallScore = parseOptionalNumberField(record, "overallScore", "results.getHrView output");
+
   return {
     campaignId: ensureStringField(record, "campaignId", "results.getHrView output"),
     companyId: ensureStringField(record, "companyId", "results.getHrView output"),
@@ -2164,6 +2207,9 @@ export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOut
       parseResultsHrViewRaterScore,
     ),
     groupOverall: parseResultsHrViewGroupOverall(record.groupOverall),
+    configuredGroupWeights: parseResultsHrViewGroupWeights(record.configuredGroupWeights),
+    effectiveGroupWeights: parseResultsHrViewGroupWeights(record.effectiveGroupWeights),
+    ...(overallScore !== undefined ? { overallScore } : {}),
   };
 };
 

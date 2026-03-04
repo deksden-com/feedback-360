@@ -185,6 +185,34 @@ describe("FT-0003 seed runner + handles", () => {
       } finally {
         await poolAfterS7Peers2.end();
       }
+
+      const s7NoSubordinates = await runSeedScenario({
+        scenario: "S7_campaign_started_some_submitted",
+        variant: "no_subordinates",
+      });
+      expect(s7NoSubordinates.handles["employee.rater_peer_3"]).toBeDefined();
+      expect(s7NoSubordinates.handles["questionnaire.subject_peer_3"]).toBeDefined();
+
+      const poolAfterS7NoSubordinates = createPool();
+      try {
+        const db = createDb(poolAfterS7NoSubordinates);
+        const counts = await db.execute(sql`
+          select
+            (select count(*) from questionnaires where status = 'submitted') as submitted_count,
+            (select count(*) from campaign_assignments) as assignments_count,
+            (
+              select count(*)
+              from campaign_assignments
+              where rater_role = 'subordinate'
+            ) as subordinate_assignments_count
+        `);
+
+        expect(Number(counts.rows[0]?.submitted_count)).toBe(4);
+        expect(Number(counts.rows[0]?.assignments_count)).toBe(4);
+        expect(Number(counts.rows[0]?.subordinate_assignments_count)).toBe(0);
+      } finally {
+        await poolAfterS7NoSubordinates.end();
+      }
     },
     120_000,
   );
