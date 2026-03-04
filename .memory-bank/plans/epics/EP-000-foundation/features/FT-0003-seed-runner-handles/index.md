@@ -1,5 +1,5 @@
 # FT-0003 — Seed runner + handles contract
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## User value
 Можно быстро получать стандартные состояния БД для тестов/e2e и отладки через CLI; тесты не зависят от случайных id.
@@ -21,8 +21,8 @@ Status: Draft (2026-03-03)
 - DB: применены миграции (см. FT-0002).
 
 ### Action (CLI, `--json`)
-1) `seed --scenario S1_company_min --json`
-2) `seed --scenario S2_org_basic --json`
+1) `pnpm seed --scenario S1_company_min --json`
+2) `pnpm seed --scenario S2_org_basic --json`
 
 ### Assert
 - Ответ — валидный JSON с полями `scenario` и `handles`.
@@ -51,5 +51,16 @@ Status: Draft (2026-03-03)
 - При добавлении новых seeds/handles обновлять: [Seed catalog](../../../../../spec/testing/seeds/index.md) — SSoT списка. Читать, чтобы acceptance сценарии не ломались от несостыковок.
 
 ## Verification (must)
-- Automated test: `packages/db/test/ft-0003-seed-runner.test.ts` (integration) вызывает `seed.run` и валидирует `{scenario, handles}`.
-- Must run: `seed --scenario S1_company_min --json` и `seed --scenario S2_org_basic --json` (или эквивалент через typed op) и сравнить наличие ожидаемых handles.
+- Automated test: `packages/db/src/migrations/ft-0003-seed-runner.test.ts` (integration) вызывает `seed.run` и валидирует `{scenario, handles}`.
+- Must run: `pnpm seed --scenario S1_company_min --json` и `pnpm seed --scenario S2_org_basic --json` (или эквивалент через typed op) и сравнить наличие ожидаемых handles.
+
+## Implementation result (2026-03-04)
+- Реализован typed contract `seed.run` в `packages/api-contract`.
+- Реализован DB seed runner в `packages/db/src/seeds.ts` со сценариями:
+  - `S0_empty`
+  - `S1_company_min`
+  - `S2_org_basic`
+- Реализован typed in-proc client вызов `seedRun` в `packages/client`.
+- Реализован CLI на Commander (`packages/cli`) с human + `--json` форматами.
+- Добавлена root-команда: `pnpm seed --scenario <Sx> [--json]`.
+- Добавлен integration тест: `packages/db/src/migrations/ft-0003-seed-runner.test.ts`.

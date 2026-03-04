@@ -1,5 +1,5 @@
 # FT-0004 — Domains & DNS (Resend records, Vercel NS)
-Status: In progress (2026-03-04)
+Status: Completed (2026-03-04)
 
 ## User value
 - Команда может воспроизводимо настроить домен и email-аутентификацию (DKIM/SPF/DMARC) без “поиска по чатам”.
@@ -36,11 +36,13 @@ Status: In progress (2026-03-04)
   - `vercel dns add go360go.ru send TXT 'v=spf1 include:amazonses.com ~all'`
   - `vercel dns add go360go.ru _dmarc TXT 'v=DMARC1; p=none;'`
 
-Operator note (2026-03-04): записи уже добавлены в Vercel DNS, ожидаем завершение делегирования NS и проверку домена в Resend.
+Operator note (2026-03-04): записи добавлены в Vercel DNS.
 
 Operator note (2026-03-04): добавлена TXT верификация SimpleLogin для `go360go.ru` (custom domain aliases).
 Operator note (2026-03-04): добавлены MX/CNAME DKIM SimpleLogin и обновлён DMARC на `p=quarantine; ...`.
 Operator note (2026-03-04): добавлен SPF SimpleLogin на `@`.
+Operator note (2026-03-04): NS делегирование на Vercel завершено.
+Operator note (2026-03-04): домен `go360go.ru` в Resend = Verified/Authenticated.
 
 ### Assert
 - `vercel dns list go360go.ru` содержит записи.

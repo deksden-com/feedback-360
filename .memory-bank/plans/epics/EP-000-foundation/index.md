@@ -9,11 +9,12 @@ Status: Draft (2026-03-03)
 
 ## Deliverables
 - Репо-структура по `.memory-bank/spec/project/repo-structure.md`
-- Минимальные команды CLI: `seed --scenario ... --json`
-- Набор seeds S0..S5 (минимум) + handles.
+- Минимальные команды CLI: `pnpm seed --scenario ... --json`
+- Набор seeds `S0_empty`, `S1_company_min`, `S2_org_basic` + handles.
+- Ops baseline для деплоя: git flow + deployment architecture + DNS SSoT.
 
 ## Scenarios / tests
-- Smoke: применить миграции + `seed S1_company_min`.
+- Smoke: применить миграции + `pnpm seed --scenario S1_company_min --json`.
 - Golden: GS1 использует seeds из этого эпика.
 
 ## Memory bank updates (after EP completion)
