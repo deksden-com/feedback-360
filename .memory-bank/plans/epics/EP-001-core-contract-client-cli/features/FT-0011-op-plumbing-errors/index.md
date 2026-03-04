@@ -1,5 +1,5 @@
 # FT-0011 — Operation plumbing + typed errors
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## User value
 Любая операция (UI/CLI/tests) имеет единый shape input/output/error, ошибки машиночитаемы и стабильны.
@@ -59,9 +59,36 @@ Status: Draft (2026-03-03)
 - При добавлении/изменении базовых error codes синхронизировать: [Error model](../../../../../spec/client-api/errors.md) — SSoT кодов/shape. Читать, чтобы acceptance тесты ссылались на единые `code`.
 
 ## Verification (must)
-- Automated test: `packages/core/test/ft/ft-0011-op-errors.test.ts` (integration) повторяет Acceptance: invalid input → `invalid_input`, RBAC → `forbidden`, `--json` shape.
+- Automated test: `packages/core/src/ft/ft-0011-op-errors.test.ts` (integration) повторяет Acceptance: invalid input → `invalid_input`, RBAC → `forbidden`, dispatcher happy-path, unknown-op typed `not_found`.
+- Automated test: `packages/cli/src/ft-0011-cli-json-error.test.ts` проверяет JSON shape `{ok:false,error}` + `exitCode != 0`.
 - Must run: `pnpm -r test` (и отдельный запуск теста FT-0011 по имени файла/теста).
 
 ## Visual evidence guidance
 - Для этой фичи скриншоты не обязательны: основное доказательство — автоматические тесты и JSON/error shape.
 - Если нужно для ревью, можно приложить 1 скрин terminal-вывода `--json` ошибки (optional).
+
+## Implementation result (2026-03-04)
+- Contract layer расширен типизированной моделью операций:
+  - `OperationResult`, `OperationError`, базовые `operationErrorCodes`,
+  - runtime parsers для `dispatch input/context`, `system.ping`, `company.updateProfile`,
+  - helper функции `okResult/errorResult/errorFromUnknown`.
+- Core layer получил `dispatchOperation` c typed обработкой:
+  - invalid input → `invalid_input`,
+  - role mismatch на write-op → `forbidden`,
+  - unknown op → `not_found`,
+  - happy path с runtime-валидацией output.
+- CLI `--json` error output приведён к целевому формату `{ok:false,error:{code,message,details}}`.
+
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` — passed.
+- `pnpm -r typecheck` — passed.
+- `pnpm -r test` — passed.
+- `build` — N/A (в FT-0011 не добавлялись runtime/build targets, покрытие выполнено quality+acceptance тестами).
+
+## Acceptance evidence (2026-03-04)
+- Integration acceptance:
+  - `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0011-op-errors.test.ts` → passed (4/4).
+- CLI acceptance (`--json` typed error + non-zero exit):
+  - `pnpm --filter @feedback-360/cli exec tsx src/index.ts -- --scenario UNKNOWN --json` → JSON `{ok:false,error.code=invalid_input}` и exit code `1`.
+- Regression gate:
+  - `pnpm -r test` зелёный, включая `packages/cli/src/ft-0011-cli-json-error.test.ts`.

@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "dependencies": {
+    "@feedback-360/api-contract": "workspace:*"
+  },
   "scripts": {
     "lint": "biome check .",
     "format": "biome format --write .",

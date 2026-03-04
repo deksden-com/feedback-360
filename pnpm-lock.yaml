@@ -75,7 +75,11 @@ importers:
 
   packages/config: {}
 
-  packages/core: {}
+  packages/core:
+    dependencies:
+      '@feedback-360/api-contract':
+        specifier: workspace:*
+        version: link:../api-contract
 
   packages/db:
     dependencies:

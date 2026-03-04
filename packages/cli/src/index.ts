@@ -1,7 +1,7 @@
 import { pathToFileURL } from "node:url";
 import { Command } from "commander";
 
-import type { SeedScenario } from "@feedback-360/api-contract";
+import { type SeedScenario, errorFromUnknown } from "@feedback-360/api-contract";
 import { createInprocClient } from "@feedback-360/client";
 
 type SeedCommandOptions = {
@@ -70,23 +70,21 @@ Examples:
 
       console.log(formatSeedHuman(result));
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
+      const typedError = errorFromUnknown(error, "invalid_input", "seed.run failed.");
 
       if (options.json) {
         console.log(
           JSON.stringify(
             {
-              error: {
-                code: "SEED_RUN_FAILED",
-                message,
-              },
+              ok: false,
+              error: typedError,
             },
             null,
             2,
           ),
         );
       } else {
-        console.error(`seed failed: ${message}`);
+        console.error(`seed failed: ${typedError.message}`);
       }
 
       process.exitCode = 1;

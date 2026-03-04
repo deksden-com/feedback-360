@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { apiContractReady, parseSeedRunInput, parseSeedRunOutput } from "./index";
+import {
+  apiContractReady,
+  parseOperationError,
+  parseSeedRunInput,
+  parseSeedRunOutput,
+} from "./index";
 
 describe("api-contract package", () => {
   it("has smoke readiness", () => {
@@ -18,5 +23,16 @@ describe("api-contract package", () => {
       },
     });
     expect(output.handles["company.main"]).toBe("id");
+  });
+
+  it("parses typed operation error", () => {
+    const error = parseOperationError({
+      code: "invalid_input",
+      message: "Input is invalid",
+      details: { field: "scenario" },
+    });
+
+    expect(error.code).toBe("invalid_input");
+    expect(error.details?.field).toBe("scenario");
   });
 });

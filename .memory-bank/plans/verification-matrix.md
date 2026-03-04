@@ -55,7 +55,8 @@ Status: Draft (2026-03-03)
 
 ## EP-001 Core + Contract + Client + CLI-first
 - FT-0011
-  - Must add test: `packages/core/test/ft/ft-0011-op-errors.test.ts`
+  - Must add test: `packages/core/src/ft/ft-0011-op-errors.test.ts`
+  - Must add test: `packages/cli/src/ft-0011-cli-json-error.test.ts`
   - Must run: invalid input → `invalid_input`, RBAC → `forbidden`, dispatcher happy-path/unknown-op typed response, CLI `--json` shape.
 - FT-0012
   - Must add test: `packages/client/test/ft/ft-0012-transport-parity.test.ts`
@@ -64,6 +65,9 @@ Status: Draft (2026-03-03)
 - FT-0013
   - Must add test: `packages/core/test/ft/ft-0013-questionnaires.test.ts`
   - Must run: list/saveDraft/submit flow + submitted immutability (`saveDraft` after submit forbidden) + GS5/GS1 regressions.
+
+### EP-001 execution evidence (2026-03-04)
+- FT-0011: what=operation plumbing + typed errors; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0011-op-errors.test.ts`, `pnpm --filter @feedback-360/cli exec tsx src/index.ts -- --scenario UNKNOWN --json`; quality_gate=passed; acceptance_gate=passed (core integration + CLI json error shape, exit code 1); result=passed.
 
 ## EP-002 Identity, tenancy, RBAC
 - FT-0021
