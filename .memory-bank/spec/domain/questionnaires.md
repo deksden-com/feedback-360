@@ -14,7 +14,11 @@ Status: Draft (2026-03-03)
 - Submit: валидируем ответы по всем компетенциям (либо валидный score/level, либо NA/UNSURE по правилам модели).
 - Комментарии опциональны (на компетенцию и общий финальный).
 
-## Campaign ended
-После `campaign.status = ended`:
-- любые сохранения/submit запрещены (read-only).
+## Campaign read-only states
+После `campaign.status` в одном из состояний:
+- `ended`
+- `processing_ai`
+- `ai_failed`
+- `completed`
 
+любые `draft save`/`submit` запрещены (read-only, доменная ошибка `campaign_ended_readonly`).
