@@ -44,7 +44,7 @@ Status: Draft (2026-03-04)
 - До зелёного состояния merge/release не продолжаем.
 
 ## Current status snapshot (2026-03-04, after CI/CD hardening)
-- GitHub Actions (`ci.yml`) на `develop`: `success` (последний run для `36166c5`).
+- GitHub Actions (`ci.yml`) на `develop`: `success` (последний проверенный run на дату снимка).
 - Branch protection: включена для `develop` и `main`:
   - required checks: `checks`, `Vercel Preview Comments`,
   - merge только через PR, force-push/delete запрещены, conversation resolution включён.
