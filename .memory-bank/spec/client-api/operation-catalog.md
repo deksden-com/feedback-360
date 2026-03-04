@@ -147,6 +147,7 @@ Status: Draft (2026-03-03)
   - idempotent: yes
   - input options: `smallGroupPolicy=hide|merge_to_other` (optional), `anonymityThreshold` (optional, default 3)
   - output includes: `groupVisibility` + per-competency visibility flags (`peersVisibility/subordinatesVisibility/otherVisibility`)
+  - output includes: `configuredGroupWeights`, `effectiveGroupWeights`, `overallScore`
   - cli: `results hr`
 
 ## Notifications

@@ -47,9 +47,16 @@ Started кампания с частично заполненными анкет
     - `employee.subject_main`, `employee.rater_manager`, `employee.rater_peer_1`, `employee.rater_peer_2`, `employee.rater_subordinate_1`,
     - `model.version.main`, `competency.main`, `competency.secondary`, `indicator.main_1`, `indicator.secondary_1`,
     - `questionnaire.subject_manager`, `questionnaire.subject_peer_1`, `questionnaire.subject_peer_2`, `questionnaire.subject_subordinate_1`.
-- `no_subordinates`:
-  - у subject нет подчинённых (или их группа скрыта), peers>=3 (для нормализации весов 50/50).
-  - Используется в FT-0053.
+- `no_subordinates` (**implemented**, FT-0053):
+  - кампания связывается с indicator-моделью (1 компетенция, 1 индикатор),
+  - создаются 4 submitted анкеты для одного subject: manager + 3 peers, без `subordinates`,
+  - проверяется нормализация весов при отсутствии группы:
+    - configured weights: `40/30/30/0`,
+    - effective weights: `manager=50`, `peers=50`, `subordinates=0`, `self=0`.
+  - Handles дополнительно включают:
+    - `employee.subject_main`, `employee.rater_manager`, `employee.rater_peer_1..3`,
+    - `model.version.main`, `competency.main`, `indicator.main_1`,
+    - `questionnaire.subject_manager`, `questionnaire.subject_peer_1..3`.
 - `levels_tie` (planned):
   - кампания использует `S3_model_levels` и в данных есть:
     - UNSURE ответы,

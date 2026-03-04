@@ -75,6 +75,21 @@ const makeClientMock = () => {
             manager: 4,
             peers: 3,
           },
+          configuredGroupWeights: {
+            manager: 40,
+            peers: 30,
+            subordinates: 30,
+            self: 0,
+            other: 0,
+          },
+          effectiveGroupWeights: {
+            manager: 100,
+            peers: 0,
+            subordinates: 0,
+            self: 0,
+            other: 0,
+          },
+          overallScore: 4,
         },
       };
     },

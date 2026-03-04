@@ -113,7 +113,9 @@ const ids = {
   campaignAssignmentSubjectPeer1: "25000000-0000-4000-8000-000000000002",
   campaignAssignmentSubjectPeer2: "25000000-0000-4000-8000-000000000003",
   campaignAssignmentSubjectSubordinate1: "25000000-0000-4000-8000-000000000004",
+  campaignAssignmentSubjectPeer3: "25000000-0000-4000-8000-000000000005",
   questionnaireMainSubordinate: "20000000-0000-4000-8000-000000000004",
+  questionnaireMainPeer3: "20000000-0000-4000-8000-000000000005",
 } as const;
 
 const truncateSql = sql.raw(`
@@ -459,6 +461,24 @@ const buildS7Peers2Handles = (): Record<string, string> => {
     "questionnaire.subject_peer_1": ids.questionnaireMainInProgress,
     "questionnaire.subject_peer_2": ids.questionnaireMainSubmitted,
     "questionnaire.subject_subordinate_1": ids.questionnaireMainSubordinate,
+  };
+};
+
+const buildS7NoSubordinatesHandles = (): Record<string, string> => {
+  return {
+    ...buildS7Handles(),
+    "employee.subject_main": ids.employeeStaffA1,
+    "employee.rater_manager": ids.employeeHeadA,
+    "employee.rater_peer_1": ids.employeeStaffA2,
+    "employee.rater_peer_2": ids.employeeStaffB1,
+    "employee.rater_peer_3": ids.employeeCeo,
+    "model.version.main": ids.modelVersionMainIndicators,
+    "competency.main": ids.competencyMain,
+    "indicator.main_1": ids.competencyIndicatorMain1,
+    "questionnaire.subject_manager": ids.questionnaireMain,
+    "questionnaire.subject_peer_1": ids.questionnaireMainInProgress,
+    "questionnaire.subject_peer_2": ids.questionnaireMainSubmitted,
+    "questionnaire.subject_peer_3": ids.questionnaireMainPeer3,
   };
 };
 
@@ -1283,13 +1303,208 @@ const insertS7Peers2 = async (db: ReturnType<typeof createDb>): Promise<Record<s
   return buildS7Peers2Handles();
 };
 
+const insertS7NoSubordinates = async (
+  db: ReturnType<typeof createDb>,
+): Promise<Record<string, string>> => {
+  const modelCreatedAt = new Date("2026-01-10T08:00:00.000Z");
+  await db.insert(competencyModelVersions).values({
+    id: ids.modelVersionMainIndicators,
+    companyId: ids.companyMain,
+    name: "S7 No Subordinates Model",
+    kind: "indicators",
+    version: 1,
+    status: "published",
+    createdAt: modelCreatedAt,
+    updatedAt: modelCreatedAt,
+  });
+
+  await db.insert(competencyGroups).values({
+    id: ids.competencyGroupMain,
+    companyId: ids.companyMain,
+    modelVersionId: ids.modelVersionMainIndicators,
+    name: "Core",
+    weight: 100,
+    order: 1,
+    createdAt: modelCreatedAt,
+    updatedAt: modelCreatedAt,
+  });
+
+  await db.insert(competencies).values({
+    id: ids.competencyMain,
+    companyId: ids.companyMain,
+    modelVersionId: ids.modelVersionMainIndicators,
+    groupId: ids.competencyGroupMain,
+    name: "Leadership",
+    order: 1,
+    createdAt: modelCreatedAt,
+    updatedAt: modelCreatedAt,
+  });
+
+  await db.insert(competencyIndicators).values({
+    id: ids.competencyIndicatorMain1,
+    companyId: ids.companyMain,
+    competencyId: ids.competencyMain,
+    text: "Sets clear direction",
+    order: 1,
+    createdAt: modelCreatedAt,
+    updatedAt: modelCreatedAt,
+  });
+
+  const firstDraftAtManager = new Date("2026-01-11T09:00:00.000Z");
+  const submittedAtManager = new Date("2026-01-11T09:20:00.000Z");
+  const firstDraftAtPeer1 = new Date("2026-01-11T10:00:00.000Z");
+  const submittedAtPeer1 = new Date("2026-01-11T10:15:00.000Z");
+  const firstDraftAtPeer2 = new Date("2026-01-11T11:00:00.000Z");
+  const submittedAtPeer2 = new Date("2026-01-11T11:20:00.000Z");
+  const firstDraftAtPeer3 = new Date("2026-01-11T12:00:00.000Z");
+  const submittedAtPeer3 = new Date("2026-01-11T12:20:00.000Z");
+
+  await db
+    .update(campaigns)
+    .set({
+      modelVersionId: ids.modelVersionMainIndicators,
+      lockedAt: firstDraftAtManager,
+      updatedAt: firstDraftAtManager,
+    })
+    .where(eq(campaigns.id, ids.campaignMain));
+
+  await db.insert(campaignAssignments).values([
+    {
+      id: ids.campaignAssignmentSubjectManager,
+      companyId: ids.companyMain,
+      campaignId: ids.campaignMain,
+      subjectEmployeeId: ids.employeeStaffA1,
+      raterEmployeeId: ids.employeeHeadA,
+      raterRole: "manager",
+      source: "manual",
+      createdAt: modelCreatedAt,
+    },
+    {
+      id: ids.campaignAssignmentSubjectPeer1,
+      companyId: ids.companyMain,
+      campaignId: ids.campaignMain,
+      subjectEmployeeId: ids.employeeStaffA1,
+      raterEmployeeId: ids.employeeStaffA2,
+      raterRole: "peer",
+      source: "manual",
+      createdAt: modelCreatedAt,
+    },
+    {
+      id: ids.campaignAssignmentSubjectPeer2,
+      companyId: ids.companyMain,
+      campaignId: ids.campaignMain,
+      subjectEmployeeId: ids.employeeStaffA1,
+      raterEmployeeId: ids.employeeStaffB1,
+      raterRole: "peer",
+      source: "manual",
+      createdAt: modelCreatedAt,
+    },
+    {
+      id: ids.campaignAssignmentSubjectPeer3,
+      companyId: ids.companyMain,
+      campaignId: ids.campaignMain,
+      subjectEmployeeId: ids.employeeStaffA1,
+      raterEmployeeId: ids.employeeCeo,
+      raterRole: "peer",
+      source: "manual",
+      createdAt: modelCreatedAt,
+    },
+  ]);
+
+  await db
+    .update(questionnaires)
+    .set({
+      subjectEmployeeId: ids.employeeStaffA1,
+      raterEmployeeId: ids.employeeHeadA,
+      status: "submitted",
+      draftPayload: {
+        indicatorResponses: {
+          [ids.competencyMain]: {
+            [ids.competencyIndicatorMain1]: 4,
+          },
+        },
+      },
+      firstDraftAt: firstDraftAtManager,
+      submittedAt: submittedAtManager,
+      updatedAt: submittedAtManager,
+    })
+    .where(eq(questionnaires.id, ids.questionnaireMain));
+
+  await db.insert(questionnaires).values([
+    {
+      id: ids.questionnaireMainInProgress,
+      companyId: ids.companyMain,
+      campaignId: ids.campaignMain,
+      subjectEmployeeId: ids.employeeStaffA1,
+      raterEmployeeId: ids.employeeStaffA2,
+      status: "submitted",
+      draftPayload: {
+        indicatorResponses: {
+          [ids.competencyMain]: {
+            [ids.competencyIndicatorMain1]: 2,
+          },
+        },
+      },
+      firstDraftAt: firstDraftAtPeer1,
+      submittedAt: submittedAtPeer1,
+      createdAt: firstDraftAtPeer1,
+      updatedAt: submittedAtPeer1,
+    },
+    {
+      id: ids.questionnaireMainSubmitted,
+      companyId: ids.companyMain,
+      campaignId: ids.campaignMain,
+      subjectEmployeeId: ids.employeeStaffA1,
+      raterEmployeeId: ids.employeeStaffB1,
+      status: "submitted",
+      draftPayload: {
+        indicatorResponses: {
+          [ids.competencyMain]: {
+            [ids.competencyIndicatorMain1]: 3,
+          },
+        },
+      },
+      firstDraftAt: firstDraftAtPeer2,
+      submittedAt: submittedAtPeer2,
+      createdAt: firstDraftAtPeer2,
+      updatedAt: submittedAtPeer2,
+    },
+    {
+      id: ids.questionnaireMainPeer3,
+      companyId: ids.companyMain,
+      campaignId: ids.campaignMain,
+      subjectEmployeeId: ids.employeeStaffA1,
+      raterEmployeeId: ids.employeeCeo,
+      status: "submitted",
+      draftPayload: {
+        indicatorResponses: {
+          [ids.competencyMain]: {
+            [ids.competencyIndicatorMain1]: 4,
+          },
+        },
+      },
+      firstDraftAt: firstDraftAtPeer3,
+      submittedAt: submittedAtPeer3,
+      createdAt: firstDraftAtPeer3,
+      updatedAt: submittedAtPeer3,
+    },
+  ]);
+
+  return buildS7NoSubordinatesHandles();
+};
+
 const insertS7 = async (
   db: ReturnType<typeof createDb>,
   options?: { variant?: string },
 ): Promise<Record<string, string>> => {
   await insertS5(db);
 
-  if (options?.variant && options.variant !== "na_heavy_peer" && options.variant !== "peers2") {
+  if (
+    options?.variant &&
+    options.variant !== "na_heavy_peer" &&
+    options.variant !== "peers2" &&
+    options.variant !== "no_subordinates"
+  ) {
     throw new Error(
       `Unsupported variant for S7_campaign_started_some_submitted: ${options.variant}`,
     );
@@ -1301,6 +1516,10 @@ const insertS7 = async (
 
   if (options?.variant === "peers2") {
     return insertS7Peers2(db);
+  }
+
+  if (options?.variant === "no_subordinates") {
+    return insertS7NoSubordinates(db);
   }
 
   const firstDraftAtInProgress = new Date("2026-01-11T10:00:00.000Z");
@@ -1392,7 +1611,9 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
     !(
       (parsed.scenario === "S4_campaign_draft" && parsed.variant === "no_participants") ||
       (parsed.scenario === "S7_campaign_started_some_submitted" &&
-        (parsed.variant === "na_heavy_peer" || parsed.variant === "peers2"))
+        (parsed.variant === "na_heavy_peer" ||
+          parsed.variant === "peers2" ||
+          parsed.variant === "no_subordinates"))
     )
   ) {
     throw new Error(`Unsupported seed variant for ${parsed.scenario}: ${parsed.variant}`);

@@ -74,6 +74,21 @@ const makeClientMock = (capturedInputs: CapturedInput[]) => {
             subordinates: 2,
             other: 3.3333,
           },
+          configuredGroupWeights: {
+            manager: 40,
+            peers: 30,
+            subordinates: 30,
+            self: 0,
+            other: 0,
+          },
+          effectiveGroupWeights: {
+            manager: 50,
+            peers: 0,
+            subordinates: 0,
+            self: 0,
+            other: 50,
+          },
+          overallScore: 3.6667,
         },
       };
     },
