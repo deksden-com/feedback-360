@@ -50,11 +50,47 @@ Resend использует поддомен `send.go360go.ru` для MAIL FROM.
 - Name: `@`
 - Value: `sl-verification=huyfnasbfreflxnkwipwryqcjzbqcz`
 
+## SimpleLogin: inbound mail routing + DKIM + DMARC hardening
+Источник: DNS инструкции SimpleLogin для custom domain aliases (входящая почта + подписи/политики).
+
+### MX (inbound)
+- Type: `MX`
+- Name: `@`
+- Priority: `10`
+- Target: `mx1.simplelogin.co.`
+
+- Type: `MX`
+- Name: `@`
+- Priority: `20`
+- Target: `mx2.simplelogin.co.`
+
+### DKIM (CNAME selectors)
+- Type: `CNAME`
+- Name: `dkim._domainkey`
+- Value: `dkim._domainkey.simplelogin.co.`
+
+- Type: `CNAME`
+- Name: `dkim02._domainkey`
+- Value: `dkim02._domainkey.simplelogin.co.`
+
+- Type: `CNAME`
+- Name: `dkim03._domainkey`
+- Value: `dkim03._domainkey.simplelogin.co.`
+
+### DMARC (policy)
+⚠️ У нас уже есть transactional email через Resend. DMARC `p=quarantine` со строгим выравниванием (`adkim=s; aspf=s`) допустим, но требует чтобы любые “настоящие” отправители с `From: *@go360go.ru` были корректно настроены (DKIM/SPF alignment), иначе письма могут попасть в spam/quarantine.
+
+- Type: `TXT`
+- Name: `_dmarc`
+- Value: `v=DMARC1; p=quarantine; pct=100; adkim=s; aspf=s`
+
 ## Verification (must)
 После того как NS реально делегируются на Vercel:
 1) `vercel domains inspect go360go.ru` показывает зелёные NS (`ns1.vercel-dns.com`, `ns2.vercel-dns.com`).
 2) `vercel dns list go360go.ru` содержит записи DKIM/SPF/DMARC выше.
 3) В Resend домен `go360go.ru` переходит в состояние Verified/Authenticated.
+4) В SimpleLogin домен проходит verification и custom-domain aliases принимают входящие письма.
 
 ## Change log (operator notes)
 - 2026-03-04: DNS записи Resend добавлены в Vercel DNS (ожидаем завершение делегирования NS).
+- 2026-03-04: DNS записи SimpleLogin (MX/CNAME DKIM) добавлены в Vercel DNS; DMARC обновлён на `p=quarantine` со strict alignment.
