@@ -11,6 +11,14 @@ Status: Draft (2026-03-03)
 - GS4 (multi-tenant & RBAC)
 - GS10 (RLS smoke)
 
+## Progress report (evidence-based)
+- `as_of`: 2026-03-04
+- `total_features`: 3
+- `completed_features`: 0
+- `evidence_confirmed_features`: 0
+- verification link:
+  - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-002. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
+
 ## Memory bank updates (after EP completion)
 - Зафиксировать фактическую модель identity (User vs Employee) и ограничения MVP: [Auth & identity](../../../spec/security/auth-and-identity.md) — определения и правила “users pre-created, signups off”. Читать, чтобы не случился “скрытый signup”.
 - Доработать RBAC матрицу до уровня операций: [RBAC spec](../../../spec/security/rbac.md) — роли × действия/ops. Читать, чтобы тесты могли проверять `forbidden` точечно.

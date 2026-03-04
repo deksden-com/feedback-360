@@ -13,6 +13,14 @@ Status: Draft (2026-03-03)
 - GS6 (started immutability)
 - GS12 (campaign progress)
 
+## Progress report (evidence-based)
+- `as_of`: 2026-03-04
+- `total_features`: 6
+- `completed_features`: 0
+- `evidence_confirmed_features`: 0
+- verification link:
+  - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-004. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
+
 ## Memory bank updates (after EP completion)
 - Подтвердить state machine кампании и анкеты по фактическому коду: [Campaign lifecycle](../../../spec/domain/campaign-lifecycle.md) — статусы и переходы. Читать, чтобы не было “скрытых” переходов.
 - Синхронизировать модель анкет (draft/save/submit) и lock semantics: [Questionnaires](../../../spec/domain/questionnaires.md) — статусы и запреты. Читать, чтобы “первый ответ = draft save” был реализован именно так.

@@ -11,6 +11,14 @@ Status: Draft (2026-03-03)
 - GS7 (notifications idempotency & timezone)
 - GS13 (campaign invites)
 
+## Progress report (evidence-based)
+- `as_of`: 2026-03-04
+- `total_features`: 4
+- `completed_features`: 0
+- `evidence_confirmed_features`: 0
+- verification link:
+  - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-006. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
+
 ## Memory bank updates (after EP completion)
 - Подтвердить outbox и retry политику (без дублей): [Outbox & retries](../../../spec/notifications/outbox-and-retries.md) — идемпотентность, backoff, DLQ. Читать, чтобы не спамить сотрудников и не терять письма.
 - Синхронизировать расписания и timezone/quiet hours: [Notifications spec](../../../spec/notifications/notifications.md) — события и когда шлём. Читать, чтобы cron логика и требования совпадали.

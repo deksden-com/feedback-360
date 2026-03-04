@@ -10,6 +10,14 @@ Status: Draft (2026-03-03)
 ## Scenarios / tests
 - Playwright e2e для GS1 (минимально)
 
+## Progress report (evidence-based)
+- `as_of`: 2026-03-04
+- `total_features`: 4
+- `completed_features`: 0
+- `evidence_confirmed_features`: 0
+- verification link:
+  - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-008. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
+
 ## Memory bank updates (after EP completion)
 - Подтвердить guardrails “UI тонкий” (только typed client): [Architecture guardrails](../../../spec/engineering/architecture-guardrails.md) — запреты на импорт core. Читать, чтобы UI не начал “жить отдельно”.
 - Синхронизировать UI flows с контрактом операций: [UI sitemap & flows](../../../spec/ui/sitemap-and-flows.md) — экраны и переходы. Читать, чтобы UI покрывал MVP сценарии без лишней логики.

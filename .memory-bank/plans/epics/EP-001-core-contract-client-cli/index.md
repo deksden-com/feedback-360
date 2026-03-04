@@ -14,6 +14,14 @@ Status: Draft (2026-03-03)
 ## Scenarios / tests
 - GS1/GS5/GS6 должны выполняться только через CLI/client ops (кроме webhook security).
 
+## Progress report (evidence-based)
+- `as_of`: 2026-03-04
+- `total_features`: 3
+- `completed_features`: 0
+- `evidence_confirmed_features`: 0
+- verification link:
+  - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-001. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
+
 ## Memory bank updates (after EP completion)
 - Держать SSoT операций и команд синхронизированным с кодом: [Operation catalog](../../../spec/client-api/operation-catalog.md) — список ops и права. Читать, чтобы UI/CLI оставались тонкими и не “придумывали” обходные пути.
 - Зафиксировать финальную форму ошибок и коды: [Error model](../../../spec/client-api/errors.md) — shape и HTTP/CLI mapping. Читать, чтобы acceptance сценарии проверяли одинаковые `code`.

@@ -11,6 +11,14 @@ AI постобработка open text: job orchestration + webhook security (H
 - GS3 (webhook security)
 - GS1 (happy path includes AI)
 
+## Progress report (evidence-based)
+- `as_of`: 2026-03-04
+- `total_features`: 3
+- `completed_features`: 0
+- `evidence_confirmed_features`: 0
+- verification link:
+  - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-007. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
+
 ## Memory bank updates (after EP completion)
 - Подтвердить webhook security (HMAC, timestamp, idempotency receipts): [AI webhooks](../../../spec/security/webhooks-ai.md) — формат подписи и обработка повторов. Читать, чтобы интеграция была защищённой.
 - Синхронизировать оркестрацию AI job и статусы кампании: [AI processing](../../../spec/ai/ai-processing.md) — status machine и retry. Читать, чтобы HR мог безопасно перезапускать обработку.
