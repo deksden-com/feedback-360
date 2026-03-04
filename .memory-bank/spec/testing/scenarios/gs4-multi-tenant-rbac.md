@@ -14,6 +14,10 @@ Status: Draft (2026-03-03)
 - HR Reader: read-only, но raw видит (MVP).
 - Любые write операции для HR Reader запрещены.
 
+## Execution slicing
+- FT-0021 закрывает tenant-isolation subset (active company A/B + cross-company read `not_found|forbidden`).
+- FT-0022 закрывает RBAC subset (hr_reader write запреты и read-only поведение).
+
 ## Client API ops (v1)
 - read ops: `results.getHrView` (и прочие list/get)
 - write ops (запрещены для hr_reader): `campaign.weights.set`, `matrix.set`, `campaign.setModelVersion`, …

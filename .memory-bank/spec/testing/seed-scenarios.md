@@ -34,7 +34,7 @@ Status: Draft (2026-03-03)
 - `S0_empty`: пустая БД (после миграций).
 - `S1_company_min`: 1 company + 1 HR admin (user+employee+membership).
 - `S1_company_roles_min` (planned): 1 company + 4 роли (hr_admin, hr_reader, manager, employee) как users+employees+memberships, для RBAC тестов.
-- `S1_multi_tenant_min` (planned): 2 companies + 1 user в двух memberships (и соответствующие employee), чтобы тестировать изоляцию и переключение компании.
+- `S1_multi_tenant_min`: 2 companies + 1 user в двух memberships (и соответствующие employee) + company-scoped campaigns/questionnaires, чтобы тестировать изоляцию и переключение компании.
 - `S2_org_basic`: подразделения + сотрудники + руководитель + связи.
 - `S3_model_indicators`: модель компетенций (indicators).
 - `S3_model_levels` (planned): модель компетенций (levels 1..4 + UNSURE) для GS9.

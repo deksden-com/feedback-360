@@ -101,6 +101,25 @@ const ensureWritableCampaign = (campaignStatus: string): void => {
   }
 };
 
+const ensureCampaignInCompany = async (
+  tx: DbReader,
+  campaignId: string,
+  companyId: string,
+): Promise<void> => {
+  const rows = await tx
+    .select({ campaignId: campaigns.id })
+    .from(campaigns)
+    .where(and(eq(campaigns.id, campaignId), eq(campaigns.companyId, companyId)))
+    .limit(1);
+
+  if (!rows[0]) {
+    throw createOperationError("not_found", "Campaign not found in active company.", {
+      campaignId,
+      companyId,
+    });
+  }
+};
+
 export type ListAssignedQuestionnairesInput = {
   campaignId: string;
   companyId?: string;
@@ -126,6 +145,11 @@ export const listAssignedQuestionnaires = async (
 
   try {
     const db = createDb(pool);
+
+    if (input.companyId) {
+      await ensureCampaignInCompany(db, input.campaignId, input.companyId);
+    }
+
     const whereClauses = [eq(questionnaires.campaignId, input.campaignId)];
 
     if (input.companyId) {

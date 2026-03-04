@@ -210,7 +210,7 @@ Examples:
     .description("Run deterministic database seed scenarios.")
     .requiredOption(
       "--scenario <scenario>",
-      "Seed scenario name (S0_empty | S1_company_min | S2_org_basic | S5_campaign_started_no_answers).",
+      "Seed scenario name (S0_empty | S1_company_min | S1_multi_tenant_min | S2_org_basic | S5_campaign_started_no_answers).",
     )
     .option("--variant <variant>", "Optional seed variant (currently not supported).")
     .option("--json", "Output machine-readable JSON.")

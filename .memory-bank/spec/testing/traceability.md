@@ -15,12 +15,12 @@ Status: Draft (2026-03-03)
 - Invariant: public signups off, доступ только если email есть в HR-справочнике.
   - Spec SSoT: `../security/auth-and-identity.md`
   - Tests: GS4 (planned)
-  - Seeds: `S1_company_min`, `S1_company_roles_min` (planned), `S1_multi_tenant_min` (planned)
+  - Seeds: `S1_company_min`, `S1_company_roles_min` (planned), `S1_multi_tenant_min`
 
 - Invariant: User (Auth) ≠ Employee (HR); user соответствует email и может состоять в нескольких компаниях.
   - Spec SSoT: `../security/auth-and-identity.md`, `../glossary.md`
   - Tests: GS4 (planned)
-  - Seeds: `S1_multi_tenant_min` (planned)
+  - Seeds: `S1_multi_tenant_min`
 
 ## Campaign lifecycle & mutability
 - Invariant: после `started` нельзя менять модель и состав участников.
@@ -90,7 +90,7 @@ Status: Draft (2026-03-03)
 - Invariant: multi-tenant изоляция усиливается RLS “deny by default”; service-role операции для cron/outbox/webhooks.
   - Spec SSoT: `../security/rls.md`, `../operations/runbook.md`
   - Tests: GS10 (planned, RLS smoke)
-  - Seeds: `S1_multi_tenant_min` (planned)
+  - Seeds: `S1_multi_tenant_min`
 
 ## Assignments autogeneration
 - Invariant: автогенерация матрицы учитывает выбранные подразделения и иерархию; руководители одного уровня — peers.

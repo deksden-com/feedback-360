@@ -24,7 +24,11 @@ const seededAt = new Date("2026-01-01T09:00:00.000Z");
 
 const ids = {
   companyMain: "10000000-0000-4000-8000-000000000001",
+  companyA: "10000000-0000-4000-8000-000000000010",
+  companyB: "10000000-0000-4000-8000-000000000011",
   membershipHrAdmin: "11000000-0000-4000-8000-000000000001",
+  membershipSharedCompanyA: "11000000-0000-4000-8000-000000000010",
+  membershipSharedCompanyB: "11000000-0000-4000-8000-000000000011",
   membershipCeo: "11000000-0000-4000-8000-000000000002",
   membershipHeadA: "11000000-0000-4000-8000-000000000003",
   membershipHeadB: "11000000-0000-4000-8000-000000000004",
@@ -32,6 +36,8 @@ const ids = {
   membershipStaffA2: "11000000-0000-4000-8000-000000000006",
   membershipStaffB1: "11000000-0000-4000-8000-000000000007",
   employeeHrAdmin: "12000000-0000-4000-8000-000000000001",
+  employeeSharedCompanyA: "12000000-0000-4000-8000-000000000010",
+  employeeSharedCompanyB: "12000000-0000-4000-8000-000000000011",
   employeeCeo: "12000000-0000-4000-8000-000000000002",
   employeeHeadA: "12000000-0000-4000-8000-000000000003",
   employeeHeadB: "12000000-0000-4000-8000-000000000004",
@@ -39,6 +45,8 @@ const ids = {
   employeeStaffA2: "12000000-0000-4000-8000-000000000006",
   employeeStaffB1: "12000000-0000-4000-8000-000000000007",
   employeeLinkHrAdmin: "13000000-0000-4000-8000-000000000001",
+  employeeLinkSharedCompanyA: "13000000-0000-4000-8000-000000000010",
+  employeeLinkSharedCompanyB: "13000000-0000-4000-8000-000000000011",
   employeeLinkCeo: "13000000-0000-4000-8000-000000000002",
   employeeLinkHeadA: "13000000-0000-4000-8000-000000000003",
   employeeLinkHeadB: "13000000-0000-4000-8000-000000000004",
@@ -68,6 +76,7 @@ const ids = {
   positionStaffA2: "17000000-0000-4000-8000-000000000006",
   positionStaffB1: "17000000-0000-4000-8000-000000000007",
   userHrAdmin: "18000000-0000-4000-8000-000000000001",
+  userShared: "18000000-0000-4000-8000-000000000010",
   userCeo: "18000000-0000-4000-8000-000000000002",
   userHeadA: "18000000-0000-4000-8000-000000000003",
   userHeadB: "18000000-0000-4000-8000-000000000004",
@@ -75,7 +84,11 @@ const ids = {
   userStaffA2: "18000000-0000-4000-8000-000000000006",
   userStaffB1: "18000000-0000-4000-8000-000000000007",
   campaignMain: "19000000-0000-4000-8000-000000000001",
+  campaignA: "19000000-0000-4000-8000-000000000010",
+  campaignB: "19000000-0000-4000-8000-000000000011",
   questionnaireMain: "20000000-0000-4000-8000-000000000001",
+  questionnaireCompanyA: "20000000-0000-4000-8000-000000000010",
+  questionnaireCompanyB: "20000000-0000-4000-8000-000000000011",
 } as const;
 
 const truncateSql = sql.raw(`
@@ -103,6 +116,22 @@ const buildS1Handles = (): Record<string, string> => {
     "employee.hr_admin": ids.employeeHrAdmin,
     "membership.hr_admin@company.main": ids.membershipHrAdmin,
     "user.hr_admin": ids.userHrAdmin,
+  };
+};
+
+const buildS1MultiTenantHandles = (): Record<string, string> => {
+  return {
+    "company.a": ids.companyA,
+    "company.b": ids.companyB,
+    "user.shared": ids.userShared,
+    "employee.shared@company.a": ids.employeeSharedCompanyA,
+    "employee.shared@company.b": ids.employeeSharedCompanyB,
+    "membership.shared@company.a": ids.membershipSharedCompanyA,
+    "membership.shared@company.b": ids.membershipSharedCompanyB,
+    "campaign.a": ids.campaignA,
+    "campaign.b": ids.campaignB,
+    "questionnaire.a": ids.questionnaireCompanyA,
+    "questionnaire.b": ids.questionnaireCompanyB,
   };
 };
 
@@ -153,6 +182,145 @@ const insertS1 = async (db: ReturnType<typeof createDb>): Promise<Record<string,
   });
 
   return buildS1Handles();
+};
+
+const insertS1MultiTenant = async (
+  db: ReturnType<typeof createDb>,
+): Promise<Record<string, string>> => {
+  const campaignStartAt = new Date("2026-01-10T09:00:00.000Z");
+  const campaignEndAt = new Date("2026-01-20T18:00:00.000Z");
+
+  await db.insert(companies).values([
+    {
+      id: ids.companyA,
+      name: "Acme 360 A",
+      timezone: "Europe/Kaliningrad",
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+    {
+      id: ids.companyB,
+      name: "Acme 360 B",
+      timezone: "Europe/Kaliningrad",
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+  ]);
+
+  await db.insert(employees).values([
+    {
+      id: ids.employeeSharedCompanyA,
+      companyId: ids.companyA,
+      email: "shared.user@acme.example",
+      firstName: "Shared",
+      lastName: "User",
+      phone: "+10000000910",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+    {
+      id: ids.employeeSharedCompanyB,
+      companyId: ids.companyB,
+      email: "shared.user@acme.example",
+      firstName: "Shared",
+      lastName: "User",
+      phone: "+10000000911",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+  ]);
+
+  await db.insert(companyMemberships).values([
+    {
+      id: ids.membershipSharedCompanyA,
+      companyId: ids.companyA,
+      userId: ids.userShared,
+      role: "hr_admin",
+      createdAt: seededAt,
+    },
+    {
+      id: ids.membershipSharedCompanyB,
+      companyId: ids.companyB,
+      userId: ids.userShared,
+      role: "hr_admin",
+      createdAt: seededAt,
+    },
+  ]);
+
+  await db.insert(employeeUserLinks).values([
+    {
+      id: ids.employeeLinkSharedCompanyA,
+      companyId: ids.companyA,
+      employeeId: ids.employeeSharedCompanyA,
+      userId: ids.userShared,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.employeeLinkSharedCompanyB,
+      companyId: ids.companyB,
+      employeeId: ids.employeeSharedCompanyB,
+      userId: ids.userShared,
+      createdAt: seededAt,
+    },
+  ]);
+
+  await db.insert(campaigns).values([
+    {
+      id: ids.campaignA,
+      companyId: ids.companyA,
+      name: "MT Campaign A",
+      status: "started",
+      timezone: "Europe/Kaliningrad",
+      startAt: campaignStartAt,
+      endAt: campaignEndAt,
+      lockedAt: null,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+    {
+      id: ids.campaignB,
+      companyId: ids.companyB,
+      name: "MT Campaign B",
+      status: "started",
+      timezone: "Europe/Kaliningrad",
+      startAt: campaignStartAt,
+      endAt: campaignEndAt,
+      lockedAt: null,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+  ]);
+
+  await db.insert(questionnaires).values([
+    {
+      id: ids.questionnaireCompanyA,
+      companyId: ids.companyA,
+      campaignId: ids.campaignA,
+      subjectEmployeeId: ids.employeeSharedCompanyA,
+      raterEmployeeId: ids.employeeSharedCompanyA,
+      status: "not_started",
+      draftPayload: {},
+      submittedAt: null,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+    {
+      id: ids.questionnaireCompanyB,
+      companyId: ids.companyB,
+      campaignId: ids.campaignB,
+      subjectEmployeeId: ids.employeeSharedCompanyB,
+      raterEmployeeId: ids.employeeSharedCompanyB,
+      status: "not_started",
+      draftPayload: {},
+      submittedAt: null,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+  ]);
+
+  return buildS1MultiTenantHandles();
 };
 
 const buildS2Handles = (): Record<string, string> => {
@@ -587,6 +755,9 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
         break;
       case "S1_company_min":
         handles = await insertS1(db);
+        break;
+      case "S1_multi_tenant_min":
+        handles = await insertS1MultiTenant(db);
         break;
       case "S2_org_basic":
         handles = await insertS2(db);

@@ -1,6 +1,7 @@
 export const seedScenarios = [
   "S0_empty",
   "S1_company_min",
+  "S1_multi_tenant_min",
   "S2_org_basic",
   "S5_campaign_started_no_answers",
 ] as const;
