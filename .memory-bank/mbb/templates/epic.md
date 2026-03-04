@@ -13,6 +13,13 @@ Status: Template
 ### Features (vertical slices)
 Список фич внутри эпика со ссылками на их документы (каждая фича имеет сценарии и тесты).
 
+### Progress report (evidence-based)
+- `as_of`: YYYY-MM-DD
+- `total_features`: N
+- `completed_features`: N
+- `evidence_confirmed_features`: N
+- verification link: ссылка на `Verification matrix` секцию execution evidence по эпику.
+
 ### Dependencies
 - External: …
 - Internal: …

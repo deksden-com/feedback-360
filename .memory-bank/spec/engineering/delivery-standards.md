@@ -16,3 +16,14 @@ Status: Draft (2026-03-04)
 4) В verification matrix добавлен/обновлён execution evidence по соответствующему EP.
 
 Если хотя бы один пункт не выполнен — фича не переводится в `Completed`.
+
+## Epic progress reporting (mandatory)
+- В каждом epic-документе должен быть блок `## Progress report (evidence-based)`.
+- В блоке фиксируем минимум:
+  - `total_features` (сколько FT в эпике),
+  - `completed_features` (сколько FT имеют статус `Completed`),
+  - `evidence_confirmed_features` (сколько FT имеют `Acceptance evidence` и запись в verification matrix),
+  - дата обновления отчёта.
+- В отчёте должна быть ссылка на:
+  - [Verification matrix](../../plans/verification-matrix.md) — секция execution evidence по этому эпику. Читать, чтобы аудит готовности проверялся по одному SSoT-источнику.
+- Отчёт обновляем каждый раз, когда меняется статус FT или evidence по FT.

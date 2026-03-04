@@ -22,6 +22,14 @@ Status: Draft (2026-03-03)
 - Доказательства запусков вынесены в каждую feature-страницу и сводный реестр:
   - [Verification matrix](../../verification-matrix.md) — секция `EP-000 execution evidence (2026-03-04)`.
 
+## Progress report (evidence-based)
+- `as_of`: 2026-03-04
+- `total_features`: 6
+- `completed_features`: 6
+- `evidence_confirmed_features`: 6
+- verification link:
+  - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-000. Читать, чтобы проверить доказанный прогресс эпика по одному SSoT-источнику.
+
 ## Memory bank updates (after EP completion)
 - Обновить/подтвердить `spec/project/*` (SSoT по структуре и стеку): [Project specs index](../../../spec/project/index.md) — что внутри и где искать решения. Читать, чтобы “скелет” проекта и реальный scaffold не разошлись.
 - Зафиксировать реальные команды и ограничения seed runner в `spec/testing/*`: [Seed scenarios principles](../../../spec/testing/seed-scenarios.md) — контракт handles/variants. Читать, чтобы тесты не хардкодили id.
