@@ -7,6 +7,11 @@ Status: Draft (2026-03-03)
 - Contract: runtime-валидация DTO/ошибок и совместимость схем.
 - E2E: Playwright golden flows (минимум, только критичное).
 
+## Completion rule
+- Фича не считается закрытой, пока acceptance-сценарий и обязательные тесты не прогнаны и не зафиксированы в evidence.
+- Детальные правила фиксации evidence и traceability:
+  - [Delivery standards](delivery-standards.md) — commit/PR требования, acceptance gate и обязательный формат evidence. Читать, чтобы тестовые прогоны были не “на словах”, а проверяемыми артефактами.
+
 ## Conventions (placement & naming)
 Цель: чтобы ИИ-агент мог запускать проверки детерминированно и “по имени фичи/сценария”.
 

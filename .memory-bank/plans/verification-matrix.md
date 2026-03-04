@@ -13,6 +13,23 @@ Status: Draft (2026-03-03)
 - `Must add test`: какой automated test добавляем (target path).
 - `Must run`: какой сценарий(и) считаем обязательными зелёными.
 
+## Evidence policy (mandatory)
+Цель: чтобы “готово” означало **проверено** и это можно было воспроизвести спустя время.
+
+Правило: для каждого PR, который закрывает/двигает FT/EP, в этом документе обновляем evidence:
+- добавляем/обновляем секцию `### EP-XXX execution evidence (YYYY-MM-DD)` в нужном эпике,
+- на каждую затронутую фичу — строка вида `- FT-XXXX: ...`.
+
+Минимальный состав evidence (в одной строке, через `;` допустимо):
+- `what`: какие FT/GS/acceptance закрывали,
+- `where`: где гоняли (CI/local/beta) + при необходимости ссылка на CI run / Vercel preview,
+- `how`: команды/сценарии (что именно запускали),
+- `result`: passed/failed + важные детали (например, “against Supabase beta pooler”, “HMAC replay covered”).
+
+Связанные правила:
+- PR/commit traceability и обязательность evidence определены в:
+  - [Git flow](../spec/operations/git-flow.md) — правила тегов `[FT-*]/[EP-*]`, обязательных ссылок и pre-merge проверок. Читать, чтобы evidence в matrix всегда был привязан к конкретному PR/фиче.
+
 ## EP-000 Foundation
 - FT-0001
   - Must add test: `packages/config/test/ft-0001-smoke.test.ts` (или эквивалент) + CI workflow проверки.

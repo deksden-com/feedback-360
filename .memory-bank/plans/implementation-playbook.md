@@ -104,6 +104,7 @@ Checklist:
    - либо через Vitest (без UI),
    - либо через Playwright (если нужен UI).
 3) Запустить “всё” (`pnpm -r test`) и убедиться, что фича не нарушила соседние инварианты.
+4) Записать execution evidence в [Verification matrix](verification-matrix.md) и положить ссылку на evidence в PR (правила PR/evidence — в [Git flow](../spec/operations/git-flow.md)).
 
 ## 8) Seed variants (детерминированно)
 Рекомендуемый контракт:
@@ -117,4 +118,5 @@ Checklist:
 - `spec/*`: если изменились правила/интерфейсы (SSoT), обновить и добавить ссылки на rationale/ADR при необходимости.
 - `spec/client-api/*`: operation/command catalogs синхронизировать с кодом.
 - `spec/testing/*`: traceability (инвариант → тест → seed), seed docs и сценарии.
+- `plans/verification-matrix.md`: evidence по затронутому EP/FT.
 - `adr/*`: если принято новое существенное решение (WHY), зафиксировать в ADR.

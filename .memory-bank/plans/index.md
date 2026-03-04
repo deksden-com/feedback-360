@@ -7,7 +7,7 @@ Status: Draft (2026-03-03)
 - [Epics](epics.md) — список эпиков и фич внутри (definition of done кратко). Читать, чтобы дробить работу на вертикальные слайсы.
 - [Epic plans](epics/index.md) — детальные планы по эпикам и фичам (vertical slices), с deliverables и сценариями. Читать, чтобы иметь “как именно делаем” и что тестируем.
 - [Implementation playbook](implementation-playbook.md) — как превращаем FT-документы в код (contract/core/db/cli/tests) и как обновляем меморибанк по итогу. Читать, чтобы реализация была одинаковой и без “утечки логики” в клиенты.
-- [Feature template](feature-template.md) — шаблон описания фичи (value/deliverable/tests). Читать, чтобы новые фичи описывались единообразно.
+- [Feature template](feature-template.md) — ссылка на каноничный шаблон фичи (vertical slice) в MBB templates. Читать, чтобы новые фичи описывались единообразно и без дублей.
 - [How we plan](how-we-plan.md) — правила планирования и DoD фичи + связь с seed и тестами. Читать, чтобы план был исполнимым и проверяемым.
 - [Scenario registry](scenarios.md) — список ключевых сценариев MVP и их связь с seeds/tests. Читать, чтобы план и тесты оставались синхронизированными.
 - [Verification matrix](verification-matrix.md) — какой automated test добавляем и какие GS/Acceptance должны быть зелёными для каждой FT. Читать, чтобы “готово” означало проверяемо и воспроизводимо.

@@ -23,4 +23,4 @@ Status: Template
 ### Definition of done
 - Все фичи имеют сценарии (setup→action→assert) и seeds/fixtures.
 - Golden scenario(и) покрывают критичные риски (если эпик их добавляет).
-
+- Execution evidence по затронутым FT/GS записано в [Verification matrix](../../plans/verification-matrix.md) (и на него есть ссылка из PR).

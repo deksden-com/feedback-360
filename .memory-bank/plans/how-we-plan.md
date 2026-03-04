@@ -14,10 +14,12 @@ Status: Draft (2026-03-03)
 3) добавлены миграции/таблицы (если нужно),
 4) добавлена/обновлена CLI команда (human + `--json`),
 5) добавлен(ы) автотест(ы) + seed scenario (если нужен),
-6) обновлены документы SSoT в `.memory-bank/spec/*` (если фича меняет правила).
+6) прогнаны обязательные acceptance/GS сценарии (см. verification matrix) и записаны evidence,
+7) обновлены документы SSoT в `.memory-bank/spec/*` (если фича меняет правила).
 
 Ссылки (аннотированные):
 - [Engineering standards](../spec/engineering/index.md) — стандарты кодирования/архитектурных границ/тестов/документации. Читать, чтобы DoD фичи выполнялся единообразно.
+- [Verification matrix](verification-matrix.md) — какие acceptance/GS считаются обязательными и где вести evidence. Читать, чтобы “done” было воспроизводимым.
 
 ## Scenarios
 Каждая фича включает минимум один сценарий в формате:
@@ -30,11 +32,6 @@ Status: Draft (2026-03-03)
 - Seed scenario — часть тестового контракта: он фиксирует “стандартное состояние”.
 - Тесты не хардкодят ids: они используют JSON-вывод `seed` (mapping key → id).
 
-## Commit message convention (traceability)
-Для изменений по roadmap/эпикам/фичам в commit message обязательно добавляем тег:
-1) `[...]` с id фичи, если коммит закрывает или существенно двигает фичу: `[FT-XXXX]`.
-2) `[...]` с id эпика, если изменение относится к эпику в целом: `[EP-XXX]`.
-
-Примеры:
-- `feat: complete foundation workspace scaffold [FT-0001]`
-- `docs: refine epic sequencing and acceptance matrix [EP-004]`
+## Git / commits / PR traceability
+Правила ветвления, commit convention (`[FT-*]`/`[EP-*]`), обязательные ссылки на FT/EP документы и обязательность evidence — SSoT в:
+- [Git flow](../spec/operations/git-flow.md) — полный регламент веток, коммитов и PR + обязательные проверки и evidence. Читать перед merge, чтобы закрытие фич было трассируемым и проверяемым.

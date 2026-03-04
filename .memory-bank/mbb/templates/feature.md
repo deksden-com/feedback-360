@@ -3,6 +3,11 @@ Status: Template
 
 ## Feature <FT-XXX-YY> — <Name>
 
+### Traceability (mandatory)
+- Epic: `EP-XXX` + ссылка на epic doc в `.memory-bank/plans/epics/*`.
+- PR: ссылка на этот FT-документ + ссылка на evidence в [Verification matrix](../../plans/verification-matrix.md).
+- Commits/branch: следовать правилам `[FT-*]/[EP-*]` и именования веток из [Git flow](../../spec/operations/git-flow.md).
+
 ### User value
 Что меняется для пользователя (HR/Employee/Manager) и какой outcome.
 
