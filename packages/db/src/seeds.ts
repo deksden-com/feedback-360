@@ -29,6 +29,7 @@ const ids = {
   membershipHrAdmin: "11000000-0000-4000-8000-000000000001",
   membershipSharedCompanyA: "11000000-0000-4000-8000-000000000010",
   membershipSharedCompanyB: "11000000-0000-4000-8000-000000000011",
+  membershipCompanyAOnly: "11000000-0000-4000-8000-000000000012",
   membershipCeo: "11000000-0000-4000-8000-000000000002",
   membershipHeadA: "11000000-0000-4000-8000-000000000003",
   membershipHeadB: "11000000-0000-4000-8000-000000000004",
@@ -38,6 +39,7 @@ const ids = {
   employeeHrAdmin: "12000000-0000-4000-8000-000000000001",
   employeeSharedCompanyA: "12000000-0000-4000-8000-000000000010",
   employeeSharedCompanyB: "12000000-0000-4000-8000-000000000011",
+  employeeCompanyAOnly: "12000000-0000-4000-8000-000000000012",
   employeeCeo: "12000000-0000-4000-8000-000000000002",
   employeeHeadA: "12000000-0000-4000-8000-000000000003",
   employeeHeadB: "12000000-0000-4000-8000-000000000004",
@@ -47,6 +49,7 @@ const ids = {
   employeeLinkHrAdmin: "13000000-0000-4000-8000-000000000001",
   employeeLinkSharedCompanyA: "13000000-0000-4000-8000-000000000010",
   employeeLinkSharedCompanyB: "13000000-0000-4000-8000-000000000011",
+  employeeLinkCompanyAOnly: "13000000-0000-4000-8000-000000000012",
   employeeLinkCeo: "13000000-0000-4000-8000-000000000002",
   employeeLinkHeadA: "13000000-0000-4000-8000-000000000003",
   employeeLinkHeadB: "13000000-0000-4000-8000-000000000004",
@@ -77,6 +80,7 @@ const ids = {
   positionStaffB1: "17000000-0000-4000-8000-000000000007",
   userHrAdmin: "18000000-0000-4000-8000-000000000001",
   userShared: "18000000-0000-4000-8000-000000000010",
+  userCompanyAOnly: "18000000-0000-4000-8000-000000000012",
   userCeo: "18000000-0000-4000-8000-000000000002",
   userHeadA: "18000000-0000-4000-8000-000000000003",
   userHeadB: "18000000-0000-4000-8000-000000000004",
@@ -124,10 +128,13 @@ const buildS1MultiTenantHandles = (): Record<string, string> => {
     "company.a": ids.companyA,
     "company.b": ids.companyB,
     "user.shared": ids.userShared,
+    "user.company_a_only": ids.userCompanyAOnly,
     "employee.shared@company.a": ids.employeeSharedCompanyA,
     "employee.shared@company.b": ids.employeeSharedCompanyB,
+    "employee.company_a_only@company.a": ids.employeeCompanyAOnly,
     "membership.shared@company.a": ids.membershipSharedCompanyA,
     "membership.shared@company.b": ids.membershipSharedCompanyB,
+    "membership.company_a_only@company.a": ids.membershipCompanyAOnly,
     "campaign.a": ids.campaignA,
     "campaign.b": ids.campaignB,
     "questionnaire.a": ids.questionnaireCompanyA,
@@ -230,6 +237,17 @@ const insertS1MultiTenant = async (
       createdAt: seededAt,
       updatedAt: seededAt,
     },
+    {
+      id: ids.employeeCompanyAOnly,
+      companyId: ids.companyA,
+      email: "company.a.only@acme.example",
+      firstName: "CompanyA",
+      lastName: "Only",
+      phone: "+10000000912",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
   ]);
 
   await db.insert(companyMemberships).values([
@@ -247,6 +265,13 @@ const insertS1MultiTenant = async (
       role: "hr_admin",
       createdAt: seededAt,
     },
+    {
+      id: ids.membershipCompanyAOnly,
+      companyId: ids.companyA,
+      userId: ids.userCompanyAOnly,
+      role: "employee",
+      createdAt: seededAt,
+    },
   ]);
 
   await db.insert(employeeUserLinks).values([
@@ -262,6 +287,13 @@ const insertS1MultiTenant = async (
       companyId: ids.companyB,
       employeeId: ids.employeeSharedCompanyB,
       userId: ids.userShared,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.employeeLinkCompanyAOnly,
+      companyId: ids.companyA,
+      employeeId: ids.employeeCompanyAOnly,
+      userId: ids.userCompanyAOnly,
       createdAt: seededAt,
     },
   ]);

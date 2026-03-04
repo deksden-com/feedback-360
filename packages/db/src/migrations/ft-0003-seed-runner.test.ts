@@ -42,8 +42,10 @@ describe("FT-0003 seed runner + handles", () => {
       expect(s1MultiTenant.handles["company.a"]).toBeDefined();
       expect(s1MultiTenant.handles["company.b"]).toBeDefined();
       expect(s1MultiTenant.handles["user.shared"]).toBeDefined();
+      expect(s1MultiTenant.handles["user.company_a_only"]).toBeDefined();
       expect(s1MultiTenant.handles["employee.shared@company.a"]).toBeDefined();
       expect(s1MultiTenant.handles["employee.shared@company.b"]).toBeDefined();
+      expect(s1MultiTenant.handles["employee.company_a_only@company.a"]).toBeDefined();
 
       const pool = createPool();
       try {
@@ -56,7 +58,7 @@ describe("FT-0003 seed runner + handles", () => {
       `);
 
         expect(Number(counts.rows[0]?.companies_count)).toBe(2);
-        expect(Number(counts.rows[0]?.employees_count)).toBe(2);
+        expect(Number(counts.rows[0]?.employees_count)).toBe(3);
         expect(Number(counts.rows[0]?.departments_count)).toBe(0);
       } finally {
         await pool.end();

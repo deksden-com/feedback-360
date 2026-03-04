@@ -7,7 +7,7 @@ Status: Draft (2026-03-03)
 - [S0_empty](s0-empty.md): пустая БД после миграций. Читать, чтобы стартовать тесты миграций/инициализации.
 - [S1_company_min](s1-company-min.md): 1 company + 1 HR admin (user+employee+membership). Читать, чтобы тестировать базовый доступ и создание сущностей.
 - [S1_company_roles_min (planned)](s1-company-roles-min.md): 1 company + полный набор ролей, чтобы проверять RBAC. Читать, чтобы тесты могли исполнять операции под разными ролями детерминированно.
-- [S1_multi_tenant_min](s1-multi-tenant-min.md): 2 companies + 1 user в двух memberships + company-scoped campaigns/questionnaires. Читать, чтобы тестировать изоляцию и переключение компании.
+- [S1_multi_tenant_min](s1-multi-tenant-min.md): 2 companies + shared user в двух memberships + user только в company A + company-scoped campaigns/questionnaires. Читать, чтобы тестировать изоляцию, переключение компании и RLS smoke.
 - [S2_org_basic](s2-org-basic.md): базовая оргструктура. Читать, чтобы тестировать автогенерацию матрицы и снапшоты.
 - [S3_model_indicators](s3-model-indicators.md): модель компетенций indicators. Читать, чтобы тестировать анкеты/расчёты indicators.
 - [S3_model_levels (planned)](s3-model-levels.md): модель компетенций levels (1..4 + UNSURE). Читать, чтобы тестировать GS9 и уровневые агрегации без смешения с indicators.

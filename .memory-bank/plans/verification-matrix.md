@@ -82,12 +82,13 @@ Status: Draft (2026-03-03)
   - Must add test: `packages/core/src/ft/ft-0022-rbac.test.ts`
   - Must run: GS4 RBAC subset (hr_reader read allowed + write forbidden + no partial changes).
 - FT-0023
-  - Must add test: `packages/db/test/ft/ft-0023-rls-smoke.test.ts`
-  - Must run: GS10.
+  - Must add test: `packages/db/src/migrations/ft-0023-rls-smoke.test.ts`
+  - Must run: GS10 (RLS row filtering for user context + service-role bypass).
 
 ### EP-002 execution evidence (2026-03-04)
 - FT-0021: what=identity multi-tenant baseline + active company isolation; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0021-multi-tenant.test.ts`, `pnpm --filter @feedback-360/db exec vitest run src/migrations/ft-0003-seed-runner.test.ts`; quality_gate=passed; acceptance_gate=passed (active company A/B isolation, cross-company read -> `not_found`, `S1_multi_tenant_min` handles validated; DB integration subtest skips when DB URL absent); result=passed.
 - FT-0022: what=RBAC enforcement for hr_reader (read-only); where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0022-rbac-no-db.test.ts`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0022-rbac.test.ts`; quality_gate=passed; acceptance_gate=passed (`questionnaire.listAssigned` allowed, `questionnaire.saveDraft`/`questionnaire.submit`/`company.updateProfile` forbidden, no partial changes; DB integration subtest skips when DB URL absent); result=passed.
+- FT-0023: what=RLS deny-by-default + service-role contours; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/db exec vitest run src/migrations/ft-0023-rls-smoke.test.ts`; quality_gate=passed; acceptance_gate=passed (user-context sees only own company rows, foreign rows hidden by RLS, service-role context can read target row; integration subtest skips when DB URL absent); result=passed.
 
 ## EP-003 Org structure + snapshots
 - FT-0031
