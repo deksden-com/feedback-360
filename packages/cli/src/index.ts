@@ -48,6 +48,12 @@ type CampaignSnapshotListOptions = {
   campaign: string;
 };
 
+type ResultsHrOptions = {
+  json?: boolean;
+  campaign: string;
+  subject: string;
+};
+
 type CampaignParticipantsAddDepartmentsOptions = {
   json?: boolean;
   fromDepartments: string[];
@@ -490,6 +496,38 @@ const formatMatrixSetHuman = (data: { campaignId: string; totalAssignments: numb
   return `Matrix set: campaign=${data.campaignId}, totalAssignments=${data.totalAssignments}`;
 };
 
+const formatResultsHrHuman = (data: {
+  campaignId: string;
+  subjectEmployeeId: string;
+  competencyScores: Array<{
+    competencyId: string;
+    competencyName: string;
+    managerScore?: number;
+    peersScore?: number;
+    subordinatesScore?: number;
+    selfScore?: number;
+  }>;
+  groupOverall: {
+    manager?: number;
+    peers?: number;
+    subordinates?: number;
+    self?: number;
+  };
+}): string => {
+  const lines = [
+    `HR results: campaign=${data.campaignId}, subject=${data.subjectEmployeeId}, competencies=${data.competencyScores.length}`,
+    `Group overall: manager=${data.groupOverall.manager ?? "-"}, peers=${data.groupOverall.peers ?? "-"}, subordinates=${data.groupOverall.subordinates ?? "-"}, self=${data.groupOverall.self ?? "-"}`,
+  ];
+
+  for (const competency of data.competencyScores) {
+    lines.push(
+      `- ${competency.competencyId} (${competency.competencyName}): manager=${competency.managerScore ?? "-"}, peers=${competency.peersScore ?? "-"}, subordinates=${competency.subordinatesScore ?? "-"}, self=${competency.selfScore ?? "-"}`,
+    );
+  }
+
+  return lines.join("\n");
+};
+
 const buildDefaultModelPayload = (name: string, kind: "indicators" | "levels") => {
   if (kind === "levels") {
     return {
@@ -578,6 +616,7 @@ const normalizeLegacySeedArgs = (argv: string[]): string[] => {
     "matrix",
     "ai",
     "questionnaire",
+    "results",
   ]);
   if (!knownTopLevelCommands.has(firstArgument) && firstArgument.startsWith("--")) {
     normalizedArgv.splice(2, 0, "seed");
@@ -613,6 +652,7 @@ Examples:
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- matrix set <campaign_id> --assignments-json '[{"subjectEmployeeId":"<id>","raterEmployeeId":"<id>","raterRole":"manager"}]' --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- ai run <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- questionnaire list --campaign <campaign_id> --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- results hr --campaign <campaign_id> --subject <employee_id> --json
 `,
     );
 
@@ -1460,6 +1500,33 @@ Examples:
         console.log(
           `Submitted: questionnaire=${result.data.questionnaireId}, submittedAt=${result.data.submittedAt}${result.data.wasAlreadySubmitted ? " (already submitted)" : ""}`,
         );
+      }
+    });
+
+  const resultsCommand = program.command("results").description("Results read operations.");
+
+  resultsCommand
+    .command("hr")
+    .description("Get HR view of indicator-based results for subject in campaign.")
+    .requiredOption("--campaign <campaign_id>", "Campaign identifier.")
+    .requiredOption("--subject <employee_id>", "Subject employee identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: ResultsHrOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.resultsGetHrView({
+        campaignId: options.campaign,
+        subjectEmployeeId: options.subject,
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatResultsHrHuman(result.data));
       }
     });
 

@@ -7,6 +7,7 @@ export * from "./matrix";
 export * from "./models";
 export * from "./org";
 export * from "./questionnaires";
+export * from "./results";
 export * from "./seeds";
 export * from "./snapshots";
 export * as schema from "./schema";

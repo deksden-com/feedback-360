@@ -41,6 +41,8 @@ import {
   type QuestionnaireSaveDraftOutput,
   type QuestionnaireSubmitInput,
   type QuestionnaireSubmitOutput,
+  type ResultsGetHrViewInput,
+  type ResultsGetHrViewOutput,
   type SystemPingOutput,
   createOperationError,
   errorFromUnknown,
@@ -88,6 +90,8 @@ import {
   parseQuestionnaireSaveDraftOutput,
   parseQuestionnaireSubmitInput,
   parseQuestionnaireSubmitOutput,
+  parseResultsGetHrViewInput,
+  parseResultsGetHrViewOutput,
   parseSystemPingInput,
   parseSystemPingOutput,
 } from "@feedback-360/api-contract";
@@ -99,6 +103,7 @@ import {
   endCampaign,
   generateSuggestedMatrix,
   getCampaignProgress,
+  getResultsHrView,
   listActiveEmployees,
   listAssignedQuestionnaires,
   listCampaignEmployeeSnapshots,
@@ -742,6 +747,43 @@ const runCampaignProgressGet = async (
   }
 };
 
+const runResultsGetHrView = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<ResultsGetHrViewOutput>> => {
+  if (!hasRole(request, ["hr_admin", "hr_reader"])) {
+    return errorResult(
+      createOperationError("forbidden", "Current role cannot view HR results.", {
+        operation: "results.getHrView",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: ResultsGetHrViewInput;
+  try {
+    parsedInput = parseResultsGetHrViewInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid results.getHrView input."),
+    );
+  }
+
+  try {
+    const output = await getResultsHrView({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+      subjectEmployeeId: parsedInput.subjectEmployeeId,
+    });
+    return okResult(parseResultsGetHrViewOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to get HR results."));
+  }
+};
+
 const runCampaignParticipantsAddFromDepartments = async (
   request: DispatchOperationInput,
 ): Promise<OperationResult<CampaignParticipantsAddFromDepartmentsOutput>> => {
@@ -1022,6 +1064,7 @@ export const dispatchOperation = (
     | CampaignWeightsSetOutput
     | CampaignParticipantsMutationOutput
     | CampaignProgressGetOutput
+    | ResultsGetHrViewOutput
     | CampaignTransitionOutput
     | OrgDepartmentMoveOutput
     | OrgManagerSetOutput
@@ -1091,6 +1134,8 @@ export const dispatchOperation = (
       return runCampaignSnapshotList(parsedRequest);
     case "campaign.progress.get":
       return runCampaignProgressGet(parsedRequest);
+    case "results.getHrView":
+      return runResultsGetHrView(parsedRequest);
     case "campaign.participants.addFromDepartments":
       return runCampaignParticipantsAddFromDepartments(parsedRequest);
     case "matrix.generateSuggested":

@@ -21,17 +21,24 @@ Started кампания с частично заполненными анкет
 - `questionnaire.main_not_started`
 - `questionnaire.main_in_progress`
 - `questionnaire.main_submitted`
+- `employee.subject_main`
 - `employee.head_a` (pending rater x2)
 - `employee.staff_a1`, `employee.staff_a2` (pending subjects)
 
 ## Variants (edge cases)
-- Текущая реализация variant не поддерживает; кейсы ниже запланированы под EP-005.
-- `peers2`:
+- `na_heavy_peer` (**implemented**, FT-0051):
+  - кампания связывается с indicator-моделью (3 индикатора на компетенцию),
+  - создаются 3 submitted анкеты для одного subject: manager + peer + peer,
+  - один peer отвечает `NA` по большинству индикаторов, чтобы проверить:
+    - исключение `NA` из per-rater score,
+    - equal-rater weighting на уровне группы (не indicator-weighted average).
+  - Handles дополнительно включают:
+    - `employee.subject_main`, `employee.rater_manager`, `employee.rater_peer_1`, `employee.rater_peer_2`,
+    - `model.version.main`, `competency.main`, `indicator.main_1..3`,
+    - `questionnaire.subject_manager`, `questionnaire.subject_peer_1`, `questionnaire.subject_peer_2`.
+- `peers2` (planned):
   - peers оценщиков ровно 2 (для hide/merge threshold тестов).
   - Используется в GS2/FT-0052.
-- `na_heavy_peer`:
-  - один peer отвечает NA по большинству индикаторов (для проверки “exclude NA” и equal rater weighting).
-  - Используется в FT-0051.
 - `no_subordinates`:
   - у subject нет подчинённых (или их группа скрыта), peers>=3 (для нормализации весов 50/50).
   - Используется в FT-0053.

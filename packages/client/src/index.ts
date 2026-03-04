@@ -41,6 +41,8 @@ import {
   type QuestionnaireSaveDraftOutput,
   type QuestionnaireSubmitInput,
   type QuestionnaireSubmitOutput,
+  type ResultsGetHrViewInput,
+  type ResultsGetHrViewOutput,
   type SeedRunInput,
   type SeedRunOutput,
   type SystemPingOutput,
@@ -91,6 +93,8 @@ import {
   parseQuestionnaireSaveDraftOutput,
   parseQuestionnaireSubmitInput,
   parseQuestionnaireSubmitOutput,
+  parseResultsGetHrViewInput,
+  parseResultsGetHrViewOutput,
   parseSeedRunInput,
   parseSeedRunOutput,
   parseSystemPingOutput,
@@ -215,6 +219,10 @@ export type Feedback360Client = {
     input: QuestionnaireSubmitInput,
     context?: OperationContext,
   ): Promise<OperationResult<QuestionnaireSubmitOutput>>;
+  resultsGetHrView(
+    input: ResultsGetHrViewInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<ResultsGetHrViewOutput>>;
   setActiveContext(context: OperationContext): OperationResult<OperationContext>;
   getActiveContext(): OperationContext;
   setActiveCompany(companyId: string): OperationResult<ClientSetActiveCompanyOutput>;
@@ -707,6 +715,24 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseQuestionnaireSubmitOutput,
+      });
+    },
+
+    resultsGetHrView: async (input, context) => {
+      let parsedInput: ResultsGetHrViewInput;
+      try {
+        parsedInput = parseResultsGetHrViewInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid resultsGetHrView input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "results.getHrView",
+        input: parsedInput,
+        context,
+        parseOutput: parseResultsGetHrViewOutput,
       });
     },
 

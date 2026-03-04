@@ -129,6 +129,31 @@ describe("FT-0003 seed runner + handles", () => {
       } finally {
         await poolAfterS7.end();
       }
+
+      const s7NaHeavy = await runSeedScenario({
+        scenario: "S7_campaign_started_some_submitted",
+        variant: "na_heavy_peer",
+      });
+      expect(s7NaHeavy.handles["employee.subject_main"]).toBeDefined();
+      expect(s7NaHeavy.handles["employee.rater_peer_1"]).toBeDefined();
+      expect(s7NaHeavy.handles["competency.main"]).toBeDefined();
+
+      const poolAfterS7NaHeavy = createPool();
+      try {
+        const db = createDb(poolAfterS7NaHeavy);
+        const counts = await db.execute(sql`
+          select
+            (select count(*) from questionnaires where status = 'submitted') as submitted_count,
+            (select count(*) from campaign_assignments) as assignments_count,
+            (select count(*) from competency_indicators) as indicators_count
+        `);
+
+        expect(Number(counts.rows[0]?.submitted_count)).toBe(3);
+        expect(Number(counts.rows[0]?.assignments_count)).toBe(3);
+        expect(Number(counts.rows[0]?.indicators_count)).toBe(3);
+      } finally {
+        await poolAfterS7NaHeavy.end();
+      }
     },
     60_000,
   );

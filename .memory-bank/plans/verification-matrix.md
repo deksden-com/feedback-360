@@ -160,8 +160,9 @@ Status: Draft (2026-03-03)
 
 ## EP-005 Results + anonymity + weights
 - FT-0051
-  - Must add test: `packages/core/test/ft/ft-0051-indicators-aggregations.test.ts`
-  - Must run: NA исключение + equal rater weighting.
+  - Must add test: `packages/core/src/ft/ft-0051-indicators-aggregations.test.ts`
+  - Must add test: `packages/cli/src/ft-0051-results-hr-cli.test.ts`
+  - Must run: NA исключение + equal rater weighting + RBAC (`employee` → `forbidden`) для `results.getHrView`.
 - FT-0052
   - Must add test: `packages/core/test/ft/ft-0052-anonymity.test.ts`
   - Must run: GS2.
@@ -174,6 +175,9 @@ Status: Draft (2026-03-03)
 - FT-0055
   - Must add test: `packages/core/test/ft/ft-0055-results-views.test.ts`
   - Must run: role-based shaping (raw vs processed) + anonymity flags.
+
+### EP-005 execution evidence (2026-03-04)
+- FT-0051: what=indicator aggregations (`results.getHrView`) с NA exclusion + equal-rater weighting; where=local + Supabase beta pooler + CLI scenario on real DB; how=`pnpm --filter @feedback-360/api-contract lint`, `pnpm --filter @feedback-360/api-contract typecheck`, `pnpm --filter @feedback-360/api-contract test`, `pnpm --filter @feedback-360/db lint`, `pnpm --filter @feedback-360/db typecheck`, `pnpm --filter @feedback-360/core lint`, `pnpm --filter @feedback-360/core typecheck`, `pnpm --filter @feedback-360/client lint`, `pnpm --filter @feedback-360/client typecheck`, `pnpm --filter @feedback-360/cli lint`, `pnpm --filter @feedback-360/cli typecheck`, `pnpm --filter @feedback-360/cli exec vitest run src/ft-0051-results-hr-cli.test.ts`, `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0051-indicators-aggregations.test.ts`, `set -a; source .env; set +a; pnpm --filter @feedback-360/db exec vitest run src/migrations/ft-0003-seed-runner.test.ts`; quality_gate=passed; acceptance_gate=passed (`S7 --variant na_heavy_peer`: `peers_score=3`, `naive_indicator_weighted=2`, `employee -> forbidden`); result=passed.
 
 ## EP-006 Notifications outbox (email)
 - FT-0061

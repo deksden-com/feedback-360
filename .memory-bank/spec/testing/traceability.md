@@ -44,6 +44,11 @@ Status: Draft (2026-03-03)
   - Seeds: `S4_campaign_draft`, `S5_campaign_started_no_answers`
 
 ## Privacy / anonymity / calculations
+- Invariant: indicators-агрегация использует `equal rater weighting` (а не “среднее по всем indicator answers”); NA исключается из per-rater score.
+  - Spec SSoT: `../domain/calculations.md`
+  - Tests: FT-0051 acceptance (`results.getHrView`)
+  - Seeds: `S7_campaign_started_some_submitted --variant na_heavy_peer`
+
 - Invariant: anonymity threshold=3 для peers/subordinates; manager всегда персонально; self вес 0.
   - Spec SSoT: `../domain/anonymity-policy.md`, `../domain/calculations.md`
   - Tests: GS2 + GS1
