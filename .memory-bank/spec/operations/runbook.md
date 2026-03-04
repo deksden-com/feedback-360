@@ -54,12 +54,13 @@ Status: Draft (2026-03-04)
   - последний deployment `go360go-prod` имеет статус `Ready` (preview target).
   - зафиксирован remaining issue: deployments переходят в `Ready`, но содержат `routesCount=0/outputCount=0` (пустой output), поэтому требуется отдельная донастройка monorepo-build в Vercel.
 - Sentry build-token remediation:
-  - удалены `SENTRY_AUTH_TOKEN` из Vercel env (beta/prod), чтобы остановить падения build на `Invalid token (401)`;
-  - runtime DSN/ORG/PROJECT сохранены.
+  - `SENTRY_AUTH_TOKEN` восстановлен в Vercel env (beta/prod);
+  - `SENTRY_ORG=deksdencom`, `SENTRY_PROJECT`: `go360go-beta` (beta), `go360go-prod` (prod production), `go360go-beta` (prod preview/development);
+  - токен подтверждён через `sentry-cli` (scopes + upload sourcemaps в локальном `next build`).
 
 ### Remaining operational follow-up
 1. Починить monorepo deploy output в Vercel (deployment не должен быть пустым; проверить `/api/health` на beta после фикса).
-2. Добавить валидный `SENTRY_AUTH_TOKEN` обратно (beta/prod), если нужен sourcemap upload в CI/CD.
+2. После фикса Vercel monorepo output перепроверить в cloud-build, что `sentry-cli` шаги (release/sourcemaps) проходят без `401/403`.
 3. После следующего merge в `main` зафиксировать первый `go360go-prod` deployment со статусом `Ready` на production target.
 
 ## Environment checklist
