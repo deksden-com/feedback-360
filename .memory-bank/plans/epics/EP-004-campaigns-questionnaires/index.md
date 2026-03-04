@@ -16,8 +16,8 @@ Status: Draft (2026-03-03)
 ## Progress report (evidence-based)
 - `as_of`: 2026-03-04
 - `total_features`: 6
-- `completed_features`: 4
-- `evidence_confirmed_features`: 4
+- `completed_features`: 5
+- `evidence_confirmed_features`: 5
 - verification link:
   - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-004. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
 

@@ -89,7 +89,12 @@ const getQuestionnaireRow = async (
 };
 
 const ensureWritableCampaign = (campaignStatus: string): void => {
-  if (campaignStatus === "ended") {
+  if (
+    campaignStatus === "ended" ||
+    campaignStatus === "processing_ai" ||
+    campaignStatus === "ai_failed" ||
+    campaignStatus === "completed"
+  ) {
     throw createOperationError("campaign_ended_readonly", "Campaign is ended and read-only.");
   }
 
