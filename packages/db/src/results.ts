@@ -1,6 +1,9 @@
 import {
   type ResultsGetHrViewOutput,
   type ResultsGroupKey,
+  type ResultsGroupVisibilityState,
+  type ResultsHrViewGroupVisibility,
+  type SmallGroupPolicy,
   createOperationError,
 } from "@feedback-360/api-contract";
 import { and, eq, inArray } from "drizzle-orm";
@@ -77,6 +80,8 @@ export type GetResultsHrViewInput = {
   companyId: string;
   campaignId: string;
   subjectEmployeeId: string;
+  smallGroupPolicy?: SmallGroupPolicy;
+  anonymityThreshold?: number;
 };
 
 type CompetencyWithGroup = {
@@ -89,6 +94,13 @@ type CompetencyWithGroup = {
   groupOrder: number;
 };
 
+const defaultAnonymityThreshold = 3;
+const defaultSmallGroupPolicy: SmallGroupPolicy = "hide";
+
+const hiddenGroupVisibility = (smallGroupPolicy: SmallGroupPolicy): ResultsGroupVisibilityState => {
+  return smallGroupPolicy === "merge_to_other" ? "merged" : "hidden";
+};
+
 export const getResultsHrView = async (
   input: GetResultsHrViewInput,
 ): Promise<ResultsGetHrViewOutput> => {
@@ -96,6 +108,8 @@ export const getResultsHrView = async (
 
   try {
     const db = createDb(pool);
+    const smallGroupPolicy = input.smallGroupPolicy ?? defaultSmallGroupPolicy;
+    const anonymityThreshold = input.anonymityThreshold ?? defaultAnonymityThreshold;
 
     const campaignRows = await db
       .select({
@@ -189,6 +203,9 @@ export const getResultsHrView = async (
       groupWeight: row.groupWeight,
       groupOrder: row.groupOrder,
     }));
+    const groupWeightByCompetency = new Map(
+      typedCompetencies.map((item) => [item.competencyId, item.groupWeight]),
+    );
 
     const competencyIds = typedCompetencies.map((item) => item.competencyId);
     const indicatorRows = await db
@@ -240,6 +257,13 @@ export const getResultsHrView = async (
         sum: number;
         ratersWithScore: number;
       }
+    >();
+    const scoredRowsByGroupCompetency = new Map<
+      string,
+      Array<{
+        raterEmployeeId: string;
+        score: number;
+      }>
     >();
     const raterScores: ResultsGetHrViewOutput["raterScores"] = [];
 
@@ -297,8 +321,44 @@ export const getResultsHrView = async (
         aggregate.sum += score;
         aggregate.ratersWithScore += 1;
         aggregateByGroupCompetency.set(aggregateKey, aggregate);
+
+        const scoredRows = scoredRowsByGroupCompetency.get(aggregateKey) ?? [];
+        scoredRows.push({
+          raterEmployeeId: row.raterEmployeeId,
+          score,
+        });
+        scoredRowsByGroupCompetency.set(aggregateKey, scoredRows);
       }
     }
+
+    const peersSubmitted = submittedCountByGroup.get("peers") ?? 0;
+    const subordinatesSubmitted = submittedCountByGroup.get("subordinates") ?? 0;
+    const peersGroupVisibility: ResultsGroupVisibilityState =
+      peersSubmitted >= anonymityThreshold ? "shown" : hiddenGroupVisibility(smallGroupPolicy);
+    const subordinatesGroupVisibility: ResultsGroupVisibilityState =
+      subordinatesSubmitted >= anonymityThreshold
+        ? "shown"
+        : hiddenGroupVisibility(smallGroupPolicy);
+
+    const shouldCalculateOtherVisibility =
+      smallGroupPolicy === "merge_to_other" &&
+      (peersGroupVisibility === "merged" || subordinatesGroupVisibility === "merged");
+    const mergedSubmittedCount =
+      (peersGroupVisibility === "merged" ? peersSubmitted : 0) +
+      (subordinatesGroupVisibility === "merged" ? subordinatesSubmitted : 0);
+
+    const groupVisibility: ResultsHrViewGroupVisibility = {
+      manager: "shown",
+      peers: peersGroupVisibility,
+      subordinates: subordinatesGroupVisibility,
+      self: "shown",
+      ...(shouldCalculateOtherVisibility
+        ? {
+            other:
+              mergedSubmittedCount >= anonymityThreshold ? ("shown" as const) : ("hidden" as const),
+          }
+        : {}),
+    };
 
     const competencyScores: ResultsGetHrViewOutput["competencyScores"] = typedCompetencies.map(
       (competency) => {
@@ -328,6 +388,40 @@ export const getResultsHrView = async (
             ? roundScore(selfAggregate.sum / selfAggregate.ratersWithScore)
             : undefined;
 
+        const peersVisibility: ResultsGroupVisibilityState =
+          peersGroupVisibility === "shown" &&
+          (peersAggregate?.ratersWithScore ?? 0) >= anonymityThreshold
+            ? "shown"
+            : hiddenGroupVisibility(smallGroupPolicy);
+        const subordinatesVisibility: ResultsGroupVisibilityState =
+          subordinatesGroupVisibility === "shown" &&
+          (subordinatesAggregate?.ratersWithScore ?? 0) >= anonymityThreshold
+            ? "shown"
+            : hiddenGroupVisibility(smallGroupPolicy);
+
+        const hasMergedCompetency =
+          smallGroupPolicy === "merge_to_other" &&
+          (peersVisibility === "merged" || subordinatesVisibility === "merged");
+        const mergedRows = [
+          ...(peersVisibility === "merged"
+            ? (scoredRowsByGroupCompetency.get(`peers:${competency.competencyId}`) ?? [])
+            : []),
+          ...(subordinatesVisibility === "merged"
+            ? (scoredRowsByGroupCompetency.get(`subordinates:${competency.competencyId}`) ?? [])
+            : []),
+        ];
+        const otherRaters = mergedRows.length;
+        const otherVisibility =
+          hasMergedCompetency && otherRaters >= anonymityThreshold
+            ? ("shown" as const)
+            : hasMergedCompetency
+              ? ("hidden" as const)
+              : undefined;
+        const otherScore =
+          otherVisibility === "shown" && otherRaters > 0
+            ? roundScore(mergedRows.reduce((sum, row) => sum + row.score, 0) / mergedRows.length)
+            : undefined;
+
         return {
           competencyId: competency.competencyId,
           competencyName: competency.competencyName,
@@ -341,6 +435,13 @@ export const getResultsHrView = async (
           subordinatesRaters: subordinatesAggregate?.ratersWithScore ?? 0,
           ...(selfScore !== undefined ? { selfScore } : {}),
           selfRaters: selfAggregate?.ratersWithScore ?? 0,
+          ...(otherScore !== undefined ? { otherScore } : {}),
+          otherRaters,
+          managerVisibility: "shown",
+          peersVisibility,
+          subordinatesVisibility,
+          selfVisibility: "shown",
+          ...(otherVisibility ? { otherVisibility } : {}),
         };
       },
     );
@@ -367,6 +468,29 @@ export const getResultsHrView = async (
       }
     }
 
+    if (groupVisibility.other === "shown") {
+      let weightedSum = 0;
+      let weightSum = 0;
+
+      for (const competency of competencyScores) {
+        if (competency.otherVisibility !== "shown" || competency.otherScore === undefined) {
+          continue;
+        }
+
+        const weight = groupWeightByCompetency.get(competency.competencyId) ?? 0;
+        if (weight <= 0) {
+          continue;
+        }
+
+        weightedSum += competency.otherScore * weight;
+        weightSum += weight;
+      }
+
+      if (weightSum > 0) {
+        groupOverall.other = roundScore(weightedSum / weightSum);
+      }
+    }
+
     const sortedRaterScores = [...raterScores].sort((left, right) => {
       if (groupOrder[left.group] !== groupOrder[right.group]) {
         return groupOrder[left.group] - groupOrder[right.group];
@@ -383,6 +507,9 @@ export const getResultsHrView = async (
       subjectEmployeeId: input.subjectEmployeeId,
       modelVersionId: model.modelVersionId,
       modelKind: "indicators",
+      anonymityThreshold,
+      smallGroupPolicy,
+      groupVisibility,
       competencyScores,
       raterScores: sortedRaterScores,
       groupOverall,

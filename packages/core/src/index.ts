@@ -777,6 +777,8 @@ const runResultsGetHrView = async (
       companyId: companyIdOrError,
       campaignId: parsedInput.campaignId,
       subjectEmployeeId: parsedInput.subjectEmployeeId,
+      smallGroupPolicy: parsedInput.smallGroupPolicy,
+      anonymityThreshold: parsedInput.anonymityThreshold,
     });
     return okResult(parseResultsGetHrViewOutput(output));
   } catch (error) {

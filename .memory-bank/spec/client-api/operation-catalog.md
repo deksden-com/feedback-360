@@ -145,6 +145,8 @@ Status: Draft (2026-03-03)
 - `results.getHrView`
   - roles: hr_admin/hr_reader
   - idempotent: yes
+  - input options: `smallGroupPolicy=hide|merge_to_other` (optional), `anonymityThreshold` (optional, default 3)
+  - output includes: `groupVisibility` + per-competency visibility flags (`peersVisibility/subordinatesVisibility/otherVisibility`)
   - cli: `results hr`
 
 ## Notifications

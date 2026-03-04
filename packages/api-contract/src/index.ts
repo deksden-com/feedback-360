@@ -352,10 +352,16 @@ export type CampaignProgressGetOutput = {
 
 export const resultsGroupKeys = ["manager", "peers", "subordinates", "self"] as const;
 export type ResultsGroupKey = (typeof resultsGroupKeys)[number];
+export const resultsGroupVisibilityStates = ["shown", "hidden", "merged"] as const;
+export type ResultsGroupVisibilityState = (typeof resultsGroupVisibilityStates)[number];
+export const smallGroupPolicies = ["hide", "merge_to_other"] as const;
+export type SmallGroupPolicy = (typeof smallGroupPolicies)[number];
 
 export type ResultsGetHrViewInput = {
   campaignId: string;
   subjectEmployeeId: string;
+  smallGroupPolicy?: SmallGroupPolicy;
+  anonymityThreshold?: number;
 };
 
 export type ResultsHrViewRaterScore = {
@@ -380,6 +386,13 @@ export type ResultsHrViewCompetencyScore = {
   subordinatesRaters: number;
   selfScore?: number;
   selfRaters: number;
+  otherScore?: number;
+  otherRaters: number;
+  managerVisibility: "shown";
+  peersVisibility: ResultsGroupVisibilityState;
+  subordinatesVisibility: ResultsGroupVisibilityState;
+  selfVisibility: "shown";
+  otherVisibility?: "shown" | "hidden";
 };
 
 export type ResultsHrViewGroupOverall = {
@@ -387,6 +400,15 @@ export type ResultsHrViewGroupOverall = {
   peers?: number;
   subordinates?: number;
   self?: number;
+  other?: number;
+};
+
+export type ResultsHrViewGroupVisibility = {
+  manager: "shown";
+  peers: ResultsGroupVisibilityState;
+  subordinates: ResultsGroupVisibilityState;
+  self: "shown";
+  other?: "shown" | "hidden";
 };
 
 export type ResultsGetHrViewOutput = {
@@ -395,6 +417,9 @@ export type ResultsGetHrViewOutput = {
   subjectEmployeeId: string;
   modelVersionId: string;
   modelKind: "indicators";
+  anonymityThreshold: number;
+  smallGroupPolicy: SmallGroupPolicy;
+  groupVisibility: ResultsHrViewGroupVisibility;
   competencyScores: ResultsHrViewCompetencyScore[];
   raterScores: ResultsHrViewRaterScore[];
   groupOverall: ResultsHrViewGroupOverall;
@@ -610,6 +635,14 @@ const isPendingQuestionnaireStatus = (
 
 const isResultsGroupKey = (value: string): value is ResultsGroupKey => {
   return resultsGroupKeys.includes(value as ResultsGroupKey);
+};
+
+const isResultsGroupVisibilityState = (value: string): value is ResultsGroupVisibilityState => {
+  return resultsGroupVisibilityStates.includes(value as ResultsGroupVisibilityState);
+};
+
+const isSmallGroupPolicy = (value: string): value is SmallGroupPolicy => {
+  return smallGroupPolicies.includes(value as SmallGroupPolicy);
 };
 
 export const isKnownOperation = (value: string): value is KnownOperation => {
@@ -1723,11 +1756,40 @@ export const parseCampaignProgressGetOutput = (value: unknown): CampaignProgress
 
 export const parseResultsGetHrViewInput = (value: unknown): ResultsGetHrViewInput => {
   const record = ensureObject(value, "results.getHrView input");
-  ensureAllowedKeys(record, ["campaignId", "subjectEmployeeId"], "results.getHrView input");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "subjectEmployeeId", "smallGroupPolicy", "anonymityThreshold"],
+    "results.getHrView input",
+  );
+
+  const smallGroupPolicyValue = record.smallGroupPolicy;
+  if (smallGroupPolicyValue !== undefined) {
+    if (typeof smallGroupPolicyValue !== "string" || !isSmallGroupPolicy(smallGroupPolicyValue)) {
+      throw new Error(
+        `results.getHrView input.smallGroupPolicy must be one of: ${smallGroupPolicies.join(", ")}`,
+      );
+    }
+  }
+
+  const anonymityThresholdValue = record.anonymityThreshold;
+  if (anonymityThresholdValue !== undefined) {
+    if (
+      typeof anonymityThresholdValue !== "number" ||
+      Number.isNaN(anonymityThresholdValue) ||
+      !Number.isInteger(anonymityThresholdValue) ||
+      anonymityThresholdValue < 1
+    ) {
+      throw new Error("results.getHrView input.anonymityThreshold must be an integer >= 1.");
+    }
+  }
 
   return {
     campaignId: ensureStringField(record, "campaignId", "results.getHrView input"),
     subjectEmployeeId: ensureStringField(record, "subjectEmployeeId", "results.getHrView input"),
+    ...(smallGroupPolicyValue ? { smallGroupPolicy: smallGroupPolicyValue } : {}),
+    ...(typeof anonymityThresholdValue === "number"
+      ? { anonymityThreshold: anonymityThresholdValue }
+      : {}),
   };
 };
 
@@ -1813,6 +1875,13 @@ const parseResultsHrViewCompetencyScore = (value: unknown): ResultsHrViewCompete
       "subordinatesRaters",
       "selfScore",
       "selfRaters",
+      "otherScore",
+      "otherRaters",
+      "managerVisibility",
+      "peersVisibility",
+      "subordinatesVisibility",
+      "selfVisibility",
+      "otherVisibility",
     ],
     "results.getHrView output.competencyScores[]",
   );
@@ -1837,6 +1906,61 @@ const parseResultsHrViewCompetencyScore = (value: unknown): ResultsHrViewCompete
     "selfScore",
     "results.getHrView output.competencyScores[]",
   );
+  const otherScore = parseOptionalNumberField(
+    record,
+    "otherScore",
+    "results.getHrView output.competencyScores[]",
+  );
+  const managerVisibility = ensureStringField(
+    record,
+    "managerVisibility",
+    "results.getHrView output.competencyScores[]",
+  );
+  if (managerVisibility !== "shown") {
+    throw new Error(
+      'results.getHrView output.competencyScores[].managerVisibility must be "shown".',
+    );
+  }
+
+  const peersVisibility = ensureStringField(
+    record,
+    "peersVisibility",
+    "results.getHrView output.competencyScores[]",
+  );
+  if (!isResultsGroupVisibilityState(peersVisibility)) {
+    throw new Error(
+      `results.getHrView output.competencyScores[].peersVisibility must be one of: ${resultsGroupVisibilityStates.join(", ")}`,
+    );
+  }
+
+  const subordinatesVisibility = ensureStringField(
+    record,
+    "subordinatesVisibility",
+    "results.getHrView output.competencyScores[]",
+  );
+  if (!isResultsGroupVisibilityState(subordinatesVisibility)) {
+    throw new Error(
+      `results.getHrView output.competencyScores[].subordinatesVisibility must be one of: ${resultsGroupVisibilityStates.join(", ")}`,
+    );
+  }
+
+  const selfVisibility = ensureStringField(
+    record,
+    "selfVisibility",
+    "results.getHrView output.competencyScores[]",
+  );
+  if (selfVisibility !== "shown") {
+    throw new Error('results.getHrView output.competencyScores[].selfVisibility must be "shown".');
+  }
+
+  const otherVisibilityValue = record.otherVisibility;
+  if (otherVisibilityValue !== undefined) {
+    if (otherVisibilityValue !== "shown" && otherVisibilityValue !== "hidden") {
+      throw new Error(
+        'results.getHrView output.competencyScores[].otherVisibility must be "shown" or "hidden" when provided.',
+      );
+    }
+  }
 
   return {
     competencyId: ensureStringField(
@@ -1879,6 +2003,17 @@ const parseResultsHrViewCompetencyScore = (value: unknown): ResultsHrViewCompete
       "selfRaters",
       "results.getHrView output.competencyScores[]",
     ),
+    ...(otherScore !== undefined ? { otherScore } : {}),
+    otherRaters: ensureNumberField(
+      record,
+      "otherRaters",
+      "results.getHrView output.competencyScores[]",
+    ),
+    managerVisibility: "shown",
+    peersVisibility,
+    subordinatesVisibility,
+    selfVisibility: "shown",
+    ...(otherVisibilityValue ? { otherVisibility: otherVisibilityValue } : {}),
   };
 };
 
@@ -1886,7 +2021,7 @@ const parseResultsHrViewGroupOverall = (value: unknown): ResultsHrViewGroupOvera
   const record = ensureObject(value, "results.getHrView output.groupOverall");
   ensureAllowedKeys(
     record,
-    ["manager", "peers", "subordinates", "self"],
+    ["manager", "peers", "subordinates", "self", "other"],
     "results.getHrView output.groupOverall",
   );
 
@@ -1902,12 +2037,68 @@ const parseResultsHrViewGroupOverall = (value: unknown): ResultsHrViewGroupOvera
     "results.getHrView output.groupOverall",
   );
   const self = parseOptionalNumberField(record, "self", "results.getHrView output.groupOverall");
+  const other = parseOptionalNumberField(record, "other", "results.getHrView output.groupOverall");
 
   return {
     ...(manager !== undefined ? { manager } : {}),
     ...(peers !== undefined ? { peers } : {}),
     ...(subordinates !== undefined ? { subordinates } : {}),
     ...(self !== undefined ? { self } : {}),
+    ...(other !== undefined ? { other } : {}),
+  };
+};
+
+const parseResultsHrViewGroupVisibility = (value: unknown): ResultsHrViewGroupVisibility => {
+  const record = ensureObject(value, "results.getHrView output.groupVisibility");
+  ensureAllowedKeys(
+    record,
+    ["manager", "peers", "subordinates", "self", "other"],
+    "results.getHrView output.groupVisibility",
+  );
+
+  const manager = ensureStringField(record, "manager", "results.getHrView output.groupVisibility");
+  if (manager !== "shown") {
+    throw new Error('results.getHrView output.groupVisibility.manager must be "shown".');
+  }
+
+  const peers = ensureStringField(record, "peers", "results.getHrView output.groupVisibility");
+  if (!isResultsGroupVisibilityState(peers)) {
+    throw new Error(
+      `results.getHrView output.groupVisibility.peers must be one of: ${resultsGroupVisibilityStates.join(", ")}`,
+    );
+  }
+
+  const subordinates = ensureStringField(
+    record,
+    "subordinates",
+    "results.getHrView output.groupVisibility",
+  );
+  if (!isResultsGroupVisibilityState(subordinates)) {
+    throw new Error(
+      `results.getHrView output.groupVisibility.subordinates must be one of: ${resultsGroupVisibilityStates.join(", ")}`,
+    );
+  }
+
+  const self = ensureStringField(record, "self", "results.getHrView output.groupVisibility");
+  if (self !== "shown") {
+    throw new Error('results.getHrView output.groupVisibility.self must be "shown".');
+  }
+
+  const otherValue = record.other;
+  if (otherValue !== undefined) {
+    if (otherValue !== "shown" && otherValue !== "hidden") {
+      throw new Error(
+        'results.getHrView output.groupVisibility.other must be "shown" or "hidden" when provided.',
+      );
+    }
+  }
+
+  return {
+    manager: "shown",
+    peers,
+    subordinates,
+    self: "shown",
+    ...(otherValue ? { other: otherValue } : {}),
   };
 };
 
@@ -1921,6 +2112,9 @@ export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOut
       "subjectEmployeeId",
       "modelVersionId",
       "modelKind",
+      "anonymityThreshold",
+      "smallGroupPolicy",
+      "groupVisibility",
       "competencyScores",
       "raterScores",
       "groupOverall",
@@ -1933,12 +2127,35 @@ export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOut
     throw new Error('results.getHrView output.modelKind must be "indicators".');
   }
 
+  const smallGroupPolicyValue = ensureStringField(
+    record,
+    "smallGroupPolicy",
+    "results.getHrView output",
+  );
+  if (!isSmallGroupPolicy(smallGroupPolicyValue)) {
+    throw new Error(
+      `results.getHrView output.smallGroupPolicy must be one of: ${smallGroupPolicies.join(", ")}`,
+    );
+  }
+
+  const anonymityThreshold = ensureNumberField(
+    record,
+    "anonymityThreshold",
+    "results.getHrView output",
+  );
+  if (!Number.isInteger(anonymityThreshold) || anonymityThreshold < 1) {
+    throw new Error("results.getHrView output.anonymityThreshold must be an integer >= 1.");
+  }
+
   return {
     campaignId: ensureStringField(record, "campaignId", "results.getHrView output"),
     companyId: ensureStringField(record, "companyId", "results.getHrView output"),
     subjectEmployeeId: ensureStringField(record, "subjectEmployeeId", "results.getHrView output"),
     modelVersionId: ensureStringField(record, "modelVersionId", "results.getHrView output"),
     modelKind: "indicators",
+    anonymityThreshold,
+    smallGroupPolicy: smallGroupPolicyValue,
+    groupVisibility: parseResultsHrViewGroupVisibility(record.groupVisibility),
     competencyScores: ensureArray(
       record.competencyScores,
       "results.getHrView output.competencyScores",

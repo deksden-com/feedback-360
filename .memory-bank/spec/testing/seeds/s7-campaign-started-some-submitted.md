@@ -36,9 +36,17 @@ Started кампания с частично заполненными анкет
     - `employee.subject_main`, `employee.rater_manager`, `employee.rater_peer_1`, `employee.rater_peer_2`,
     - `model.version.main`, `competency.main`, `indicator.main_1..3`,
     - `questionnaire.subject_manager`, `questionnaire.subject_peer_1`, `questionnaire.subject_peer_2`.
-- `peers2` (planned):
-  - peers оценщиков ровно 2 (для hide/merge threshold тестов).
-  - Используется в GS2/FT-0052.
+- `peers2` (**implemented**, FT-0052):
+  - кампания связывается с indicator-моделью (2 компетенции, 2 индикатора),
+  - создаются 4 submitted анкеты для одного subject: manager + peer + peer + subordinate,
+  - распределение для проверки анонимности:
+    - peers=2 и subordinates=1 (обе группы ниже threshold=3),
+    - при `merge_to_other` объединённая группа `other` имеет `n=3` и становится `shown`,
+    - для `competency.secondary` валидный `n_valid=1`, поэтому `otherVisibility=hidden` на уровне компетенции.
+  - Handles дополнительно включают:
+    - `employee.subject_main`, `employee.rater_manager`, `employee.rater_peer_1`, `employee.rater_peer_2`, `employee.rater_subordinate_1`,
+    - `model.version.main`, `competency.main`, `competency.secondary`, `indicator.main_1`, `indicator.secondary_1`,
+    - `questionnaire.subject_manager`, `questionnaire.subject_peer_1`, `questionnaire.subject_peer_2`, `questionnaire.subject_subordinate_1`.
 - `no_subordinates`:
   - у subject нет подчинённых (или их группа скрыта), peers>=3 (для нормализации весов 50/50).
   - Используется в FT-0053.

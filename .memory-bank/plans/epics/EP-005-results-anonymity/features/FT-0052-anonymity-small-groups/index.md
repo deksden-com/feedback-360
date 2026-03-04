@@ -1,5 +1,5 @@
 # FT-0052 — Anonymity threshold + small groups (hide/merge)
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-05)
 
 ## User value
 Система скрывает/сливает группы при малом числе оценщиков, предотвращая раскрытие личности.
@@ -22,11 +22,13 @@ Status: Draft (2026-03-03)
 - Seed: `S7_campaign_started_some_submitted --variant peers2`.
 
 ### Action (CLI, `--json`)
-1) `results my --campaign <handles.campaign.main> --json` (или `results team/hr` по роли)
+1) `results hr --campaign <handles.campaign.main> --subject <handles.employee.subject_main> --json` (default policy `hide`).
+2) `results hr --campaign <handles.campaign.main> --subject <handles.employee.subject_main> --small-group-policy merge_to_other --json`.
 
 ### Assert
-- peers скрыт (hide) или слит в `other` (merge_to_other), согласно policy.
-- Per-competency threshold применяется по `n_valid`.
+- `hide`: `groupVisibility.peers=subordinates=hidden`.
+- `merge_to_other`: `groupVisibility.peers=subordinates=merged`, `groupVisibility.other=shown`.
+- Per-competency threshold: при `merge_to_other` для компетенции `competency.secondary` получаем `otherVisibility=hidden` (недостаточно `n_valid`).
 
 ## Implementation plan (target repo)
 - Core (anonymity policy):
@@ -45,12 +47,36 @@ Status: Draft (2026-03-03)
   - “merge_to_other” должен быть предсказуем: какие группы сливаем и как считаем weights после merge (см. FT-0053).
 
 ## Tests
-- Unit: policy hide/merge при `n=2` и per-competency `n_valid`.
-- Integration: `results my` на variant `peers2` отдаёт `visibility=hidden|merged` без raw раскрытия.
+- Integration: `results.getHrView` на variant `peers2` отдаёт `visibility=hidden|merged` и per-competency visibility по `n_valid`.
+- CLI: `results hr` прокидывает `--small-group-policy/--anonymity-threshold` в typed input.
 
 ## Memory bank updates
 - При изменении порога/правил обновить: [Anonymity policy](../../../../../spec/domain/anonymity-policy.md) — SSoT. Читать, чтобы правки не “расползлись” между витринами.
 
 ## Verification (must)
-- Automated test: `packages/core/test/ft/ft-0052-anonymity.test.ts` (unit+integration) проверяет hide/merge + per-competency threshold на `S7 --variant peers2`.
+- Automated test: `packages/core/src/ft/ft-0052-anonymity.test.ts` (integration) проверяет hide/merge + per-competency threshold на `S7 --variant peers2`.
+- Automated test: `packages/cli/src/ft-0052-results-hr-anonymity-cli.test.ts` проверяет прокидывание CLI опций в typed client.
 - Must run: GS2 должен быть зелёным.
+
+## Project grounding (2026-03-05)
+- [Anonymity policy](../../../../../spec/domain/anonymity-policy.md): canonical threshold/hide/merge правила. Читать, чтобы visibility считалась по SSoT и не допускала deanonymization.
+- [GS2 Small group anonymity](../../../../../spec/testing/scenarios/gs2-small-group-anonymity.md): acceptance intent для merge/hide edge case. Читать, чтобы автотест проверял именно бизнес-инварианты.
+- [Seed S7](../../../../../spec/testing/seeds/s7-campaign-started-some-submitted.md): variant `peers2` и handles. Читать, чтобы сценарий был детерминированным и воспроизводимым.
+- [Implementation playbook](../../../../../plans/implementation-playbook.md): порядок “vertical slice + evidence”. Читать, чтобы завершить фичу через checks+acceptance.
+
+## Quality checks evidence (2026-03-05)
+- `pnpm --filter @feedback-360/api-contract lint && pnpm --filter @feedback-360/api-contract typecheck` → passed.
+- `pnpm --filter @feedback-360/db lint && pnpm --filter @feedback-360/db typecheck` → passed.
+- `pnpm --filter @feedback-360/core lint && pnpm --filter @feedback-360/core typecheck` → passed.
+- `pnpm --filter @feedback-360/client lint && pnpm --filter @feedback-360/client typecheck` → passed.
+- `pnpm --filter @feedback-360/cli lint && pnpm --filter @feedback-360/cli typecheck` → passed.
+
+## Acceptance evidence (2026-03-05)
+- `pnpm --filter @feedback-360/cli exec vitest run src/ft-0051-results-hr-cli.test.ts src/ft-0052-results-hr-anonymity-cli.test.ts` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0051-indicators-aggregations.test.ts` → passed (FT-0051 no-regression).
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0052-anonymity.test.ts` → passed (integration, Supabase pooler).
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/db exec vitest run src/migrations/ft-0003-seed-runner.test.ts` → passed (`S7 --variant peers2`).
+- CLI scenario (real DB, seed `S7_campaign_started_some_submitted --variant peers2`) via `pnpm exec tsx packages/cli/src/index.ts`:
+  - default policy (`hide`) → `groupVisibility.peers=hidden`, `groupVisibility.subordinates=hidden`.
+  - `--small-group-policy merge_to_other` → `groupVisibility.other=shown`, `competency.secondary.otherVisibility=hidden`.
+  - `employee` role on `results hr` → `error.code=forbidden`.

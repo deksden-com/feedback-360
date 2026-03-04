@@ -166,7 +166,7 @@ Status: Draft (2026-03-03)
   - roles: manager
   - idempotency: yes
 
-- command: `results hr [--campaign <id>] [--subject <employee_id>]`
+- command: `results hr [--campaign <id>] [--subject <employee_id>] [--small-group-policy hide|merge_to_other] [--anonymity-threshold <n>]`
   - op: `results.getHrView`
   - roles: hr_admin/hr_reader
   - idempotency: yes
