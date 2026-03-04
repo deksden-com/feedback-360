@@ -6,12 +6,13 @@ Status: Draft (2026-03-03)
 
 ## Action
 1) После старта меняем сотруднику department/manager в HR-справочнике.
-2) Запрашиваем назначения/результаты кампании.
+2) Запрашиваем snapshot кампании до/после изменения.
 
 ## Assertions
-- Кампания продолжает использовать снапшот стартовых данных для назначений/групп и отчётов.
+- Snapshot кампании остаётся неизменным после изменения live HR-справочника.
+- Live-история сотрудника меняется, но snapshot не пересчитывается.
 
 ## Client API ops (v1)
 - `org.department.move` / `org.manager.set` (меняем справочник)
-- `matrix.generateSuggested` / results get (проверяем, что кампанию не “повело”)
-
+- `campaign.snapshot.list` (проверяем, что кампанию не “повело”)
+- `matrix.generateSuggested` / results get (planned next slices)

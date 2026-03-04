@@ -19,6 +19,7 @@ import {
   employees,
   questionnaires,
 } from "./schema";
+import { createCampaignEmployeeSnapshotsForCampaignStartInDb } from "./snapshots";
 
 const seededAt = new Date("2026-01-01T09:00:00.000Z");
 
@@ -97,6 +98,7 @@ const ids = {
 
 const truncateSql = sql.raw(`
   truncate table
+    campaign_employee_snapshots,
     questionnaires,
     campaigns,
     employee_positions,
@@ -762,6 +764,11 @@ const insertS5 = async (db: ReturnType<typeof createDb>): Promise<Record<string,
     submittedAt: null,
     createdAt: seededAt,
     updatedAt: seededAt,
+  });
+
+  await createCampaignEmployeeSnapshotsForCampaignStartInDb(db, {
+    companyId: ids.companyMain,
+    campaignId: ids.campaignMain,
   });
 
   return buildS5Handles();

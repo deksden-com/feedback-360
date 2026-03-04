@@ -40,7 +40,7 @@ Status: Draft (2026-03-03)
 
 - Invariant: оргданные/роли/связи в кампании — это снапшот на момент старта и не обновляется после старта.
   - Spec SSoT: `../domain/org-structure.md`
-  - Tests: GS8 (planned)
+  - Tests: GS8 (baseline implemented in FT-0032 via `campaign.snapshot.list`; matrix/results coupling planned next slices)
   - Seeds: `S4_campaign_draft`, `S5_campaign_started_no_answers`
 
 ## Privacy / anonymity / calculations

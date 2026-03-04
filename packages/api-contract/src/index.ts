@@ -63,6 +63,7 @@ export const knownOperations = [
   "employee.listActive",
   "org.department.move",
   "org.manager.set",
+  "campaign.snapshot.list",
   "client.setActiveCompany",
   "questionnaire.listAssigned",
   "questionnaire.saveDraft",
@@ -145,6 +146,29 @@ export type OrgManagerSetOutput = {
   managerEmployeeId: string;
   changed: boolean;
   effectiveAt: string;
+};
+
+export type CampaignSnapshotListInput = {
+  campaignId: string;
+};
+
+export type CampaignSnapshotListItem = {
+  snapshotId: string;
+  companyId: string;
+  campaignId: string;
+  employeeId: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  departmentId?: string;
+  managerEmployeeId?: string;
+  positionTitle?: string;
+  positionLevel?: number;
+  snapshotAt: string;
+};
+
+export type CampaignSnapshotListOutput = {
+  items: CampaignSnapshotListItem[];
 };
 
 export type ClientSetActiveCompanyInput = {
@@ -735,6 +759,97 @@ export const parseOrgManagerSetOutput = (value: unknown): OrgManagerSetOutput =>
     managerEmployeeId: ensureStringField(record, "managerEmployeeId", "org.manager.set output"),
     changed: ensureBooleanField(record, "changed", "org.manager.set output"),
     effectiveAt: ensureStringField(record, "effectiveAt", "org.manager.set output"),
+  };
+};
+
+const parseCampaignSnapshotListItem = (value: unknown): CampaignSnapshotListItem => {
+  const record = ensureObject(value, "campaign.snapshot.list output.items[]");
+  ensureAllowedKeys(
+    record,
+    [
+      "snapshotId",
+      "companyId",
+      "campaignId",
+      "employeeId",
+      "email",
+      "firstName",
+      "lastName",
+      "departmentId",
+      "managerEmployeeId",
+      "positionTitle",
+      "positionLevel",
+      "snapshotAt",
+    ],
+    "campaign.snapshot.list output.items[]",
+  );
+
+  const firstName = record.firstName;
+  if (firstName !== undefined && firstName !== null && typeof firstName !== "string") {
+    throw new Error("campaign.snapshot.list output.items[].firstName must be a string.");
+  }
+
+  const lastName = record.lastName;
+  if (lastName !== undefined && lastName !== null && typeof lastName !== "string") {
+    throw new Error("campaign.snapshot.list output.items[].lastName must be a string.");
+  }
+
+  const departmentId = record.departmentId;
+  if (departmentId !== undefined && departmentId !== null && typeof departmentId !== "string") {
+    throw new Error("campaign.snapshot.list output.items[].departmentId must be a string.");
+  }
+
+  const managerEmployeeId = record.managerEmployeeId;
+  if (
+    managerEmployeeId !== undefined &&
+    managerEmployeeId !== null &&
+    typeof managerEmployeeId !== "string"
+  ) {
+    throw new Error("campaign.snapshot.list output.items[].managerEmployeeId must be a string.");
+  }
+
+  const positionTitle = record.positionTitle;
+  if (positionTitle !== undefined && positionTitle !== null && typeof positionTitle !== "string") {
+    throw new Error("campaign.snapshot.list output.items[].positionTitle must be a string.");
+  }
+
+  const positionLevel = record.positionLevel;
+  if (positionLevel !== undefined && positionLevel !== null && typeof positionLevel !== "number") {
+    throw new Error("campaign.snapshot.list output.items[].positionLevel must be a number.");
+  }
+
+  return {
+    snapshotId: ensureStringField(record, "snapshotId", "campaign.snapshot.list output.items[]"),
+    companyId: ensureStringField(record, "companyId", "campaign.snapshot.list output.items[]"),
+    campaignId: ensureStringField(record, "campaignId", "campaign.snapshot.list output.items[]"),
+    employeeId: ensureStringField(record, "employeeId", "campaign.snapshot.list output.items[]"),
+    email: ensureStringField(record, "email", "campaign.snapshot.list output.items[]"),
+    ...(typeof firstName === "string" ? { firstName } : {}),
+    ...(typeof lastName === "string" ? { lastName } : {}),
+    ...(typeof departmentId === "string" ? { departmentId } : {}),
+    ...(typeof managerEmployeeId === "string" ? { managerEmployeeId } : {}),
+    ...(typeof positionTitle === "string" ? { positionTitle } : {}),
+    ...(typeof positionLevel === "number" ? { positionLevel } : {}),
+    snapshotAt: ensureStringField(record, "snapshotAt", "campaign.snapshot.list output.items[]"),
+  };
+};
+
+export const parseCampaignSnapshotListInput = (value: unknown): CampaignSnapshotListInput => {
+  const record = ensureObject(value, "campaign.snapshot.list input");
+  ensureAllowedKeys(record, ["campaignId"], "campaign.snapshot.list input");
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.snapshot.list input"),
+  };
+};
+
+export const parseCampaignSnapshotListOutput = (value: unknown): CampaignSnapshotListOutput => {
+  const record = ensureObject(value, "campaign.snapshot.list output");
+  ensureAllowedKeys(record, ["items"], "campaign.snapshot.list output");
+
+  return {
+    items: ensureArray(record.items, "campaign.snapshot.list output.items").map(
+      parseCampaignSnapshotListItem,
+    ),
   };
 };
 

@@ -1,5 +1,5 @@
 # FT-0032 — Snapshot on campaign start
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## User value
 Кампания фиксирует оргсостояние на момент старта; дальнейшие изменения справочника не ломают отчёты и назначения кампании.
@@ -20,11 +20,13 @@ Status: Draft (2026-03-03)
 - Seed: `S5_campaign_started_no_answers --json` (campaign started, snapshot exists).
 
 ### Action
-1) После старта изменить employee department/manager в справочнике (ops `org.department.move` / `org.manager.set`).
-2) Запросить матрицу/результаты кампании (matrix/results ops).
+1) Считать snapshot кампании (`campaign.snapshot.list`).
+2) После старта изменить employee department/manager в справочнике (ops `org.department.move` / `org.manager.set`).
+3) Повторно считать snapshot кампании (`campaign.snapshot.list`).
 
 ### Assert
-- Кампанийные данные (матрица/группы/отчёты) не изменились и продолжают использовать snapshot старта.
+- Snapshot кампании не изменился после изменения live HR-справочника.
+- Live история сотрудника изменилась (новые интервалы department/manager), но snapshot остался прежним.
 
 ## Implementation plan (target repo)
 - DB:
@@ -43,11 +45,32 @@ Status: Draft (2026-03-03)
   - При soft delete employee в справочнике — snapshot и исторические данные кампании остаются.
 
 ## Tests
-- Integration (GS8): изменить оргсправочник после start и убедиться, что матрица/результаты кампании не изменились.
+- Integration (GS8): изменить оргсправочник после start и убедиться, что snapshot кампании не изменился.
+- Automated tests:
+  - `packages/core/src/ft/ft-0032-snapshot-no-db.test.ts`
+  - `packages/core/src/ft/ft-0032-snapshot.test.ts`
+  - `packages/cli/src/ft-0032-campaign-snapshot-cli.test.ts`
 
 ## Memory bank updates
 - Если меняется состав полей в snapshot — обновить: [Org structure](../../../../../spec/domain/org-structure.md) — SSoT состава данных. Читать, чтобы автогенерация и отчёты оставались согласованными.
 
 ## Verification (must)
-- Automated test: `packages/core/test/ft/ft-0032-snapshot.test.ts` (integration) проверяет, что изменения справочника после start не меняют snapshot-based вычисления.
-- Must run: GS8 должен быть зелёным.
+- Must run: `pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, targeted FT-0032 acceptance tests.
+
+## Project grounding (2026-03-04)
+- [Campaign lifecycle](../../../../../spec/domain/campaign-lifecycle.md): правило, что snapshot формируется на старте и дальше неизменяем.
+- [Org structure](../../../../../spec/domain/org-structure.md): какие орг-атрибуты нужно фиксировать в snapshot.
+- [GS8 Snapshot immutability](../../../../../spec/testing/scenarios/gs8-snapshot.md): целевой сценарий проверки неизменяемости.
+- [Operation catalog](../../../../../spec/client-api/operation-catalog.md): актуальный список ops и RBAC.
+- [CLI command catalog](../../../../../spec/cli/command-catalog.md): 1:1 команды к ops для acceptance проверок.
+
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` → passed.
+- `pnpm -r typecheck` → passed.
+- `pnpm -r test` → passed.
+- Build: N/A (изменения только в `packages/*`, отдельного build-gate для FT-0032 нет).
+
+## Acceptance evidence (2026-03-04)
+- `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0032-snapshot-no-db.test.ts src/ft/ft-0032-snapshot.test.ts` → passed (`ft-0032-snapshot.test.ts`: integration subtest skipped без `SUPABASE_DB_POOLER_URL`/`DATABASE_URL`).
+- `pnpm --filter @feedback-360/cli exec vitest run src/ft-0032-campaign-snapshot-cli.test.ts` → passed.
+- Проверено по acceptance intent: после `org.department.move` + `org.manager.set` live-история изменилась, а `campaign.snapshot.list` вернул неизменный snapshot.

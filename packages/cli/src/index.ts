@@ -35,6 +35,11 @@ type QuestionnaireSaveDraftOptions = {
   draftJson?: string;
 };
 
+type CampaignSnapshotListOptions = {
+  json?: boolean;
+  campaign: string;
+};
+
 type EmployeeUpsertOptions = {
   json?: boolean;
   email?: string;
@@ -201,6 +206,29 @@ const formatEmployeeListHuman = (data: {
   return lines.join("\n");
 };
 
+const formatCampaignSnapshotsHuman = (data: {
+  items: Array<{
+    employeeId: string;
+    email: string;
+    departmentId?: string;
+    managerEmployeeId?: string;
+    snapshotAt: string;
+  }>;
+}): string => {
+  if (data.items.length === 0) {
+    return "No campaign snapshots found.";
+  }
+
+  const lines = [`Campaign snapshots: ${data.items.length}`];
+  for (const item of data.items) {
+    lines.push(
+      `- employee=${item.employeeId}, email=${item.email}, department=${item.departmentId ?? "-"}, manager=${item.managerEmployeeId ?? "-"}, snapshotAt=${item.snapshotAt}`,
+    );
+  }
+
+  return lines.join("\n");
+};
+
 const parseBooleanOption = (value: string, fieldName: string): boolean => {
   const normalized = value.trim().toLowerCase();
   if (normalized === "true") {
@@ -224,7 +252,14 @@ const normalizeLegacySeedArgs = (argv: string[]): string[] => {
     return normalizedArgv;
   }
 
-  const knownTopLevelCommands = new Set(["seed", "company", "employee", "org", "questionnaire"]);
+  const knownTopLevelCommands = new Set([
+    "seed",
+    "company",
+    "employee",
+    "org",
+    "campaign",
+    "questionnaire",
+  ]);
   if (!knownTopLevelCommands.has(firstArgument) && firstArgument.startsWith("--")) {
     normalizedArgv.splice(2, 0, "seed");
   }
@@ -245,6 +280,7 @@ export const runCli = async (argv: string[]): Promise<void> => {
 Examples:
   pnpm seed --scenario S1_company_min
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- company use <company_id>
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign snapshot list --campaign <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- questionnaire list --campaign <campaign_id> --json
 `,
     );
@@ -433,6 +469,33 @@ Examples:
         console.log(
           `Manager set: employee=${result.data.employeeId}, previous=${result.data.previousManagerEmployeeId ?? "-"}, current=${result.data.managerEmployeeId}, changed=${result.data.changed}`,
         );
+      }
+    });
+
+  const campaignCommand = program.command("campaign").description("Campaign operations.");
+
+  campaignCommand
+    .command("snapshot")
+    .description("Campaign snapshot operations.")
+    .command("list")
+    .description("List campaign employee snapshots (snapshot-on-start).")
+    .requiredOption("--campaign <campaign_id>", "Campaign identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: CampaignSnapshotListOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.campaignSnapshotList({
+        campaignId: options.campaign,
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatCampaignSnapshotsHuman(result.data));
       }
     });
 

@@ -15,6 +15,7 @@ describe("client package", () => {
     expect(typeof client.employeeListActive).toBe("function");
     expect(typeof client.orgDepartmentMove).toBe("function");
     expect(typeof client.orgManagerSet).toBe("function");
+    expect(typeof client.campaignSnapshotList).toBe("function");
     expect(typeof client.questionnaireListAssigned).toBe("function");
     expect(typeof client.questionnaireSaveDraft).toBe("function");
     expect(typeof client.questionnaireSubmit).toBe("function");

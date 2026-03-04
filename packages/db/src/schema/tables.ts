@@ -135,6 +135,39 @@ export const campaigns = pgTable("campaigns", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const campaignEmployeeSnapshots = pgTable(
+  "campaign_employee_snapshots",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    employeeId: uuid("employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    firstName: text("first_name"),
+    lastName: text("last_name"),
+    phone: text("phone"),
+    telegramUserId: text("telegram_user_id"),
+    telegramChatId: text("telegram_chat_id"),
+    departmentId: uuid("department_id").references(() => departments.id, { onDelete: "set null" }),
+    managerEmployeeId: uuid("manager_employee_id").references(() => employees.id, {
+      onDelete: "set null",
+    }),
+    positionTitle: text("position_title"),
+    positionLevel: integer("position_level"),
+    snapshotAt: timestamp("snapshot_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique("uq_campaign_snapshot_campaign_employee").on(table.campaignId, table.employeeId),
+  ],
+);
+
 export const questionnaires = pgTable(
   "questionnaires",
   {

@@ -1,4 +1,6 @@
 import {
+  type CampaignSnapshotListInput,
+  type CampaignSnapshotListOutput,
   type ClientSetActiveCompanyOutput,
   type DispatchOperationInput,
   type EmployeeListActiveInput,
@@ -24,6 +26,8 @@ import {
   errorFromUnknown,
   errorResult,
   okResult,
+  parseCampaignSnapshotListInput,
+  parseCampaignSnapshotListOutput,
   parseClientSetActiveCompanyInput,
   parseClientSetActiveCompanyOutput,
   parseDispatchOperationInput,
@@ -94,6 +98,10 @@ export type Feedback360Client = {
     input: OrgManagerSetInput,
     context?: OperationContext,
   ): Promise<OperationResult<OrgManagerSetOutput>>;
+  campaignSnapshotList(
+    input: CampaignSnapshotListInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignSnapshotListOutput>>;
   questionnaireListAssigned(
     input: QuestionnaireListAssignedInput,
     context?: OperationContext,
@@ -278,6 +286,24 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseOrgManagerSetOutput,
+      });
+    },
+
+    campaignSnapshotList: async (input, context) => {
+      let parsedInput: CampaignSnapshotListInput;
+      try {
+        parsedInput = parseCampaignSnapshotListInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid campaignSnapshotList input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "campaign.snapshot.list",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignSnapshotListOutput,
       });
     },
 

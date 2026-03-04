@@ -117,6 +117,11 @@ Status: Draft (2026-03-03)
   - roles: hr_admin/hr_reader
   - idempotency: yes
 
+- command: `campaign snapshot list --campaign <campaign_id>`
+  - op: `campaign.snapshot.list`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
 ## Matrix / assignments
 - command: `matrix generate <campaign_id> --from-departments <dept_id>...`
   - op: `matrix.generateSuggested`

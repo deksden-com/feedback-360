@@ -1,4 +1,6 @@
 import {
+  type CampaignSnapshotListInput,
+  type CampaignSnapshotListOutput,
   type CompanyUpdateProfileInput,
   type CompanyUpdateProfileOutput,
   type DispatchOperationInput,
@@ -23,6 +25,8 @@ import {
   errorResult,
   isKnownOperation,
   okResult,
+  parseCampaignSnapshotListInput,
+  parseCampaignSnapshotListOutput,
   parseCompanyUpdateProfileInput,
   parseCompanyUpdateProfileOutput,
   parseDispatchOperationInput,
@@ -46,6 +50,7 @@ import {
 import {
   listActiveEmployees,
   listAssignedQuestionnaires,
+  listCampaignEmployeeSnapshots,
   moveEmployeeDepartment,
   saveQuestionnaireDraft,
   setEmployeeManager,
@@ -275,6 +280,44 @@ const runOrgManagerSet = async (
   }
 };
 
+const runCampaignSnapshotList = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignSnapshotListOutput>> => {
+  if (!hasRole(request, ["hr_admin", "hr_reader"])) {
+    return errorResult(
+      createOperationError("forbidden", "Current role cannot list campaign snapshots.", {
+        operation: "campaign.snapshot.list",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignSnapshotListInput;
+  try {
+    parsedInput = parseCampaignSnapshotListInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid campaign.snapshot.list input."),
+    );
+  }
+
+  try {
+    const output = await listCampaignEmployeeSnapshots({
+      campaignId: parsedInput.campaignId,
+      companyId: companyIdOrError,
+    });
+    return okResult(parseCampaignSnapshotListOutput(output));
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Failed to list campaign snapshots."),
+    );
+  }
+};
+
 const runQuestionnaireListAssigned = async (
   request: DispatchOperationInput,
 ): Promise<OperationResult<QuestionnaireListAssignedOutput>> => {
@@ -399,6 +442,7 @@ export const dispatchOperation = (
     | EmployeeListActiveOutput
     | OrgDepartmentMoveOutput
     | OrgManagerSetOutput
+    | CampaignSnapshotListOutput
     | QuestionnaireListAssignedOutput
     | QuestionnaireSaveDraftOutput
     | QuestionnaireSubmitOutput
@@ -436,6 +480,8 @@ export const dispatchOperation = (
       return runOrgDepartmentMove(parsedRequest);
     case "org.manager.set":
       return runOrgManagerSet(parsedRequest);
+    case "campaign.snapshot.list":
+      return runCampaignSnapshotList(parsedRequest);
     case "questionnaire.listAssigned":
       return runQuestionnaireListAssigned(parsedRequest);
     case "questionnaire.saveDraft":

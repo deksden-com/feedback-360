@@ -103,6 +103,10 @@ Status: Draft (2026-03-03)
   - roles: hr_admin/hr_reader
   - idempotent: yes
   - cli: `campaign progress`
+- `campaign.snapshot.list`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - cli: `campaign snapshot list`
 
 ## Matrix / assignments
 - `matrix.generateSuggested`
