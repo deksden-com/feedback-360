@@ -56,6 +56,9 @@ importers:
       '@feedback-360/client':
         specifier: workspace:*
         version: link:../client
+      '@feedback-360/core':
+        specifier: workspace:*
+        version: link:../core
       commander:
         specifier: 14.0.1
         version: 14.0.1
@@ -69,6 +72,9 @@ importers:
       '@feedback-360/api-contract':
         specifier: workspace:*
         version: link:../api-contract
+      '@feedback-360/core':
+        specifier: workspace:*
+        version: link:../core
       '@feedback-360/db':
         specifier: workspace:*
         version: link:../db

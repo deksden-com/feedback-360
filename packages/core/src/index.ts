@@ -95,6 +95,13 @@ export const dispatchOperation = (
       return runSystemPing(parsedRequest.input);
     case "company.updateProfile":
       return runCompanyUpdateProfile(parsedRequest);
+    case "client.setActiveCompany":
+      return errorResult(
+        createOperationError(
+          "not_found",
+          "Operation client.setActiveCompany is client-local and unavailable in core dispatcher.",
+        ),
+      );
     case "seed.run":
       return errorResult(
         createOperationError(

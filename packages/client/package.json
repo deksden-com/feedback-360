@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@feedback-360/api-contract": "workspace:*",
+    "@feedback-360/core": "workspace:*",
     "@feedback-360/db": "workspace:*"
   }
 }

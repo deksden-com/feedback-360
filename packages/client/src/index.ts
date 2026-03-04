@@ -1,23 +1,180 @@
 import {
+  type ClientSetActiveCompanyOutput,
+  type DispatchOperationInput,
+  type OperationContext,
+  type OperationResult,
   type SeedRunInput,
   type SeedRunOutput,
+  type SystemPingOutput,
+  createOperationError,
+  errorFromUnknown,
+  errorResult,
+  okResult,
+  parseClientSetActiveCompanyInput,
+  parseClientSetActiveCompanyOutput,
+  parseDispatchOperationInput,
+  parseOperationResult,
   parseSeedRunInput,
   parseSeedRunOutput,
+  parseSystemPingOutput,
 } from "@feedback-360/api-contract";
+import { dispatchOperation } from "@feedback-360/core";
 import { runSeedScenario } from "@feedback-360/db";
+
+export type OperationTransport = {
+  invoke(request: DispatchOperationInput): Promise<unknown>;
+};
+
+type FetchLike = (
+  input: string,
+  init?: {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: string;
+  },
+) => Promise<{ json(): Promise<unknown> }>;
+
+export type CreateHttpTransportOptions = {
+  baseUrl: string;
+  endpointPath?: string;
+  fetchFn?: FetchLike;
+};
+
+type InvokeOperationParams<Output> = {
+  operation: string;
+  input: unknown;
+  context?: OperationContext;
+  parseOutput: (value: unknown) => Output;
+};
 
 export type Feedback360Client = {
   seedRun(input: SeedRunInput): Promise<SeedRunOutput>;
+  systemPing(context?: OperationContext): Promise<OperationResult<SystemPingOutput>>;
+  setActiveCompany(companyId: string): OperationResult<ClientSetActiveCompanyOutput>;
+  getActiveCompany(): string | undefined;
+  invokeOperation<Output>(params: InvokeOperationParams<Output>): Promise<OperationResult<Output>>;
 };
 
-export const createInprocClient = (): Feedback360Client => {
+export const createInprocTransport = (): OperationTransport => {
+  return {
+    invoke: async (request) => dispatchOperation(request),
+  };
+};
+
+export const createHttpTransport = (options: CreateHttpTransportOptions): OperationTransport => {
+  const endpointPath = options.endpointPath ?? "/api/v1/operations";
+  const normalizedBaseUrl = options.baseUrl.endsWith("/")
+    ? options.baseUrl.slice(0, -1)
+    : options.baseUrl;
+  const endpointUrl = `${normalizedBaseUrl}${endpointPath}`;
+  const fetchImpl: FetchLike = options.fetchFn ?? ((input, init) => fetch(input, init));
+
+  return {
+    invoke: async (request) => {
+      const response = await fetchImpl(endpointUrl, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(request),
+      });
+
+      return response.json();
+    },
+  };
+};
+
+export const createClient = (transport: OperationTransport): Feedback360Client => {
+  let activeCompanyId: string | undefined;
+
+  const withActiveCompany = (context?: OperationContext): OperationContext => {
+    if (!activeCompanyId) {
+      return context ?? {};
+    }
+
+    if (context?.companyId) {
+      return context;
+    }
+
+    return {
+      ...(context ?? {}),
+      companyId: activeCompanyId,
+    };
+  };
+
+  const invokeOperation = async <Output>({
+    operation,
+    input,
+    context,
+    parseOutput,
+  }: InvokeOperationParams<Output>): Promise<OperationResult<Output>> => {
+    let request: DispatchOperationInput;
+    try {
+      request = parseDispatchOperationInput({
+        operation,
+        input,
+        context: withActiveCompany(context),
+      });
+    } catch (error) {
+      return errorResult(errorFromUnknown(error, "invalid_input", "Invalid operation request."));
+    }
+
+    let rawResult: unknown;
+    try {
+      rawResult = await transport.invoke(request);
+    } catch (error) {
+      return errorResult(
+        errorFromUnknown(error, "invalid_input", "Operation transport invocation failed."),
+      );
+    }
+
+    try {
+      return parseOperationResult(rawResult, parseOutput);
+    } catch (error) {
+      return errorResult(
+        errorFromUnknown(error, "invalid_input", "Invalid operation result payload."),
+      );
+    }
+  };
+
   return {
     seedRun: async (input) => {
       const parsedInput = parseSeedRunInput(input);
       const output = await runSeedScenario(parsedInput);
       return parseSeedRunOutput(output);
     },
+
+    systemPing: async (context) => {
+      return invokeOperation({
+        operation: "system.ping",
+        input: {},
+        context,
+        parseOutput: parseSystemPingOutput,
+      });
+    },
+
+    setActiveCompany: (companyId) => {
+      try {
+        const parsedInput = parseClientSetActiveCompanyInput({ companyId });
+        activeCompanyId = parsedInput.companyId;
+        return okResult(parseClientSetActiveCompanyOutput(parsedInput));
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid active company payload."),
+        );
+      }
+    },
+
+    getActiveCompany: () => {
+      return activeCompanyId;
+    },
+
+    invokeOperation,
   };
+};
+
+export const createInprocClient = (): Feedback360Client => {
+  return createClient(createInprocTransport());
 };
 
 export const clientReady = true;

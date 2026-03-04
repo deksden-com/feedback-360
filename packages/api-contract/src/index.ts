@@ -49,7 +49,12 @@ export type DispatchOperationInput = {
   context?: OperationContext;
 };
 
-export const knownOperations = ["seed.run", "system.ping", "company.updateProfile"] as const;
+export const knownOperations = [
+  "seed.run",
+  "system.ping",
+  "company.updateProfile",
+  "client.setActiveCompany",
+] as const;
 export type KnownOperation = (typeof knownOperations)[number];
 
 export type SystemPingInput = Record<string, never>;
@@ -67,6 +72,14 @@ export type CompanyUpdateProfileOutput = {
   companyId: string;
   name: string;
   updatedAt: string;
+};
+
+export type ClientSetActiveCompanyInput = {
+  companyId: string;
+};
+
+export type ClientSetActiveCompanyOutput = {
+  companyId: string;
 };
 
 export type SeedRunInput = {
@@ -374,6 +387,24 @@ export const parseCompanyUpdateProfileOutput = (value: unknown): CompanyUpdatePr
     companyId: ensureStringField(record, "companyId", "company.updateProfile output"),
     name: ensureStringField(record, "name", "company.updateProfile output"),
     updatedAt: ensureStringField(record, "updatedAt", "company.updateProfile output"),
+  };
+};
+
+export const parseClientSetActiveCompanyInput = (value: unknown): ClientSetActiveCompanyInput => {
+  const record = ensureObject(value, "client.setActiveCompany input");
+  ensureAllowedKeys(record, ["companyId"], "client.setActiveCompany input");
+
+  return {
+    companyId: ensureStringField(record, "companyId", "client.setActiveCompany input"),
+  };
+};
+
+export const parseClientSetActiveCompanyOutput = (value: unknown): ClientSetActiveCompanyOutput => {
+  const record = ensureObject(value, "client.setActiveCompany output");
+  ensureAllowedKeys(record, ["companyId"], "client.setActiveCompany output");
+
+  return {
+    companyId: ensureStringField(record, "companyId", "client.setActiveCompany output"),
   };
 };
 

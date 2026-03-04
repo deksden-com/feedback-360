@@ -1,5 +1,5 @@
 # FT-0012 — Typed client transport (HTTP + in-proc)
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## User value
 UI и CLI вызывают одни и те же операции; тесты могут вызывать операции in-proc без сети, поведение не расходится.
@@ -59,10 +59,36 @@ UI и CLI вызывают одни и те же операции; тесты м
 - Если меняется модель active company/контекста — обновить: [Auth & tenancy](../../../../../spec/client-api/auth-and-tenancy.md) — SSoT правил. Читать, чтобы UI/CLI были консистентны.
 
 ## Verification (must)
-- Automated test: `packages/client/test/ft/ft-0012-transport-parity.test.ts` (integration) проверяет parity `system.ping` (HTTP vs in-proc).
-- Automated test: `packages/client/test/ft/ft-0012-active-company-context.test.ts` (unit/integration) проверяет client-local set + parity propagation.
+- Automated test: `packages/client/src/ft-0012-transport-parity.test.ts` (integration) проверяет parity `system.ping` (HTTP vs in-proc).
+- Automated test: `packages/client/src/ft-0012-active-company-context.test.ts` (unit/integration) проверяет client-local set + parity propagation.
 - Must run: FT-0012 parity тест + `pnpm -r test`.
 
 ## Visual evidence guidance
 - Скриншоты опциональны: ключевая проверка фичи должна подтверждаться тестами parity/context.
 - Если прикладываем визуализацию, достаточно 1 скрина/сниппета лога с результатом parity тестов (optional).
+
+## Implementation result (2026-03-04)
+- В `packages/client` реализован транспортный слой:
+  - `OperationTransport` интерфейс,
+  - `createInprocTransport()` (через core dispatcher),
+  - `createHttpTransport()` (fetch-based transport),
+  - `createClient()` как общий typed client поверх транспорта.
+- Добавлена client-local операция `setActiveCompany(companyId)`:
+  - сохраняет active company в памяти клиента,
+  - не вызывает transport,
+  - инжектит `companyId` в context при вызовах ops (если context.companyId явно не задан).
+- Добавлен ops-метод `systemPing()` и общий `invokeOperation(...)` с runtime-парсингом `OperationResult`.
+- Контракт расширен для FT-0012:
+  - `client.setActiveCompany` input/output parsers,
+  - `knownOperations` включает `client.setActiveCompany`.
+
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` — passed.
+- `pnpm -r typecheck` — passed.
+- `pnpm -r test` — passed.
+- `build` — N/A (в FT-0012 проверяли transport/client contract и parity тестами; новых build targets нет).
+
+## Acceptance evidence (2026-03-04)
+- `pnpm --filter @feedback-360/client exec vitest run src/ft-0012-transport-parity.test.ts` → passed (HTTP vs in-proc parity).
+- `pnpm --filter @feedback-360/client exec vitest run src/ft-0012-active-company-context.test.ts` → passed (setActiveCompany no-network + context propagation parity).
+- Regression gate: `pnpm -r test` зелёный.

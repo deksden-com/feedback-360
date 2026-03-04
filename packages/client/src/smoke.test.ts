@@ -7,8 +7,11 @@ describe("client package", () => {
     expect(clientReady).toBe(true);
   });
 
-  it("creates inproc client with seedRun operation", () => {
+  it("creates inproc client with key operations", () => {
     const client = createInprocClient();
     expect(typeof client.seedRun).toBe("function");
+    expect(typeof client.systemPing).toBe("function");
+    expect(typeof client.setActiveCompany).toBe("function");
+    expect(typeof client.invokeOperation).toBe("function");
   });
 });

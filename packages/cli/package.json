@@ -14,6 +14,7 @@
   "dependencies": {
     "@feedback-360/api-contract": "workspace:*",
     "@feedback-360/client": "workspace:*",
+    "@feedback-360/core": "workspace:*",
     "commander": "14.0.1"
   },
   "devDependencies": {

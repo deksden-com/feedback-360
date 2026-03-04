@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   apiContractReady,
+  parseClientSetActiveCompanyInput,
   parseOperationError,
   parseSeedRunInput,
   parseSeedRunOutput,
@@ -34,5 +35,10 @@ describe("api-contract package", () => {
 
     expect(error.code).toBe("invalid_input");
     expect(error.details?.field).toBe("scenario");
+  });
+
+  it("parses client active company input", () => {
+    const parsed = parseClientSetActiveCompanyInput({ companyId: "company-1" });
+    expect(parsed.companyId).toBe("company-1");
   });
 });
