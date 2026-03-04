@@ -23,10 +23,14 @@ Status: Draft (2026-03-03)
 ### Action (integration test)
 1) Вызвать любую operation handler функцию с невалидным input (schema violation).
 2) Вызвать write-операцию в контексте роли без прав (RBAC).
+3) Вызвать operation dispatcher с валидной operation и валидным input (happy-path через роутер/диспетчер).
+4) Вызвать operation dispatcher с неизвестной operation.
 
 ### Assert
 - (1) возвращает error shape `{"code","message","details"}` и `code=invalid_input` (или согласованный эквивалент).
 - (2) возвращает `code=forbidden`.
+- (3) возвращает `ok=true` и output, прошедший runtime-валидацию output schema.
+- (4) возвращает typed error (`code=not_found` или согласованный `operation_not_found` в рамках Error model).
 - При вызове через CLI с `--json`: печатается `{"ok":false,"error":{...}}` и `exitCode != 0`.
 
 ## Implementation plan (target repo)
@@ -48,6 +52,7 @@ Status: Draft (2026-03-03)
 ## Tests
 - Contract: тесты runtime-схем (невалидный input → `invalid_input`).
 - Integration: запрет по RBAC → `forbidden` (под role без прав).
+- Integration: dispatcher happy-path/unknown-op (typed response в обоих кейсах).
 - CLI: snapshot тест `--json` ошибки (shape стабильный).
 
 ## Memory bank updates

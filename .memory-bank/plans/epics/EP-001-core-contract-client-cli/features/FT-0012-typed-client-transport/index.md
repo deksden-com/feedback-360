@@ -23,13 +23,20 @@ UI и CLI вызывают одни и те же операции; тесты м
 ### Action
 1) Вызвать `system.ping` через HTTP transport клиента.
 2) Вызвать `system.ping` через in-proc transport клиента.
+3) Вызвать `client.setActiveCompany(<company_id>)`.
+4) Выполнить любой ops-вызов через оба транспорта и проверить, что active company контекст передаётся одинаково (через envelope/header/context в adapter layer).
+5) Проверить, что `client.setActiveCompany` — client-local операция (без сетевого вызова).
 
 ### Assert
 - Оба ответа валидируются одинаковой схемой и эквивалентны по данным.
 - Ошибки (если возникают) имеют одинаковый shape и коды.
+- После (3) active company сохранена в клиентском контексте.
+- После (4) оба транспорта видят одинаковый active company context.
+- После (5) transport spy не фиксирует сетевого вызова на `client.setActiveCompany`.
 
 ### Client API ops (v1)
 - `system.ping`
+- `client.setActiveCompany`
 
 ## Implementation plan (target repo)
 - `packages/client`:
@@ -45,10 +52,13 @@ UI и CLI вызывают одни и те же операции; тесты м
 ## Tests
 - Integration: сравнение `system.ping` HTTP vs in-proc (эквивалентность данных).
 - Unit: сериализация/десериализация ошибок одинакова для обоих транспортов.
+- Unit/Integration: `client.setActiveCompany` обновляет client-local контекст и не вызывает transport.
+- Integration: active company context propagation parity (HTTP vs in-proc).
 
 ## Memory bank updates
 - Если меняется модель active company/контекста — обновить: [Auth & tenancy](../../../../../spec/client-api/auth-and-tenancy.md) — SSoT правил. Читать, чтобы UI/CLI были консистентны.
 
 ## Verification (must)
 - Automated test: `packages/client/test/ft/ft-0012-transport-parity.test.ts` (integration) проверяет parity `system.ping` (HTTP vs in-proc).
+- Automated test: `packages/client/test/ft/ft-0012-active-company-context.test.ts` (unit/integration) проверяет client-local set + parity propagation.
 - Must run: FT-0012 parity тест + `pnpm -r test`.

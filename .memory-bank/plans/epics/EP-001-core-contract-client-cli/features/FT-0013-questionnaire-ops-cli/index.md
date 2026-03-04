@@ -27,13 +27,20 @@ Status: Draft (2026-03-03)
 2) `questionnaire list --campaign <handles.campaign.main> --status not_started --json` → взять `questionnaire_id`
 3) `questionnaire save-draft <questionnaire_id> ... --json`
 4) `questionnaire submit <questionnaire_id> --json`
+5) `questionnaire list --campaign <handles.campaign.main> --status submitted --json` (проверить, что анкета появилась в submitted списке)
+6) Повторный `questionnaire submit <questionnaire_id> --json`
+7) Попытка `questionnaire save-draft <questionnaire_id> ... --json` после submit
+8) `questionnaire list --campaign <handles.campaign.main>` (human output, без `--json`)
 
 ### Assert
 - После (3): анкета `status=in_progress`, а у кампании выставлен `locked_at`.
 - После (4): анкета `status=submitted`, `submitted_at` заполнен.
-- Повторный `submit`:
+- После (5): `questionnaire_id` присутствует в submitted списке.
+- Повторный `submit` (шаг 6):
   - либо идемпотентный no-op (предпочтительно),
   - либо доменная ошибка с typed `code` (должно быть зафиксировано в реализации и тестах).
+- Шаг (7): submit-анкета immutable — `save-draft` не меняет ответы и возвращает typed error (`invalid_transition` или согласованный эквивалент).
+- Шаг (8): human-формат команды доступен и возвращает `exitCode=0`.
 
 ### Client API ops (v1)
 - `client.setActiveCompany` (client-local)
@@ -60,6 +67,7 @@ Status: Draft (2026-03-03)
 - Unit: state machine анкеты (draft→submitted) + поведение повторного submit.
 - Integration: `saveDraft` выставляет `campaign.locked_at` и это влияет на запрещённые ops (через GS5/FT-0044).
 - CLI: `questionnaire list --json` детерминированно возвращает список, пригодный для сценариев.
+- CLI/Integration: после `submitted` попытка `save-draft` должна быть запрещена и проверяться typed code.
 
 ## Memory bank updates
 - При уточнении поведения повторного `submit` обновить: [Questionnaires](../../../../../spec/domain/questionnaires.md) — SSoT доменных инвариантов. Читать, чтобы UI/CLI и тесты были согласованы.

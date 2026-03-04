@@ -52,13 +52,14 @@ Status: Draft (2026-03-03)
 ## EP-001 Core + Contract + Client + CLI-first
 - FT-0011
   - Must add test: `packages/core/test/ft/ft-0011-op-errors.test.ts`
-  - Must run: invalid input → `invalid_input`, RBAC → `forbidden`, CLI `--json` shape.
+  - Must run: invalid input → `invalid_input`, RBAC → `forbidden`, dispatcher happy-path/unknown-op typed response, CLI `--json` shape.
 - FT-0012
   - Must add test: `packages/client/test/ft/ft-0012-transport-parity.test.ts`
-  - Must run: `system.ping` parity (HTTP vs in-proc).
+  - Must add test: `packages/client/test/ft/ft-0012-active-company-context.test.ts`
+  - Must run: `system.ping` parity (HTTP vs in-proc) + `client.setActiveCompany` no-network + context propagation parity.
 - FT-0013
   - Must add test: `packages/core/test/ft/ft-0013-questionnaires.test.ts`
-  - Must run: GS5 (lock) частично опирается на saveDraft; GS1 (happy path) использует list/save/submit.
+  - Must run: list/saveDraft/submit flow + submitted immutability (`saveDraft` after submit forbidden) + GS5/GS1 regressions.
 
 ## EP-002 Identity, tenancy, RBAC
 - FT-0021
