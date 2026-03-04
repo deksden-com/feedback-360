@@ -22,6 +22,7 @@ Status: Draft (2026-03-04)
 
 ## Deploy topology (L2 ops view)
 - `apps/web` deploys on Vercel (App Router).
+- Vercel build strategy for monorepo is pinned in `apps/web/vercel.json` (`builds: [{ src: "package.json", use: "@vercel/next" }]`), чтобы избежать empty-output deploy при авто-детекте в `rootDirectory=apps/web`.
 - Runtime data in Supabase Postgres + Supabase Auth.
 - Transactional email through Resend (custom SMTP also configured in Supabase Auth).
 - Error monitoring through Sentry.

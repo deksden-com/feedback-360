@@ -50,18 +50,21 @@ Status: Draft (2026-03-04)
   - merge только через PR, force-push/delete запрещены, conversation resolution включён.
 - Vercel projects:
   - `go360go-beta` и `go360go-prod` переведены на `framework=nextjs`, build/dev команды: `pnpm build` / `pnpm dev`, root directory=`apps/web`.
+  - `go360go-beta` требует финальной синхронизации `productionBranch=develop` (сейчас в API состоянии ещё `main`).
   - после настройки последний deployment `go360go-beta` имеет статус `Ready` (production target),
   - последний deployment `go360go-prod` имеет статус `Ready` (preview target).
-  - зафиксирован remaining issue: deployments переходят в `Ready`, но содержат `routesCount=0/outputCount=0` (пустой output), поэтому требуется отдельная донастройка monorepo-build в Vercel.
+  - root cause empty-output зафиксирован: `vercel build` в cloud завершался за ~70ms и публиковал только static-source output (без Next routes).
+  - mitigation внесён в кодовую базу: `apps/web/vercel.json` с явным `@vercel/next` builder (`src=package.json`), локальный `vercel build` теперь стабильно выполняет `pnpm run build`, детектирует Next.js routes и формирует serverless output.
 - Sentry build-token remediation:
   - `SENTRY_AUTH_TOKEN` восстановлен в Vercel env (beta/prod);
   - `SENTRY_ORG=deksdencom`, `SENTRY_PROJECT`: `go360go-beta` (beta), `go360go-prod` (prod production), `go360go-beta` (prod preview/development);
   - токен подтверждён через `sentry-cli` (scopes + upload sourcemaps в локальном `next build`).
 
 ### Remaining operational follow-up
-1. Починить monorepo deploy output в Vercel (deployment не должен быть пустым; проверить `/api/health` на beta после фикса).
-2. После фикса Vercel monorepo output перепроверить в cloud-build, что `sentry-cli` шаги (release/sourcemaps) проходят без `401/403`.
-3. После следующего merge в `main` зафиксировать первый `go360go-prod` deployment со статусом `Ready` на production target.
+1. Выставить в Vercel для `go360go-beta` production branch = `develop` (и убедиться, что alias `beta.go360go.ru` всегда указывает на deploy из `develop`).
+2. Дождаться снятия Vercel hobby лимита deploy/day (`api-deployments-free-per-day`) и перепроверить cloud deploy для `go360go-beta`/`go360go-prod`.
+3. После следующего cloud deploy проверить `200` на `https://beta.go360go.ru/api/health` и `https://go360go.ru/api/health`.
+4. После успешного cloud deploy перепроверить в build logs, что `sentry-cli` шаги (release/sourcemaps) проходят без `401/403`.
 
 ## Environment checklist
 - Vercel env vars are present and mapped to the right environment.
