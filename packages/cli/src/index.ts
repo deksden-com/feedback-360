@@ -75,8 +75,20 @@ type CampaignSetModelOptions = {
   json?: boolean;
 };
 
+type CampaignWeightsSetOptions = {
+  json?: boolean;
+  manager: number;
+  peers: number;
+  subordinates: number;
+};
+
 type CampaignParticipantsMutationOptions = {
   json?: boolean;
+};
+
+type MatrixSetOptions = {
+  json?: boolean;
+  assignmentsJson: string;
 };
 
 type AiRunOptions = {
@@ -359,6 +371,22 @@ const formatCampaignParticipantsMutationHuman = (data: {
   return `Campaign participants updated: campaign=${data.campaignId}, changed=${data.changedEmployeeIds.length}, total=${data.totalParticipants}`;
 };
 
+const formatCampaignWeightsSetHuman = (data: {
+  campaignId: string;
+  manager: number;
+  peers: number;
+  subordinates: number;
+  self: number;
+  changed: boolean;
+  updatedAt: string;
+}): string => {
+  return `Campaign weights updated: campaign=${data.campaignId}, manager=${data.manager}, peers=${data.peers}, subordinates=${data.subordinates}, self=${data.self}, changed=${data.changed}, updatedAt=${data.updatedAt}`;
+};
+
+const formatMatrixSetHuman = (data: { campaignId: string; totalAssignments: number }): string => {
+  return `Matrix set: campaign=${data.campaignId}, totalAssignments=${data.totalAssignments}`;
+};
+
 const buildDefaultModelPayload = (name: string, kind: "indicators" | "levels") => {
   if (kind === "levels") {
     return {
@@ -462,12 +490,14 @@ Examples:
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- model version create --name "Q1 Model" --kind indicators --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign create --name "Q1 Campaign" --model-version <model_version_id> --start-at 2026-02-01T09:00:00.000Z --end-at 2026-02-28T18:00:00.000Z --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign set-model <campaign_id> <model_version_id> --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign weights set <campaign_id> --manager 40 --peers 30 --subordinates 30 --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants add <campaign_id> <employee_id>... --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants remove <campaign_id> <employee_id>... --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign start <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign stop <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign snapshot list --campaign <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants add-departments <campaign_id> --from-departments <department_id>...
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- matrix set <campaign_id> --assignments-json '[{"subjectEmployeeId":"<id>","raterEmployeeId":"<id>","raterRole":"manager"}]' --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- ai run <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- questionnaire list --campaign <campaign_id> --json
 `,
@@ -773,6 +803,54 @@ Examples:
       },
     );
 
+  const campaignWeightsCommand = campaignCommand
+    .command("weights")
+    .description("Campaign weights operations.");
+
+  campaignWeightsCommand
+    .command("set")
+    .description("Set campaign rater-group weights (`draft`/`started`, until lock).")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .requiredOption("--manager <value>", "Manager weight.", Number)
+    .requiredOption("--peers <value>", "Peers weight.", Number)
+    .requiredOption("--subordinates <value>", "Subordinates weight.", Number)
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (campaignId: string, options: CampaignWeightsSetOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      if (
+        !Number.isFinite(options.manager) ||
+        !Number.isFinite(options.peers) ||
+        !Number.isFinite(options.subordinates)
+      ) {
+        emitError(
+          createOperationError(
+            "invalid_input",
+            "Weights must be finite numbers for --manager/--peers/--subordinates.",
+          ),
+          options.json,
+        );
+        return;
+      }
+
+      const result = await client.campaignWeightsSet({
+        campaignId,
+        manager: options.manager,
+        peers: options.peers,
+        subordinates: options.subordinates,
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatCampaignWeightsSetHuman(result.data));
+      }
+    });
+
   campaignCommand
     .command("start")
     .description("Start campaign (`draft -> started`).")
@@ -1000,6 +1078,57 @@ Examples:
 
       if (!options.json && result.ok) {
         console.log(formatMatrixSuggestionsHuman(result.data));
+      }
+    });
+
+  matrixCommand
+    .command("set")
+    .description("Replace matrix assignments (`draft`/`started`, until lock).")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .requiredOption(
+      "--assignments-json <json>",
+      "JSON array of assignments [{subjectEmployeeId,raterEmployeeId,raterRole}].",
+    )
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (campaignId: string, options: MatrixSetOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      let assignmentsPayload: unknown;
+      try {
+        assignmentsPayload = JSON.parse(options.assignmentsJson);
+      } catch (error: unknown) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Invalid --assignments-json payload."),
+          options.json,
+        );
+        return;
+      }
+
+      if (!Array.isArray(assignmentsPayload)) {
+        emitError(
+          createOperationError("invalid_input", "--assignments-json must be a JSON array."),
+          options.json,
+        );
+        return;
+      }
+
+      const result = await client.matrixSet({
+        campaignId,
+        assignments: assignmentsPayload as Array<{
+          subjectEmployeeId: string;
+          raterEmployeeId: string;
+          raterRole: "manager" | "peer" | "subordinate" | "self";
+        }>,
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatMatrixSetHuman(result.data));
       }
     });
 

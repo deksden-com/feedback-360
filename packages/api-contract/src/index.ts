@@ -67,6 +67,7 @@ export const knownOperations = [
   "campaign.stop",
   "campaign.end",
   "campaign.setModelVersion",
+  "campaign.weights.set",
   "campaign.participants.add",
   "campaign.participants.remove",
   "employee.upsert",
@@ -76,6 +77,7 @@ export const knownOperations = [
   "campaign.snapshot.list",
   "campaign.participants.addFromDepartments",
   "matrix.generateSuggested",
+  "matrix.set",
   "ai.runForCampaign",
   "client.setActiveCompany",
   "questionnaire.listAssigned",
@@ -208,6 +210,23 @@ export type CampaignParticipantsMutationOutput = {
   totalParticipants: number;
 };
 
+export type CampaignWeightsSetInput = {
+  campaignId: string;
+  manager: number;
+  peers: number;
+  subordinates: number;
+};
+
+export type CampaignWeightsSetOutput = {
+  campaignId: string;
+  manager: number;
+  peers: number;
+  subordinates: number;
+  self: 0;
+  changed: boolean;
+  updatedAt: string;
+};
+
 export type EmployeeUpsertInput = {
   employeeId: string;
   email?: string;
@@ -317,6 +336,16 @@ export type MatrixGenerateSuggestedInput = {
 export type MatrixGenerateSuggestedOutput = {
   campaignId: string;
   generatedAssignments: MatrixGeneratedAssignment[];
+  totalAssignments: number;
+};
+
+export type MatrixSetInput = {
+  campaignId: string;
+  assignments: MatrixGeneratedAssignment[];
+};
+
+export type MatrixSetOutput = {
+  campaignId: string;
   totalAssignments: number;
 };
 
@@ -1078,6 +1107,46 @@ export const parseCampaignParticipantsMutationOutput = (
   };
 };
 
+export const parseCampaignWeightsSetInput = (value: unknown): CampaignWeightsSetInput => {
+  const record = ensureObject(value, "campaign.weights.set input");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "manager", "peers", "subordinates"],
+    "campaign.weights.set input",
+  );
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.weights.set input"),
+    manager: ensureNumberField(record, "manager", "campaign.weights.set input"),
+    peers: ensureNumberField(record, "peers", "campaign.weights.set input"),
+    subordinates: ensureNumberField(record, "subordinates", "campaign.weights.set input"),
+  };
+};
+
+export const parseCampaignWeightsSetOutput = (value: unknown): CampaignWeightsSetOutput => {
+  const record = ensureObject(value, "campaign.weights.set output");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "manager", "peers", "subordinates", "self", "changed", "updatedAt"],
+    "campaign.weights.set output",
+  );
+
+  const selfValue = ensureNumberField(record, "self", "campaign.weights.set output");
+  if (selfValue !== 0) {
+    throw new Error("campaign.weights.set output.self must be 0.");
+  }
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.weights.set output"),
+    manager: ensureNumberField(record, "manager", "campaign.weights.set output"),
+    peers: ensureNumberField(record, "peers", "campaign.weights.set output"),
+    subordinates: ensureNumberField(record, "subordinates", "campaign.weights.set output"),
+    self: 0,
+    changed: ensureBooleanField(record, "changed", "campaign.weights.set output"),
+    updatedAt: ensureStringField(record, "updatedAt", "campaign.weights.set output"),
+  };
+};
+
 export const parseEmployeeUpsertInput = (value: unknown): EmployeeUpsertInput => {
   const record = ensureObject(value, "employee.upsert input");
   ensureAllowedKeys(
@@ -1529,6 +1598,28 @@ export const parseMatrixGenerateSuggestedOutput = (
       "totalAssignments",
       "matrix.generateSuggested output",
     ),
+  };
+};
+
+export const parseMatrixSetInput = (value: unknown): MatrixSetInput => {
+  const record = ensureObject(value, "matrix.set input");
+  ensureAllowedKeys(record, ["campaignId", "assignments"], "matrix.set input");
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "matrix.set input"),
+    assignments: ensureArray(record.assignments, "matrix.set input.assignments").map(
+      parseMatrixGeneratedAssignment,
+    ),
+  };
+};
+
+export const parseMatrixSetOutput = (value: unknown): MatrixSetOutput => {
+  const record = ensureObject(value, "matrix.set output");
+  ensureAllowedKeys(record, ["campaignId", "totalAssignments"], "matrix.set output");
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "matrix.set output"),
+    totalAssignments: ensureNumberField(record, "totalAssignments", "matrix.set output"),
   };
 };
 

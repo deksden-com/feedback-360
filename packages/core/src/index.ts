@@ -13,6 +13,8 @@ import {
   type CampaignSnapshotListOutput,
   type CampaignTransitionInput,
   type CampaignTransitionOutput,
+  type CampaignWeightsSetInput,
+  type CampaignWeightsSetOutput,
   type CompanyUpdateProfileInput,
   type CompanyUpdateProfileOutput,
   type DispatchOperationInput,
@@ -22,6 +24,8 @@ import {
   type EmployeeUpsertOutput,
   type MatrixGenerateSuggestedInput,
   type MatrixGenerateSuggestedOutput,
+  type MatrixSetInput,
+  type MatrixSetOutput,
   type ModelVersionCreateInput,
   type ModelVersionCreateOutput,
   type OperationResult,
@@ -55,6 +59,8 @@ import {
   parseCampaignSnapshotListOutput,
   parseCampaignTransitionInput,
   parseCampaignTransitionOutput,
+  parseCampaignWeightsSetInput,
+  parseCampaignWeightsSetOutput,
   parseCompanyUpdateProfileInput,
   parseCompanyUpdateProfileOutput,
   parseDispatchOperationInput,
@@ -64,6 +70,8 @@ import {
   parseEmployeeUpsertOutput,
   parseMatrixGenerateSuggestedInput,
   parseMatrixGenerateSuggestedOutput,
+  parseMatrixSetInput,
+  parseMatrixSetOutput,
   parseModelVersionCreateInput,
   parseModelVersionCreateOutput,
   parseOrgDepartmentMoveInput,
@@ -94,7 +102,9 @@ import {
   runAiForCampaign,
   saveQuestionnaireDraft,
   setCampaignModelVersion,
+  setCampaignWeights,
   setEmployeeManager,
+  setMatrixAssignments,
   startCampaign,
   stopCampaign,
   submitQuestionnaire,
@@ -381,6 +391,45 @@ const runCampaignSetModelVersion = async (
     return errorResult(
       errorFromUnknown(error, "invalid_input", "Failed to set campaign model version."),
     );
+  }
+};
+
+const runCampaignWeightsSet = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignWeightsSetOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can set campaign weights.", {
+        operation: "campaign.weights.set",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignWeightsSetInput;
+  try {
+    parsedInput = parseCampaignWeightsSetInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid campaign.weights.set input."),
+    );
+  }
+
+  try {
+    const output = await setCampaignWeights({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+      manager: parsedInput.manager,
+      peers: parsedInput.peers,
+      subordinates: parsedInput.subordinates,
+    });
+    return okResult(parseCampaignWeightsSetOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to set campaign weights."));
   }
 };
 
@@ -733,6 +782,41 @@ const runMatrixGenerateSuggested = async (
   }
 };
 
+const runMatrixSet = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<MatrixSetOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can set matrix assignments.", {
+        operation: "matrix.set",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: MatrixSetInput;
+  try {
+    parsedInput = parseMatrixSetInput(request.input);
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Invalid matrix.set input."));
+  }
+
+  try {
+    const output = await setMatrixAssignments({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+      assignments: parsedInput.assignments,
+    });
+    return okResult(parseMatrixSetOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to set matrix."));
+  }
+};
+
 const runQuestionnaireListAssigned = async (
   request: DispatchOperationInput,
 ): Promise<OperationResult<QuestionnaireListAssignedOutput>> => {
@@ -892,6 +976,7 @@ export const dispatchOperation = (
     | EmployeeUpsertOutput
     | EmployeeListActiveOutput
     | CampaignSetModelVersionOutput
+    | CampaignWeightsSetOutput
     | CampaignParticipantsMutationOutput
     | CampaignTransitionOutput
     | OrgDepartmentMoveOutput
@@ -899,6 +984,7 @@ export const dispatchOperation = (
     | CampaignSnapshotListOutput
     | CampaignParticipantsAddFromDepartmentsOutput
     | MatrixGenerateSuggestedOutput
+    | MatrixSetOutput
     | AiRunForCampaignOutput
     | ModelVersionCreateOutput
     | CampaignCreateOutput
@@ -943,6 +1029,8 @@ export const dispatchOperation = (
       return runCampaignEnd(parsedRequest);
     case "campaign.setModelVersion":
       return runCampaignSetModelVersion(parsedRequest);
+    case "campaign.weights.set":
+      return runCampaignWeightsSet(parsedRequest);
     case "campaign.participants.add":
       return runCampaignParticipantsAdd(parsedRequest);
     case "campaign.participants.remove":
@@ -961,6 +1049,8 @@ export const dispatchOperation = (
       return runCampaignParticipantsAddFromDepartments(parsedRequest);
     case "matrix.generateSuggested":
       return runMatrixGenerateSuggested(parsedRequest);
+    case "matrix.set":
+      return runMatrixSet(parsedRequest);
     case "ai.runForCampaign":
       return runAiRunForCampaign(parsedRequest);
     case "questionnaire.listAssigned":

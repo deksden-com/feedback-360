@@ -132,7 +132,10 @@ Status: Draft (2026-03-03)
   - Must add test: `packages/cli/src/ft-0043-started-immutability-cli.test.ts`
   - Must run: GS6.
 - FT-0044
+  - Must add test: `packages/core/src/ft/ft-0044-lock-on-draft-save-no-db.test.ts`
   - Must add test: `packages/core/src/ft/ft-0044-lock-on-draft-save.test.ts`
+  - Must add test: `packages/client/src/ft-0044-lock-on-draft-save-client.test.ts`
+  - Must add test: `packages/cli/src/ft-0044-lock-on-draft-save-cli.test.ts`
   - Must run: GS5.
 - FT-0045
   - Must add test: `packages/core/src/ft/ft-0045-ended-readonly.test.ts`
@@ -145,6 +148,7 @@ Status: Draft (2026-03-03)
 - FT-0041: what=competency model versions + campaign create vertical slice (`model.version.create`, `campaign.create`); where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0041-models-no-db.test.ts src/ft/ft-0041-models.test.ts`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0041-model-campaign-client.test.ts`, `pnpm --filter @feedback-360/cli exec vitest run src/ft-0041-model-campaign-cli.test.ts`; quality_gate=passed; acceptance_gate=passed (HR creates model version and linked draft campaign; invalid weights -> `invalid_input`; DB integration subtests skipped without DB URL); result=passed.
 - FT-0042: what=campaign lifecycle transitions (`campaign.start`, `campaign.stop`, `campaign.end`) with idempotent repeats; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0042-campaign-lifecycle-no-db.test.ts src/ft/ft-0042-campaign-lifecycle.test.ts`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0042-campaign-lifecycle-client.test.ts`, `pnpm --filter @feedback-360/cli exec vitest run src/ft-0042-campaign-lifecycle-cli.test.ts`; quality_gate=passed; acceptance_gate=passed (draft->started and started->ended transitions, repeats no-op in target status, invalid reverse transition -> `invalid_transition`, non-HR role -> `forbidden`; DB integration subtests skipped without DB URL); result=passed.
 - FT-0043: what=started immutability for model and participants (`campaign.setModelVersion`, `campaign.participants.add/remove`); where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0043-started-immutability-no-db.test.ts src/ft/ft-0043-started-immutability.test.ts`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0043-started-immutability-client.test.ts`, `pnpm --filter @feedback-360/cli exec vitest run src/ft-0043-started-immutability-cli.test.ts`; quality_gate=passed; acceptance_gate=passed (before start mutations succeed, after start all mutations fail with `campaign_started_immutable`; DB integration subtests skipped without DB URL); result=passed.
+- FT-0044: what=lock semantics on first draft save for matrix/weights (`questionnaire.saveDraft`, `campaign.weights.set`, `matrix.set`); where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0044-lock-on-draft-save-no-db.test.ts src/ft/ft-0044-lock-on-draft-save.test.ts`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0044-lock-on-draft-save-client.test.ts`, `pnpm --filter @feedback-360/cli exec vitest run src/ft-0044-lock-on-draft-save-cli.test.ts`; quality_gate=passed; acceptance_gate=passed (до lock изменения матрицы/весов разрешены, после первого draft-save обе операции возвращают `campaign_locked`; DB integration subtest skipped without DB URL); result=passed.
 
 ## EP-005 Results + anonymity + weights
 - FT-0051

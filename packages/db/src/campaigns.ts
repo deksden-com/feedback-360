@@ -54,6 +54,16 @@ export type CampaignSetModelVersionOutput = {
   updatedAt: string;
 };
 
+export type CampaignWeightsSetOutput = {
+  campaignId: string;
+  manager: number;
+  peers: number;
+  subordinates: number;
+  self: 0;
+  changed: boolean;
+  updatedAt: string;
+};
+
 const parseTimestamp = (value: string, fieldName: string): Date => {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
@@ -405,6 +415,132 @@ export const setCampaignModelVersion = async (input: {
       return {
         campaignId: input.campaignId,
         modelVersionId: updated.modelVersionId,
+        changed: true,
+        updatedAt: updated.updatedAt.toISOString(),
+      };
+    });
+  } finally {
+    await pool.end();
+  }
+};
+
+export const setCampaignWeights = async (input: {
+  companyId: string;
+  campaignId: string;
+  manager: number;
+  peers: number;
+  subordinates: number;
+}): Promise<CampaignWeightsSetOutput> => {
+  const manager = input.manager;
+  const peers = input.peers;
+  const subordinates = input.subordinates;
+  const self = 0;
+
+  const weights = [manager, peers, subordinates];
+  for (const value of weights) {
+    if (!Number.isFinite(value) || value < 0) {
+      throw createOperationError("invalid_input", "Weights must be non-negative numbers.");
+    }
+  }
+
+  const roundedSum = manager + peers + subordinates + self;
+  if (Math.abs(roundedSum - 100) > Number.EPSILON) {
+    throw createOperationError("invalid_input", "Weights must sum to 100 with self=0.");
+  }
+
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+
+    return await db.transaction(async (tx) => {
+      const campaignRows = await tx
+        .select({
+          campaignId: campaigns.id,
+          status: campaigns.status,
+          lockedAt: campaigns.lockedAt,
+          managerWeight: campaigns.managerWeight,
+          peersWeight: campaigns.peersWeight,
+          subordinatesWeight: campaigns.subordinatesWeight,
+          selfWeight: campaigns.selfWeight,
+        })
+        .from(campaigns)
+        .where(and(eq(campaigns.id, input.campaignId), eq(campaigns.companyId, input.companyId)))
+        .limit(1);
+
+      const campaign = campaignRows[0];
+      if (!campaign) {
+        throw createOperationError("not_found", "Campaign not found in active company.", {
+          campaignId: input.campaignId,
+          companyId: input.companyId,
+        });
+      }
+
+      if (campaign.lockedAt) {
+        throw createOperationError("campaign_locked", "Campaign matrix is locked.", {
+          campaignId: input.campaignId,
+          lockedAt: campaign.lockedAt.toISOString(),
+        });
+      }
+
+      if (campaign.status !== "draft" && campaign.status !== "started") {
+        throw createOperationError(
+          "invalid_transition",
+          "Campaign weights can be changed only in draft or started status.",
+          {
+            campaignId: input.campaignId,
+            status: campaign.status,
+          },
+        );
+      }
+
+      const changed =
+        campaign.managerWeight !== manager ||
+        campaign.peersWeight !== peers ||
+        campaign.subordinatesWeight !== subordinates ||
+        campaign.selfWeight !== self;
+
+      const now = new Date();
+      if (!changed) {
+        return {
+          campaignId: input.campaignId,
+          manager,
+          peers,
+          subordinates,
+          self,
+          changed: false,
+          updatedAt: now.toISOString(),
+        };
+      }
+
+      const updatedRows = await tx
+        .update(campaigns)
+        .set({
+          managerWeight: manager,
+          peersWeight: peers,
+          subordinatesWeight: subordinates,
+          selfWeight: self,
+          updatedAt: now,
+        })
+        .where(eq(campaigns.id, input.campaignId))
+        .returning({
+          managerWeight: campaigns.managerWeight,
+          peersWeight: campaigns.peersWeight,
+          subordinatesWeight: campaigns.subordinatesWeight,
+          selfWeight: campaigns.selfWeight,
+          updatedAt: campaigns.updatedAt,
+        });
+
+      const updated = updatedRows[0];
+      if (!updated) {
+        throw createOperationError("invalid_transition", "Failed to set campaign weights.");
+      }
+
+      return {
+        campaignId: input.campaignId,
+        manager: updated.managerWeight,
+        peers: updated.peersWeight,
+        subordinates: updated.subordinatesWeight,
+        self: 0,
         changed: true,
         updatedAt: updated.updatedAt.toISOString(),
       };

@@ -56,6 +56,17 @@ type MatrixGenerateSuggestedOutput = {
   totalAssignments: number;
 };
 
+type MatrixSetInput = {
+  companyId: string;
+  campaignId: string;
+  assignments: MatrixGeneratedAssignment[];
+};
+
+export type MatrixSetOutput = {
+  campaignId: string;
+  totalAssignments: number;
+};
+
 type CampaignState = {
   companyId: string;
   campaignId: string;
@@ -728,6 +739,129 @@ export const generateSuggestedMatrix = async (
         campaignId: input.campaignId,
         generatedAssignments,
         totalAssignments: generatedAssignments.length,
+      };
+    });
+  } finally {
+    await pool.end();
+  }
+};
+
+export const setMatrixAssignments = async (input: MatrixSetInput): Promise<MatrixSetOutput> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    return await db.transaction(async (tx) => {
+      const campaign = await getCampaignState(tx, input.companyId, input.campaignId);
+      throwIfCampaignLocked(campaign);
+
+      if (campaign.status !== "draft" && campaign.status !== "started") {
+        throw createOperationError(
+          "invalid_transition",
+          "Matrix can be changed only in draft or started campaign.",
+          {
+            campaignId: input.campaignId,
+            status: campaign.status,
+          },
+        );
+      }
+
+      const deduplicated = new Map<string, MatrixGeneratedAssignment>();
+      for (const assignment of input.assignments) {
+        const subjectEmployeeId = assignment.subjectEmployeeId.trim();
+        const raterEmployeeId = assignment.raterEmployeeId.trim();
+
+        if (!subjectEmployeeId || !raterEmployeeId) {
+          throw createOperationError(
+            "invalid_input",
+            "Matrix assignments must contain non-empty subject/rater identifiers.",
+          );
+        }
+
+        if (subjectEmployeeId === raterEmployeeId && assignment.raterRole !== "self") {
+          throw createOperationError(
+            "invalid_input",
+            "Self assignment is allowed only with raterRole=self.",
+            {
+              subjectEmployeeId,
+              raterEmployeeId,
+            },
+          );
+        }
+
+        const key = `${subjectEmployeeId}:${raterEmployeeId}`;
+        deduplicated.set(key, {
+          subjectEmployeeId,
+          raterEmployeeId,
+          raterRole: assignment.raterRole,
+        });
+      }
+
+      const normalizedAssignments = [...deduplicated.values()].sort((left, right) => {
+        if (left.subjectEmployeeId !== right.subjectEmployeeId) {
+          return left.subjectEmployeeId.localeCompare(right.subjectEmployeeId);
+        }
+        return left.raterEmployeeId.localeCompare(right.raterEmployeeId);
+      });
+
+      const uniqueEmployeeIds = [
+        ...new Set(
+          normalizedAssignments.flatMap((assignment) => [
+            assignment.subjectEmployeeId,
+            assignment.raterEmployeeId,
+          ]),
+        ),
+      ];
+      if (uniqueEmployeeIds.length > 0) {
+        const employeeRows = await tx
+          .select({
+            employeeId: employees.id,
+          })
+          .from(employees)
+          .where(
+            and(
+              eq(employees.companyId, input.companyId),
+              inArray(employees.id, uniqueEmployeeIds),
+              eq(employees.isActive, true),
+              isNull(employees.deletedAt),
+            ),
+          );
+        const existingEmployeeIds = new Set(employeeRows.map((row) => row.employeeId));
+        const missingEmployeeIds = uniqueEmployeeIds.filter(
+          (employeeId) => !existingEmployeeIds.has(employeeId),
+        );
+        if (missingEmployeeIds.length > 0) {
+          throw createOperationError("not_found", "Some assignment employees are unavailable.", {
+            campaignId: input.campaignId,
+            employeeIds: missingEmployeeIds,
+          });
+        }
+      }
+
+      await tx
+        .delete(campaignAssignments)
+        .where(
+          and(
+            eq(campaignAssignments.companyId, input.companyId),
+            eq(campaignAssignments.campaignId, input.campaignId),
+          ),
+        );
+
+      if (normalizedAssignments.length > 0) {
+        await tx.insert(campaignAssignments).values(
+          normalizedAssignments.map((assignment) => ({
+            companyId: input.companyId,
+            campaignId: input.campaignId,
+            subjectEmployeeId: assignment.subjectEmployeeId,
+            raterEmployeeId: assignment.raterEmployeeId,
+            raterRole: assignment.raterRole,
+            source: "manual",
+          })),
+        );
+      }
+
+      return {
+        campaignId: input.campaignId,
+        totalAssignments: normalizedAssignments.length,
       };
     });
   } finally {

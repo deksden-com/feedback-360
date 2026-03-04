@@ -1,5 +1,5 @@
 # FT-0044 — Lock on first draft save (matrix + weights)
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## User value
 После первого ответа (draft save) HR не может менять матрицу оценщиков и веса, что повышает доверие к процессу.
@@ -57,5 +57,27 @@ Status: Draft (2026-03-03)
 - Если уточняем freeze-правило или список запрещённых ops — обновить: [Campaign lifecycle](../../../../../spec/domain/campaign-lifecycle.md) — SSoT. Читать, чтобы правила были едины для CLI/UI.
 
 ## Verification (must)
-- Automated test: `packages/core/test/ft/ft-0044-lock-on-draft-save.test.ts` (integration) повторяет GS5: до lock разрешено, после lock → `campaign_locked`.
+- Automated tests:
+  - `packages/core/src/ft/ft-0044-lock-on-draft-save-no-db.test.ts`
+  - `packages/core/src/ft/ft-0044-lock-on-draft-save.test.ts`
+  - `packages/client/src/ft-0044-lock-on-draft-save-client.test.ts`
+  - `packages/cli/src/ft-0044-lock-on-draft-save-cli.test.ts`
 - Must run: GS5 должен быть зелёным.
+
+## Project grounding (2026-03-04)
+- [Campaign lifecycle](../../../../../spec/domain/campaign-lifecycle.md): lock на первом `questionnaire.saveDraft` и список запрещённых ops после lock.
+- [GS5 Lock semantics](../../../../../spec/testing/scenarios/gs5-lock-semantics.md): проверяемый сценарий “до lock можно, после lock нельзя”.
+- [Operation catalog](../../../../../spec/client-api/operation-catalog.md): `campaign.weights.set`, `matrix.set`, `questionnaire.saveDraft`.
+- [CLI command catalog](../../../../../spec/cli/command-catalog.md): команды `campaign weights set` и `matrix set`.
+
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` → passed.
+- `pnpm -r typecheck` → passed.
+- `pnpm -r test` → passed.
+- Build: N/A (изменения в packages/core/db/client/cli).
+
+## Acceptance evidence (2026-03-04)
+- `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0044-lock-on-draft-save-no-db.test.ts src/ft/ft-0044-lock-on-draft-save.test.ts` → passed (`integration subtest skipped` без `SUPABASE_DB_POOLER_URL`/`DATABASE_URL`).
+- `pnpm --filter @feedback-360/client exec vitest run src/ft-0044-lock-on-draft-save-client.test.ts` → passed.
+- `pnpm --filter @feedback-360/cli exec vitest run src/ft-0044-lock-on-draft-save-cli.test.ts` → passed.
+- Проверено по intent: до `questionnaire.saveDraft` операции `campaign.weights.set`/`matrix.set` выполняются; после первого draft-save обе операции возвращают `campaign_locked`.

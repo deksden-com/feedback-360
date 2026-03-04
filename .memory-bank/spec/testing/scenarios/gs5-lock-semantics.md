@@ -1,5 +1,5 @@
 # GS5 — Lock semantics (draft save) (planned)
-Status: Draft (2026-03-03)
+Status: Baseline Implemented (2026-03-04)
 
 ## Setup
 - Seed: `S5_campaign_started_no_answers`

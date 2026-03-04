@@ -13,6 +13,8 @@ import {
   type CampaignSnapshotListOutput,
   type CampaignTransitionInput,
   type CampaignTransitionOutput,
+  type CampaignWeightsSetInput,
+  type CampaignWeightsSetOutput,
   type ClientSetActiveCompanyOutput,
   type DispatchOperationInput,
   type EmployeeListActiveInput,
@@ -21,6 +23,8 @@ import {
   type EmployeeUpsertOutput,
   type MatrixGenerateSuggestedInput,
   type MatrixGenerateSuggestedOutput,
+  type MatrixSetInput,
+  type MatrixSetOutput,
   type ModelVersionCreateInput,
   type ModelVersionCreateOutput,
   type OperationContext,
@@ -56,6 +60,8 @@ import {
   parseCampaignSnapshotListOutput,
   parseCampaignTransitionInput,
   parseCampaignTransitionOutput,
+  parseCampaignWeightsSetInput,
+  parseCampaignWeightsSetOutput,
   parseClientSetActiveCompanyInput,
   parseClientSetActiveCompanyOutput,
   parseDispatchOperationInput,
@@ -65,6 +71,8 @@ import {
   parseEmployeeUpsertOutput,
   parseMatrixGenerateSuggestedInput,
   parseMatrixGenerateSuggestedOutput,
+  parseMatrixSetInput,
+  parseMatrixSetOutput,
   parseModelVersionCreateInput,
   parseModelVersionCreateOutput,
   parseOperationResult,
@@ -126,6 +134,10 @@ export type Feedback360Client = {
     input: CampaignSetModelVersionInput,
     context?: OperationContext,
   ): Promise<OperationResult<CampaignSetModelVersionOutput>>;
+  campaignWeightsSet(
+    input: CampaignWeightsSetInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignWeightsSetOutput>>;
   campaignParticipantsAdd(
     input: CampaignParticipantsMutationInput,
     context?: OperationContext,
@@ -174,6 +186,10 @@ export type Feedback360Client = {
     input: MatrixGenerateSuggestedInput,
     context?: OperationContext,
   ): Promise<OperationResult<MatrixGenerateSuggestedOutput>>;
+  matrixSet(
+    input: MatrixSetInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<MatrixSetOutput>>;
   aiRunForCampaign(
     input: AiRunForCampaignInput,
     context?: OperationContext,
@@ -362,6 +378,24 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseCampaignParticipantsMutationOutput,
+      });
+    },
+
+    campaignWeightsSet: async (input, context) => {
+      let parsedInput: CampaignWeightsSetInput;
+      try {
+        parsedInput = parseCampaignWeightsSetInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid campaignWeightsSet input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "campaign.weights.set",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignWeightsSetOutput,
       });
     },
 
@@ -560,6 +594,22 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseMatrixGenerateSuggestedOutput,
+      });
+    },
+
+    matrixSet: async (input, context) => {
+      let parsedInput: MatrixSetInput;
+      try {
+        parsedInput = parseMatrixSetInput(input);
+      } catch (error) {
+        return errorResult(errorFromUnknown(error, "invalid_input", "Invalid matrixSet input."));
+      }
+
+      return invokeOperation({
+        operation: "matrix.set",
+        input: parsedInput,
+        context,
+        parseOutput: parseMatrixSetOutput,
       });
     },
 
