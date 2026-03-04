@@ -8,6 +8,7 @@ import { sql } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
 import {
+  campaigns,
   companies,
   companyMemberships,
   departments,
@@ -16,6 +17,7 @@ import {
   employeePositions,
   employeeUserLinks,
   employees,
+  questionnaires,
 } from "./schema";
 
 const seededAt = new Date("2026-01-01T09:00:00.000Z");
@@ -72,10 +74,14 @@ const ids = {
   userStaffA1: "18000000-0000-4000-8000-000000000005",
   userStaffA2: "18000000-0000-4000-8000-000000000006",
   userStaffB1: "18000000-0000-4000-8000-000000000007",
+  campaignMain: "19000000-0000-4000-8000-000000000001",
+  questionnaireMain: "20000000-0000-4000-8000-000000000001",
 } as const;
 
 const truncateSql = sql.raw(`
   truncate table
+    questionnaires,
+    campaigns,
     employee_positions,
     employee_manager_history,
     employee_department_history,
@@ -167,6 +173,14 @@ const buildS2Handles = (): Record<string, string> => {
     "user.staff_a1": ids.userStaffA1,
     "user.staff_a2": ids.userStaffA2,
     "user.staff_b1": ids.userStaffB1,
+  };
+};
+
+const buildS5Handles = (): Record<string, string> => {
+  return {
+    ...buildS2Handles(),
+    "campaign.main": ids.campaignMain,
+    "questionnaire.main": ids.questionnaireMain,
   };
 };
 
@@ -518,6 +532,41 @@ const insertS2 = async (db: ReturnType<typeof createDb>): Promise<Record<string,
   return buildS2Handles();
 };
 
+const insertS5 = async (db: ReturnType<typeof createDb>): Promise<Record<string, string>> => {
+  await insertS2(db);
+
+  const campaignStartAt = new Date("2026-01-10T09:00:00.000Z");
+  const campaignEndAt = new Date("2026-01-20T18:00:00.000Z");
+
+  await db.insert(campaigns).values({
+    id: ids.campaignMain,
+    companyId: ids.companyMain,
+    name: "Q1 360 Campaign",
+    status: "started",
+    timezone: "Europe/Kaliningrad",
+    startAt: campaignStartAt,
+    endAt: campaignEndAt,
+    lockedAt: null,
+    createdAt: seededAt,
+    updatedAt: seededAt,
+  });
+
+  await db.insert(questionnaires).values({
+    id: ids.questionnaireMain,
+    companyId: ids.companyMain,
+    campaignId: ids.campaignMain,
+    subjectEmployeeId: ids.employeeStaffA1,
+    raterEmployeeId: ids.employeeHeadA,
+    status: "not_started",
+    draftPayload: {},
+    submittedAt: null,
+    createdAt: seededAt,
+    updatedAt: seededAt,
+  });
+
+  return buildS5Handles();
+};
+
 export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutput> => {
   const parsed = parseSeedRunInput(input);
 
@@ -541,6 +590,9 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
         break;
       case "S2_org_basic":
         handles = await insertS2(db);
+        break;
+      case "S5_campaign_started_no_answers":
+        handles = await insertS5(db);
         break;
       default:
         throw new Error(`Unsupported seed scenario: ${parsed.scenario}`);

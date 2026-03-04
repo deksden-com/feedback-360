@@ -86,6 +86,9 @@ importers:
       '@feedback-360/api-contract':
         specifier: workspace:*
         version: link:../api-contract
+      '@feedback-360/db':
+        specifier: workspace:*
+        version: link:../db
 
   packages/db:
     dependencies:

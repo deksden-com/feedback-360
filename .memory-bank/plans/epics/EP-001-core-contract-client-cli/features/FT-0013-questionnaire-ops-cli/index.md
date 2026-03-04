@@ -1,5 +1,5 @@
 # FT-0013 — Questionnaire ops + CLI
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## User value
 Сотрудник может: увидеть список анкет, сохранять черновики и отправлять анкеты; система корректно триггерит lock на первом draft save.
@@ -73,7 +73,9 @@ Status: Draft (2026-03-03)
 - При уточнении поведения повторного `submit` обновить: [Questionnaires](../../../../../spec/domain/questionnaires.md) — SSoT доменных инвариантов. Читать, чтобы UI/CLI и тесты были согласованы.
 
 ## Verification (must)
-- Automated test: `packages/core/test/ft/ft-0013-questionnaires.test.ts` (integration) повторяет Acceptance list/saveDraft/submit + idempotency повторного submit.
+- Automated test: `packages/core/src/ft/ft-0013-questionnaires-no-db.test.ts` (acceptance no-db) повторяет list/saveDraft/submit + idempotent re-submit + immutable after submit.
+- Automated test: `packages/core/src/ft/ft-0013-questionnaires.test.ts` (integration) повторяет те же шаги на реальной БД при наличии DB URL.
+- Automated test: `packages/cli/src/ft-0013-questionnaire-cli.test.ts` проверяет CLI flow (`company use`, `questionnaire list/save-draft/submit`) включая human output и typed error после submit.
 - Must run:
   - `FT-0013` acceptance тест,
   - GS1 (happy path) и GS5 (lock semantics) должны оставаться зелёными, т.к. опираются на list/saveDraft/submit.
@@ -86,3 +88,42 @@ Status: Draft (2026-03-03)
   3) `step-03` — `submit` + `submitted_at`,
   4) `step-04` — попытка `save-draft` после submit (typed error).
 - Дополнительно можно приложить human-output `questionnaire list` (без `--json`) как UX-подтверждение.
+
+## Implementation result (2026-03-04)
+- Контракт расширен операциями анкеты:
+  - `questionnaire.listAssigned`,
+  - `questionnaire.saveDraft`,
+  - `questionnaire.submit`,
+  - runtime-парсеры input/output для всех DTO.
+- DB слой расширен:
+  - таблицы `campaigns`, `questionnaires` + миграция `0001_ft0013_campaigns_questionnaires.sql`,
+  - seed `S5_campaign_started_no_answers` с handles `campaign.main`, `questionnaire.main`,
+  - DB use-cases: list/saveDraft/submit с lock trigger и submitted immutability.
+- Core dispatcher расширен обработчиками операций анкеты:
+  - role checks,
+  - проверка active company context,
+  - typed errors (`forbidden`, `not_found`, `invalid_transition`, `campaign_ended_readonly`).
+- CLI расширен командами:
+  - `company use`,
+  - `questionnaire list`,
+  - `questionnaire save-draft`,
+  - `questionnaire submit`,
+  - сохранение active company в локальном CLI state.
+
+## Quality checks evidence (2026-03-04)
+- `pnpm -r lint` — passed.
+- `pnpm -r typecheck` — passed.
+- `pnpm -r test` — passed.
+- `build` — N/A (в FT-0013 изменения покрыты unit/integration/CLI acceptance тестами; отдельный build-target не добавлялся).
+
+## Acceptance evidence (2026-03-04)
+- `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0013-questionnaires-no-db.test.ts` → passed.
+- `pnpm --filter @feedback-360/cli exec vitest run src/ft-0013-questionnaire-cli.test.ts` → passed.
+- `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0013-questionnaires.test.ts` → passed with integration test skipped when DB URL отсутствует (`hasDatabaseUrl=false`).
+- В acceptance сценарии подтверждено:
+  - list (`not_started` → `submitted`),
+  - `saveDraft` выставляет `campaignLockedAt`,
+  - `submit` переводит в `submitted`,
+  - повторный `submit` — idempotent (`wasAlreadySubmitted=true`),
+  - `saveDraft` после `submitted` возвращает `invalid_transition`,
+  - human output `questionnaire list` содержит `status=submitted`.

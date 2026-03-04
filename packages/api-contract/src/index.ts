@@ -1,4 +1,9 @@
-export const seedScenarios = ["S0_empty", "S1_company_min", "S2_org_basic"] as const;
+export const seedScenarios = [
+  "S0_empty",
+  "S1_company_min",
+  "S2_org_basic",
+  "S5_campaign_started_no_answers",
+] as const;
 
 export type SeedScenario = (typeof seedScenarios)[number];
 
@@ -54,6 +59,9 @@ export const knownOperations = [
   "system.ping",
   "company.updateProfile",
   "client.setActiveCompany",
+  "questionnaire.listAssigned",
+  "questionnaire.saveDraft",
+  "questionnaire.submit",
 ] as const;
 export type KnownOperation = (typeof knownOperations)[number];
 
@@ -80,6 +88,50 @@ export type ClientSetActiveCompanyInput = {
 
 export type ClientSetActiveCompanyOutput = {
   companyId: string;
+};
+
+export const questionnaireStatuses = ["not_started", "in_progress", "submitted"] as const;
+export type QuestionnaireStatus = (typeof questionnaireStatuses)[number];
+
+export type QuestionnaireListAssignedInput = {
+  campaignId: string;
+  status?: QuestionnaireStatus;
+};
+
+export type QuestionnaireListAssignedItem = {
+  questionnaireId: string;
+  campaignId: string;
+  companyId: string;
+  subjectEmployeeId: string;
+  raterEmployeeId: string;
+  status: QuestionnaireStatus;
+  submittedAt?: string;
+};
+
+export type QuestionnaireListAssignedOutput = {
+  items: QuestionnaireListAssignedItem[];
+};
+
+export type QuestionnaireSaveDraftInput = {
+  questionnaireId: string;
+  draft: Record<string, unknown>;
+};
+
+export type QuestionnaireSaveDraftOutput = {
+  questionnaireId: string;
+  status: "in_progress";
+  campaignLockedAt: string;
+};
+
+export type QuestionnaireSubmitInput = {
+  questionnaireId: string;
+};
+
+export type QuestionnaireSubmitOutput = {
+  questionnaireId: string;
+  status: "submitted";
+  submittedAt: string;
+  wasAlreadySubmitted: boolean;
 };
 
 export type SeedRunInput = {
@@ -117,6 +169,14 @@ const ensureAllowedKeys = (
   }
 };
 
+const ensureArray = (value: unknown, fieldName: string): unknown[] => {
+  if (!Array.isArray(value)) {
+    throw new Error(`${fieldName} must be an array.`);
+  }
+
+  return value;
+};
+
 const ensureStringField = (
   value: Record<string, unknown>,
   field: string,
@@ -140,6 +200,10 @@ const isOperationErrorCode = (value: string): value is OperationErrorCode => {
 
 const isMembershipRole = (value: string): value is MembershipRole => {
   return membershipRoles.includes(value as MembershipRole);
+};
+
+const isQuestionnaireStatus = (value: string): value is QuestionnaireStatus => {
+  return questionnaireStatuses.includes(value as QuestionnaireStatus);
 };
 
 export const isKnownOperation = (value: string): value is KnownOperation => {
@@ -405,6 +469,171 @@ export const parseClientSetActiveCompanyOutput = (value: unknown): ClientSetActi
 
   return {
     companyId: ensureStringField(record, "companyId", "client.setActiveCompany output"),
+  };
+};
+
+export const parseQuestionnaireListAssignedInput = (
+  value: unknown,
+): QuestionnaireListAssignedInput => {
+  const record = ensureObject(value, "questionnaire.listAssigned input");
+  ensureAllowedKeys(record, ["campaignId", "status"], "questionnaire.listAssigned input");
+
+  const status = record.status;
+  if (status !== undefined) {
+    if (typeof status !== "string" || !isQuestionnaireStatus(status)) {
+      throw new Error(
+        `questionnaire.listAssigned input.status must be one of: ${questionnaireStatuses.join(", ")}`,
+      );
+    }
+  }
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "questionnaire.listAssigned input"),
+    ...(status ? { status } : {}),
+  };
+};
+
+const parseQuestionnaireListAssignedItem = (value: unknown): QuestionnaireListAssignedItem => {
+  const record = ensureObject(value, "questionnaire.listAssigned output.items[]");
+  ensureAllowedKeys(
+    record,
+    [
+      "questionnaireId",
+      "campaignId",
+      "companyId",
+      "subjectEmployeeId",
+      "raterEmployeeId",
+      "status",
+      "submittedAt",
+    ],
+    "questionnaire.listAssigned output.items[]",
+  );
+
+  const status = record.status;
+  if (typeof status !== "string" || !isQuestionnaireStatus(status)) {
+    throw new Error(
+      `questionnaire.listAssigned output.items[].status must be one of: ${questionnaireStatuses.join(", ")}`,
+    );
+  }
+
+  const submittedAt = record.submittedAt;
+  if (submittedAt !== undefined && submittedAt !== null && typeof submittedAt !== "string") {
+    throw new Error("questionnaire.listAssigned output.items[].submittedAt must be a string.");
+  }
+
+  return {
+    questionnaireId: ensureStringField(
+      record,
+      "questionnaireId",
+      "questionnaire.listAssigned output.items[]",
+    ),
+    campaignId: ensureStringField(
+      record,
+      "campaignId",
+      "questionnaire.listAssigned output.items[]",
+    ),
+    companyId: ensureStringField(record, "companyId", "questionnaire.listAssigned output.items[]"),
+    subjectEmployeeId: ensureStringField(
+      record,
+      "subjectEmployeeId",
+      "questionnaire.listAssigned output.items[]",
+    ),
+    raterEmployeeId: ensureStringField(
+      record,
+      "raterEmployeeId",
+      "questionnaire.listAssigned output.items[]",
+    ),
+    status,
+    ...(typeof submittedAt === "string" ? { submittedAt } : {}),
+  };
+};
+
+export const parseQuestionnaireListAssignedOutput = (
+  value: unknown,
+): QuestionnaireListAssignedOutput => {
+  const record = ensureObject(value, "questionnaire.listAssigned output");
+  ensureAllowedKeys(record, ["items"], "questionnaire.listAssigned output");
+
+  const items = ensureArray(record.items, "questionnaire.listAssigned output.items").map(
+    parseQuestionnaireListAssignedItem,
+  );
+
+  return {
+    items,
+  };
+};
+
+export const parseQuestionnaireSaveDraftInput = (value: unknown): QuestionnaireSaveDraftInput => {
+  const record = ensureObject(value, "questionnaire.saveDraft input");
+  ensureAllowedKeys(record, ["questionnaireId", "draft"], "questionnaire.saveDraft input");
+
+  const draft = record.draft;
+  if (!isRecord(draft)) {
+    throw new Error("questionnaire.saveDraft input.draft must be an object.");
+  }
+
+  return {
+    questionnaireId: ensureStringField(record, "questionnaireId", "questionnaire.saveDraft input"),
+    draft,
+  };
+};
+
+export const parseQuestionnaireSaveDraftOutput = (value: unknown): QuestionnaireSaveDraftOutput => {
+  const record = ensureObject(value, "questionnaire.saveDraft output");
+  ensureAllowedKeys(
+    record,
+    ["questionnaireId", "status", "campaignLockedAt"],
+    "questionnaire.saveDraft output",
+  );
+
+  const status = record.status;
+  if (status !== "in_progress") {
+    throw new Error('questionnaire.saveDraft output.status must be "in_progress".');
+  }
+
+  return {
+    questionnaireId: ensureStringField(record, "questionnaireId", "questionnaire.saveDraft output"),
+    status: "in_progress",
+    campaignLockedAt: ensureStringField(
+      record,
+      "campaignLockedAt",
+      "questionnaire.saveDraft output",
+    ),
+  };
+};
+
+export const parseQuestionnaireSubmitInput = (value: unknown): QuestionnaireSubmitInput => {
+  const record = ensureObject(value, "questionnaire.submit input");
+  ensureAllowedKeys(record, ["questionnaireId"], "questionnaire.submit input");
+
+  return {
+    questionnaireId: ensureStringField(record, "questionnaireId", "questionnaire.submit input"),
+  };
+};
+
+export const parseQuestionnaireSubmitOutput = (value: unknown): QuestionnaireSubmitOutput => {
+  const record = ensureObject(value, "questionnaire.submit output");
+  ensureAllowedKeys(
+    record,
+    ["questionnaireId", "status", "submittedAt", "wasAlreadySubmitted"],
+    "questionnaire.submit output",
+  );
+
+  const status = record.status;
+  if (status !== "submitted") {
+    throw new Error('questionnaire.submit output.status must be "submitted".');
+  }
+
+  const wasAlreadySubmitted = record.wasAlreadySubmitted;
+  if (typeof wasAlreadySubmitted !== "boolean") {
+    throw new Error("questionnaire.submit output.wasAlreadySubmitted must be a boolean.");
+  }
+
+  return {
+    questionnaireId: ensureStringField(record, "questionnaireId", "questionnaire.submit output"),
+    status: "submitted",
+    submittedAt: ensureStringField(record, "submittedAt", "questionnaire.submit output"),
+    wasAlreadySubmitted,
   };
 };
 

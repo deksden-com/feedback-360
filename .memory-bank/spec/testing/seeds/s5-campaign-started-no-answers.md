@@ -5,13 +5,14 @@ Status: Draft (2026-03-03)
 Started campaign с матрицей назначений, но без draft/submitted.
 
 ## Requires
-- `S4_campaign_draft`
+- `S2_org_basic`
 
 ## Creates
-- campaign status=started, locked_at=null
-- assignments (matrix)
-- questionnaires rows (optional: pre-created for each assignment)
+- campaign `campaign.main` со статусом `started`, `locked_at=null`
+- одна анкета `questionnaire.main` со статусом `not_started` (без draft/submitted)
+- контекст компании и сотрудников из `S2_org_basic` (детерминированные handles)
 
 ## Handles
+- `company.main`
 - `campaign.main`
-
+- `questionnaire.main`

@@ -5,7 +5,8 @@
   "type": "module",
   "exports": "./src/index.ts",
   "dependencies": {
-    "@feedback-360/api-contract": "workspace:*"
+    "@feedback-360/api-contract": "workspace:*",
+    "@feedback-360/db": "workspace:*"
   },
   "scripts": {
     "lint": "biome check .",

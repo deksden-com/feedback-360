@@ -1,4 +1,13 @@
-import { boolean, integer, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 export const companies = pgTable("companies", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -110,3 +119,49 @@ export const employeePositions = pgTable("employee_positions", {
   endAt: timestamp("end_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const campaigns = pgTable("campaigns", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  companyId: uuid("company_id")
+    .notNull()
+    .references(() => companies.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  status: text("status").notNull().default("draft"),
+  timezone: text("timezone").notNull().default("Europe/Kaliningrad"),
+  startAt: timestamp("start_at", { withTimezone: true }).notNull(),
+  endAt: timestamp("end_at", { withTimezone: true }).notNull(),
+  lockedAt: timestamp("locked_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const questionnaires = pgTable(
+  "questionnaires",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    subjectEmployeeId: uuid("subject_employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    raterEmployeeId: uuid("rater_employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    status: text("status").notNull().default("not_started"),
+    draftPayload: jsonb("draft_payload").notNull().default({}),
+    submittedAt: timestamp("submitted_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique("uq_questionnaires_campaign_subject_rater").on(
+      table.campaignId,
+      table.subjectEmployeeId,
+      table.raterEmployeeId,
+    ),
+  ],
+);

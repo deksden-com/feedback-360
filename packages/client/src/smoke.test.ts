@@ -11,6 +11,9 @@ describe("client package", () => {
     const client = createInprocClient();
     expect(typeof client.seedRun).toBe("function");
     expect(typeof client.systemPing).toBe("function");
+    expect(typeof client.questionnaireListAssigned).toBe("function");
+    expect(typeof client.questionnaireSaveDraft).toBe("function");
+    expect(typeof client.questionnaireSubmit).toBe("function");
     expect(typeof client.setActiveCompany).toBe("function");
     expect(typeof client.invokeOperation).toBe("function");
   });

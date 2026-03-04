@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { dispatchOperation } from "../index";
 
 describe("FT-0011 operation plumbing + typed errors", () => {
-  it("returns invalid_input for schema violations", () => {
-    const result = dispatchOperation({
+  it("returns invalid_input for schema violations", async () => {
+    const result = await dispatchOperation({
       operation: "system.ping",
       input: { unexpected: true },
     });
@@ -15,8 +15,8 @@ describe("FT-0011 operation plumbing + typed errors", () => {
     }
   });
 
-  it("returns forbidden for write operation when role has no access", () => {
-    const result = dispatchOperation({
+  it("returns forbidden for write operation when role has no access", async () => {
+    const result = await dispatchOperation({
       operation: "company.updateProfile",
       input: {
         companyId: "company-1",
@@ -33,8 +33,8 @@ describe("FT-0011 operation plumbing + typed errors", () => {
     }
   });
 
-  it("returns validated output for happy-path dispatch", () => {
-    const result = dispatchOperation({
+  it("returns validated output for happy-path dispatch", async () => {
+    const result = await dispatchOperation({
       operation: "company.updateProfile",
       input: {
         companyId: "company-1",
@@ -53,8 +53,8 @@ describe("FT-0011 operation plumbing + typed errors", () => {
     }
   });
 
-  it("returns typed not_found for unknown operation", () => {
-    const result = dispatchOperation({
+  it("returns typed not_found for unknown operation", async () => {
+    const result = await dispatchOperation({
       operation: "operation.unknown",
       input: {},
     });

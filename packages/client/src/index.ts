@@ -3,6 +3,12 @@ import {
   type DispatchOperationInput,
   type OperationContext,
   type OperationResult,
+  type QuestionnaireListAssignedInput,
+  type QuestionnaireListAssignedOutput,
+  type QuestionnaireSaveDraftInput,
+  type QuestionnaireSaveDraftOutput,
+  type QuestionnaireSubmitInput,
+  type QuestionnaireSubmitOutput,
   type SeedRunInput,
   type SeedRunOutput,
   type SystemPingOutput,
@@ -14,6 +20,12 @@ import {
   parseClientSetActiveCompanyOutput,
   parseDispatchOperationInput,
   parseOperationResult,
+  parseQuestionnaireListAssignedInput,
+  parseQuestionnaireListAssignedOutput,
+  parseQuestionnaireSaveDraftInput,
+  parseQuestionnaireSaveDraftOutput,
+  parseQuestionnaireSubmitInput,
+  parseQuestionnaireSubmitOutput,
   parseSeedRunInput,
   parseSeedRunOutput,
   parseSystemPingOutput,
@@ -50,6 +62,18 @@ type InvokeOperationParams<Output> = {
 export type Feedback360Client = {
   seedRun(input: SeedRunInput): Promise<SeedRunOutput>;
   systemPing(context?: OperationContext): Promise<OperationResult<SystemPingOutput>>;
+  questionnaireListAssigned(
+    input: QuestionnaireListAssignedInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<QuestionnaireListAssignedOutput>>;
+  questionnaireSaveDraft(
+    input: QuestionnaireSaveDraftInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<QuestionnaireSaveDraftOutput>>;
+  questionnaireSubmit(
+    input: QuestionnaireSubmitInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<QuestionnaireSubmitOutput>>;
   setActiveCompany(companyId: string): OperationResult<ClientSetActiveCompanyOutput>;
   getActiveCompany(): string | undefined;
   invokeOperation<Output>(params: InvokeOperationParams<Output>): Promise<OperationResult<Output>>;
@@ -150,6 +174,60 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: {},
         context,
         parseOutput: parseSystemPingOutput,
+      });
+    },
+
+    questionnaireListAssigned: async (input, context) => {
+      let parsedInput: QuestionnaireListAssignedInput;
+      try {
+        parsedInput = parseQuestionnaireListAssignedInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid questionnaireListAssigned input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "questionnaire.listAssigned",
+        input: parsedInput,
+        context,
+        parseOutput: parseQuestionnaireListAssignedOutput,
+      });
+    },
+
+    questionnaireSaveDraft: async (input, context) => {
+      let parsedInput: QuestionnaireSaveDraftInput;
+      try {
+        parsedInput = parseQuestionnaireSaveDraftInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid questionnaireSaveDraft input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "questionnaire.saveDraft",
+        input: parsedInput,
+        context,
+        parseOutput: parseQuestionnaireSaveDraftOutput,
+      });
+    },
+
+    questionnaireSubmit: async (input, context) => {
+      let parsedInput: QuestionnaireSubmitInput;
+      try {
+        parsedInput = parseQuestionnaireSubmitInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid questionnaireSubmit input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "questionnaire.submit",
+        input: parsedInput,
+        context,
+        parseOutput: parseQuestionnaireSubmitOutput,
       });
     },
 

@@ -63,12 +63,15 @@ Status: Draft (2026-03-03)
   - Must add test: `packages/client/src/ft-0012-active-company-context.test.ts`
   - Must run: `system.ping` parity (HTTP vs in-proc) + `client.setActiveCompany` no-network + context propagation parity.
 - FT-0013
-  - Must add test: `packages/core/test/ft/ft-0013-questionnaires.test.ts`
+  - Must add test: `packages/core/src/ft/ft-0013-questionnaires-no-db.test.ts`
+  - Must add test: `packages/core/src/ft/ft-0013-questionnaires.test.ts`
+  - Must add test: `packages/cli/src/ft-0013-questionnaire-cli.test.ts`
   - Must run: list/saveDraft/submit flow + submitted immutability (`saveDraft` after submit forbidden) + GS5/GS1 regressions.
 
 ### EP-001 execution evidence (2026-03-04)
 - FT-0011: what=operation plumbing + typed errors; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0011-op-errors.test.ts`, `pnpm --filter @feedback-360/cli exec tsx src/index.ts -- --scenario UNKNOWN --json`; quality_gate=passed; acceptance_gate=passed (core integration + CLI json error shape, exit code 1); result=passed.
 - FT-0012: what=typed client transport parity + active company context; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0012-transport-parity.test.ts`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0012-active-company-context.test.ts`; quality_gate=passed; acceptance_gate=passed (HTTP/in-proc parity, no-network setActiveCompany, context propagation parity); result=passed.
+- FT-0013: what=questionnaire ops + CLI flow; where=local; how=`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0013-questionnaires-no-db.test.ts`, `pnpm --filter @feedback-360/cli exec vitest run src/ft-0013-questionnaire-cli.test.ts`, `pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0013-questionnaires.test.ts`; quality_gate=passed; acceptance_gate=passed (list/saveDraft/submit, lock, idempotent re-submit, immutable after submit; DB integration test skips when DB URL absent); result=passed.
 
 ## EP-002 Identity, tenancy, RBAC
 - FT-0021
