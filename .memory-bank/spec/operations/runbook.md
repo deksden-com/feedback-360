@@ -52,13 +52,15 @@ Status: Draft (2026-03-04)
   - `go360go-beta` и `go360go-prod` переведены на `framework=nextjs`, build/dev команды: `pnpm build` / `pnpm dev`, root directory=`apps/web`.
   - после настройки последний deployment `go360go-beta` имеет статус `Ready` (production target),
   - последний deployment `go360go-prod` имеет статус `Ready` (preview target).
+  - зафиксирован remaining issue: deployments переходят в `Ready`, но содержат `routesCount=0/outputCount=0` (пустой output), поэтому требуется отдельная донастройка monorepo-build в Vercel.
 - Sentry build-token remediation:
   - удалены `SENTRY_AUTH_TOKEN` из Vercel env (beta/prod), чтобы остановить падения build на `Invalid token (401)`;
   - runtime DSN/ORG/PROJECT сохранены.
 
 ### Remaining operational follow-up
-1. Добавить валидный `SENTRY_AUTH_TOKEN` обратно (beta/prod), если нужен sourcemap upload в CI/CD.
-2. После следующего merge в `main` зафиксировать первый `go360go-prod` deployment со статусом `Ready` на production target.
+1. Починить monorepo deploy output в Vercel (deployment не должен быть пустым; проверить `/api/health` на beta после фикса).
+2. Добавить валидный `SENTRY_AUTH_TOKEN` обратно (beta/prod), если нужен sourcemap upload в CI/CD.
+3. После следующего merge в `main` зафиксировать первый `go360go-prod` deployment со статусом `Ready` на production target.
 
 ## Environment checklist
 - Vercel env vars are present and mapped to the right environment.
