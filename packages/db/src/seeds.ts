@@ -4,7 +4,7 @@ import {
   parseSeedRunInput,
   parseSeedRunOutput,
 } from "@feedback-360/api-contract";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
 import {
@@ -98,6 +98,7 @@ const ids = {
 
 const truncateSql = sql.raw(`
   truncate table
+    ai_jobs,
     campaign_assignments,
     campaign_participants,
     campaign_employee_snapshots,
@@ -386,6 +387,10 @@ const buildS5Handles = (): Record<string, string> => {
     "campaign.main": ids.campaignMain,
     "questionnaire.main": ids.questionnaireMain,
   };
+};
+
+const buildS8Handles = (): Record<string, string> => {
+  return buildS5Handles();
 };
 
 const buildS4Handles = (): Record<string, string> => {
@@ -783,6 +788,20 @@ const insertS5 = async (db: ReturnType<typeof createDb>): Promise<Record<string,
   return buildS5Handles();
 };
 
+const insertS8 = async (db: ReturnType<typeof createDb>): Promise<Record<string, string>> => {
+  await insertS5(db);
+
+  await db
+    .update(campaigns)
+    .set({
+      status: "ended",
+      updatedAt: new Date("2026-01-21T00:00:00.000Z"),
+    })
+    .where(eq(campaigns.id, ids.campaignMain));
+
+  return buildS8Handles();
+};
+
 const insertS4 = async (
   db: ReturnType<typeof createDb>,
   options?: { variant?: string },
@@ -849,6 +868,9 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
         break;
       case "S5_campaign_started_no_answers":
         handles = await insertS5(db);
+        break;
+      case "S8_campaign_ended":
+        handles = await insertS8(db);
         break;
       default:
         throw new Error(`Unsupported seed scenario: ${parsed.scenario}`);

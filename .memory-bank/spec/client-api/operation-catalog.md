@@ -161,6 +161,7 @@ Status: Draft (2026-03-03)
   - roles: hr_admin
   - idempotent: yes (per campaign, unless explicit retry)
   - cli: `ai run`
+  - MVP behavior: `mvp_stub` synchronous completion (no external HTTP/webhook), campaign ends in `completed`.
 - `ai.webhook.receive`
   - roles: service role only (endpoint)
   - idempotent: yes (by webhook receipt)

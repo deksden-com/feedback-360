@@ -5,6 +5,7 @@ export const seedScenarios = [
   "S2_org_basic",
   "S4_campaign_draft",
   "S5_campaign_started_no_answers",
+  "S8_campaign_ended",
 ] as const;
 
 export type SeedScenario = (typeof seedScenarios)[number];
@@ -67,6 +68,7 @@ export const knownOperations = [
   "campaign.snapshot.list",
   "campaign.participants.addFromDepartments",
   "matrix.generateSuggested",
+  "ai.runForCampaign",
   "client.setActiveCompany",
   "questionnaire.listAssigned",
   "questionnaire.saveDraft",
@@ -201,6 +203,19 @@ export type MatrixGenerateSuggestedOutput = {
   campaignId: string;
   generatedAssignments: MatrixGeneratedAssignment[];
   totalAssignments: number;
+};
+
+export type AiRunForCampaignInput = {
+  campaignId: string;
+};
+
+export type AiRunForCampaignOutput = {
+  campaignId: string;
+  aiJobId: string;
+  provider: "mvp_stub";
+  status: "completed";
+  completedAt: string;
+  wasAlreadyCompleted: boolean;
 };
 
 export type ClientSetActiveCompanyInput = {
@@ -1051,6 +1066,47 @@ export const parseMatrixGenerateSuggestedOutput = (
       record,
       "totalAssignments",
       "matrix.generateSuggested output",
+    ),
+  };
+};
+
+export const parseAiRunForCampaignInput = (value: unknown): AiRunForCampaignInput => {
+  const record = ensureObject(value, "ai.runForCampaign input");
+  ensureAllowedKeys(record, ["campaignId"], "ai.runForCampaign input");
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "ai.runForCampaign input"),
+  };
+};
+
+export const parseAiRunForCampaignOutput = (value: unknown): AiRunForCampaignOutput => {
+  const record = ensureObject(value, "ai.runForCampaign output");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "aiJobId", "provider", "status", "completedAt", "wasAlreadyCompleted"],
+    "ai.runForCampaign output",
+  );
+
+  const provider = ensureStringField(record, "provider", "ai.runForCampaign output");
+  if (provider !== "mvp_stub") {
+    throw new Error('ai.runForCampaign output.provider must be "mvp_stub".');
+  }
+
+  const status = ensureStringField(record, "status", "ai.runForCampaign output");
+  if (status !== "completed") {
+    throw new Error('ai.runForCampaign output.status must be "completed".');
+  }
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "ai.runForCampaign output"),
+    aiJobId: ensureStringField(record, "aiJobId", "ai.runForCampaign output"),
+    provider: "mvp_stub",
+    status: "completed",
+    completedAt: ensureStringField(record, "completedAt", "ai.runForCampaign output"),
+    wasAlreadyCompleted: ensureBooleanField(
+      record,
+      "wasAlreadyCompleted",
+      "ai.runForCampaign output",
     ),
   };
 };

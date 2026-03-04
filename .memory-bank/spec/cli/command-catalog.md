@@ -181,6 +181,7 @@ Status: Draft (2026-03-03)
   - op: `ai.runForCampaign`
   - roles: hr_admin
   - idempotency: yes (per campaign, unless explicit retry)
+  - MVP behavior: `mvp_stub` synchronous completion (no external AI HTTP call).
 
 ## System
 - command: `ping [--json]`

@@ -85,6 +85,24 @@ describe("FT-0003 seed runner + handles", () => {
       } finally {
         await pool.end();
       }
+
+      const s8 = await runSeedScenario({ scenario: "S8_campaign_ended" });
+      expect(s8.handles["campaign.main"]).toBeDefined();
+      expect(s8.handles["questionnaire.main"]).toBeDefined();
+
+      const poolAfterS8 = createPool();
+      try {
+        const db = createDb(poolAfterS8);
+        const statusRows = await db.execute(sql`
+        select status
+        from campaigns
+        limit 1
+      `);
+
+        expect(statusRows.rows[0]?.status).toBe("ended");
+      } finally {
+        await poolAfterS8.end();
+      }
     },
     30_000,
   );

@@ -1,4 +1,6 @@
 import {
+  type AiRunForCampaignInput,
+  type AiRunForCampaignOutput,
   type CampaignParticipantsAddFromDepartmentsInput,
   type CampaignParticipantsAddFromDepartmentsOutput,
   type CampaignSnapshotListInput,
@@ -30,6 +32,8 @@ import {
   errorFromUnknown,
   errorResult,
   okResult,
+  parseAiRunForCampaignInput,
+  parseAiRunForCampaignOutput,
   parseCampaignParticipantsAddFromDepartmentsInput,
   parseCampaignParticipantsAddFromDepartmentsOutput,
   parseCampaignSnapshotListInput,
@@ -118,6 +122,10 @@ export type Feedback360Client = {
     input: MatrixGenerateSuggestedInput,
     context?: OperationContext,
   ): Promise<OperationResult<MatrixGenerateSuggestedOutput>>;
+  aiRunForCampaign(
+    input: AiRunForCampaignInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<AiRunForCampaignOutput>>;
   questionnaireListAssigned(
     input: QuestionnaireListAssignedInput,
     context?: OperationContext,
@@ -360,6 +368,24 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseMatrixGenerateSuggestedOutput,
+      });
+    },
+
+    aiRunForCampaign: async (input, context) => {
+      let parsedInput: AiRunForCampaignInput;
+      try {
+        parsedInput = parseAiRunForCampaignInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid aiRunForCampaign input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "ai.runForCampaign",
+        input: parsedInput,
+        context,
+        parseOutput: parseAiRunForCampaignOutput,
       });
     },
 

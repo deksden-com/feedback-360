@@ -11,9 +11,12 @@ Status: Draft (2026-03-03)
 3) Rater submit анкеты.
 4) Кампания ends (cron by `end_at` или HR stop).
 5) HR запускает AI job → webhook success.
+   - MVP profile: `mvp_stub` (без webhook), кампания завершается синхронно в `completed`.
 
 ## Assertions
-- Status: `started -> ended -> processing_ai -> completed`.
+- Status:
+  - target (full): `started -> ended -> processing_ai -> completed`,
+  - MVP stub: `started -> ended -> (sync stub) -> completed`.
 - После lock запрещены изменения матрицы/весов.
 - После ended анкеты read-only.
 - Employee видит агрегаты и processed/summary open text, не видит raw.
@@ -25,7 +28,7 @@ Status: Draft (2026-03-03)
 - `campaign.stop` (если manual stop вместо cron)
 - `campaign.end` (если manual helper вместо cron)
 - `ai.runForCampaign`
-- `ai.webhook.receive`
+- `ai.webhook.receive` (full profile, не требуется для MVP stub)
 
 ## CLI example (human; use `--json` in tests)
 1) `seed --scenario S4_campaign_draft --json` → взять `handles.company.main`, `handles.campaign.main`.
@@ -36,4 +39,4 @@ Status: Draft (2026-03-03)
 6) `questionnaire submit <questionnaire_id>`
 7) `campaign end <handles.campaign.main>` (или cron)
 8) `ai run <handles.campaign.main>`
-9) (webhook test helper) вызвать endpoint `ai.webhook.receive` с валидной подписью и `idempotency_key`.
+9) (full profile only) вызвать endpoint `ai.webhook.receive` с валидной подписью и `idempotency_key`.

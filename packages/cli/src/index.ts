@@ -51,6 +51,10 @@ type MatrixGenerateOptions = {
   fromDepartments?: string[];
 };
 
+type AiRunOptions = {
+  json?: boolean;
+};
+
 type EmployeeUpsertOptions = {
   json?: boolean;
   email?: string;
@@ -262,6 +266,17 @@ const formatMatrixSuggestionsHuman = (data: {
   return lines.join("\n");
 };
 
+const formatAiRunHuman = (data: {
+  campaignId: string;
+  aiJobId: string;
+  provider: string;
+  status: string;
+  completedAt: string;
+  wasAlreadyCompleted: boolean;
+}): string => {
+  return `AI processing ${data.wasAlreadyCompleted ? "already completed" : "completed"}: campaign=${data.campaignId}, job=${data.aiJobId}, provider=${data.provider}, status=${data.status}, completedAt=${data.completedAt}`;
+};
+
 const parseBooleanOption = (value: string, fieldName: string): boolean => {
   const normalized = value.trim().toLowerCase();
   if (normalized === "true") {
@@ -292,6 +307,7 @@ const normalizeLegacySeedArgs = (argv: string[]): string[] => {
     "org",
     "campaign",
     "matrix",
+    "ai",
     "questionnaire",
   ]);
   if (!knownTopLevelCommands.has(firstArgument) && firstArgument.startsWith("--")) {
@@ -316,6 +332,7 @@ Examples:
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- company use <company_id>
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign snapshot list --campaign <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants add-departments <campaign_id> --from-departments <department_id>...
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- ai run <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- questionnaire list --campaign <campaign_id> --json
 `,
     );
@@ -325,7 +342,7 @@ Examples:
     .description("Run deterministic database seed scenarios.")
     .requiredOption(
       "--scenario <scenario>",
-      "Seed scenario name (S0_empty | S1_company_min | S1_multi_tenant_min | S2_org_basic | S4_campaign_draft | S5_campaign_started_no_answers).",
+      "Seed scenario name (S0_empty | S1_company_min | S1_multi_tenant_min | S2_org_basic | S4_campaign_draft | S5_campaign_started_no_answers | S8_campaign_ended).",
     )
     .option("--variant <variant>", "Optional seed variant (currently not supported).")
     .option("--json", "Output machine-readable JSON.")
@@ -611,6 +628,29 @@ Examples:
 
       if (!options.json && result.ok) {
         console.log(formatMatrixSuggestionsHuman(result.data));
+      }
+    });
+
+  const aiCommand = program.command("ai").description("AI processing operations.");
+
+  aiCommand
+    .command("run")
+    .description("Run AI processing for ended campaign (MVP stub mode).")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (campaignId: string, options: AiRunOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.aiRunForCampaign({ campaignId });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatAiRunHuman(result.data));
       }
     });
 

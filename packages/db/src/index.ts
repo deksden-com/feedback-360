@@ -1,5 +1,6 @@
 export * from "./connection-string";
 export * from "./db";
+export * from "./ai";
 export * from "./employees";
 export * from "./matrix";
 export * from "./org";

@@ -37,5 +37,6 @@ Status: Draft (2026-03-03)
 - `notifications dispatch`
 - `reminders generate`
 - `ai run <campaign_id>`
+  - MVP: работает в `mvp_stub` режиме (без внешнего AI вызова), возвращает completed/idempotent результат.
 
 SSoT маппинга “команда → операция”: [Command catalog](command-catalog.md) — 1:1 соответствие CLI и typed client API. Читать, чтобы не “размазывать” одну команду по нескольким операциям и чтобы тесты повторяли поведение UI.

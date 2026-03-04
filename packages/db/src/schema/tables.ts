@@ -135,6 +135,30 @@ export const campaigns = pgTable("campaigns", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const aiJobs = pgTable(
+  "ai_jobs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull().default("mvp_stub"),
+    status: text("status").notNull().default("completed"),
+    idempotencyKey: text("idempotency_key").notNull(),
+    requestPayload: jsonb("request_payload").notNull().default({}),
+    responsePayload: jsonb("response_payload").notNull().default({}),
+    errorPayload: jsonb("error_payload"),
+    requestedAt: timestamp("requested_at", { withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique("uq_ai_job_campaign_idempotency").on(table.campaignId, table.idempotencyKey)],
+);
+
 export const campaignEmployeeSnapshots = pgTable(
   "campaign_employee_snapshots",
   {
