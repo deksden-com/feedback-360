@@ -2,7 +2,7 @@ import { createOperationError } from "@feedback-360/api-contract";
 import { and, desc, eq } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
-import { aiJobs, aiWebhookReceipts, campaigns } from "./schema";
+import { aiJobs, aiWebhookReceipts, campaigns, questionnaires } from "./schema";
 
 const MVP_STUB_PROVIDER = "mvp_stub";
 const MVP_STUB_IDEMPOTENCY_KEY = "mvp_stub_default";
@@ -35,6 +35,120 @@ export type ApplyAiWebhookResultOutput = {
   noOp: boolean;
   campaignStatus: string;
   aiJobStatus: string;
+};
+
+type AiCommentPatch = {
+  questionnaireId?: string;
+  subjectEmployeeId?: string;
+  raterEmployeeId?: string;
+  competencyComments: Record<
+    string,
+    {
+      processedText?: string;
+      summaryText?: string;
+    }
+  >;
+};
+
+const asObjectRecord = (value: unknown): Record<string, unknown> | undefined => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+  return value as Record<string, unknown>;
+};
+
+const toNonEmptyString = (value: unknown): string | undefined => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const parseAiCommentPatches = (payload: Record<string, unknown>): AiCommentPatch[] => {
+  const rawItems = payload.questionnaire_comments;
+  if (!Array.isArray(rawItems)) {
+    return [];
+  }
+
+  const patches: AiCommentPatch[] = [];
+  for (const item of rawItems) {
+    const itemRecord = asObjectRecord(item);
+    if (!itemRecord) {
+      continue;
+    }
+
+    const questionnaireId = toNonEmptyString(itemRecord.questionnaire_id);
+    const subjectEmployeeId = toNonEmptyString(itemRecord.subject_employee_id);
+    const raterEmployeeId = toNonEmptyString(itemRecord.rater_employee_id);
+    if (!questionnaireId && (!subjectEmployeeId || !raterEmployeeId)) {
+      continue;
+    }
+
+    const commentsRecord = asObjectRecord(itemRecord.competency_comments);
+    if (!commentsRecord) {
+      continue;
+    }
+
+    const competencyComments: AiCommentPatch["competencyComments"] = {};
+    for (const [competencyId, rawBundle] of Object.entries(commentsRecord)) {
+      const bundleRecord = asObjectRecord(rawBundle);
+      if (!bundleRecord) {
+        continue;
+      }
+
+      const processedText = toNonEmptyString(bundleRecord.processed_text);
+      const summaryText = toNonEmptyString(bundleRecord.summary_text);
+      if (!processedText && !summaryText) {
+        continue;
+      }
+
+      competencyComments[competencyId] = {
+        ...(processedText ? { processedText } : {}),
+        ...(summaryText ? { summaryText } : {}),
+      };
+    }
+
+    if (Object.keys(competencyComments).length === 0) {
+      continue;
+    }
+
+    patches.push({
+      ...(questionnaireId ? { questionnaireId } : {}),
+      ...(subjectEmployeeId ? { subjectEmployeeId } : {}),
+      ...(raterEmployeeId ? { raterEmployeeId } : {}),
+      competencyComments,
+    });
+  }
+
+  return patches;
+};
+
+const mergeQuestionnaireDraftPayloadWithAiComments = (
+  draftPayload: unknown,
+  patch: AiCommentPatch,
+): Record<string, unknown> => {
+  const basePayload = asObjectRecord(draftPayload) ?? {};
+  const nextPayload: Record<string, unknown> = {
+    ...basePayload,
+  };
+
+  const existingComments = asObjectRecord(basePayload.competencyComments) ?? {};
+  const nextComments: Record<string, unknown> = {
+    ...existingComments,
+  };
+
+  for (const [competencyId, bundle] of Object.entries(patch.competencyComments)) {
+    const existingBundle = asObjectRecord(existingComments[competencyId]) ?? {};
+    nextComments[competencyId] = {
+      ...existingBundle,
+      ...(bundle.processedText ? { processedText: bundle.processedText } : {}),
+      ...(bundle.summaryText ? { summaryText: bundle.summaryText } : {}),
+    };
+  }
+
+  nextPayload.competencyComments = nextComments;
+  return nextPayload;
 };
 
 const mapAiRunOutput = (
@@ -288,6 +402,51 @@ export const applyAiWebhookResult = async (
 
       const nextCampaignStatus = input.status === "completed" ? "completed" : "ai_failed";
       const nextAiJobStatus = input.status === "completed" ? "completed" : "failed";
+
+      if (input.status === "completed") {
+        const commentPatches = parseAiCommentPatches(input.payload);
+        for (const patch of commentPatches) {
+          const rows = await tx
+            .select({
+              questionnaireId: questionnaires.id,
+              draftPayload: questionnaires.draftPayload,
+            })
+            .from(questionnaires)
+            .where(
+              patch.questionnaireId
+                ? and(
+                    eq(questionnaires.companyId, aiJob.companyId),
+                    eq(questionnaires.campaignId, input.campaignId),
+                    eq(questionnaires.id, patch.questionnaireId),
+                  )
+                : and(
+                    eq(questionnaires.companyId, aiJob.companyId),
+                    eq(questionnaires.campaignId, input.campaignId),
+                    eq(questionnaires.subjectEmployeeId, patch.subjectEmployeeId ?? ""),
+                    eq(questionnaires.raterEmployeeId, patch.raterEmployeeId ?? ""),
+                  ),
+            )
+            .limit(1);
+
+          const row = rows[0];
+          if (!row) {
+            continue;
+          }
+
+          const nextDraftPayload = mergeQuestionnaireDraftPayloadWithAiComments(
+            row.draftPayload,
+            patch,
+          );
+
+          await tx
+            .update(questionnaires)
+            .set({
+              draftPayload: nextDraftPayload,
+              updatedAt: now,
+            })
+            .where(eq(questionnaires.id, row.questionnaireId));
+        }
+      }
 
       await tx
         .update(aiJobs)

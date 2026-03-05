@@ -56,7 +56,7 @@ Status: Draft (2026-03-03)
 
 - Invariant: open text сотруднику/руководителю — только AI-processed/summary; HR видит raw (включая HR reader).
   - Spec SSoT: `../domain/results-visibility.md`, `../domain/anonymity-policy.md`, `../operations/data-retention-privacy.md`
-  - Tests: GS1
+  - Tests: GS1 + FT-0073 acceptance (`webhook ingestion + role-based shaping`)
   - Seeds: `S9_campaign_completed_with_ai`
 
 - Invariant: threshold применяется и на уровне (group × competency), чтобы NA/UNSURE не снижали анонимность “точечно”.

@@ -8,6 +8,10 @@ Webhook принимается на серверной стороне (Next.js r
 ## Identity & scoping
 - Webhook всегда относится к конкретной кампании: `campaign_id`.
 - Payload содержит `ai_job_id` и `campaign_id`.
+- Для `status=completed` payload может включать `questionnaire_comments[]` с processed/summary patch:
+  - `questionnaire_id` (preferred) или `subject_employee_id + rater_employee_id`,
+  - `competency_comments.<competency_id>.processed_text`,
+  - `competency_comments.<competency_id>.summary_text`.
 
 ## HMAC
 MVP профиль:
