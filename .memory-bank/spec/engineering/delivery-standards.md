@@ -11,7 +11,7 @@ Status: Draft (2026-03-04)
 
 ## Mandatory closure checklist (applies to every FT)
 1) Коммиты и PR оформлены по traceability-правилам (`[FT-*]`/`[EP-*]`, ссылки на EP/FT документы).
-2) Прогнаны code-quality проверки: `pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test` (+ `build`, где применимо).
+2) Прогнаны code-quality проверки: `pnpm checks` как preferred workspace gate; если меняли DB topology или flaky integration suite — дополнительно `pnpm test:db` / `pnpm test:db:full` по необходимости.
 3) После реализации фичи отдельно прогнан её `Acceptance (auto)` сценарий и обязательные GS (по verification matrix).
 4) В feature doc есть блок `Quality checks evidence (YYYY-MM-DD)` с результатами `lint/typecheck/test` (+ `build`, где применимо).
 5) В feature doc есть блок `Acceptance evidence (YYYY-MM-DD)` с командами/результатами приемочного сценария и связанных GS.
@@ -26,6 +26,7 @@ Status: Draft (2026-03-04)
    - ссылка на GitHub Actions run (или check-runs commit),
    - ссылка на Vercel deployment (preview/beta/prod),
    - итоговый статус (`success/ready`) и root-cause заметка, если был fail.
+9) Если менялись планы/статусы/evidence в меморибанке — прогнан `pnpm docs:audit` (или эквивалентный audit для целевого эпика) и результат зафиксирован в feature/epic doc.
 
 Если хотя бы один пункт не выполнен — фича не переводится в `Completed`.
 
@@ -43,6 +44,7 @@ Status: Draft (2026-03-04)
 - В отчёте должна быть ссылка на:
   - [Verification matrix](../../plans/verification-matrix.md) — секция execution evidence по этому эпику. Читать, чтобы аудит готовности проверялся по одному SSoT-источнику.
 - Отчёт обновляем каждый раз, когда меняется статус FT или evidence по FT.
+- После обновления статусов/счётчиков прогоняем `pnpm docs:audit` для соответствующего эпика, чтобы `Progress report`, FT status и verification matrix не расходились.
 
 ## Visual evidence policy (screenshots, optional-by-context)
 Скриншоты используем там, где они реально повышают проверяемость результата.

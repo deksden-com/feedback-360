@@ -52,11 +52,12 @@ Status: Draft (2026-03-04)
 Смысл: reviewer должен открыть SSoT-план/acceptance без поиска по репозиторию.
 
 ### Mandatory checks before merge to `develop`
-- CI: `pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test` (или эквивалентный набор в CI).
+- CI: `pnpm checks` (или эквивалентный набор в CI: `lint + typecheck + unit/contract + curated db integration + web build`).
 - GitHub checks: для HEAD-коммита PR все required checks в репозитории должны быть `success` (минимум workflow `ci.yml` / job `checks`).
 - Vercel deploy check: preview deployment для PR (или branch deployment для `develop`) должен быть `Ready`.
 - Acceptance: после реализации каждой затронутой FT отдельно прогоняется её `Acceptance (auto)` сценарий; в PR должны быть зелёными все такие сценарии.
 - Golden scenarios: если фича участвует в GS* — соответствующие GS должны быть зелёными (см. verification matrix).
+- Для runtime/user-facing фич до промоушена в `main` обязателен успешный beta smoke workflow (`.github/workflows/beta-smoke.yml`) или локально воспроизведённый эквивалентный запуск против `https://beta.go360go.ru` с evidence.
 
 ### Mandatory checks before merge to `main`
 - Все пункты из merge в `develop` уже должны быть выполнены.

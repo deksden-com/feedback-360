@@ -41,9 +41,10 @@ SSoT правил ветвления/commit convention/PR/evidence:
 
 ## 10) Evidence-first completion (обязательное правило)
 Фича не переводится в `Completed`, пока:
-1) не пройден отдельный quality gate (`lint` + `typecheck` + `test`, и `build` где применимо),
+1) не пройден отдельный quality gate (`pnpm checks` как preferred workspace gate; при необходимости `pnpm test:db` / `pnpm test:db:full`),
 2) после реализации фичи не прогнан её acceptance-сценарий и обязательные GS,
-3) не записаны доказательства выполнения (команды/результаты/дата) в memory bank.
+3) не записаны доказательства выполнения (команды/результаты/дата) в memory bank,
+4) если менялись планы/статусы/evidence — не пройден memory-bank audit (`pnpm docs:audit` или эквивалент для целевого эпика).
 
 Для user-facing/runtime фич evidence включает browser-smoke на целевом окружении через `$agent-browser` (с артефактами скриншотов по шагам сценария).
 

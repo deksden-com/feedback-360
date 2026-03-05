@@ -10,6 +10,7 @@
     "test:db": "pnpm --filter @feedback-360/db test:db && pnpm --filter @feedback-360/client test:db && pnpm --filter @feedback-360/core test:db",
     "test:db:full": "pnpm --filter @feedback-360/db test:db:full && pnpm --filter @feedback-360/client test:db:full && pnpm --filter @feedback-360/core test:db:full",
     "checks": "pnpm lint && pnpm typecheck && pnpm test && pnpm test:db && pnpm --filter @feedback-360/web build",
+    "docs:audit": "node scripts/audit-memory-bank.mjs --ep EP-009",
     "format": "pnpm -r format",
     "db:migrate": "pnpm --filter @feedback-360/db db:migrate",
     "db:health": "pnpm --filter @feedback-360/db db:health",

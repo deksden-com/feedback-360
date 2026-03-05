@@ -92,9 +92,8 @@ Status: Template
 ### Quality checks evidence (after implementation)
 - Date: `YYYY-MM-DD`
 - Checks run:
-  - `pnpm -r lint`
-  - `pnpm -r typecheck`
-  - `pnpm -r test`
+  - `pnpm checks`
+  - `pnpm test:db` / `pnpm test:db:full` (если релевантно для DB/integration hardening)
   - `build` (если применимо)
 - Result: passed/failed + краткий комментарий (что именно проверялось).
 
@@ -106,6 +105,8 @@ Status: Template
 - Для markdown-отчётов скриншоты вставляем как изображения:
   - `![step-01](relative/path/to/step-01.png)`
   - `![step-02](relative/path/to/step-02.png)`
+- Если менялись FT/EP статусы, progress counts или verification matrix — дописываем `docs audit`:
+  - `pnpm docs:audit`
 
 ### CI/CD evidence (mandatory for runtime/deploy/integration changes)
 - GitHub:

@@ -11,6 +11,7 @@ SSoT шаблон фичи (vertical slice) живёт в:
 - шаблон включает обязательный `Project grounding` перед кодированием (что именно прочитать и зафиксировать).
 - шаблон включает обязательный раздел `Manual verification (deployed environment)` — пошаговая инструкция ручной проверки фичи на реальном окружении (`beta` по умолчанию).
 - для browser-проверок в manual verification используем `$agent-browser` (как стандартный инструмент smoke/evidence).
+- базовый quality gate для workspace — `pnpm checks`; для планов/статусов/evidence добавляем `pnpm docs:audit`.
 
 Ссылки (аннотированные):
 - [Implementation playbook](implementation-playbook.md) — чеклист “FT → код”. Читать, чтобы план был исполнимым и вертикальным.
