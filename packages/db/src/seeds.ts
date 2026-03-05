@@ -2014,9 +2014,10 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
   }
 
   const pool = createPool();
+  const client = await pool.connect();
 
   try {
-    const db = createDb(pool);
+    const db = createDb(client);
     await resetDatabase(db);
 
     let handles: Record<string, string>;
@@ -2061,6 +2062,7 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
       handles,
     });
   } finally {
+    client.release();
     await pool.end();
   }
 };

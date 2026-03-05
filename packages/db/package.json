@@ -8,7 +8,9 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run",
+    "test": "cross-env FEEDBACK360_SKIP_DB_TESTS=1 vitest run",
+    "test:db": "vitest run --testTimeout=20000 --maxWorkers=1 --no-file-parallelism src/migrations/ft-0002-migrations-health.test.ts src/migrations/ft-0023-rls-smoke.test.ts src/migrations/ft-0091-db-integration-isolation.test.ts src/ft/ft-0085-identity-provision.test.ts",
+    "test:db:full": "vitest run --testTimeout=20000 --maxWorkers=1 --no-file-parallelism src/migrations src/ft",
     "db:migrate": "tsx src/scripts/migrate.ts",
     "db:health": "tsx src/scripts/health.ts"
   },

@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+import { Pool, type PoolClient } from "pg";
 
 import { getDatabaseUrl } from "./connection-string";
 import * as schema from "./schema";
@@ -29,6 +29,6 @@ export const createPool = (context: DbSessionContext = {}): Pool => {
   });
 };
 
-export const createDb = (pool: Pool) => {
-  return drizzle(pool, { schema });
+export const createDb = (client: Pool | PoolClient) => {
+  return drizzle(client, { schema });
 };

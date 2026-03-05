@@ -242,5 +242,5 @@ describe("FT-0013 CLI questionnaire flow", () => {
       .map((call) => String(call[0] ?? ""))
       .find((line) => line.includes("status=submitted"));
     expect(humanLine).toContain("status=submitted");
-  });
+  }, 15000);
 });

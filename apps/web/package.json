@@ -8,6 +8,7 @@
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run src",
+    "test:smoke:beta": "playwright test --config playwright/playwright.config.mjs --workers=1 tests/smoke",
     "dev": "next dev",
     "build": "next build",
     "start": "next start"

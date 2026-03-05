@@ -15,4 +15,5 @@ Status: Draft (2026-03-03)
 9) Notifications (email-only) + outbox + cron scheduling.
 10) AI processing + webhook security + retry.
 11) Minimal UI (HR flow + employee flow) + Playwright golden e2e.
-
+12) Test & release hardening (DB integration isolation, CI checks, beta smoke gates, evidence sync).
+13) Production readiness (retention/privacy, observability, runbook drill, release rehearsal).

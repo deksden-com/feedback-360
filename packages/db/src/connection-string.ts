@@ -55,6 +55,10 @@ const loadEnvIfNeeded = (): void => {
 
 loadEnvIfNeeded();
 
+const isDatabaseTestRunDisabled = (): boolean => {
+  return process.env.FEEDBACK360_SKIP_DB_TESTS === "1";
+};
+
 export const getDatabaseUrl = (): string => {
   const rawValue = process.env.SUPABASE_DB_POOLER_URL ?? process.env.DATABASE_URL;
 
@@ -67,6 +71,24 @@ export const getDatabaseUrl = (): string => {
   return normalizeSupabasePoolerConnectionString(rawValue);
 };
 
+export const isSupabasePoolerDatabaseUrl = (): boolean => {
+  const rawValue = process.env.SUPABASE_DB_POOLER_URL ?? process.env.DATABASE_URL;
+
+  if (!rawValue) {
+    return false;
+  }
+
+  try {
+    return isSupabasePoolerHost(new URL(rawValue).hostname);
+  } catch {
+    return false;
+  }
+};
+
 export const hasDatabaseUrl = (): boolean => {
+  if (isDatabaseTestRunDisabled()) {
+    return false;
+  }
+
   return Boolean(process.env.SUPABASE_DB_POOLER_URL ?? process.env.DATABASE_URL);
 };

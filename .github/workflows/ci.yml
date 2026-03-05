@@ -16,7 +16,15 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - run: pnpm install --frozen-lockfile=false
-      - run: pnpm -r lint
-      - run: pnpm -r typecheck
-      - run: pnpm -r test
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile=false
+      - name: Lint workspace
+        run: pnpm -r lint
+      - name: Typecheck workspace
+        run: pnpm -r typecheck
+      - name: Unit and contract tests
+        run: pnpm -r test
+      - name: DB integration lane
+        run: pnpm test:db
+      - name: Web build
+        run: pnpm --filter @feedback-360/web build
