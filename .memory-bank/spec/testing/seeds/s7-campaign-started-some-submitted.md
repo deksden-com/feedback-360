@@ -57,11 +57,16 @@ Started кампания с частично заполненными анкет
     - `employee.subject_main`, `employee.rater_manager`, `employee.rater_peer_1..3`,
     - `model.version.main`, `competency.main`, `indicator.main_1`,
     - `questionnaire.subject_manager`, `questionnaire.subject_peer_1..3`.
-- `levels_tie` (planned):
-  - кампания использует `S3_model_levels` и в данных есть:
-    - UNSURE ответы,
-    - tie за mode (например 2 и 3 поровну) для одной группы.
-  - Используется в GS9/FT-0054.
+- `levels_tie` (**implemented**, FT-0054):
+  - кампания использует levels-модель (`kind=levels`) с `competency_levels` 1..4,
+  - создаются 5 submitted анкет для одного subject: manager + 2 peers + 2 subordinates,
+  - manager отвечает `UNSURE` (проверка `n_unsure` и исключения из `n_valid`),
+  - peers+subordinates дают tie по merged группе `other`: 2 голоса за level 2 и 2 голоса за level 3 (`mode_level=null`),
+  - используется в GS9/FT-0054.
+  - Handles дополнительно включают:
+    - `employee.subject_main`, `employee.rater_manager`, `employee.rater_peer_1`, `employee.rater_peer_2`, `employee.rater_subordinate_1`, `employee.rater_subordinate_2`,
+    - `model.version.main`, `competency.main`,
+    - `questionnaire.subject_manager`, `questionnaire.subject_peer_1`, `questionnaire.subject_peer_2`, `questionnaire.subject_subordinate_1`, `questionnaire.subject_subordinate_2`.
 
 ## Notes
 - Для per-competency threshold важно, чтобы варианты содержали кейс `n_valid < 3` на одной компетенции при том, что группа в целом проходит порог.

@@ -71,8 +71,8 @@ Status: Draft (2026-03-03)
 
 - Invariant: levels модель — mode+distribution; tie-break → `mode_level = null`; UNSURE исключаем из агрегаций.
   - Spec SSoT: `../domain/calculations.md`, `../glossary.md`
-  - Tests: GS9 (planned, levels)
-  - Seeds: `S3_model_levels` (planned) + `S7_campaign_started_some_submitted --variant levels_tie` (planned)
+  - Tests: GS9 (implemented via FT-0054 acceptance на `results.getHrView`)
+  - Seeds: `S7_campaign_started_some_submitted --variant levels_tie`
 
 ## Notifications
 - Invariant: email-only MVP; outbox идемпотентен; расписание по таймзоне кампании.

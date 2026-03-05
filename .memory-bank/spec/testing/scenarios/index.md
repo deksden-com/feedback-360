@@ -11,7 +11,7 @@ Status: Draft (2026-03-03)
 - [GS6 Started immutability (planned)](gs6-started-immutability.md): model/participants immutable после start. Читать, чтобы обеспечить честность процесса.
 - [GS7 Notifications (planned)](gs7-notifications.md): outbox idempotency + timezone. Читать, чтобы не спамить и слать “в нужное время”.
 - [GS8 Snapshot immutability (planned)](gs8-snapshot.md): изменения справочника после start не меняют кампанию. Читать, чтобы история была консистентной.
-- [GS9 Levels rules (planned)](gs9-levels.md): mode/distribution + UNSURE + tie. Читать, чтобы levels работали “по отрасли”.
+- [GS9 Levels rules](gs9-levels.md): mode/distribution + UNSURE + tie. Читать, чтобы levels работали “по отрасли”.
 - [GS10 RLS smoke (planned)](gs10-rls.md): deny-by-default + service role. Читать, чтобы multi-tenant был защищён на уровне БД.
 - [GS11 Matrix autogen (planned)](gs11-matrix-autogen.md): автогенерация по подразделениям и иерархии. Читать, чтобы матрица не была “рандомной”.
 - [GS12 Campaign progress](gs12-campaign-progress.md): HR видит ход заполнения анкет. Читать, чтобы “прогресс кампании” был измеримым и пригодным для reminders.

@@ -501,6 +501,7 @@ const formatMatrixSetHuman = (data: { campaignId: string; totalAssignments: numb
 const formatResultsHrHuman = (data: {
   campaignId: string;
   subjectEmployeeId: string;
+  modelKind: "indicators" | "levels";
   smallGroupPolicy: "hide" | "merge_to_other";
   anonymityThreshold: number;
   groupVisibility: {
@@ -521,6 +522,36 @@ const formatResultsHrHuman = (data: {
     subordinatesVisibility: "shown" | "hidden" | "merged";
     otherScore?: number;
     otherVisibility?: "shown" | "hidden";
+    managerLevels?: {
+      modeLevel: 1 | 2 | 3 | 4 | null;
+      distribution: { level1: number; level2: number; level3: number; level4: number };
+      nValid: number;
+      nUnsure: number;
+    };
+    peersLevels?: {
+      modeLevel: 1 | 2 | 3 | 4 | null;
+      distribution: { level1: number; level2: number; level3: number; level4: number };
+      nValid: number;
+      nUnsure: number;
+    };
+    subordinatesLevels?: {
+      modeLevel: 1 | 2 | 3 | 4 | null;
+      distribution: { level1: number; level2: number; level3: number; level4: number };
+      nValid: number;
+      nUnsure: number;
+    };
+    selfLevels?: {
+      modeLevel: 1 | 2 | 3 | 4 | null;
+      distribution: { level1: number; level2: number; level3: number; level4: number };
+      nValid: number;
+      nUnsure: number;
+    };
+    otherLevels?: {
+      modeLevel: 1 | 2 | 3 | 4 | null;
+      distribution: { level1: number; level2: number; level3: number; level4: number };
+      nValid: number;
+      nUnsure: number;
+    };
   }>;
   groupOverall: {
     manager?: number;
@@ -531,7 +562,7 @@ const formatResultsHrHuman = (data: {
   };
 }): string => {
   const lines = [
-    `HR results: campaign=${data.campaignId}, subject=${data.subjectEmployeeId}, competencies=${data.competencyScores.length}`,
+    `HR results: campaign=${data.campaignId}, subject=${data.subjectEmployeeId}, kind=${data.modelKind}, competencies=${data.competencyScores.length}`,
     `Anonymity: threshold=${data.anonymityThreshold}, policy=${data.smallGroupPolicy}, visibility={manager:${data.groupVisibility.manager}, peers:${data.groupVisibility.peers}, subordinates:${data.groupVisibility.subordinates}, self:${data.groupVisibility.self}${data.groupVisibility.other ? `, other:${data.groupVisibility.other}` : ""}}`,
     `Group overall: manager=${data.groupOverall.manager ?? "-"}, peers=${data.groupOverall.peers ?? "-"}, subordinates=${data.groupOverall.subordinates ?? "-"}, self=${data.groupOverall.self ?? "-"}, other=${data.groupOverall.other ?? "-"}`,
   ];
@@ -540,6 +571,11 @@ const formatResultsHrHuman = (data: {
     lines.push(
       `- ${competency.competencyId} (${competency.competencyName}): manager=${competency.managerScore ?? "-"}, peers=${competency.peersScore ?? "-"} [${competency.peersVisibility}], subordinates=${competency.subordinatesScore ?? "-"} [${competency.subordinatesVisibility}], self=${competency.selfScore ?? "-"}, other=${competency.otherScore ?? "-"}${competency.otherVisibility ? ` [${competency.otherVisibility}]` : ""}`,
     );
+    if (data.modelKind === "levels") {
+      lines.push(
+        `  levels: manager(mode=${competency.managerLevels?.modeLevel ?? "null"}, n=${competency.managerLevels?.nValid ?? 0}, unsure=${competency.managerLevels?.nUnsure ?? 0}), peers(mode=${competency.peersLevels?.modeLevel ?? "null"}, n=${competency.peersLevels?.nValid ?? 0}, unsure=${competency.peersLevels?.nUnsure ?? 0}), subordinates(mode=${competency.subordinatesLevels?.modeLevel ?? "null"}, n=${competency.subordinatesLevels?.nValid ?? 0}, unsure=${competency.subordinatesLevels?.nUnsure ?? 0}), other(mode=${competency.otherLevels?.modeLevel ?? "null"}, n=${competency.otherLevels?.nValid ?? 0}, unsure=${competency.otherLevels?.nUnsure ?? 0})`,
+      );
+    }
   }
 
   return lines.join("\n");
@@ -683,7 +719,7 @@ Examples:
     )
     .option(
       "--variant <variant>",
-      "Optional seed variant (S4: no_participants; S7: na_heavy_peer | peers2 | no_subordinates).",
+      "Optional seed variant (S4: no_participants; S7: na_heavy_peer | peers2 | no_subordinates | levels_tie).",
     )
     .option("--json", "Output machine-readable JSON.")
     .action(async (options: SeedCommandOptions) => {
@@ -1528,7 +1564,7 @@ Examples:
 
   resultsCommand
     .command("hr")
-    .description("Get HR view of indicator-based results for subject in campaign.")
+    .description("Get HR view of results for subject in campaign.")
     .requiredOption("--campaign <campaign_id>", "Campaign identifier.")
     .requiredOption("--subject <employee_id>", "Subject employee identifier.")
     .option(

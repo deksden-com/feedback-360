@@ -213,6 +213,36 @@ describe("FT-0003 seed runner + handles", () => {
       } finally {
         await poolAfterS7NoSubordinates.end();
       }
+
+      const s7LevelsTie = await runSeedScenario({
+        scenario: "S7_campaign_started_some_submitted",
+        variant: "levels_tie",
+      });
+      expect(s7LevelsTie.handles["employee.rater_subordinate_2"]).toBeDefined();
+      expect(s7LevelsTie.handles["model.version.main"]).toBeDefined();
+
+      const poolAfterS7LevelsTie = createPool();
+      try {
+        const db = createDb(poolAfterS7LevelsTie);
+        const counts = await db.execute(sql`
+          select
+            (select count(*) from questionnaires where status = 'submitted') as submitted_count,
+            (select count(*) from campaign_assignments) as assignments_count,
+            (select count(*) from competency_levels) as levels_count,
+            (
+              select count(*)
+              from competency_model_versions
+              where kind = 'levels'
+            ) as levels_model_count
+        `);
+
+        expect(Number(counts.rows[0]?.submitted_count)).toBe(5);
+        expect(Number(counts.rows[0]?.assignments_count)).toBe(5);
+        expect(Number(counts.rows[0]?.levels_count)).toBe(4);
+        expect(Number(counts.rows[0]?.levels_model_count)).toBe(1);
+      } finally {
+        await poolAfterS7LevelsTie.end();
+      }
     },
     120_000,
   );
