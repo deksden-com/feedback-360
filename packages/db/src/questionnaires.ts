@@ -52,10 +52,15 @@ const getQuestionnaireRow = async (
   tx: DbReader,
   questionnaireId: string,
   companyId?: string,
+  raterEmployeeId?: string,
 ): Promise<QuestionnaireDbRow> => {
-  const whereClause = companyId
-    ? and(eq(questionnaires.id, questionnaireId), eq(questionnaires.companyId, companyId))
-    : eq(questionnaires.id, questionnaireId);
+  const whereClauses = [eq(questionnaires.id, questionnaireId)];
+  if (companyId) {
+    whereClauses.push(eq(questionnaires.companyId, companyId));
+  }
+  if (raterEmployeeId) {
+    whereClauses.push(eq(questionnaires.raterEmployeeId, raterEmployeeId));
+  }
 
   const rows = await tx
     .select({
@@ -73,7 +78,7 @@ const getQuestionnaireRow = async (
     })
     .from(questionnaires)
     .innerJoin(campaigns, eq(campaigns.id, questionnaires.campaignId))
-    .where(whereClause)
+    .where(and(...whereClauses))
     .limit(1);
 
   const row = rows[0];
@@ -134,9 +139,10 @@ const ensureCampaignInCompany = async (
 };
 
 export type ListAssignedQuestionnairesInput = {
-  campaignId: string;
+  campaignId?: string;
   companyId?: string;
   status?: QuestionnaireStatus;
+  raterEmployeeId?: string;
 };
 
 export type ListAssignedQuestionnairesOutput = {
@@ -159,14 +165,22 @@ export const listAssignedQuestionnaires = async (
   try {
     const db = createDb(pool);
 
-    if (input.companyId) {
+    if (input.companyId && input.campaignId) {
       await ensureCampaignInCompany(db, input.campaignId, input.companyId);
     }
 
-    const whereClauses = [eq(questionnaires.campaignId, input.campaignId)];
+    const whereClauses = [];
+
+    if (input.campaignId) {
+      whereClauses.push(eq(questionnaires.campaignId, input.campaignId));
+    }
 
     if (input.companyId) {
       whereClauses.push(eq(questionnaires.companyId, input.companyId));
+    }
+
+    if (input.raterEmployeeId) {
+      whereClauses.push(eq(questionnaires.raterEmployeeId, input.raterEmployeeId));
     }
 
     if (input.status) {
@@ -184,7 +198,7 @@ export const listAssignedQuestionnaires = async (
         submittedAt: questionnaires.submittedAt,
       })
       .from(questionnaires)
-      .where(and(...whereClauses))
+      .where(whereClauses.length > 0 ? and(...whereClauses) : undefined)
       .orderBy(questionnaires.createdAt);
 
     return {
@@ -207,6 +221,7 @@ export type SaveQuestionnaireDraftInput = {
   questionnaireId: string;
   draft: Record<string, unknown>;
   companyId?: string;
+  raterEmployeeId?: string;
 };
 
 export type SaveQuestionnaireDraftOutput = {
@@ -225,6 +240,9 @@ export const saveQuestionnaireDraft = async (
 
     return await db.transaction(async (tx) => {
       const row = await getQuestionnaireRow(tx, input.questionnaireId, input.companyId);
+      if (input.raterEmployeeId && row.raterEmployeeId !== input.raterEmployeeId) {
+        throw createOperationError("forbidden", "Questionnaire is not assigned to current rater.");
+      }
       ensureWritableCampaign(row.campaignStatus);
 
       if (row.status === "submitted") {
@@ -282,6 +300,7 @@ export const saveQuestionnaireDraft = async (
 export type SubmitQuestionnaireInput = {
   questionnaireId: string;
   companyId?: string;
+  raterEmployeeId?: string;
 };
 
 export type SubmitQuestionnaireOutput = {
@@ -301,6 +320,9 @@ export const submitQuestionnaire = async (
 
     return await db.transaction(async (tx) => {
       const row = await getQuestionnaireRow(tx, input.questionnaireId, input.companyId);
+      if (input.raterEmployeeId && row.raterEmployeeId !== input.raterEmployeeId) {
+        throw createOperationError("forbidden", "Questionnaire is not assigned to current rater.");
+      }
       ensureWritableCampaign(row.campaignStatus);
 
       if (row.status === "submitted" && row.submittedAt) {
@@ -466,6 +488,73 @@ export const getQuestionnaireForDebug = async (
     const db = createDb(pool);
     const row = await getQuestionnaireRow(db, questionnaireId);
     return mapQuestionnaireRow(row);
+  } finally {
+    await pool.end();
+  }
+};
+
+export type GetQuestionnaireDraftInput = {
+  questionnaireId: string;
+  companyId?: string;
+  raterEmployeeId?: string;
+};
+
+export type GetQuestionnaireDraftOutput = {
+  questionnaireId: string;
+  campaignId: string;
+  companyId: string;
+  subjectEmployeeId: string;
+  raterEmployeeId: string;
+  status: QuestionnaireStatus;
+  campaignStatus: "draft" | "started" | "ended" | "processing_ai" | "ai_failed" | "completed";
+  draft: Record<string, unknown>;
+  firstDraftAt?: string;
+  submittedAt?: string;
+};
+
+const ensureCampaignStatus = (
+  value: string,
+): "draft" | "started" | "ended" | "processing_ai" | "ai_failed" | "completed" => {
+  if (
+    value === "draft" ||
+    value === "started" ||
+    value === "ended" ||
+    value === "processing_ai" ||
+    value === "ai_failed" ||
+    value === "completed"
+  ) {
+    return value;
+  }
+
+  throw createOperationError("invalid_input", `Unsupported campaign status: ${value}`);
+};
+
+export const getQuestionnaireDraft = async (
+  input: GetQuestionnaireDraftInput,
+): Promise<GetQuestionnaireDraftOutput> => {
+  const pool = createPool();
+
+  try {
+    const db = createDb(pool);
+    const row = await getQuestionnaireRow(
+      db,
+      input.questionnaireId,
+      input.companyId,
+      input.raterEmployeeId,
+    );
+
+    return {
+      questionnaireId: row.questionnaireId,
+      campaignId: row.campaignId,
+      companyId: row.companyId,
+      subjectEmployeeId: row.subjectEmployeeId,
+      raterEmployeeId: row.raterEmployeeId,
+      status: ensureQuestionnaireStatus(row.status),
+      campaignStatus: ensureCampaignStatus(row.campaignStatus),
+      draft: row.draftPayload,
+      ...(row.firstDraftAt ? { firstDraftAt: row.firstDraftAt.toISOString() } : {}),
+      ...(row.submittedAt ? { submittedAt: row.submittedAt.toISOString() } : {}),
+    };
   } finally {
     await pool.end();
   }

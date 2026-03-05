@@ -90,6 +90,7 @@ export const knownOperations = [
   "ai.runForCampaign",
   "client.setActiveCompany",
   "questionnaire.listAssigned",
+  "questionnaire.getDraft",
   "questionnaire.saveDraft",
   "questionnaire.submit",
 ] as const;
@@ -610,7 +611,7 @@ export const questionnaireStatuses = ["not_started", "in_progress", "submitted"]
 export type QuestionnaireStatus = (typeof questionnaireStatuses)[number];
 
 export type QuestionnaireListAssignedInput = {
-  campaignId: string;
+  campaignId?: string;
   status?: QuestionnaireStatus;
 };
 
@@ -626,6 +627,23 @@ export type QuestionnaireListAssignedItem = {
 
 export type QuestionnaireListAssignedOutput = {
   items: QuestionnaireListAssignedItem[];
+};
+
+export type QuestionnaireGetDraftInput = {
+  questionnaireId: string;
+};
+
+export type QuestionnaireGetDraftOutput = {
+  questionnaireId: string;
+  campaignId: string;
+  companyId: string;
+  subjectEmployeeId: string;
+  raterEmployeeId: string;
+  status: QuestionnaireStatus;
+  campaignStatus: "draft" | "started" | "ended" | "processing_ai" | "ai_failed" | "completed";
+  draft: Record<string, unknown>;
+  firstDraftAt?: string;
+  submittedAt?: string;
 };
 
 export type QuestionnaireSaveDraftInput = {
@@ -3015,6 +3033,14 @@ export const parseQuestionnaireListAssignedInput = (
   const record = ensureObject(value, "questionnaire.listAssigned input");
   ensureAllowedKeys(record, ["campaignId", "status"], "questionnaire.listAssigned input");
 
+  const campaignId = record.campaignId;
+  if (
+    campaignId !== undefined &&
+    (typeof campaignId !== "string" || campaignId.trim().length === 0)
+  ) {
+    throw new Error("questionnaire.listAssigned input.campaignId must be a non-empty string.");
+  }
+
   const status = record.status;
   if (status !== undefined) {
     if (typeof status !== "string" || !isQuestionnaireStatus(status)) {
@@ -3025,7 +3051,7 @@ export const parseQuestionnaireListAssignedInput = (
   }
 
   return {
-    campaignId: ensureStringField(record, "campaignId", "questionnaire.listAssigned input"),
+    ...(typeof campaignId === "string" ? { campaignId: campaignId.trim() } : {}),
     ...(status ? { status } : {}),
   };
 };
@@ -3097,6 +3123,94 @@ export const parseQuestionnaireListAssignedOutput = (
 
   return {
     items,
+  };
+};
+
+const campaignStatuses = [
+  "draft",
+  "started",
+  "ended",
+  "processing_ai",
+  "ai_failed",
+  "completed",
+] as const;
+type CampaignStatus = (typeof campaignStatuses)[number];
+const isCampaignStatus = (value: string): value is CampaignStatus => {
+  return campaignStatuses.includes(value as CampaignStatus);
+};
+
+export const parseQuestionnaireGetDraftInput = (value: unknown): QuestionnaireGetDraftInput => {
+  const record = ensureObject(value, "questionnaire.getDraft input");
+  ensureAllowedKeys(record, ["questionnaireId"], "questionnaire.getDraft input");
+
+  return {
+    questionnaireId: ensureStringField(record, "questionnaireId", "questionnaire.getDraft input"),
+  };
+};
+
+export const parseQuestionnaireGetDraftOutput = (value: unknown): QuestionnaireGetDraftOutput => {
+  const record = ensureObject(value, "questionnaire.getDraft output");
+  ensureAllowedKeys(
+    record,
+    [
+      "questionnaireId",
+      "campaignId",
+      "companyId",
+      "subjectEmployeeId",
+      "raterEmployeeId",
+      "status",
+      "campaignStatus",
+      "draft",
+      "firstDraftAt",
+      "submittedAt",
+    ],
+    "questionnaire.getDraft output",
+  );
+
+  const status = record.status;
+  if (typeof status !== "string" || !isQuestionnaireStatus(status)) {
+    throw new Error(
+      `questionnaire.getDraft output.status must be one of: ${questionnaireStatuses.join(", ")}`,
+    );
+  }
+
+  const campaignStatus = record.campaignStatus;
+  if (typeof campaignStatus !== "string" || !isCampaignStatus(campaignStatus)) {
+    throw new Error(
+      `questionnaire.getDraft output.campaignStatus must be one of: ${campaignStatuses.join(", ")}`,
+    );
+  }
+
+  const draft = record.draft;
+  if (!isRecord(draft)) {
+    throw new Error("questionnaire.getDraft output.draft must be an object.");
+  }
+
+  const firstDraftAt = record.firstDraftAt;
+  if (firstDraftAt !== undefined && firstDraftAt !== null && typeof firstDraftAt !== "string") {
+    throw new Error("questionnaire.getDraft output.firstDraftAt must be a string.");
+  }
+
+  const submittedAt = record.submittedAt;
+  if (submittedAt !== undefined && submittedAt !== null && typeof submittedAt !== "string") {
+    throw new Error("questionnaire.getDraft output.submittedAt must be a string.");
+  }
+
+  return {
+    questionnaireId: ensureStringField(record, "questionnaireId", "questionnaire.getDraft output"),
+    campaignId: ensureStringField(record, "campaignId", "questionnaire.getDraft output"),
+    companyId: ensureStringField(record, "companyId", "questionnaire.getDraft output"),
+    subjectEmployeeId: ensureStringField(
+      record,
+      "subjectEmployeeId",
+      "questionnaire.getDraft output",
+    ),
+    raterEmployeeId: ensureStringField(record, "raterEmployeeId", "questionnaire.getDraft output"),
+    status,
+    campaignStatus,
+    draft,
+    ...(typeof firstDraftAt === "string" ? { firstDraftAt } : {}),
+    ...(typeof submittedAt === "string" ? { submittedAt } : {}),
   };
 };
 
