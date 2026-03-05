@@ -90,6 +90,7 @@ Status: Draft (2026-03-03)
 - `campaign.start`
   - roles: hr_admin
   - idempotent: yes (transition)
+  - side effect: enqueue `campaign_invite` outbox rows for active campaign participants/assignments recipients (idempotent by outbox key)
   - cli: `campaign start`
 - `campaign.stop`
   - roles: hr_admin

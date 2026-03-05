@@ -1,5 +1,5 @@
 # FT-0064 — Campaign start invites (magic link emails)
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-05)
 
 ## User value
 Сотрудники и оценщики автоматически получают письмо с magic link при старте кампании и могут сразу войти и заполнить анкеты.
@@ -54,5 +54,14 @@ Status: Draft (2026-03-03)
 - При уточнении получателей invites обновить: [Notification spec](../../../../../spec/notifications/notifications.md) — SSoT триггеров. Читать, чтобы HR/employee ожидания совпадали с кодом.
 
 ## Verification (must)
-- Automated test: `packages/core/test/ft/ft-0064-campaign-invites.test.ts` (integration) проверяет создание outbox invites без дублей + отправку через мок dispatcher.
+- Automated test: `packages/core/src/ft/ft-0064-campaign-invites.test.ts` (integration) проверяет создание outbox invites без дублей + отправку через dispatcher.
 - Must run: GS13 должен быть зелёным.
+
+## Execution evidence (2026-03-05)
+- `pnpm --filter @feedback-360/db lint && pnpm --filter @feedback-360/db typecheck` → passed.
+- `pnpm --filter @feedback-360/core lint && pnpm --filter @feedback-360/core typecheck` → passed.
+- `set -a; source .env; set +a; pnpm db:migrate` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0061-outbox-dispatch.test.ts src/ft/ft-0062-idempotency-retries.test.ts src/ft/ft-0063-scheduling.test.ts src/ft/ft-0064-campaign-invites.test.ts --fileParallelism=false` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/db exec vitest run src/migrations/ft-0003-seed-runner.test.ts` → passed.
+- `pnpm --filter @feedback-360/client exec vitest run src/ft-0061-notifications-client.test.ts` → passed.
+- `pnpm --filter @feedback-360/cli exec vitest run src/ft-0061-notifications-cli.test.ts` → passed.

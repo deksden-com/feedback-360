@@ -1,8 +1,10 @@
 import { createOperationError } from "@feedback-360/api-contract";
-import { and, asc, count, eq, isNull, lte, ne, or, sql } from "drizzle-orm";
+import { and, asc, count, eq, inArray, isNull, lte, ne, or, sql } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
 import {
+  campaignAssignments,
+  campaignParticipants,
   campaigns,
   companies,
   employees,
@@ -43,6 +45,8 @@ export type NotificationsDispatchOutboxOutput = {
   attemptsLogged: number;
   remainingPending: number;
 };
+
+type TxLike = Pick<ReturnType<typeof createDb>, "select" | "insert">;
 
 type OutboxStatus = "pending" | "sent" | "failed" | "dead_letter";
 
@@ -195,12 +199,131 @@ export const evaluateReminderSchedule = (input: {
   };
 };
 
+export const enqueueCampaignInvitesOnStartInDb = async (
+  tx: TxLike,
+  input: {
+    companyId: string;
+    campaignId: string;
+    campaignName: string;
+    now: Date;
+  },
+): Promise<{
+  candidateRecipients: number;
+  generated: number;
+  deduplicated: number;
+}> => {
+  const participantRows = await tx
+    .select({
+      employeeId: campaignParticipants.employeeId,
+    })
+    .from(campaignParticipants)
+    .where(
+      and(
+        eq(campaignParticipants.companyId, input.companyId),
+        eq(campaignParticipants.campaignId, input.campaignId),
+      ),
+    );
+
+  const assignmentRows = await tx
+    .select({
+      raterEmployeeId: campaignAssignments.raterEmployeeId,
+      subjectEmployeeId: campaignAssignments.subjectEmployeeId,
+    })
+    .from(campaignAssignments)
+    .where(
+      and(
+        eq(campaignAssignments.companyId, input.companyId),
+        eq(campaignAssignments.campaignId, input.campaignId),
+      ),
+    );
+
+  const recipientEmployeeIds = new Set<string>();
+  for (const row of participantRows) {
+    recipientEmployeeIds.add(row.employeeId);
+  }
+  for (const row of assignmentRows) {
+    recipientEmployeeIds.add(row.raterEmployeeId);
+    recipientEmployeeIds.add(row.subjectEmployeeId);
+  }
+
+  if (recipientEmployeeIds.size === 0) {
+    return {
+      candidateRecipients: 0,
+      generated: 0,
+      deduplicated: 0,
+    };
+  }
+
+  const recipientRows = await tx
+    .select({
+      employeeId: employees.id,
+      toEmail: employees.email,
+    })
+    .from(employees)
+    .where(
+      and(
+        eq(employees.companyId, input.companyId),
+        eq(employees.isActive, true),
+        inArray(employees.id, [...recipientEmployeeIds]),
+      ),
+    );
+
+  let generated = 0;
+  let deduplicated = 0;
+  for (const recipient of recipientRows) {
+    const idempotencyKey = buildInviteIdempotencyKey(input.campaignId, recipient.employeeId);
+    const inserted = await tx
+      .insert(notificationOutbox)
+      .values({
+        companyId: input.companyId,
+        campaignId: input.campaignId,
+        recipientEmployeeId: recipient.employeeId,
+        channel: "email",
+        eventType: "campaign_invite",
+        templateKey: "campaign_invite@v1",
+        locale: "ru",
+        toEmail: recipient.toEmail,
+        payloadJson: {
+          campaignId: input.campaignId,
+          campaignName: input.campaignName,
+          recipientEmployeeId: recipient.employeeId,
+          invitedAt: input.now.toISOString(),
+        },
+        status: "pending",
+        idempotencyKey,
+        attempts: 0,
+        nextRetryAt: null,
+        createdAt: input.now,
+        updatedAt: input.now,
+      })
+      .onConflictDoNothing()
+      .returning({
+        id: notificationOutbox.id,
+      });
+
+    if (inserted.length > 0) {
+      generated += 1;
+    } else {
+      deduplicated += 1;
+    }
+  }
+
+  return {
+    candidateRecipients: recipientRows.length,
+    generated,
+    deduplicated,
+  };
+};
+
 const buildReminderIdempotencyKey = (
   campaignId: string,
   recipientEmployeeId: string,
   dateBucket: string,
 ): string =>
   `campaign:${campaignId}:event:campaign_reminder:employee:${recipientEmployeeId}:day:${dateBucket}`;
+
+const buildInviteIdempotencyKey = (campaignId: string, recipientEmployeeId: string): string =>
+  `campaign:${campaignId}:event:campaign_invite:employee:${recipientEmployeeId}`;
 
 const parsePayload = (value: unknown): Record<string, unknown> => {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {

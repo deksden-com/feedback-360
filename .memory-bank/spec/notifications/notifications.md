@@ -19,8 +19,16 @@ MVP default:
 
 ## Outbox & idempotency
 - Все уведомления создаются как записи в outbox.
-- Idempotency key включает: `campaign_id`, `event_type`, `recipient_employee_id`, `date_bucket`.
+- Для reminders idempotency key включает: `campaign_id`, `event_type`, `recipient_employee_id`, `date_bucket`.
+- Для invites idempotency key включает: `campaign_id`, `event_type`, `recipient_employee_id`.
 - `date_bucket` для reminders вычисляется по **локальной дате таймзоны кампании** (не UTC).
+
+## Invite recipients (MVP)
+- На `campaign.start` получатели invite формируются как union:
+  - `campaign_participants.employee_id`
+  - `campaign_assignments.rater_employee_id`
+  - `campaign_assignments.subject_employee_id`
+- Отправка только активным сотрудникам (`employees.is_active=true`).
 
 ## Invite content (agreed)
 Invite/started уведомления содержат magic-link для входа:

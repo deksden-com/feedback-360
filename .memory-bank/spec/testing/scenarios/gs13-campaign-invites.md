@@ -1,5 +1,5 @@
-# GS13 — Campaign invites (magic link) (planned)
-Status: Draft (2026-03-03)
+# GS13 — Campaign invites (magic link)
+Status: Active (2026-03-05)
 
 ## Setup
 - Seed: `S4_campaign_draft`
@@ -13,7 +13,9 @@ Status: Draft (2026-03-03)
 - Outbox записи `campaign_invite` создаются ровно один раз на (campaign, recipient) (идемпотентность).
 - Dispatcher отправляет письма (мок провайдера), attempts записываются.
 
+Примечание по покрытию:
+- Сценарий закрыт FT-0064 (integration + dispatcher path).
+
 ## Client API ops (v1)
 - `campaign.start`
 - `notifications.dispatchOutbox`
-

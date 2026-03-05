@@ -106,6 +106,7 @@ Status: Draft (2026-03-03)
   - op: `campaign.start`
   - roles: hr_admin
   - idempotency: yes
+  - side effect: enqueue `campaign_invite` outbox rows (idempotent)
 
 - command: `campaign stop <campaign_id>`
   - op: `campaign.stop`

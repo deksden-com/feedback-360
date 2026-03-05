@@ -14,7 +14,8 @@ Status: Active (2026-03-05)
 
 ## Idempotency
 - `idempotency_key` строится так, чтобы повторный запуск генерации outbox не создавал дубль:
-  - минимум: `campaign_id + event_type + recipient_employee_id + date_bucket`
+  - reminders: `campaign_id + event_type + recipient_employee_id + date_bucket`
+  - invites: `campaign_id + event_type + recipient_employee_id`
 
 ## Retry policy (MVP default)
 - Максимум попыток: 10
