@@ -181,7 +181,7 @@ describe("FT-0013 questionnaire ops (no-db acceptance)", () => {
     });
 
     expect(submit.ok).toBe(true);
-    if (submit.ok && "submittedAt" in submit.data) {
+    if (submit.ok && "wasAlreadySubmitted" in submit.data) {
       expect(submit.data.status).toBe("submitted");
       expect(submit.data.wasAlreadySubmitted).toBe(false);
     }

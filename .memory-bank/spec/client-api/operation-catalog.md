@@ -124,14 +124,31 @@ Status: Draft (2026-03-03)
 - `questionnaire.listAssigned`
   - roles: employee/manager/hr_*
   - idempotent: yes
+  - scope:
+    - `employee/manager`: только анкеты, где текущий `userId` связан с `rater_employee_id` в active company;
+    - `hr_admin/hr_reader`: все анкеты active company.
+  - `campaignId` optional: можно получить все назначенные анкеты active company.
   - cli: `questionnaire list`
+- `questionnaire.getDraft`
+  - roles: employee/manager/hr_*
+  - idempotent: yes
+  - scope:
+    - `employee/manager`: только своя анкета (`rater_employee_id` текущего user);
+    - `hr_admin/hr_reader`: доступ ко всем анкетам active company.
+  - cli: N/A (используется в web UI).
 - `questionnaire.saveDraft`
   - roles: employee/manager/hr_admin
   - idempotent: yes (by questionnaire+item)
+  - scope:
+    - `employee/manager`: можно сохранять только свою анкету;
+    - `hr_admin`: может сохранять любую анкету active company.
   - cli: `questionnaire save-draft`
 - `questionnaire.submit`
   - roles: employee/manager/hr_admin
   - idempotent: yes (transition)
+  - scope:
+    - `employee/manager`: можно submit только свою анкету;
+    - `hr_admin`: может submit любую анкету active company.
   - cli: `questionnaire submit`
 
 ## Results

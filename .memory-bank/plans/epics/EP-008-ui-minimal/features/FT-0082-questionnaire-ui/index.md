@@ -1,5 +1,5 @@
 # FT-0082 — Questionnaire UI (list/fill/draft/submit)
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-05)
 
 ## User value
 Сотрудник видит свои анкеты, может сохранять черновики и отправлять.
@@ -91,3 +91,35 @@ Status: Draft (2026-03-03)
 ## Design constraints (what we do NOT take)
 - Не переносим поведение, которое конфликтует с read-only после `ended` и freeze-правилами.
 - Не копируем демо-тексты/данные и любые action-кнопки, которых нет в нашем typed API.
+
+## Progress note (2026-03-05)
+- Выполнен вертикальный слайс FT-0082:
+  - contract/core/client: добавлена операция `questionnaire.getDraft`, `questionnaire.listAssigned` теперь поддерживает список без `campaignId`, а rater-scoping enforced по `userId -> employee`.
+  - web UI: добавлены страницы `/questionnaires` и `/questionnaires/[questionnaireId]`.
+  - web API: добавлены route handlers `/api/questionnaires/draft` и `/api/questionnaires/submit`.
+  - security: manager/employee получают только свои анкеты (list/get/save/submit).
+
+## Quality checks evidence (2026-03-05)
+- `pnpm --filter @feedback-360/api-contract lint && pnpm --filter @feedback-360/api-contract typecheck` → passed.
+- `pnpm --filter @feedback-360/db lint && pnpm --filter @feedback-360/db typecheck` → passed.
+- `pnpm --filter @feedback-360/core lint && pnpm --filter @feedback-360/core typecheck` → passed.
+- `pnpm --filter @feedback-360/client lint && pnpm --filter @feedback-360/client typecheck` → passed.
+- `pnpm --filter @feedback-360/web lint && pnpm --filter @feedback-360/web typecheck` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0013-questionnaires.test.ts src/ft/ft-0082-questionnaire-access.test.ts --fileParallelism=false` → passed.
+- `pnpm --filter @feedback-360/client exec vitest run src/ft-0082-questionnaire-get-draft-client.test.ts` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/web test` → passed.
+
+## Acceptance evidence (2026-03-05)
+- `set -a; source .env; set +a; cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0082-questionnaire-ui.spec.ts` → passed.
+- Covered acceptance:
+  - `S5_campaign_started_no_answers`: список анкет → открыть анкету → save draft → submit → статус `submitted`.
+  - `S8_campaign_ended`: UI read-only + backend `campaign_ended_readonly` на попытке save.
+- Artifacts:
+  - step-01: список анкет.
+    ![step-01-questionnaire-list](../../../../../evidence/EP-008/FT-0082/2026-03-05/step-01-questionnaire-list.png)
+  - step-02: draft сохранён и восстановлен в форме.
+    ![step-02-questionnaire-draft-saved](../../../../../evidence/EP-008/FT-0082/2026-03-05/step-02-questionnaire-draft-saved.png)
+  - step-03: анкета отправлена, статус в списке обновлён.
+    ![step-03-questionnaire-submitted](../../../../../evidence/EP-008/FT-0082/2026-03-05/step-03-questionnaire-submitted.png)
+  - step-04: `ended`-кампания в read-only.
+    ![step-04-ended-readonly-view](../../../../../evidence/EP-008/FT-0082/2026-03-05/step-04-ended-readonly-view.png)

@@ -42,6 +42,9 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button asChild variant="secondary">
+              <a href="/questionnaires">Мои анкеты</a>
+            </Button>
             <Button asChild>
               <a href="/select-company">Сменить компанию</a>
             </Button>

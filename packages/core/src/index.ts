@@ -41,6 +41,8 @@ import {
   type OrgDepartmentMoveOutput,
   type OrgManagerSetInput,
   type OrgManagerSetOutput,
+  type QuestionnaireGetDraftInput,
+  type QuestionnaireGetDraftOutput,
   type QuestionnaireListAssignedInput,
   type QuestionnaireListAssignedOutput,
   type QuestionnaireSaveDraftInput,
@@ -100,6 +102,8 @@ import {
   parseOrgDepartmentMoveOutput,
   parseOrgManagerSetInput,
   parseOrgManagerSetOutput,
+  parseQuestionnaireGetDraftInput,
+  parseQuestionnaireGetDraftOutput,
   parseQuestionnaireListAssignedInput,
   parseQuestionnaireListAssignedOutput,
   parseQuestionnaireSaveDraftInput,
@@ -126,6 +130,7 @@ import {
   generateSuggestedMatrix,
   getCampaignProgress,
   getEmployeeIdByUserInCompany,
+  getQuestionnaireDraft,
   getResultsHrView,
   isCampaignSubjectManagedByEmployee,
   listActiveEmployees,
@@ -181,6 +186,47 @@ const ensureContextCompany = (request: DispatchOperationInput): string | Operati
 const hasRole = (request: DispatchOperationInput, allowedRoles: readonly string[]): boolean => {
   const role = request.context?.role;
   return Boolean(role && allowedRoles.includes(role));
+};
+
+const resolveRaterEmployeeId = async (
+  request: DispatchOperationInput,
+  companyId: string,
+  operation: string,
+): Promise<string | undefined | OperationResult<never>> => {
+  const role = request.context?.role;
+  if (role !== "manager" && role !== "employee") {
+    return undefined;
+  }
+
+  const userId = request.context?.userId;
+  if (!userId) {
+    return errorResult(
+      createOperationError(
+        "unauthenticated",
+        "User context is required for questionnaire access.",
+        {
+          operation,
+        },
+      ),
+    );
+  }
+
+  const employeeId = await getEmployeeIdByUserInCompany({
+    companyId,
+    userId,
+  });
+
+  if (!employeeId) {
+    return errorResult(
+      createOperationError("forbidden", "No employee profile linked to current user.", {
+        operation,
+        companyId,
+        userId,
+      }),
+    );
+  }
+
+  return employeeId;
 };
 
 const runCompanyUpdateProfile = (
@@ -1249,15 +1295,73 @@ const runQuestionnaireListAssigned = async (
   }
 
   try {
+    const raterEmployeeIdOrError = await resolveRaterEmployeeId(
+      request,
+      companyIdOrError,
+      "questionnaire.listAssigned",
+    );
+    if (typeof raterEmployeeIdOrError !== "string" && raterEmployeeIdOrError !== undefined) {
+      return raterEmployeeIdOrError;
+    }
+
     const output = await listAssignedQuestionnaires({
       campaignId: parsedInput.campaignId,
       status: parsedInput.status,
       companyId: companyIdOrError,
+      ...(raterEmployeeIdOrError ? { raterEmployeeId: raterEmployeeIdOrError } : {}),
     });
     return okResult(parseQuestionnaireListAssignedOutput(output));
   } catch (error) {
     return errorResult(
       errorFromUnknown(error, "invalid_input", "Failed to list assigned questionnaires."),
+    );
+  }
+};
+
+const runQuestionnaireGetDraft = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<QuestionnaireGetDraftOutput>> => {
+  if (!hasRole(request, ["hr_admin", "hr_reader", "manager", "employee"])) {
+    return errorResult(
+      createOperationError("forbidden", "Current role cannot read questionnaire draft.", {
+        operation: "questionnaire.getDraft",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: QuestionnaireGetDraftInput;
+  try {
+    parsedInput = parseQuestionnaireGetDraftInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid questionnaire.getDraft input."),
+    );
+  }
+
+  try {
+    const raterEmployeeIdOrError = await resolveRaterEmployeeId(
+      request,
+      companyIdOrError,
+      "questionnaire.getDraft",
+    );
+    if (typeof raterEmployeeIdOrError !== "string" && raterEmployeeIdOrError !== undefined) {
+      return raterEmployeeIdOrError;
+    }
+
+    const output = await getQuestionnaireDraft({
+      questionnaireId: parsedInput.questionnaireId,
+      companyId: companyIdOrError,
+      ...(raterEmployeeIdOrError ? { raterEmployeeId: raterEmployeeIdOrError } : {}),
+    });
+    return okResult(parseQuestionnaireGetDraftOutput(output));
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Failed to get questionnaire draft."),
     );
   }
 };
@@ -1288,10 +1392,20 @@ const runQuestionnaireSaveDraft = async (
   }
 
   try {
+    const raterEmployeeIdOrError = await resolveRaterEmployeeId(
+      request,
+      companyIdOrError,
+      "questionnaire.saveDraft",
+    );
+    if (typeof raterEmployeeIdOrError !== "string" && raterEmployeeIdOrError !== undefined) {
+      return raterEmployeeIdOrError;
+    }
+
     const output = await saveQuestionnaireDraft({
       questionnaireId: parsedInput.questionnaireId,
       draft: parsedInput.draft,
       companyId: companyIdOrError,
+      ...(raterEmployeeIdOrError ? { raterEmployeeId: raterEmployeeIdOrError } : {}),
     });
     return okResult(parseQuestionnaireSaveDraftOutput(output));
   } catch (error) {
@@ -1327,9 +1441,19 @@ const runQuestionnaireSubmit = async (
   }
 
   try {
+    const raterEmployeeIdOrError = await resolveRaterEmployeeId(
+      request,
+      companyIdOrError,
+      "questionnaire.submit",
+    );
+    if (typeof raterEmployeeIdOrError !== "string" && raterEmployeeIdOrError !== undefined) {
+      return raterEmployeeIdOrError;
+    }
+
     const output = await submitQuestionnaire({
       questionnaireId: parsedInput.questionnaireId,
       companyId: companyIdOrError,
+      ...(raterEmployeeIdOrError ? { raterEmployeeId: raterEmployeeIdOrError } : {}),
     });
     return okResult(parseQuestionnaireSubmitOutput(output));
   } catch (error) {
@@ -1402,6 +1526,7 @@ export const dispatchOperation = (
     | ModelVersionCreateOutput
     | CampaignCreateOutput
     | QuestionnaireListAssignedOutput
+    | QuestionnaireGetDraftOutput
     | QuestionnaireSaveDraftOutput
     | QuestionnaireSubmitOutput
   >
@@ -1482,6 +1607,8 @@ export const dispatchOperation = (
       return runAiRunForCampaign(parsedRequest);
     case "questionnaire.listAssigned":
       return runQuestionnaireListAssigned(parsedRequest);
+    case "questionnaire.getDraft":
+      return runQuestionnaireGetDraft(parsedRequest);
     case "questionnaire.saveDraft":
       return runQuestionnaireSaveDraft(parsedRequest);
     case "questionnaire.submit":

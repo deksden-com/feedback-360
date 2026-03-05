@@ -14,14 +14,17 @@ describe("FT-0013 questionnaire ops", () => {
       const companyId = seeded.handles["company.main"];
       const campaignId = seeded.handles["campaign.main"];
       const questionnaireId = seeded.handles["questionnaire.main"];
+      const managerUserId = seeded.handles["user.head_a"];
 
       expect(companyId).toBeDefined();
       expect(campaignId).toBeDefined();
       expect(questionnaireId).toBeDefined();
+      expect(managerUserId).toBeDefined();
 
       const context = {
         companyId: String(companyId),
-        role: "employee" as const,
+        role: "manager" as const,
+        userId: String(managerUserId),
       };
 
       const listNotStarted = await dispatchOperation({
@@ -67,7 +70,7 @@ describe("FT-0013 questionnaire ops", () => {
       });
 
       expect(submitted.ok).toBe(true);
-      if (submitted.ok && "submittedAt" in submitted.data) {
+      if (submitted.ok && "wasAlreadySubmitted" in submitted.data) {
         expect(submitted.data.status).toBe("submitted");
         expect(submitted.data.wasAlreadySubmitted).toBe(false);
       }
