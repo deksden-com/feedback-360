@@ -126,6 +126,18 @@ type AiRunOptions = {
   json?: boolean;
 };
 
+type RemindersGenerateOptions = {
+  json?: boolean;
+  campaign: string;
+};
+
+type NotificationsDispatchOptions = {
+  json?: boolean;
+  campaign?: string;
+  limit?: string;
+  provider?: "stub" | "resend";
+};
+
 type EmployeeUpsertOptions = {
   json?: boolean;
   email?: string;
@@ -443,6 +455,27 @@ const formatAiRunHuman = (data: {
   return `AI processing ${data.wasAlreadyCompleted ? "already completed" : "completed"}: campaign=${data.campaignId}, job=${data.aiJobId}, provider=${data.provider}, status=${data.status}, completedAt=${data.completedAt}`;
 };
 
+const formatRemindersGenerateHuman = (data: {
+  campaignId: string;
+  dateBucket: string;
+  candidateRecipients: number;
+  generated: number;
+  deduplicated: number;
+}): string => {
+  return `Reminders generated: campaign=${data.campaignId}, date=${data.dateBucket}, candidates=${data.candidateRecipients}, generated=${data.generated}, deduplicated=${data.deduplicated}`;
+};
+
+const formatNotificationsDispatchHuman = (data: {
+  provider: "stub" | "resend";
+  processed: number;
+  sent: number;
+  failed: number;
+  attemptsLogged: number;
+  remainingPending: number;
+}): string => {
+  return `Notification dispatch: provider=${data.provider}, processed=${data.processed}, sent=${data.sent}, failed=${data.failed}, attempts=${data.attemptsLogged}, remainingPending=${data.remainingPending}`;
+};
+
 const formatModelVersionCreateHuman = (data: {
   modelVersionId: string;
   companyId: string;
@@ -748,6 +781,8 @@ const normalizeLegacySeedArgs = (argv: string[]): string[] => {
     "campaign",
     "matrix",
     "ai",
+    "reminders",
+    "notifications",
     "questionnaire",
     "results",
   ]);
@@ -783,6 +818,8 @@ Examples:
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign snapshot list --campaign <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants add-departments <campaign_id> --from-departments <department_id>...
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- matrix set <campaign_id> --assignments-json '[{"subjectEmployeeId":"<id>","raterEmployeeId":"<id>","raterRole":"manager"}]' --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- reminders generate --campaign <campaign_id> --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- notifications dispatch --campaign <campaign_id> --provider stub --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- ai run <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- questionnaire list --campaign <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- results my --campaign <campaign_id> --json
@@ -1520,6 +1557,93 @@ Examples:
 
       if (!options.json && result.ok) {
         console.log(formatMatrixSetHuman(result.data));
+      }
+    });
+
+  const remindersCommand = program
+    .command("reminders")
+    .description("Reminder generation operations.");
+
+  remindersCommand
+    .command("generate")
+    .description("Generate reminder outbox rows for pending questionnaires.")
+    .requiredOption("--campaign <campaign_id>", "Campaign identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: RemindersGenerateOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.notificationsGenerateReminders({
+        campaignId: options.campaign,
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatRemindersGenerateHuman(result.data));
+      }
+    });
+
+  const notificationsCommand = program
+    .command("notifications")
+    .description("Notification outbox dispatch operations.");
+
+  notificationsCommand
+    .command("dispatch")
+    .description("Dispatch pending notification outbox rows.")
+    .option("--campaign <campaign_id>", "Campaign identifier filter.")
+    .option("--limit <n>", "Max outbox rows to process in one run (default: 100).")
+    .option("--provider <provider>", "Dispatch provider: stub | resend.", "stub")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: NotificationsDispatchOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      let parsedLimit: number | undefined;
+      if (options.limit !== undefined) {
+        const value = Number(options.limit);
+        if (!Number.isInteger(value) || value < 1) {
+          emitError(
+            createOperationError("invalid_input", "--limit must be an integer >= 1.", {
+              value: options.limit,
+            }),
+            options.json,
+          );
+          return;
+        }
+        parsedLimit = value;
+      }
+
+      if (
+        options.provider !== undefined &&
+        options.provider !== "stub" &&
+        options.provider !== "resend"
+      ) {
+        emitError(
+          createOperationError("invalid_input", '--provider must be "stub" or "resend".', {
+            value: options.provider,
+          }),
+          options.json,
+        );
+        return;
+      }
+
+      const result = await client.notificationsDispatchOutbox({
+        ...(options.campaign ? { campaignId: options.campaign } : {}),
+        ...(typeof parsedLimit === "number" ? { limit: parsedLimit } : {}),
+        ...(options.provider ? { provider: options.provider } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatNotificationsDispatchHuman(result.data));
       }
     });
 

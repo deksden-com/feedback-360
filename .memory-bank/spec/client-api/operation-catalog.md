@@ -153,12 +153,14 @@ Status: Draft (2026-03-03)
 
 ## Notifications
 - `notifications.generateReminders`
-  - roles: service role (cron) / hr_admin (manual)
+  - roles: hr_admin (MVP via core dispatcher)
   - idempotent: yes (by idempotency key)
+  - input options: `campaignId`
   - cli: `reminders generate`
 - `notifications.dispatchOutbox`
-  - roles: service role (cron) / hr_admin (manual)
+  - roles: hr_admin (MVP via core dispatcher)
   - idempotent: yes
+  - input options: `campaignId?`, `limit?`, `provider=stub|resend`
   - cli: `notifications dispatch`
 
 ## AI

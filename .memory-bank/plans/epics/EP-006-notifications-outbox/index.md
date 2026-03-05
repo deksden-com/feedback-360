@@ -1,5 +1,5 @@
 # EP-006 — Notifications outbox (email)
-Status: Draft (2026-03-03)
+Status: Active (2026-03-05)
 
 ## Goal
 Надёжные email уведомления (Resend) через outbox: без дублей, с расписанием по таймзоне.
@@ -12,10 +12,10 @@ Status: Draft (2026-03-03)
 - GS13 (campaign invites)
 
 ## Progress report (evidence-based)
-- `as_of`: 2026-03-04
+- `as_of`: 2026-03-05
 - `total_features`: 4
-- `completed_features`: 0
-- `evidence_confirmed_features`: 0
+- `completed_features`: 1
+- `evidence_confirmed_features`: 1
 - verification link:
   - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-006. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
 

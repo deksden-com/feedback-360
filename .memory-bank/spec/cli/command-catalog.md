@@ -176,12 +176,12 @@ Status: Draft (2026-03-03)
 ## Notifications
 - command: `reminders generate [--campaign <id>]`
   - op: `notifications.generateReminders`
-  - roles: service role (cron) / hr_admin (manual)
+  - roles: hr_admin
   - idempotency: yes
 
-- command: `notifications dispatch`
+- command: `notifications dispatch [--campaign <id>] [--limit <n>] [--provider stub|resend]`
   - op: `notifications.dispatchOutbox`
-  - roles: service role (cron) / hr_admin (manual)
+  - roles: hr_admin
   - idempotency: yes
 
 ## AI

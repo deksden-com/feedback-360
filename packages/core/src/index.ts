@@ -30,6 +30,10 @@ import {
   type MatrixSetOutput,
   type ModelVersionCreateInput,
   type ModelVersionCreateOutput,
+  type NotificationsDispatchOutboxInput,
+  type NotificationsDispatchOutboxOutput,
+  type NotificationsGenerateRemindersInput,
+  type NotificationsGenerateRemindersOutput,
   type OperationResult,
   type OrgDepartmentMoveInput,
   type OrgDepartmentMoveOutput,
@@ -84,6 +88,10 @@ import {
   parseMatrixSetOutput,
   parseModelVersionCreateInput,
   parseModelVersionCreateOutput,
+  parseNotificationsDispatchOutboxInput,
+  parseNotificationsDispatchOutboxOutput,
+  parseNotificationsGenerateRemindersInput,
+  parseNotificationsGenerateRemindersOutput,
   parseOrgDepartmentMoveInput,
   parseOrgDepartmentMoveOutput,
   parseOrgManagerSetInput,
@@ -108,7 +116,9 @@ import {
   addCampaignParticipantsFromDepartments,
   createCampaign,
   createModelVersion,
+  dispatchNotificationOutbox,
   endCampaign,
+  generateReminderOutbox,
   generateSuggestedMatrix,
   getCampaignProgress,
   getEmployeeIdByUserInCompany,
@@ -757,6 +767,84 @@ const runCampaignProgressGet = async (
   }
 };
 
+const runNotificationsGenerateReminders = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<NotificationsGenerateRemindersOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can generate reminders.", {
+        operation: "notifications.generateReminders",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: NotificationsGenerateRemindersInput;
+  try {
+    parsedInput = parseNotificationsGenerateRemindersInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid notifications.generateReminders input."),
+    );
+  }
+
+  try {
+    const output = await generateReminderOutbox({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+    });
+    return okResult(parseNotificationsGenerateRemindersOutput(output));
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Failed to generate reminder outbox."),
+    );
+  }
+};
+
+const runNotificationsDispatchOutbox = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<NotificationsDispatchOutboxOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can dispatch notifications.", {
+        operation: "notifications.dispatchOutbox",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: NotificationsDispatchOutboxInput;
+  try {
+    parsedInput = parseNotificationsDispatchOutboxInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid notifications.dispatchOutbox input."),
+    );
+  }
+
+  try {
+    const output = await dispatchNotificationOutbox({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+      limit: parsedInput.limit,
+      provider: parsedInput.provider,
+    });
+    return okResult(parseNotificationsDispatchOutboxOutput(output));
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Failed to dispatch notification outbox."),
+    );
+  }
+};
+
 const runResultsGetHrView = async (
   request: DispatchOperationInput,
 ): Promise<OperationResult<ResultsGetHrViewOutput>> => {
@@ -1261,6 +1349,8 @@ export const dispatchOperation = (
     | CampaignWeightsSetOutput
     | CampaignParticipantsMutationOutput
     | CampaignProgressGetOutput
+    | NotificationsGenerateRemindersOutput
+    | NotificationsDispatchOutboxOutput
     | ResultsGetMyDashboardOutput
     | ResultsGetTeamDashboardOutput
     | ResultsGetHrViewOutput
@@ -1333,6 +1423,10 @@ export const dispatchOperation = (
       return runCampaignSnapshotList(parsedRequest);
     case "campaign.progress.get":
       return runCampaignProgressGet(parsedRequest);
+    case "notifications.generateReminders":
+      return runNotificationsGenerateReminders(parsedRequest);
+    case "notifications.dispatchOutbox":
+      return runNotificationsDispatchOutbox(parsedRequest);
     case "results.getMyDashboard":
       return runResultsGetMyDashboard(parsedRequest);
     case "results.getTeamDashboard":

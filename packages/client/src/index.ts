@@ -29,6 +29,10 @@ import {
   type MatrixSetOutput,
   type ModelVersionCreateInput,
   type ModelVersionCreateOutput,
+  type NotificationsDispatchOutboxInput,
+  type NotificationsDispatchOutboxOutput,
+  type NotificationsGenerateRemindersInput,
+  type NotificationsGenerateRemindersOutput,
   type OperationContext,
   type OperationResult,
   type OrgDepartmentMoveInput,
@@ -85,6 +89,10 @@ import {
   parseMatrixSetOutput,
   parseModelVersionCreateInput,
   parseModelVersionCreateOutput,
+  parseNotificationsDispatchOutboxInput,
+  parseNotificationsDispatchOutboxOutput,
+  parseNotificationsGenerateRemindersInput,
+  parseNotificationsGenerateRemindersOutput,
   parseOperationContext,
   parseOperationResult,
   parseOrgDepartmentMoveInput,
@@ -199,6 +207,14 @@ export type Feedback360Client = {
     input: CampaignProgressGetInput,
     context?: OperationContext,
   ): Promise<OperationResult<CampaignProgressGetOutput>>;
+  notificationsGenerateReminders(
+    input: NotificationsGenerateRemindersInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<NotificationsGenerateRemindersOutput>>;
+  notificationsDispatchOutbox(
+    input?: NotificationsDispatchOutboxInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<NotificationsDispatchOutboxOutput>>;
   campaignParticipantsAddFromDepartments(
     input: CampaignParticipantsAddFromDepartmentsInput,
     context?: OperationContext,
@@ -603,6 +619,42 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseCampaignProgressGetOutput,
+      });
+    },
+
+    notificationsGenerateReminders: async (input, context) => {
+      let parsedInput: NotificationsGenerateRemindersInput;
+      try {
+        parsedInput = parseNotificationsGenerateRemindersInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid notificationsGenerateReminders input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "notifications.generateReminders",
+        input: parsedInput,
+        context,
+        parseOutput: parseNotificationsGenerateRemindersOutput,
+      });
+    },
+
+    notificationsDispatchOutbox: async (input, context) => {
+      let parsedInput: NotificationsDispatchOutboxInput;
+      try {
+        parsedInput = parseNotificationsDispatchOutboxInput(input ?? {});
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid notificationsDispatchOutbox input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "notifications.dispatchOutbox",
+        input: parsedInput,
+        context,
+        parseOutput: parseNotificationsDispatchOutboxOutput,
       });
     },
 

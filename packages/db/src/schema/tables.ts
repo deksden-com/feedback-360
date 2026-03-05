@@ -260,6 +260,58 @@ export const aiWebhookReceipts = pgTable(
   (table) => [unique("uq_ai_webhook_receipt_idempotency").on(table.idempotencyKey)],
 );
 
+export const notificationOutbox = pgTable(
+  "notification_outbox",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    recipientEmployeeId: uuid("recipient_employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    channel: text("channel").notNull().default("email"),
+    eventType: text("event_type").notNull(),
+    templateKey: text("template_key").notNull(),
+    locale: text("locale").notNull().default("ru"),
+    toEmail: text("to_email").notNull(),
+    payloadJson: jsonb("payload_json").notNull().default({}),
+    status: text("status").notNull().default("pending"),
+    idempotencyKey: text("idempotency_key").notNull(),
+    attempts: integer("attempts").notNull().default(0),
+    lastError: text("last_error"),
+    nextRetryAt: timestamp("next_retry_at", { withTimezone: true }),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique("uq_notification_outbox_idempotency").on(table.idempotencyKey)],
+);
+
+export const notificationAttempts = pgTable(
+  "notification_attempts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    outboxId: uuid("outbox_id")
+      .notNull()
+      .references(() => notificationOutbox.id, { onDelete: "cascade" }),
+    attemptNo: integer("attempt_no").notNull(),
+    provider: text("provider").notNull(),
+    status: text("status").notNull(),
+    providerMessageId: text("provider_message_id"),
+    errorMessage: text("error_message"),
+    requestedAt: timestamp("requested_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique("uq_notification_attempt_outbox_attempt").on(table.outboxId, table.attemptNo)],
+);
+
 export const campaignEmployeeSnapshots = pgTable(
   "campaign_employee_snapshots",
   {

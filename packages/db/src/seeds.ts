@@ -126,6 +126,8 @@ const ids = {
 
 const truncateSql = sql.raw(`
   truncate table
+    notification_attempts,
+    notification_outbox,
     ai_webhook_receipts,
     ai_jobs,
     competency_levels,
