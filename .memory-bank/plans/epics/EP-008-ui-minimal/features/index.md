@@ -1,5 +1,5 @@
 # EP-008 — Feature catalog
-Status: In Progress (2026-03-05)
+Status: Completed (2026-03-05)
 
 - [FT-0081 Auth + company switcher UI](FT-0081-auth-company-switcher-ui/index.md): вход и выбор активной компании. **Completed (2026-03-05)**. Читать, чтобы multi-company user не путался.
 - [FT-0082 Questionnaire UI](FT-0082-questionnaire-ui/index.md): список анкет + draft/save/submit. **Completed (2026-03-05)**. Читать, чтобы основной пользовательский путь был удобен.

@@ -12,6 +12,8 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run"
+    "test": "cross-env FEEDBACK360_SKIP_DB_TESTS=1 vitest run",
+    "test:db": "vitest run --testTimeout=45000 --maxWorkers=1 --no-file-parallelism src/ft/ft-0042-campaign-lifecycle.test.ts src/ft/ft-0055-results-views.test.ts src/ft/ft-0071-ai-run.test.ts",
+    "test:db:full": "vitest run --testTimeout=45000 --maxWorkers=1 --no-file-parallelism src/ft/*.test.ts --exclude src/ft/*-no-db.test.ts --exclude src/ft/ft-0011-op-errors.test.ts"
   }
 }

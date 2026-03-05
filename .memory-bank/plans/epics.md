@@ -64,3 +64,17 @@ Status: Draft (2026-03-03)
 - employee fill questionnaires + view dashboard
 - manager view (team)
   - Детали: [EP-008 Feature catalog](epics/EP-008-ui-minimal/features/index.md) — UI фичи и e2e сценарии. Читать, чтобы UI оставался thin.
+
+## Epic 11 — Test & release hardening
+- DB integration isolation
+- CI checks topology / merge gate stabilization
+- beta smoke release gates
+- docs/evidence sync
+  - Детали: [EP-009 Feature catalog](epics/EP-009-test-release-hardening/features/index.md) — hardening фичи с acceptance сценариями. Читать, чтобы после MVP разработка и релизы были стабильными.
+
+## Epic 12 — Production readiness
+- retention/privacy finalization
+- observability baseline
+- runbook and recovery drill
+- release rehearsal
+  - Детали: [EP-010 Feature catalog](epics/EP-010-prod-readiness/features/index.md) — эксплуатационная готовность с проверяемыми deliverables. Читать, чтобы перейти от MVP к production-grade процессу.

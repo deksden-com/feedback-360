@@ -240,3 +240,37 @@ Status: Draft (2026-03-03)
 - FT-0082: what=questionnaire UI thin slice (`/questionnaires`, `/questionnaires/[questionnaireId]`) + typed ops `questionnaire.listAssigned|getDraft|saveDraft|submit` with rater-scoped access; where=local + Supabase beta pooler; how=`pnpm --filter @feedback-360/api-contract lint && pnpm --filter @feedback-360/api-contract typecheck`, `pnpm --filter @feedback-360/db lint && pnpm --filter @feedback-360/db typecheck`, `pnpm --filter @feedback-360/core lint && pnpm --filter @feedback-360/core typecheck`, `pnpm --filter @feedback-360/client lint && pnpm --filter @feedback-360/client typecheck`, `pnpm --filter @feedback-360/web lint && pnpm --filter @feedback-360/web typecheck`, `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0013-questionnaires.test.ts src/ft/ft-0082-questionnaire-access.test.ts --fileParallelism=false`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0082-questionnaire-get-draft-client.test.ts`, `set -a; source .env; set +a; pnpm --filter @feedback-360/web test`, `set -a; source .env; set +a; cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0082-questionnaire-ui.spec.ts`; quality_gate=passed; acceptance_gate=passed (`S5`: list→draft→submit, `S8`: ended read-only + `campaign_ended_readonly`); artifacts=`.memory-bank/evidence/EP-008/FT-0082/2026-03-05/step-01-questionnaire-list.png`, `.memory-bank/evidence/EP-008/FT-0082/2026-03-05/step-02-questionnaire-draft-saved.png`, `.memory-bank/evidence/EP-008/FT-0082/2026-03-05/step-03-questionnaire-submitted.png`, `.memory-bank/evidence/EP-008/FT-0082/2026-03-05/step-04-ended-readonly-view.png`; result=passed.
 - FT-0083: what=results dashboards thin slice (`/results`, `/results/team`, `/results/hr`) + typed ops `results.getMyDashboard|getTeamDashboard|getHrView`; where=local + Supabase beta pooler; how=`pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `set -a; source .env; set +a; pnpm --filter @feedback-360/web test`, `set -a; source .env; set +a; pnpm --filter @feedback-360/web build`, `set -a; source .env; set +a; cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0083-results-ui.spec.ts`; quality_gate=passed; acceptance_gate=passed (`S9`: employee/manager dashboards hide raw comments, HR dashboard shows raw+processed+summary); artifacts=`.memory-bank/evidence/EP-008/FT-0083/2026-03-05/step-01-employee-results-without-raw.png`, `.memory-bank/evidence/EP-008/FT-0083/2026-03-05/step-02-manager-results-without-raw.png`, `.memory-bank/evidence/EP-008/FT-0083/2026-03-05/step-03-hr-results-with-raw.png`; result=passed.
 - FT-0084: what=HR campaign workbench thin UI (`/hr/campaigns`) + typed adapter `/api/hr/campaigns/execute` for campaign lifecycle/matrix/progress/AI retry; where=local + Supabase beta pooler; how=`set -a; source .env; set +a; pnpm --filter @feedback-360/web lint`, `set -a; source .env; set +a; pnpm --filter @feedback-360/web typecheck`, `set -a; source .env; set +a; pnpm --filter @feedback-360/web test`, `set -a; source .env; set +a; pnpm --filter @feedback-360/web build`, `set -a; source .env; set +a; cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0084-hr-campaign-ui.spec.ts`; quality_gate=passed; acceptance_gate=passed (`S4`: HR create/start/matrix, `S5`: first draft-save lock with `campaign_locked`, `S8`: AI retry button runs `ai.runForCampaign`); artifacts=`.memory-bank/evidence/EP-008/FT-0084/2026-03-05/step-01-hr-campaign-start-and-matrix.png`, `.memory-bank/evidence/EP-008/FT-0084/2026-03-05/step-02-hr-campaign-locked.png`, `.memory-bank/evidence/EP-008/FT-0084/2026-03-05/step-03-hr-campaign-ai-retry.png`; result=passed.
+
+## EP-009 Test & release hardening
+- FT-0091
+  - Must add test: stable DB integration lane rerun against the same environment without shared-state failures.
+  - Must run: repeated DB integration suite + workspace `checks` equivalent.
+- FT-0092
+  - Must add test: PR/CI smoke proving required `checks` context exists and unblocks merge.
+  - Must run: GitHub PR to `develop` with green required status and reproducible local command set.
+- FT-0093
+  - Must add test: browser smoke on `beta` for at least one auth flow and one domain flow.
+  - Must run: deploy to `beta` + screenshot evidence.
+- FT-0094
+  - Must add test: docs audit / consistency check across FT/EP/index/verification matrix.
+  - Must run: manual consistency sweep with zero status drift.
+
+### EP-009 execution evidence (2026-03-05)
+- FT-0091: what=DB integration isolation + deterministic seed replay; where=local + Supabase beta pooler; how=`pnpm test:db`, rerun `pnpm test:db`, `pnpm checks`, targeted `pnpm --filter @feedback-360/db exec vitest run --testTimeout=45000 --maxWorkers=1 --no-file-parallelism src/migrations/ft-0091-db-integration-isolation.test.ts`; quality_gate=passed; acceptance_gate=passed (DB lane green twice подряд, no duplicate/FK drift, seed replay deterministic, curated DB timeouts raised to 45s for cloud latency); ci_run=`https://github.com/deksden-com/feedback-360/actions/runs/22738344260`; result=passed.
+- FT-0092: what=required GitHub `checks` topology + Vercel-ready PR surface; where=GitHub PR `#26` + local repro; how=`pnpm checks`, `gh pr checks 26`, `gh run list --workflow ci.yml --limit 3`; quality_gate=passed; acceptance_gate=passed (`checks` context exists, branch protection sees green status, PR no longer blocked by missing context); ci_run=`https://github.com/deksden-com/feedback-360/actions/runs/22738344260`; deploy=`https://go360go-beta-qjzyzd712-deksdens-projects.vercel.app`; result=passed.
+- FT-0093: what=beta smoke release gates + manual browser evidence; where=real `https://beta.go360go.ru`; how=`PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web test:smoke:beta`, manual `$agent-browser` login→demo→select-company flow; quality_gate=passed; acceptance_gate=passed (5 smoke specs green on beta, manual screenshots captured, workflow dispatch green on updated SHA); browser_smoke=passed; ci_run=`https://github.com/deksden-com/feedback-360/actions/runs/22738351836`; artifacts=`.memory-bank/evidence/EP-009/FT-0093/2026-03-05/step-01-beta-login.png`, `.memory-bank/evidence/EP-009/FT-0093/2026-03-05/step-02-beta-select-company.png`; result=passed.
+- FT-0094: what=docs/evidence sync + epic progress audit; where=local; how=`pnpm docs:audit`, `rg -n "Status: Draft|Status: In Progress" .memory-bank/plans/epics/EP-009-test-release-hardening`; quality_gate=passed; acceptance_gate=passed (EP counts match feature docs, completed FT all have evidence blocks, verification matrix section present); result=passed.
+
+## EP-010 Production readiness
+- FT-0101
+  - Must add test: docs consistency check between retention/privacy, RBAC, results visibility and glossary.
+  - Must run: resolved policy review with no open retention ambiguity.
+- FT-0102
+  - Must add test: controlled runtime error + webhook/cron trace validation on `beta`.
+  - Must run: Sentry/logs smoke with correlation ids.
+- FT-0103
+  - Must add test: runbook drill checklist with health verification after recovery walkthrough.
+  - Must run: recovery/release drill on `beta`.
+- FT-0104
+  - Must add test: release rehearsal checklist with CI/deploy/smoke evidence bundle.
+  - Must run: one end-to-end rehearsal before `prod` promotion.

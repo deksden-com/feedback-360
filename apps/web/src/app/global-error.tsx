@@ -1,7 +1,6 @@
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
-import NextError from "next/error";
 import { useEffect } from "react";
 
 export default function GlobalError({
@@ -15,12 +14,15 @@ export default function GlobalError({
 
   return (
     <html lang="ru">
-      <body>
-        {/* `NextError` is the default Next.js error page component. Its type
-        definition requires a `statusCode` prop. However, since the App Router
-        does not expose status codes for errors, we simply pass 0 to render a
-        generic error message. */}
-        <NextError statusCode={0} />
+      <body className="bg-background text-foreground">
+        <main className="mx-auto flex min-h-dvh w-full max-w-2xl items-center justify-center p-6">
+          <div className="w-full space-y-3 rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
+            <h1 className="text-2xl font-semibold tracking-tight">Что-то пошло не так</h1>
+            <p className="text-sm text-muted-foreground">
+              Мы уже записали ошибку. Попробуйте обновить страницу или вернуться позже.
+            </p>
+          </div>
+        </main>
       </body>
     </html>
   );

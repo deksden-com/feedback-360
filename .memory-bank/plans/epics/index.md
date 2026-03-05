@@ -20,3 +20,5 @@ Status: Draft (2026-03-03)
 - [EP-006 Notifications outbox (email)](EP-006-notifications-outbox/index.md): outbox, расписания, timezone, Resend. Читать, чтобы напоминания работали без дублей.
 - [EP-007 AI processing + webhook security](EP-007-ai-webhooks/index.md): ai_jobs, HMAC webhook, processed text aggregates, retry. Читать, чтобы AI обработка была безопасной.
 - [EP-008 Minimal UI (thin)](EP-008-ui-minimal/index.md): первые экраны поверх typed client. Читать, чтобы UI не “утёк” в бизнес-логику.
+- [EP-009 Test & release hardening](EP-009-test-release-hardening/index.md): стабилизация DB integration tests, CI checks topology, beta smoke gates и sync evidence. Читать, чтобы поставка фич стала предсказуемой и без flaky merge blockers.
+- [EP-010 Production readiness](EP-010-prod-readiness/index.md): retention/privacy, observability, runbook drill и release rehearsal. Читать, чтобы после MVP система была готова к спокойной эксплуатации.
