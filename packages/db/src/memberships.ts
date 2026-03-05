@@ -37,7 +37,7 @@ export const listMemberships = async (
           isNull(companies.deletedAt),
         ),
       )
-      .orderBy(asc(companies.name), asc(companyMemberships.createdAt));
+      .orderBy(asc(companies.name), asc(companyMemberships.companyId));
 
     return {
       items: rows
