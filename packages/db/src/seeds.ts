@@ -511,6 +511,12 @@ const buildS8Handles = (): Record<string, string> => {
   return buildS5Handles();
 };
 
+const buildS9Handles = (): Record<string, string> => {
+  return {
+    ...buildS7Peers2Handles(),
+  };
+};
+
 const buildS4Handles = (): Record<string, string> => {
   return {
     ...buildS2Handles(),
@@ -918,6 +924,121 @@ const insertS8 = async (db: ReturnType<typeof createDb>): Promise<Record<string,
     .where(eq(campaigns.id, ids.campaignMain));
 
   return buildS8Handles();
+};
+
+const insertS9 = async (db: ReturnType<typeof createDb>): Promise<Record<string, string>> => {
+  await insertS7(db, { variant: "peers2" });
+
+  await db
+    .update(campaigns)
+    .set({
+      status: "completed",
+      updatedAt: new Date("2026-01-22T00:00:00.000Z"),
+    })
+    .where(eq(campaigns.id, ids.campaignMain));
+
+  await db
+    .update(questionnaires)
+    .set({
+      draftPayload: {
+        indicatorResponses: {
+          [ids.competencyMain]: {
+            [ids.competencyIndicatorMain1]: 4,
+          },
+          [ids.competencySecondary]: {
+            [ids.competencyIndicatorSecondary1]: 4,
+          },
+        },
+        competencyComments: {
+          [ids.competencyMain]: {
+            rawText: "Руководитель: системно держит фокус и приоритеты.",
+            processedText: "Держит фокус команды и чётко расставляет приоритеты.",
+            summaryText: "Сильный фокус и приоритизация.",
+          },
+          [ids.competencySecondary]: {
+            rawText: "Руководитель: конструктивно взаимодействует с коллегами.",
+            processedText: "Конструктивно взаимодействует с коллегами и поддерживает диалог.",
+            summaryText: "Конструктивное взаимодействие с коллегами.",
+          },
+        },
+      },
+      updatedAt: new Date("2026-01-22T00:00:00.000Z"),
+    })
+    .where(eq(questionnaires.id, ids.questionnaireMain));
+
+  await db
+    .update(questionnaires)
+    .set({
+      draftPayload: {
+        indicatorResponses: {
+          [ids.competencyMain]: {
+            [ids.competencyIndicatorMain1]: 3,
+          },
+          [ids.competencySecondary]: {
+            [ids.competencyIndicatorSecondary1]: 3,
+          },
+        },
+        competencyComments: {
+          [ids.competencyMain]: {
+            rawText: "Коллега: иногда перегружает деталями.",
+            processedText: "Иногда уходит в детали, стоит чаще выделять главное.",
+            summaryText: "Нужно чаще выделять главное.",
+          },
+        },
+      },
+      updatedAt: new Date("2026-01-22T00:00:00.000Z"),
+    })
+    .where(eq(questionnaires.id, ids.questionnaireMainInProgress));
+
+  await db
+    .update(questionnaires)
+    .set({
+      draftPayload: {
+        indicatorResponses: {
+          [ids.competencyMain]: {
+            [ids.competencyIndicatorMain1]: 5,
+          },
+          [ids.competencySecondary]: {
+            [ids.competencyIndicatorSecondary1]: "NA",
+          },
+        },
+        competencyComments: {
+          [ids.competencyMain]: {
+            rawText: "Коллега: быстро реагирует на блокеры.",
+            processedText: "Быстро реагирует на блокеры и помогает команде.",
+            summaryText: "Быстро снимает блокеры.",
+          },
+        },
+      },
+      updatedAt: new Date("2026-01-22T00:00:00.000Z"),
+    })
+    .where(eq(questionnaires.id, ids.questionnaireMainSubmitted));
+
+  await db
+    .update(questionnaires)
+    .set({
+      draftPayload: {
+        indicatorResponses: {
+          [ids.competencyMain]: {
+            [ids.competencyIndicatorMain1]: 2,
+          },
+          [ids.competencySecondary]: {
+            [ids.competencyIndicatorSecondary1]: "NA",
+          },
+        },
+        competencyComments: {
+          [ids.competencyMain]: {
+            rawText: "Подчиненный: не всегда объясняет контекст изменений.",
+            processedText: "Иногда не хватает контекста при изменениях, полезно пояснять причины.",
+            summaryText: "Нужно чаще пояснять контекст изменений.",
+          },
+        },
+      },
+      updatedAt: new Date("2026-01-22T00:00:00.000Z"),
+    })
+    .where(eq(questionnaires.id, ids.questionnaireMainSubordinate));
+
+  return buildS9Handles();
 };
 
 const insertS7NaHeavyPeer = async (
@@ -1925,6 +2046,9 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
         break;
       case "S8_campaign_ended":
         handles = await insertS8(db);
+        break;
+      case "S9_campaign_completed_with_ai":
+        handles = await insertS9(db);
         break;
       default:
         throw new Error(`Unsupported seed scenario: ${parsed.scenario}`);

@@ -7,6 +7,7 @@ export const seedScenarios = [
   "S5_campaign_started_no_answers",
   "S7_campaign_started_some_submitted",
   "S8_campaign_ended",
+  "S9_campaign_completed_with_ai",
 ] as const;
 
 export type SeedScenario = (typeof seedScenarios)[number];
@@ -72,6 +73,8 @@ export const knownOperations = [
   "campaign.participants.add",
   "campaign.participants.remove",
   "campaign.progress.get",
+  "results.getMyDashboard",
+  "results.getTeamDashboard",
   "results.getHrView",
   "employee.upsert",
   "employee.listActive",
@@ -364,6 +367,19 @@ export type ResultsGetHrViewInput = {
   anonymityThreshold?: number;
 };
 
+export type ResultsGetMyDashboardInput = {
+  campaignId: string;
+  smallGroupPolicy?: SmallGroupPolicy;
+  anonymityThreshold?: number;
+};
+
+export type ResultsGetTeamDashboardInput = {
+  campaignId: string;
+  subjectEmployeeId: string;
+  smallGroupPolicy?: SmallGroupPolicy;
+  anonymityThreshold?: number;
+};
+
 export type ResultsHrViewRaterScore = {
   raterEmployeeId: string;
   group: ResultsGroupKey;
@@ -438,6 +454,17 @@ export type ResultsHrViewGroupVisibility = {
   other?: "shown" | "hidden";
 };
 
+export type ResultsOpenTextGroup = ResultsGroupKey | "other";
+
+export type ResultsOpenTextItem = {
+  competencyId: string;
+  group: ResultsOpenTextGroup;
+  count: number;
+  rawText?: string;
+  processedText?: string;
+  summaryText?: string;
+};
+
 export type ResultsGetHrViewOutput = {
   campaignId: string;
   companyId: string;
@@ -453,7 +480,26 @@ export type ResultsGetHrViewOutput = {
   configuredGroupWeights: ResultsHrViewGroupWeights;
   effectiveGroupWeights: ResultsHrViewGroupWeights;
   overallScore?: number;
+  openText?: ResultsOpenTextItem[];
 };
+
+export type ResultsGetMyDashboardOutput = {
+  campaignId: string;
+  companyId: string;
+  subjectEmployeeId: string;
+  modelVersionId: string;
+  modelKind: "indicators" | "levels";
+  anonymityThreshold: number;
+  smallGroupPolicy: SmallGroupPolicy;
+  groupVisibility: ResultsHrViewGroupVisibility;
+  competencyScores: ResultsHrViewCompetencyScore[];
+  groupOverall: ResultsHrViewGroupOverall;
+  effectiveGroupWeights: ResultsHrViewGroupWeights;
+  overallScore?: number;
+  openText: ResultsOpenTextItem[];
+};
+
+export type ResultsGetTeamDashboardOutput = ResultsGetMyDashboardOutput;
 
 export type CampaignParticipantsAddFromDepartmentsInput = {
   campaignId: string;
@@ -1823,6 +1869,87 @@ export const parseResultsGetHrViewInput = (value: unknown): ResultsGetHrViewInpu
   };
 };
 
+export const parseResultsGetMyDashboardInput = (value: unknown): ResultsGetMyDashboardInput => {
+  const record = ensureObject(value, "results.getMyDashboard input");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "smallGroupPolicy", "anonymityThreshold"],
+    "results.getMyDashboard input",
+  );
+
+  const smallGroupPolicyValue = record.smallGroupPolicy;
+  if (smallGroupPolicyValue !== undefined) {
+    if (typeof smallGroupPolicyValue !== "string" || !isSmallGroupPolicy(smallGroupPolicyValue)) {
+      throw new Error(
+        `results.getMyDashboard input.smallGroupPolicy must be one of: ${smallGroupPolicies.join(", ")}`,
+      );
+    }
+  }
+
+  const anonymityThresholdValue = record.anonymityThreshold;
+  if (anonymityThresholdValue !== undefined) {
+    if (
+      typeof anonymityThresholdValue !== "number" ||
+      Number.isNaN(anonymityThresholdValue) ||
+      !Number.isInteger(anonymityThresholdValue) ||
+      anonymityThresholdValue < 1
+    ) {
+      throw new Error("results.getMyDashboard input.anonymityThreshold must be an integer >= 1.");
+    }
+  }
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "results.getMyDashboard input"),
+    ...(smallGroupPolicyValue ? { smallGroupPolicy: smallGroupPolicyValue } : {}),
+    ...(typeof anonymityThresholdValue === "number"
+      ? { anonymityThreshold: anonymityThresholdValue }
+      : {}),
+  };
+};
+
+export const parseResultsGetTeamDashboardInput = (value: unknown): ResultsGetTeamDashboardInput => {
+  const record = ensureObject(value, "results.getTeamDashboard input");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "subjectEmployeeId", "smallGroupPolicy", "anonymityThreshold"],
+    "results.getTeamDashboard input",
+  );
+
+  const smallGroupPolicyValue = record.smallGroupPolicy;
+  if (smallGroupPolicyValue !== undefined) {
+    if (typeof smallGroupPolicyValue !== "string" || !isSmallGroupPolicy(smallGroupPolicyValue)) {
+      throw new Error(
+        `results.getTeamDashboard input.smallGroupPolicy must be one of: ${smallGroupPolicies.join(", ")}`,
+      );
+    }
+  }
+
+  const anonymityThresholdValue = record.anonymityThreshold;
+  if (anonymityThresholdValue !== undefined) {
+    if (
+      typeof anonymityThresholdValue !== "number" ||
+      Number.isNaN(anonymityThresholdValue) ||
+      !Number.isInteger(anonymityThresholdValue) ||
+      anonymityThresholdValue < 1
+    ) {
+      throw new Error("results.getTeamDashboard input.anonymityThreshold must be an integer >= 1.");
+    }
+  }
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "results.getTeamDashboard input"),
+    subjectEmployeeId: ensureStringField(
+      record,
+      "subjectEmployeeId",
+      "results.getTeamDashboard input",
+    ),
+    ...(smallGroupPolicyValue ? { smallGroupPolicy: smallGroupPolicyValue } : {}),
+    ...(typeof anonymityThresholdValue === "number"
+      ? { anonymityThreshold: anonymityThresholdValue }
+      : {}),
+  };
+};
+
 const parseOptionalNumberField = (
   record: Record<string, unknown>,
   field: string,
@@ -2252,6 +2379,46 @@ const parseResultsHrViewGroupWeights = (value: unknown): ResultsHrViewGroupWeigh
   };
 };
 
+const parseResultsOpenTextItem = (value: unknown): ResultsOpenTextItem => {
+  const record = ensureObject(value, "results output.openText[]");
+  ensureAllowedKeys(
+    record,
+    ["competencyId", "group", "count", "rawText", "processedText", "summaryText"],
+    "results output.openText[]",
+  );
+
+  const group = ensureStringField(record, "group", "results output.openText[]");
+  if (group !== "other" && !isResultsGroupKey(group)) {
+    throw new Error(
+      "results output.openText[].group must be one of manager|peers|subordinates|self|other.",
+    );
+  }
+
+  const rawText = record.rawText;
+  if (rawText !== undefined && rawText !== null && typeof rawText !== "string") {
+    throw new Error("results output.openText[].rawText must be a string when provided.");
+  }
+
+  const processedText = record.processedText;
+  if (processedText !== undefined && processedText !== null && typeof processedText !== "string") {
+    throw new Error("results output.openText[].processedText must be a string when provided.");
+  }
+
+  const summaryText = record.summaryText;
+  if (summaryText !== undefined && summaryText !== null && typeof summaryText !== "string") {
+    throw new Error("results output.openText[].summaryText must be a string when provided.");
+  }
+
+  return {
+    competencyId: ensureStringField(record, "competencyId", "results output.openText[]"),
+    group: group as ResultsOpenTextGroup,
+    count: ensureNumberField(record, "count", "results output.openText[]"),
+    ...(typeof rawText === "string" ? { rawText } : {}),
+    ...(typeof processedText === "string" ? { processedText } : {}),
+    ...(typeof summaryText === "string" ? { summaryText } : {}),
+  };
+};
+
 export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOutput => {
   const record = ensureObject(value, "results.getHrView output");
   ensureAllowedKeys(
@@ -2271,6 +2438,7 @@ export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOut
       "configuredGroupWeights",
       "effectiveGroupWeights",
       "overallScore",
+      "openText",
     ],
     "results.getHrView output",
   );
@@ -2301,6 +2469,10 @@ export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOut
   }
 
   const overallScore = parseOptionalNumberField(record, "overallScore", "results.getHrView output");
+  const openTextValue = record.openText;
+  if (openTextValue !== undefined && !Array.isArray(openTextValue)) {
+    throw new Error("results.getHrView output.openText must be an array when provided.");
+  }
 
   return {
     campaignId: ensureStringField(record, "campaignId", "results.getHrView output"),
@@ -2322,7 +2494,83 @@ export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOut
     configuredGroupWeights: parseResultsHrViewGroupWeights(record.configuredGroupWeights),
     effectiveGroupWeights: parseResultsHrViewGroupWeights(record.effectiveGroupWeights),
     ...(overallScore !== undefined ? { overallScore } : {}),
+    ...(Array.isArray(openTextValue)
+      ? { openText: openTextValue.map(parseResultsOpenTextItem) }
+      : {}),
   };
+};
+
+const parseResultsDashboardOutput = (
+  value: unknown,
+  fieldName: string,
+): ResultsGetMyDashboardOutput => {
+  const record = ensureObject(value, fieldName);
+  ensureAllowedKeys(
+    record,
+    [
+      "campaignId",
+      "companyId",
+      "subjectEmployeeId",
+      "modelVersionId",
+      "modelKind",
+      "anonymityThreshold",
+      "smallGroupPolicy",
+      "groupVisibility",
+      "competencyScores",
+      "groupOverall",
+      "effectiveGroupWeights",
+      "overallScore",
+      "openText",
+    ],
+    fieldName,
+  );
+
+  const modelKind = ensureStringField(record, "modelKind", fieldName);
+  if (modelKind !== "indicators" && modelKind !== "levels") {
+    throw new Error(`${fieldName}.modelKind must be "indicators" or "levels".`);
+  }
+
+  const smallGroupPolicyValue = ensureStringField(record, "smallGroupPolicy", fieldName);
+  if (!isSmallGroupPolicy(smallGroupPolicyValue)) {
+    throw new Error(
+      `${fieldName}.smallGroupPolicy must be one of: ${smallGroupPolicies.join(", ")}`,
+    );
+  }
+
+  const anonymityThreshold = ensureNumberField(record, "anonymityThreshold", fieldName);
+  if (!Number.isInteger(anonymityThreshold) || anonymityThreshold < 1) {
+    throw new Error(`${fieldName}.anonymityThreshold must be an integer >= 1.`);
+  }
+
+  const overallScore = parseOptionalNumberField(record, "overallScore", fieldName);
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", fieldName),
+    companyId: ensureStringField(record, "companyId", fieldName),
+    subjectEmployeeId: ensureStringField(record, "subjectEmployeeId", fieldName),
+    modelVersionId: ensureStringField(record, "modelVersionId", fieldName),
+    modelKind,
+    anonymityThreshold,
+    smallGroupPolicy: smallGroupPolicyValue,
+    groupVisibility: parseResultsHrViewGroupVisibility(record.groupVisibility),
+    competencyScores: ensureArray(record.competencyScores, `${fieldName}.competencyScores`).map(
+      parseResultsHrViewCompetencyScore,
+    ),
+    groupOverall: parseResultsHrViewGroupOverall(record.groupOverall),
+    effectiveGroupWeights: parseResultsHrViewGroupWeights(record.effectiveGroupWeights),
+    ...(overallScore !== undefined ? { overallScore } : {}),
+    openText: ensureArray(record.openText, `${fieldName}.openText`).map(parseResultsOpenTextItem),
+  };
+};
+
+export const parseResultsGetMyDashboardOutput = (value: unknown): ResultsGetMyDashboardOutput => {
+  return parseResultsDashboardOutput(value, "results.getMyDashboard output");
+};
+
+export const parseResultsGetTeamDashboardOutput = (
+  value: unknown,
+): ResultsGetTeamDashboardOutput => {
+  return parseResultsDashboardOutput(value, "results.getTeamDashboard output");
 };
 
 const matrixRaterRoles = ["manager", "peer", "subordinate", "self"] as const;

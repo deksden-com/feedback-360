@@ -9,5 +9,5 @@ Completed campaign с AI-processed текстовыми агрегатами.
 
 ## Creates
 - campaign status=completed
-- ai job record + processed text aggregates per (subject, competency, group)
-
+- submitted questionnaires with `competencyComments` bundles (`rawText`, `processedText`, `summaryText`) per competency
+- deterministic subject/rater handles for `results my/team/hr` visibility checks

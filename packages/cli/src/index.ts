@@ -56,6 +56,21 @@ type ResultsHrOptions = {
   anonymityThreshold?: string;
 };
 
+type ResultsMyOptions = {
+  json?: boolean;
+  campaign: string;
+  smallGroupPolicy?: "hide" | "merge_to_other";
+  anonymityThreshold?: string;
+};
+
+type ResultsTeamOptions = {
+  json?: boolean;
+  campaign: string;
+  subject: string;
+  smallGroupPolicy?: "hide" | "merge_to_other";
+  anonymityThreshold?: string;
+};
+
 type CampaignParticipantsAddDepartmentsOptions = {
   json?: boolean;
   fromDepartments: string[];
@@ -581,6 +596,71 @@ const formatResultsHrHuman = (data: {
   return lines.join("\n");
 };
 
+const formatResultsDashboardHuman = (data: {
+  campaignId: string;
+  subjectEmployeeId: string;
+  modelKind: "indicators" | "levels";
+  smallGroupPolicy: "hide" | "merge_to_other";
+  anonymityThreshold: number;
+  groupVisibility: {
+    manager: "shown";
+    peers: "shown" | "hidden" | "merged";
+    subordinates: "shown" | "hidden" | "merged";
+    self: "shown";
+    other?: "shown" | "hidden";
+  };
+  competencyScores: Array<{
+    competencyId: string;
+    competencyName: string;
+    managerScore?: number;
+    peersScore?: number;
+    subordinatesScore?: number;
+    selfScore?: number;
+    peersVisibility: "shown" | "hidden" | "merged";
+    subordinatesVisibility: "shown" | "hidden" | "merged";
+    otherScore?: number;
+    otherVisibility?: "shown" | "hidden";
+  }>;
+  groupOverall: {
+    manager?: number;
+    peers?: number;
+    subordinates?: number;
+    self?: number;
+    other?: number;
+  };
+  overallScore?: number;
+  openText: Array<{
+    competencyId: string;
+    group: "manager" | "peers" | "subordinates" | "self" | "other";
+    count: number;
+    processedText?: string;
+    summaryText?: string;
+  }>;
+}): string => {
+  const lines = [
+    `Dashboard results: campaign=${data.campaignId}, subject=${data.subjectEmployeeId}, kind=${data.modelKind}, competencies=${data.competencyScores.length}`,
+    `Anonymity: threshold=${data.anonymityThreshold}, policy=${data.smallGroupPolicy}, visibility={manager:${data.groupVisibility.manager}, peers:${data.groupVisibility.peers}, subordinates:${data.groupVisibility.subordinates}, self:${data.groupVisibility.self}${data.groupVisibility.other ? `, other:${data.groupVisibility.other}` : ""}}`,
+    `Group overall: manager=${data.groupOverall.manager ?? "-"}, peers=${data.groupOverall.peers ?? "-"}, subordinates=${data.groupOverall.subordinates ?? "-"}, self=${data.groupOverall.self ?? "-"}, other=${data.groupOverall.other ?? "-"}, overall=${data.overallScore ?? "-"}`,
+  ];
+
+  for (const competency of data.competencyScores) {
+    lines.push(
+      `- ${competency.competencyId} (${competency.competencyName}): manager=${competency.managerScore ?? "-"}, peers=${competency.peersScore ?? "-"} [${competency.peersVisibility}], subordinates=${competency.subordinatesScore ?? "-"} [${competency.subordinatesVisibility}], self=${competency.selfScore ?? "-"}, other=${competency.otherScore ?? "-"}${competency.otherVisibility ? ` [${competency.otherVisibility}]` : ""}`,
+    );
+  }
+
+  if (data.openText.length > 0) {
+    lines.push("Open text:");
+    for (const item of data.openText) {
+      lines.push(
+        `- ${item.competencyId}/${item.group}: count=${item.count}, processed=${item.processedText ? "yes" : "no"}, summary=${item.summaryText ? "yes" : "no"}`,
+      );
+    }
+  }
+
+  return lines.join("\n");
+};
+
 const buildDefaultModelPayload = (name: string, kind: "indicators" | "levels") => {
   if (kind === "levels") {
     return {
@@ -705,6 +785,8 @@ Examples:
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- matrix set <campaign_id> --assignments-json '[{"subjectEmployeeId":"<id>","raterEmployeeId":"<id>","raterRole":"manager"}]' --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- ai run <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- questionnaire list --campaign <campaign_id> --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- results my --campaign <campaign_id> --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- results team --campaign <campaign_id> --subject <employee_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- results hr --campaign <campaign_id> --subject <employee_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- results hr --campaign <campaign_id> --subject <employee_id> --small-group-policy merge_to_other --anonymity-threshold 3 --json
 `,
@@ -715,7 +797,7 @@ Examples:
     .description("Run deterministic database seed scenarios.")
     .requiredOption(
       "--scenario <scenario>",
-      "Seed scenario name (S0_empty | S1_company_min | S1_multi_tenant_min | S2_org_basic | S4_campaign_draft | S5_campaign_started_no_answers | S7_campaign_started_some_submitted | S8_campaign_ended).",
+      "Seed scenario name (S0_empty | S1_company_min | S1_multi_tenant_min | S2_org_basic | S4_campaign_draft | S5_campaign_started_no_answers | S7_campaign_started_some_submitted | S8_campaign_ended | S9_campaign_completed_with_ai).",
     )
     .option(
       "--variant <variant>",
@@ -1561,6 +1643,106 @@ Examples:
     });
 
   const resultsCommand = program.command("results").description("Results read operations.");
+
+  resultsCommand
+    .command("my")
+    .description("Get current user dashboard in campaign (processed/summary open text only).")
+    .requiredOption("--campaign <campaign_id>", "Campaign identifier.")
+    .option(
+      "--small-group-policy <policy>",
+      "Anonymity policy for small groups: hide | merge_to_other (default: hide).",
+    )
+    .option("--anonymity-threshold <n>", "Anonymity threshold (integer >= 1, default: 3).")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: ResultsMyOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      let anonymityThreshold: number | undefined;
+      if (options.anonymityThreshold !== undefined) {
+        const parsed = Number(options.anonymityThreshold);
+        if (!Number.isInteger(parsed) || parsed < 1) {
+          emitError(
+            createOperationError(
+              "invalid_input",
+              "--anonymity-threshold must be an integer >= 1.",
+              {
+                value: options.anonymityThreshold,
+              },
+            ),
+            options.json,
+          );
+          return;
+        }
+        anonymityThreshold = parsed;
+      }
+
+      const result = await client.resultsGetMyDashboard({
+        campaignId: options.campaign,
+        smallGroupPolicy: options.smallGroupPolicy,
+        ...(typeof anonymityThreshold === "number" ? { anonymityThreshold } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatResultsDashboardHuman(result.data));
+      }
+    });
+
+  resultsCommand
+    .command("team")
+    .description("Get manager team dashboard for subject in campaign (processed/summary only).")
+    .requiredOption("--campaign <campaign_id>", "Campaign identifier.")
+    .requiredOption("--subject <employee_id>", "Subject employee identifier.")
+    .option(
+      "--small-group-policy <policy>",
+      "Anonymity policy for small groups: hide | merge_to_other (default: hide).",
+    )
+    .option("--anonymity-threshold <n>", "Anonymity threshold (integer >= 1, default: 3).")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: ResultsTeamOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      let anonymityThreshold: number | undefined;
+      if (options.anonymityThreshold !== undefined) {
+        const parsed = Number(options.anonymityThreshold);
+        if (!Number.isInteger(parsed) || parsed < 1) {
+          emitError(
+            createOperationError(
+              "invalid_input",
+              "--anonymity-threshold must be an integer >= 1.",
+              {
+                value: options.anonymityThreshold,
+              },
+            ),
+            options.json,
+          );
+          return;
+        }
+        anonymityThreshold = parsed;
+      }
+
+      const result = await client.resultsGetTeamDashboard({
+        campaignId: options.campaign,
+        subjectEmployeeId: options.subject,
+        smallGroupPolicy: options.smallGroupPolicy,
+        ...(typeof anonymityThreshold === "number" ? { anonymityThreshold } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatResultsDashboardHuman(result.data));
+      }
+    });
 
   resultsCommand
     .command("hr")
