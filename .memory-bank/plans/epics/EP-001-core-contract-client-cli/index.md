@@ -1,5 +1,5 @@
 # EP-001 — Core + Contract + Client + CLI-first
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## Goal
 Единый слой операций: core use-cases + typed contract + typed client + CLI, чтобы все сценарии можно было выполнять без UI.

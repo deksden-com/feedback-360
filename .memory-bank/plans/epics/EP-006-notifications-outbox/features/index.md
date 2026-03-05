@@ -1,5 +1,5 @@
 # EP-006 — Feature catalog
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-05)
 
 - [FT-0061 Outbox schema + dispatcher](FT-0061-outbox-dispatcher/index.md): outbox/attempts + отправка через Resend. **Completed (2026-03-05)**. Читать, чтобы отправка была надёжной.
 - [FT-0062 Idempotency + retries](FT-0062-idempotency-retries/index.md): отсутствие дублей + политика ретраев/dead-letter. **Completed (2026-03-05)**. Читать, чтобы не спамить и не терять письма.
