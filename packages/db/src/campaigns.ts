@@ -2,6 +2,7 @@ import { createOperationError } from "@feedback-360/api-contract";
 import { and, eq } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
+import { enqueueCampaignInvitesOnStartInDb } from "./notifications";
 import { campaigns, companies, competencyModelVersions } from "./schema";
 
 type CreateCampaignInput = {
@@ -104,6 +105,7 @@ const transitionCampaignStatus = async (
         .select({
           campaignId: campaigns.id,
           companyId: campaigns.companyId,
+          name: campaigns.name,
           status: campaigns.status,
         })
         .from(campaigns)
@@ -123,6 +125,12 @@ const transitionCampaignStatus = async (
 
       if (input.targetStatus === "started") {
         if (previousStatus === "started") {
+          await enqueueCampaignInvitesOnStartInDb(tx, {
+            companyId: input.companyId,
+            campaignId: input.campaignId,
+            campaignName: campaign.name,
+            now,
+          });
           return {
             campaignId: input.campaignId,
             previousStatus,
@@ -182,6 +190,15 @@ const transitionCampaignStatus = async (
       const updated = updatedRows[0];
       if (!updated) {
         throw createOperationError("invalid_transition", "Failed to update campaign status.");
+      }
+
+      if (input.targetStatus === "started") {
+        await enqueueCampaignInvitesOnStartInDb(tx, {
+          companyId: input.companyId,
+          campaignId: input.campaignId,
+          campaignName: campaign.name,
+          now,
+        });
       }
 
       return {

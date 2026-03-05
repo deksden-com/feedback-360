@@ -5,7 +5,7 @@ Status: Draft (2026-03-03)
 
 MVP keys:
 - `campaign_invite@v1`
-  - vars: `company_name`, `campaign_name`, `end_at_local`, `login_link`
+  - vars (current implementation): `campaignName`, `recipientEmployeeId`, `invitedAt`
+  - note: magic-link URL будет добавлен отдельным слайсом auth/invite plumbing; текущий MVP-текст приглашает войти в систему.
 - `campaign_reminder@v1`
-  - vars: `company_name`, `campaign_name`, `end_at_local`, `pending_count`, `login_link`
-
+  - vars (current implementation): `campaignName`, `recipientEmployeeId`, `pendingCount`, `dateBucket`, `timezone`
