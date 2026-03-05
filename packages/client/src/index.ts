@@ -43,6 +43,10 @@ import {
   type QuestionnaireSubmitOutput,
   type ResultsGetHrViewInput,
   type ResultsGetHrViewOutput,
+  type ResultsGetMyDashboardInput,
+  type ResultsGetMyDashboardOutput,
+  type ResultsGetTeamDashboardInput,
+  type ResultsGetTeamDashboardOutput,
   type SeedRunInput,
   type SeedRunOutput,
   type SystemPingOutput,
@@ -95,6 +99,10 @@ import {
   parseQuestionnaireSubmitOutput,
   parseResultsGetHrViewInput,
   parseResultsGetHrViewOutput,
+  parseResultsGetMyDashboardInput,
+  parseResultsGetMyDashboardOutput,
+  parseResultsGetTeamDashboardInput,
+  parseResultsGetTeamDashboardOutput,
   parseSeedRunInput,
   parseSeedRunOutput,
   parseSystemPingOutput,
@@ -223,6 +231,14 @@ export type Feedback360Client = {
     input: ResultsGetHrViewInput,
     context?: OperationContext,
   ): Promise<OperationResult<ResultsGetHrViewOutput>>;
+  resultsGetMyDashboard(
+    input: ResultsGetMyDashboardInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<ResultsGetMyDashboardOutput>>;
+  resultsGetTeamDashboard(
+    input: ResultsGetTeamDashboardInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<ResultsGetTeamDashboardOutput>>;
   setActiveContext(context: OperationContext): OperationResult<OperationContext>;
   getActiveContext(): OperationContext;
   setActiveCompany(companyId: string): OperationResult<ClientSetActiveCompanyOutput>;
@@ -733,6 +749,42 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseResultsGetHrViewOutput,
+      });
+    },
+
+    resultsGetMyDashboard: async (input, context) => {
+      let parsedInput: ResultsGetMyDashboardInput;
+      try {
+        parsedInput = parseResultsGetMyDashboardInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid resultsGetMyDashboard input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "results.getMyDashboard",
+        input: parsedInput,
+        context,
+        parseOutput: parseResultsGetMyDashboardOutput,
+      });
+    },
+
+    resultsGetTeamDashboard: async (input, context) => {
+      let parsedInput: ResultsGetTeamDashboardInput;
+      try {
+        parsedInput = parseResultsGetTeamDashboardInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid resultsGetTeamDashboard input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "results.getTeamDashboard",
+        input: parsedInput,
+        context,
+        parseOutput: parseResultsGetTeamDashboardOutput,
       });
     },
 

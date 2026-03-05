@@ -5,6 +5,7 @@ import {
   type ResultsHrViewGroupVisibility,
   type ResultsHrViewGroupWeights,
   type ResultsHrViewLevelSummary,
+  type ResultsOpenTextItem,
   type SmallGroupPolicy,
   createOperationError,
 } from "@feedback-360/api-contract";
@@ -13,11 +14,13 @@ import { and, eq, inArray } from "drizzle-orm";
 import { createDb, createPool } from "./db";
 import {
   campaignAssignments,
+  campaignEmployeeSnapshots,
   campaigns,
   competencies,
   competencyGroups,
   competencyIndicators,
   competencyModelVersions,
+  employeeUserLinks,
   questionnaires,
 } from "./schema";
 
@@ -26,6 +29,14 @@ const groupOrder: Record<ResultsGroupKey, number> = {
   peers: 2,
   subordinates: 3,
   self: 4,
+};
+
+const openTextGroupOrder: Record<ResultsOpenTextItem["group"], number> = {
+  manager: 1,
+  peers: 2,
+  subordinates: 3,
+  self: 4,
+  other: 5,
 };
 
 const assignmentRoleToResultsGroup = (value: string): ResultsGroupKey | undefined => {
@@ -105,6 +116,46 @@ const getLevelValue = (
   }
 
   return undefined;
+};
+
+const getCommentBundle = (
+  payload: Record<string, unknown>,
+  competencyId: string,
+): {
+  rawText?: string;
+  processedText?: string;
+  summaryText?: string;
+} => {
+  const competencyComments = payload.competencyComments;
+  if (
+    typeof competencyComments !== "object" ||
+    competencyComments === null ||
+    Array.isArray(competencyComments)
+  ) {
+    return {};
+  }
+
+  const commentByCompetency = (competencyComments as Record<string, unknown>)[competencyId];
+  if (
+    typeof commentByCompetency !== "object" ||
+    commentByCompetency === null ||
+    Array.isArray(commentByCompetency)
+  ) {
+    return {};
+  }
+
+  const record = commentByCompetency as Record<string, unknown>;
+  const rawText = typeof record.rawText === "string" ? record.rawText.trim() : undefined;
+  const processedText =
+    typeof record.processedText === "string" ? record.processedText.trim() : undefined;
+  const summaryText =
+    typeof record.summaryText === "string" ? record.summaryText.trim() : undefined;
+
+  return {
+    ...(rawText ? { rawText } : {}),
+    ...(processedText ? { processedText } : {}),
+    ...(summaryText ? { summaryText } : {}),
+  };
 };
 
 export type GetResultsHrViewInput = {
@@ -278,6 +329,34 @@ const buildLevelSummary = (state: LevelSummaryState | undefined): ResultsHrViewL
   };
 };
 
+const buildOpenTextItem = (params: {
+  competencyId: string;
+  group: ResultsOpenTextItem["group"];
+  entry: {
+    rawTexts: string[];
+    processedTexts: string[];
+    summaryTexts: string[];
+  };
+}): ResultsOpenTextItem => {
+  const { competencyId, group, entry } = params;
+  const count = Math.max(
+    entry.rawTexts.length,
+    entry.processedTexts.length,
+    entry.summaryTexts.length,
+  );
+
+  return {
+    competencyId,
+    group,
+    count,
+    ...(entry.rawTexts.length > 0 ? { rawText: entry.rawTexts.join("\n\n") } : {}),
+    ...(entry.processedTexts.length > 0
+      ? { processedText: entry.processedTexts.join("\n\n") }
+      : {}),
+    ...(entry.summaryTexts.length > 0 ? { summaryText: entry.summaryTexts.join("\n\n") } : {}),
+  };
+};
+
 export const getResultsHrView = async (
   input: GetResultsHrViewInput,
 ): Promise<ResultsGetHrViewOutput> => {
@@ -445,6 +524,14 @@ export const getResultsHrView = async (
         score: number;
       }>
     >();
+    const openTextByGroupCompetency = new Map<
+      string,
+      {
+        rawTexts: string[];
+        processedTexts: string[];
+        summaryTexts: string[];
+      }
+    >();
     const raterScores: ResultsGetHrViewOutput["raterScores"] = [];
 
     for (const row of questionnaireRows) {
@@ -463,6 +550,30 @@ export const getResultsHrView = async (
           : {};
 
       for (const competency of typedCompetencies) {
+        const commentBundle = getCommentBundle(payload, competency.competencyId);
+        if (
+          commentBundle.rawText !== undefined ||
+          commentBundle.processedText !== undefined ||
+          commentBundle.summaryText !== undefined
+        ) {
+          const openTextKey = `${mappedGroup}:${competency.competencyId}`;
+          const entry = openTextByGroupCompetency.get(openTextKey) ?? {
+            rawTexts: [],
+            processedTexts: [],
+            summaryTexts: [],
+          };
+          if (commentBundle.rawText) {
+            entry.rawTexts.push(commentBundle.rawText);
+          }
+          if (commentBundle.processedText) {
+            entry.processedTexts.push(commentBundle.processedText);
+          }
+          if (commentBundle.summaryText) {
+            entry.summaryTexts.push(commentBundle.summaryText);
+          }
+          openTextByGroupCompetency.set(openTextKey, entry);
+        }
+
         let score: number | undefined;
         let validScoreCount = 0;
         let totalScoreCount = 0;
@@ -743,6 +854,79 @@ export const getResultsHrView = async (
       }
     }
 
+    const openTextItems: ResultsOpenTextItem[] = [];
+    for (const competency of typedCompetencies) {
+      const groups: Array<ResultsGroupKey> = ["manager", "peers", "subordinates", "self"];
+      for (const group of groups) {
+        const entry = openTextByGroupCompetency.get(`${group}:${competency.competencyId}`);
+        if (!entry) {
+          continue;
+        }
+        openTextItems.push(
+          buildOpenTextItem({
+            competencyId: competency.competencyId,
+            group,
+            entry,
+          }),
+        );
+      }
+
+      if (smallGroupPolicy === "merge_to_other") {
+        const peersMerged = groupVisibility.peers === "merged";
+        const subordinatesMerged = groupVisibility.subordinates === "merged";
+        if (peersMerged || subordinatesMerged) {
+          const peersEntry = peersMerged
+            ? openTextByGroupCompetency.get(`peers:${competency.competencyId}`)
+            : undefined;
+          const subordinatesEntry = subordinatesMerged
+            ? openTextByGroupCompetency.get(`subordinates:${competency.competencyId}`)
+            : undefined;
+
+          const mergedOpenTextEntry = {
+            rawTexts: [...(peersEntry?.rawTexts ?? []), ...(subordinatesEntry?.rawTexts ?? [])],
+            processedTexts: [
+              ...(peersEntry?.processedTexts ?? []),
+              ...(subordinatesEntry?.processedTexts ?? []),
+            ],
+            summaryTexts: [
+              ...(peersEntry?.summaryTexts ?? []),
+              ...(subordinatesEntry?.summaryTexts ?? []),
+            ],
+          };
+          if (
+            mergedOpenTextEntry.rawTexts.length > 0 ||
+            mergedOpenTextEntry.processedTexts.length > 0 ||
+            mergedOpenTextEntry.summaryTexts.length > 0
+          ) {
+            openTextItems.push(
+              buildOpenTextItem({
+                competencyId: competency.competencyId,
+                group: "other",
+                entry: mergedOpenTextEntry,
+              }),
+            );
+          }
+        }
+      }
+    }
+
+    const sortedOpenTextItems = openTextItems.sort((left, right) => {
+      if (left.competencyId !== right.competencyId) {
+        const leftOrder =
+          typedCompetencies.find((item) => item.competencyId === left.competencyId)
+            ?.competencyOrder ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder =
+          typedCompetencies.find((item) => item.competencyId === right.competencyId)
+            ?.competencyOrder ?? Number.MAX_SAFE_INTEGER;
+        if (leftOrder !== rightOrder) {
+          return leftOrder - rightOrder;
+        }
+        return left.competencyId.localeCompare(right.competencyId);
+      }
+
+      return openTextGroupOrder[left.group] - openTextGroupOrder[right.group];
+    });
+
     const configuredGroupWeights: ResultsHrViewGroupWeights = {
       manager: campaign.managerWeight,
       peers: campaign.peersWeight,
@@ -799,7 +983,64 @@ export const getResultsHrView = async (
       configuredGroupWeights,
       effectiveGroupWeights,
       ...(overallScore !== undefined ? { overallScore } : {}),
+      ...(sortedOpenTextItems.length > 0 ? { openText: sortedOpenTextItems } : {}),
     };
+  } finally {
+    await pool.end();
+  }
+};
+
+export const getEmployeeIdByUserInCompany = async (input: {
+  companyId: string;
+  userId: string;
+}): Promise<string | undefined> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const rows = await db
+      .select({
+        employeeId: employeeUserLinks.employeeId,
+      })
+      .from(employeeUserLinks)
+      .where(
+        and(
+          eq(employeeUserLinks.companyId, input.companyId),
+          eq(employeeUserLinks.userId, input.userId),
+        ),
+      )
+      .limit(1);
+
+    return rows[0]?.employeeId;
+  } finally {
+    await pool.end();
+  }
+};
+
+export const isCampaignSubjectManagedByEmployee = async (input: {
+  companyId: string;
+  campaignId: string;
+  subjectEmployeeId: string;
+  managerEmployeeId: string;
+}): Promise<boolean> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const rows = await db
+      .select({
+        employeeId: campaignEmployeeSnapshots.employeeId,
+      })
+      .from(campaignEmployeeSnapshots)
+      .where(
+        and(
+          eq(campaignEmployeeSnapshots.companyId, input.companyId),
+          eq(campaignEmployeeSnapshots.campaignId, input.campaignId),
+          eq(campaignEmployeeSnapshots.employeeId, input.subjectEmployeeId),
+          eq(campaignEmployeeSnapshots.managerEmployeeId, input.managerEmployeeId),
+        ),
+      )
+      .limit(1);
+
+    return rows.length > 0;
   } finally {
     await pool.end();
   }

@@ -104,6 +104,25 @@ describe("FT-0003 seed runner + handles", () => {
         await poolAfterS8.end();
       }
 
+      const s9 = await runSeedScenario({ scenario: "S9_campaign_completed_with_ai" });
+      expect(s9.handles["campaign.main"]).toBeDefined();
+      expect(s9.handles["employee.subject_main"]).toBeDefined();
+
+      const poolAfterS9 = createPool();
+      try {
+        const db = createDb(poolAfterS9);
+        const counts = await db.execute(sql`
+          select
+            (select status from campaigns limit 1) as campaign_status,
+            (select count(*) from questionnaires where status = 'submitted') as submitted_count
+      `);
+
+        expect(String(counts.rows[0]?.campaign_status)).toBe("completed");
+        expect(Number(counts.rows[0]?.submitted_count)).toBe(4);
+      } finally {
+        await poolAfterS9.end();
+      }
+
       const s7 = await runSeedScenario({ scenario: "S7_campaign_started_some_submitted" });
       expect(s7.handles["campaign.main"]).toBeDefined();
       expect(s7.handles["questionnaire.main_not_started"]).toBeDefined();

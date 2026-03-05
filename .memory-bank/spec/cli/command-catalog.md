@@ -158,7 +158,7 @@ Status: Draft (2026-03-03)
 ## Results
 - command: `results my [--campaign <id>]`
   - op: `results.getMyDashboard`
-  - roles: employee
+  - roles: employee/manager/hr_*
   - idempotency: yes
 
 - command: `results team [--campaign <id>] [--subject <employee_id>]`

@@ -1,5 +1,5 @@
 # FT-0055 — Results views (employee/manager/hr)
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-05)
 
 ## User value
 Каждая роль видит “свою” витрину результатов без нарушения приватности и анонимности.
@@ -57,5 +57,28 @@ Status: Draft (2026-03-03)
 - При изменении видимости обновить: [Results visibility](../../../../../spec/domain/results-visibility.md) — SSoT. Читать, чтобы политика приватности была единой во всех витринах.
 
 ## Verification (must)
-- Automated test: `packages/core/test/ft/ft-0055-results-views.test.ts` (integration) проверяет role-based shaping (employee/manager без raw, HR с raw) и анонимность flags.
+- Automated test: `packages/core/src/ft/ft-0055-results-views.test.ts` (integration) проверяет role-based shaping (employee/manager без raw, HR с raw) и анонимность flags.
 - Must run: GS1 (happy path) должен оставаться зелёным (включая “кто что видит”).
+
+## Project grounding (2026-03-05)
+- [Results visibility](../../../../../spec/domain/results-visibility.md): SSoT правил raw/processed по ролям. Читать, чтобы не допустить утечки raw комментариев в employee/manager view.
+- [Anonymity policy](../../../../../spec/domain/anonymity-policy.md): threshold и merge/hide политика. Читать, чтобы витрины результатов соблюдали деанонимизацию.
+- [GS1 Happy path](../../../../../spec/testing/scenarios/gs1-happy-path.md): сквозной сценарий продукта. Читать, чтобы проверить регрессию после добавления новых витрин.
+- [Seed S9](../../../../../spec/testing/seeds/s9-campaign-completed-with-ai.md): готовый completed dataset с processed open text. Читать, чтобы acceptance был детерминированным.
+
+## Quality checks evidence (2026-03-05)
+- `pnpm --filter @feedback-360/api-contract lint && pnpm --filter @feedback-360/api-contract typecheck && pnpm --filter @feedback-360/db lint && pnpm --filter @feedback-360/db typecheck && pnpm --filter @feedback-360/core lint && pnpm --filter @feedback-360/core typecheck && pnpm --filter @feedback-360/client lint && pnpm --filter @feedback-360/client typecheck && pnpm --filter @feedback-360/cli lint && pnpm --filter @feedback-360/cli typecheck` → passed.
+
+## Acceptance evidence (2026-03-05)
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0055-results-views.test.ts` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/db exec vitest run src/migrations/ft-0003-seed-runner.test.ts` → passed (`S9_campaign_completed_with_ai`).
+- CLI scenario (real DB, seed `S9_campaign_completed_with_ai`) via `pnpm --filter @feedback-360/cli exec tsx src/index.ts`:
+  - `results my --campaign <campaign_id> --json` → `openText` без `rawText`.
+  - `results team --campaign <campaign_id> --subject <employee_id> --json` → `openText` без `rawText`.
+  - `results hr --campaign <campaign_id> --subject <employee_id> --json` → есть `rawText` + `processedText`.
+- GS1 regression subset (real DB, sequential):
+  - `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0013-questionnaires.test.ts src/ft/ft-0044-lock-on-draft-save.test.ts src/ft/ft-0045-ended-readonly.test.ts --fileParallelism=false` → passed.
+  - `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0071-ai-run.test.ts --testTimeout 30000` → passed.
+
+## Notes
+- DB-backed integration tests запускаем последовательными таргетированными командами (или с увеличенным `testTimeout`) для стабильных proof-результатов на shared Supabase beta DB.

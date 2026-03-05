@@ -135,7 +135,7 @@ Status: Draft (2026-03-03)
 
 ## Results
 - `results.getMyDashboard`
-  - roles: employee
+  - roles: employee/manager/hr_*
   - idempotent: yes
   - cli: `results my`
 - `results.getTeamDashboard`
