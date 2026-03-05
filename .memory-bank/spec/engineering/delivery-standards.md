@@ -16,7 +16,12 @@ Status: Draft (2026-03-04)
 4) В feature doc есть блок `Quality checks evidence (YYYY-MM-DD)` с результатами `lint/typecheck/test` (+ `build`, где применимо).
 5) В feature doc есть блок `Acceptance evidence (YYYY-MM-DD)` с командами/результатами приемочного сценария и связанных GS.
 6) В verification matrix добавлен/обновлён execution evidence по соответствующему EP.
-7) Для runtime/deploy/integration-инфраструктурных изменений зафиксированы CI/CD доказательства:
+7) В feature doc есть раздел `Manual verification (deployed environment)`:
+   - целевое окружение (обычно `beta`), URL и дата,
+   - preconditions (аккаунт/роль/seed/feature flag),
+   - пошаговая инструкция “от начала до конца” + ожидаемый результат каждого шага,
+   - пометка `N/A` с обоснованием только для non-user-facing фич.
+8) Для runtime/deploy/integration-инфраструктурных изменений зафиксированы CI/CD доказательства:
    - ссылка на GitHub Actions run (или check-runs commit),
    - ссылка на Vercel deployment (preview/beta/prod),
    - итоговый статус (`success/ready`) и root-cause заметка, если был fail.

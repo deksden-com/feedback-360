@@ -89,3 +89,34 @@ Status: Completed (2026-03-05)
   - `.memory-bank/evidence/EP-008/FT-0081/2026-03-05/step-02-active-company-a.png` — после выбора A главная страница показывает `Acme 360 A`.
   - `.memory-bank/evidence/EP-008/FT-0081/2026-03-05/step-03-company-switcher-before-b.png` — повторный вход в switcher перед переключением на B.
   - `.memory-bank/evidence/EP-008/FT-0081/2026-03-05/step-04-active-company-b.png` — после выбора B главная страница показывает `Acme 360 B`.
+
+## Manual verification (deployed environment)
+### Beta quick smoke (dev-helper path)
+- Environment:
+  - URL: `https://beta.go360go.ru`
+  - Date: `2026-03-05`
+- Preconditions:
+  - `APP_ENV != prod` (dev endpoints `/api/dev/*` доступны).
+- Steps:
+  1) Открыть `https://beta.go360go.ru/auth/login`.
+  2) Нажать `Войти в demo-режиме`.
+  3) На `select-company` выбрать `Acme 360 A`.
+  4) На `/` проверить блок “Текущая компания”.
+  5) Нажать `Сменить компанию`, выбрать `Acme 360 B`.
+- Expected:
+  - после шага 2 открывается `select-company`;
+  - после шага 3 на `/` отображается `Acme 360 A`;
+  - после шага 5 на `/` отображается `Acme 360 B`.
+
+### Beta real magic-link path
+- Preconditions:
+  - email пользователя заранее создан в Supabase Auth (signups выключены);
+  - для `auth.user.id` есть `company_memberships` (и, по бизнес-контракту, связанный employee).
+- Steps:
+  1) На `https://beta.go360go.ru/auth/login` ввести email и отправить magic link.
+  2) Открыть ссылку из письма.
+  3) На `select-company` выбрать компанию и проверить `/`.
+- Expected:
+  - вход завершён через callback;
+  - если memberships > 1, доступен выбор компании;
+  - если memberships отсутствуют, показывается ошибка загрузки компаний (корректный fail-safe).
