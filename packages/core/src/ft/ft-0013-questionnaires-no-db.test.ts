@@ -25,6 +25,21 @@ const state = {
 
 vi.mock("@feedback-360/db", () => {
   return {
+    getEmployeeIdByUserInCompany: async ({
+      companyId,
+      userId,
+    }: {
+      companyId: string;
+      userId: string;
+    }) => {
+      if (companyId !== "company-main") {
+        return null;
+      }
+      if (userId === "user-rater") {
+        return "employee-rater";
+      }
+      return null;
+    },
     listAssignedQuestionnaires: async ({
       campaignId,
       companyId,
@@ -134,6 +149,7 @@ describe("FT-0013 questionnaire ops (no-db acceptance)", () => {
     const context = {
       companyId: "company-main",
       role: "employee" as const,
+      userId: "user-rater",
     };
 
     const listNotStarted = await dispatchOperation({

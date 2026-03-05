@@ -7,6 +7,21 @@ const state = {
 
 vi.mock("@feedback-360/db", () => {
   return {
+    getEmployeeIdByUserInCompany: async ({
+      companyId,
+      userId,
+    }: {
+      companyId: string;
+      userId: string;
+    }) => {
+      if (companyId !== "company-main") {
+        return null;
+      }
+      if (userId === "user-staff-a1") {
+        return "employee-staff-a1";
+      }
+      return null;
+    },
     setCampaignWeights: async ({
       campaignId,
       manager,
@@ -86,6 +101,7 @@ describe("FT-0044 lock on first draft save (no-db)", () => {
     const employeeContext = {
       companyId: "company-main",
       role: "employee" as const,
+      userId: "user-staff-a1",
     };
 
     const beforeLockWeights = await dispatchOperation({
