@@ -28,6 +28,8 @@ import {
   type MatrixGenerateSuggestedOutput,
   type MatrixSetInput,
   type MatrixSetOutput,
+  type MembershipListInput,
+  type MembershipListOutput,
   type ModelVersionCreateInput,
   type ModelVersionCreateOutput,
   type NotificationsDispatchOutboxInput,
@@ -86,6 +88,8 @@ import {
   parseMatrixGenerateSuggestedOutput,
   parseMatrixSetInput,
   parseMatrixSetOutput,
+  parseMembershipListInput,
+  parseMembershipListOutput,
   parseModelVersionCreateInput,
   parseModelVersionCreateOutput,
   parseNotificationsDispatchOutboxInput,
@@ -127,6 +131,7 @@ import {
   listActiveEmployees,
   listAssignedQuestionnaires,
   listCampaignEmployeeSnapshots,
+  listMemberships,
   moveEmployeeDepartment,
   removeCampaignParticipants,
   runAiForCampaign,
@@ -614,6 +619,36 @@ const runEmployeeListActive = async (
     return errorResult(
       errorFromUnknown(error, "invalid_input", "Failed to list active employees."),
     );
+  }
+};
+
+const runMembershipList = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<MembershipListOutput>> => {
+  const userId = request.context?.userId;
+  if (!userId) {
+    return errorResult(
+      createOperationError("unauthenticated", "User context is required for membership list.", {
+        operation: "membership.list",
+      }),
+    );
+  }
+
+  let parsedInput: MembershipListInput;
+  try {
+    parsedInput = parseMembershipListInput(request.input);
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Invalid membership.list input."));
+  }
+
+  try {
+    const output = await listMemberships({
+      userId,
+      ...parsedInput,
+    });
+    return okResult(parseMembershipListOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to list memberships."));
   }
 };
 
@@ -1346,6 +1381,7 @@ export const dispatchOperation = (
     | CompanyUpdateProfileOutput
     | EmployeeUpsertOutput
     | EmployeeListActiveOutput
+    | MembershipListOutput
     | CampaignSetModelVersionOutput
     | CampaignWeightsSetOutput
     | CampaignParticipantsMutationOutput
@@ -1416,6 +1452,8 @@ export const dispatchOperation = (
       return runEmployeeUpsert(parsedRequest);
     case "employee.listActive":
       return runEmployeeListActive(parsedRequest);
+    case "membership.list":
+      return runMembershipList(parsedRequest);
     case "org.department.move":
       return runOrgDepartmentMove(parsedRequest);
     case "org.manager.set":

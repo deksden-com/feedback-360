@@ -1,5 +1,5 @@
 # FT-0081 — Auth + company switcher UI (thin)
-Status: In Progress (2026-03-05)
+Status: Completed (2026-03-05)
 
 ## User value
 Пользователь входит по magic link и выбирает активную компанию, если memberships > 1.
@@ -68,13 +68,19 @@ Status: In Progress (2026-03-05)
   - подключён Tailwind v4 в `apps/web`,
   - добавлен `components.json` и shadcn theming baseline,
   - добавлен первый registry-компонент `ui/button`.
-- Функциональная часть FT-0081 (magic-link UI + company switcher + Playwright acceptance) остаётся в работе.
+- Завершена функциональная часть FT-0081:
+  - добавлены экраны `auth/login`, `auth/callback`, `select-company`,
+  - добавлены API route handlers для app-session (`/api/session/*`) и dev acceptance (`/api/dev/*`),
+  - добавлены client/core/db изменения для `membership.list`,
+  - добавлен Playwright acceptance `ft-0081-auth-company-switcher.spec.ts`.
 
 ## Quality checks evidence (2026-03-05)
-- `pnpm --filter @feedback-360/web lint` → passed.
-- `pnpm --filter @feedback-360/web typecheck` → passed.
-- `pnpm --filter @feedback-360/web test` → passed.
-- `pnpm --filter @feedback-360/web build` → passed (with known Sentry/OpenTelemetry warnings, build status = success).
+- `pnpm --filter @feedback-360/api-contract lint && pnpm --filter @feedback-360/api-contract typecheck && pnpm --filter @feedback-360/api-contract test` → passed.
+- `pnpm --filter @feedback-360/db lint && pnpm --filter @feedback-360/db typecheck` → passed.
+- `pnpm --filter @feedback-360/client lint && pnpm --filter @feedback-360/client typecheck && pnpm --filter @feedback-360/client exec vitest run src/ft-0081-membership-list-client.test.ts` → passed.
+- `pnpm --filter @feedback-360/core lint && pnpm --filter @feedback-360/core typecheck && set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0081-membership-list-no-db.test.ts src/ft/ft-0081-membership-list.test.ts --fileParallelism=false` → passed.
+- `pnpm --filter @feedback-360/web lint && pnpm --filter @feedback-360/web typecheck && pnpm --filter @feedback-360/web test && pnpm --filter @feedback-360/web build` → passed (with known Sentry/OpenTelemetry warnings, build status = success).
 
 ## Acceptance evidence (2026-03-05)
-- Pending: acceptance сценарий FT-0081 (Playwright login + company switcher) будет прогнан после реализации функциональной части auth/switcher.
+- `cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs` → passed (`smoke.spec.ts`, `ft-0081-auth-company-switcher.spec.ts`).
+- Сценарий подтверждён: после dev-login пользователь переключает `active company` A→B, root page отражает выбранную компанию, и context остаётся tenant-scoped.

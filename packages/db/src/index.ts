@@ -5,6 +5,7 @@ export * from "./ai";
 export * from "./employees";
 export * from "./matrix";
 export * from "./models";
+export * from "./memberships";
 export * from "./notifications";
 export * from "./org";
 export * from "./questionnaires";
