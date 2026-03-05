@@ -7,6 +7,7 @@ Status: Draft (2026-03-03)
 - Любая отправка создаётся как запись в outbox (email в MVP).
 - Dispatcher читает outbox и делает фактическую отправку через провайдера (Resend).
 - Каждая попытка отправки логируется (attempts).
+- Базовые статусы outbox (FT-0061): `pending -> sent|failed`.
 
 ## Idempotency
 - `idempotency_key` строится так, чтобы повторный запуск генерации outbox не создавал дубль:
@@ -17,7 +18,10 @@ Status: Draft (2026-03-03)
 - Backoff: exponential (например, 1m, 5m, 15m, 1h, 6h, 24h, …) с джиттером
 - После исчерпания попыток: статус `dead_letter` (ручная разборка HR/Admin ops)
 
+Примечание по этапам:
+- FT-0061 реализует базовую доставку + attempts logging без retry backoff.
+- FT-0062 расширяет поведение до полной retry/DLQ политики из этого SSoT.
+
 Связанные документы (аннотированные ссылки):
 - [Notification spec](notifications.md): какие события генерируют outbox и когда. Читать, чтобы не появлялись “непонятные” письма.
 - [Runbook](../operations/runbook.md): cron jobs для генерации/dispatch/ретраев. Читать, чтобы эксплуатация была воспроизводимой.
-

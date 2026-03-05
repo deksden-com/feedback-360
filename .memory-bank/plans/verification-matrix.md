@@ -186,7 +186,7 @@ Status: Draft (2026-03-03)
 
 ## EP-006 Notifications outbox (email)
 - FT-0061
-  - Must add test: `packages/core/test/ft/ft-0061-outbox-dispatch.test.ts`
+  - Must add test: `packages/core/src/ft/ft-0061-outbox-dispatch.test.ts`
   - Must run: outbox status + attempts.
 - FT-0062
   - Must add test: `packages/core/test/ft/ft-0062-idempotency-retries.test.ts`
@@ -197,6 +197,9 @@ Status: Draft (2026-03-03)
 - FT-0064
   - Must add test: `packages/core/test/ft/ft-0064-campaign-invites.test.ts`
   - Must run: GS13.
+
+### EP-006 execution evidence (2026-03-05)
+- FT-0061: what=notifications outbox baseline (`notifications.generateReminders`, `notifications.dispatchOutbox`) + tables `notification_outbox`/`notification_attempts`; where=local + Supabase beta pooler + CLI scenario on real DB; how=`pnpm --filter @feedback-360/api-contract lint && pnpm --filter @feedback-360/api-contract typecheck && pnpm --filter @feedback-360/db lint && pnpm --filter @feedback-360/db typecheck && pnpm --filter @feedback-360/core lint && pnpm --filter @feedback-360/core typecheck && pnpm --filter @feedback-360/client lint && pnpm --filter @feedback-360/client typecheck && pnpm --filter @feedback-360/cli lint && pnpm --filter @feedback-360/cli typecheck`, `set -a; source .env; set +a; pnpm db:migrate`, `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0061-outbox-dispatch.test.ts`, `set -a; source .env; set +a; pnpm --filter @feedback-360/db exec vitest run src/migrations/ft-0003-seed-runner.test.ts`, `set -a; source .env; set +a; pnpm --filter @feedback-360/client exec vitest run --testTimeout 30000`, `pnpm --filter @feedback-360/cli test`, CLI checks via `pnpm --filter @feedback-360/cli exec tsx src/index.ts -- reminders generate ... --json` (x2) + `notifications dispatch --provider stub --json` + `jq` assertions; quality_gate=passed; acceptance_gate=passed (first generate creates outbox row, second deduplicates by idempotency key, dispatch logs attempt and moves row to `sent`); result=passed.
 
 ## EP-007 AI processing + webhook security
 - FT-0071

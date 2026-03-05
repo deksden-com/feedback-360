@@ -73,6 +73,8 @@ export const knownOperations = [
   "campaign.participants.add",
   "campaign.participants.remove",
   "campaign.progress.get",
+  "notifications.generateReminders",
+  "notifications.dispatchOutbox",
   "results.getMyDashboard",
   "results.getTeamDashboard",
   "results.getHrView",
@@ -351,6 +353,35 @@ export type CampaignProgressGetOutput = {
   pendingQuestionnaires: CampaignProgressPendingItem[];
   pendingByRater: CampaignProgressPendingGroupItem[];
   pendingBySubject: CampaignProgressPendingGroupItem[];
+};
+
+export type NotificationsGenerateRemindersInput = {
+  campaignId: string;
+};
+
+export type NotificationsGenerateRemindersOutput = {
+  campaignId: string;
+  dateBucket: string;
+  candidateRecipients: number;
+  generated: number;
+  deduplicated: number;
+};
+
+export type NotificationsDispatchProvider = "stub" | "resend";
+
+export type NotificationsDispatchOutboxInput = {
+  campaignId?: string;
+  limit?: number;
+  provider?: NotificationsDispatchProvider;
+};
+
+export type NotificationsDispatchOutboxOutput = {
+  provider: NotificationsDispatchProvider;
+  processed: number;
+  sent: number;
+  failed: number;
+  attemptsLogged: number;
+  remainingPending: number;
 };
 
 export const resultsGroupKeys = ["manager", "peers", "subordinates", "self"] as const;
@@ -1827,6 +1858,110 @@ export const parseCampaignProgressGetOutput = (value: unknown): CampaignProgress
       record.pendingBySubject,
       "campaign.progress.get output.pendingBySubject",
     ).map(parseCampaignProgressPendingGroupItem),
+  };
+};
+
+export const parseNotificationsGenerateRemindersInput = (
+  value: unknown,
+): NotificationsGenerateRemindersInput => {
+  const record = ensureObject(value, "notifications.generateReminders input");
+  ensureAllowedKeys(record, ["campaignId"], "notifications.generateReminders input");
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "notifications.generateReminders input"),
+  };
+};
+
+export const parseNotificationsGenerateRemindersOutput = (
+  value: unknown,
+): NotificationsGenerateRemindersOutput => {
+  const record = ensureObject(value, "notifications.generateReminders output");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "dateBucket", "candidateRecipients", "generated", "deduplicated"],
+    "notifications.generateReminders output",
+  );
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "notifications.generateReminders output"),
+    dateBucket: ensureStringField(record, "dateBucket", "notifications.generateReminders output"),
+    candidateRecipients: ensureNumberField(
+      record,
+      "candidateRecipients",
+      "notifications.generateReminders output",
+    ),
+    generated: ensureNumberField(record, "generated", "notifications.generateReminders output"),
+    deduplicated: ensureNumberField(
+      record,
+      "deduplicated",
+      "notifications.generateReminders output",
+    ),
+  };
+};
+
+export const parseNotificationsDispatchOutboxInput = (
+  value: unknown,
+): NotificationsDispatchOutboxInput => {
+  const record = ensureObject(value, "notifications.dispatchOutbox input");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "limit", "provider"],
+    "notifications.dispatchOutbox input",
+  );
+
+  const limit = record.limit;
+  if (limit !== undefined) {
+    if (!Number.isInteger(limit) || Number(limit) < 1) {
+      throw new Error("notifications.dispatchOutbox input.limit must be an integer >= 1.");
+    }
+  }
+
+  const provider = record.provider;
+  if (provider !== undefined && provider !== "stub" && provider !== "resend") {
+    throw new Error('notifications.dispatchOutbox input.provider must be "stub" or "resend".');
+  }
+
+  return {
+    ...(record.campaignId !== undefined
+      ? {
+          campaignId: ensureStringField(record, "campaignId", "notifications.dispatchOutbox input"),
+        }
+      : {}),
+    ...(typeof limit === "number" ? { limit } : {}),
+    ...(provider ? { provider } : {}),
+  };
+};
+
+export const parseNotificationsDispatchOutboxOutput = (
+  value: unknown,
+): NotificationsDispatchOutboxOutput => {
+  const record = ensureObject(value, "notifications.dispatchOutbox output");
+  ensureAllowedKeys(
+    record,
+    ["provider", "processed", "sent", "failed", "attemptsLogged", "remainingPending"],
+    "notifications.dispatchOutbox output",
+  );
+
+  const provider = ensureStringField(record, "provider", "notifications.dispatchOutbox output");
+  if (provider !== "stub" && provider !== "resend") {
+    throw new Error('notifications.dispatchOutbox output.provider must be "stub" or "resend".');
+  }
+
+  return {
+    provider,
+    processed: ensureNumberField(record, "processed", "notifications.dispatchOutbox output"),
+    sent: ensureNumberField(record, "sent", "notifications.dispatchOutbox output"),
+    failed: ensureNumberField(record, "failed", "notifications.dispatchOutbox output"),
+    attemptsLogged: ensureNumberField(
+      record,
+      "attemptsLogged",
+      "notifications.dispatchOutbox output",
+    ),
+    remainingPending: ensureNumberField(
+      record,
+      "remainingPending",
+      "notifications.dispatchOutbox output",
+    ),
   };
 };
 
