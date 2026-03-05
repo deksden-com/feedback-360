@@ -1,5 +1,5 @@
 # FT-0062 — Notification idempotency + retries
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-05)
 
 ## User value
 Система не отправляет дубликаты и корректно ретраит ошибки.
@@ -18,10 +18,13 @@ Status: Draft (2026-03-03)
 ### Setup
 - Seed: `S5_campaign_started_no_answers --json` → `handles.campaign.main`
 
-### Action (CLI, `--json`)
-1) `reminders generate --campaign <handles.campaign.main> --json`
-2) повторить (1)
-3) `notifications dispatch --json` (в тесте Resend мок: первый раз 500, затем 200)
+### Action (integration, auto)
+1) `notifications.generateReminders` дважды для одного campaign/day.
+2) В outbox payload проставить stub-флаг `__stubFailUntilAttempt=1`.
+3) `notifications.dispatchOutbox`:
+   - первый вызов получает transient failure → retry scheduled;
+   - второй вызов до `next_retry_at` ничего не обрабатывает;
+   - после принудительного сдвига `next_retry_at` в прошлое повторный dispatch отправляет запись в `sent`.
 
 ### Assert
 - Outbox не содержит дублей (idempotency key).
@@ -50,5 +53,16 @@ Status: Draft (2026-03-03)
 - При изменении формулы idempotency key обновить: [Outbox & retries](../../../../../spec/notifications/outbox-and-retries.md) — SSoT. Читать, чтобы не было дублей из-за расхождений.
 
 ## Verification (must)
-- Automated test: `packages/core/test/ft/ft-0062-idempotency-retries.test.ts` (integration) повторяет Acceptance и мокает “500 затем 200”.
-- Must run: GS7 должен быть зелёным.
+- Automated test: `packages/core/src/ft/ft-0062-idempotency-retries.test.ts` (integration) повторяет Acceptance и проверяет retry/backoff поведение.
+- Must run: GS7 (часть idempotency/retries) зелёная; timezone/quiet-hours закрываются FT-0063.
+
+## Execution evidence (2026-03-05)
+- `pnpm --filter @feedback-360/db lint && pnpm --filter @feedback-360/db typecheck` → passed.
+- `pnpm --filter @feedback-360/core lint && pnpm --filter @feedback-360/core typecheck` → passed.
+- `set -a; source .env; set +a; pnpm db:migrate` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0062-idempotency-retries.test.ts` → passed.
+- Regression:
+  - `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0061-outbox-dispatch.test.ts` → passed.
+  - `set -a; source .env; set +a; pnpm --filter @feedback-360/db exec vitest run src/migrations/ft-0003-seed-runner.test.ts` → passed.
+  - `pnpm --filter @feedback-360/client exec vitest run src/ft-0061-notifications-client.test.ts` → passed.
+  - `pnpm --filter @feedback-360/cli exec vitest run src/ft-0061-notifications-cli.test.ts` → passed.
