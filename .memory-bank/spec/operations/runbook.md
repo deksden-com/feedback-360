@@ -25,6 +25,12 @@ Status: Draft (2026-03-04)
    - required GitHub checks on merge commit in `main` = `success`,
    - Vercel deployment status for `go360go-prod` = `Ready`.
 
+### Automated beta smoke (mandatory)
+- Workflow: `.github/workflows/beta-smoke.yml` (trigger: push in `develop` + manual dispatch).
+- Scope (MVP baseline): `select-company` loading path on real beta domain via Playwright.
+- Required secret: `BETA_SMOKE_USER_ID` (provisioned user with memberships).
+- Reason: catches runtime drift between local tests and real beta environment (DB/env/deploy mismatches).
+
 ## CI/CD verification commands (operator quick-check)
 - GitHub Actions (latest runs):
   - `gh run list --repo deksden-com/feedback-360 --workflow ci.yml --limit 10`
