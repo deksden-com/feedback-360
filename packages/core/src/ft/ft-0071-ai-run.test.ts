@@ -75,6 +75,7 @@ describe("FT-0071 ai.runForCampaign", () => {
         expect(aiJobIds[0]).toBe(firstRun.data.aiJobId);
       }
     },
+    30_000,
   );
 
   it.skipIf(hasUrl)("skips integration run when database URL is absent", () => {

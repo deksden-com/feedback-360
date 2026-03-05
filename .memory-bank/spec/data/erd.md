@@ -1,5 +1,5 @@
 # ERD / Tables (conceptual)
-Status: Draft (2026-03-03)
+Status: Updated (2026-03-05)
 
 Ниже — концептуальный список таблиц (без привязки к конкретным именам/типам в коде, пока не реализовано).
 
@@ -35,7 +35,7 @@ Status: Draft (2026-03-03)
 
 ## Results & privacy
 - `campaign_results (...)` (витрина/кеш агрегатов)
-- `campaign_text_aggregates (...)` (AI-processed text per group/competency)
+- `ai_comment_aggregates (campaign_id, subject_employee_id, competency_id, rater_group, raw_text, processed_text, summary_text, source)` (AI text aggregates per group/competency)
 
 ## Notifications
 - `notification_outbox (...)` + `notification_attempts (...)`

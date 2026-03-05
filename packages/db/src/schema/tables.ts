@@ -260,6 +260,40 @@ export const aiWebhookReceipts = pgTable(
   (table) => [unique("uq_ai_webhook_receipt_idempotency").on(table.idempotencyKey)],
 );
 
+export const aiCommentAggregates = pgTable(
+  "ai_comment_aggregates",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    subjectEmployeeId: uuid("subject_employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    competencyId: uuid("competency_id")
+      .notNull()
+      .references(() => competencies.id, { onDelete: "cascade" }),
+    raterGroup: text("rater_group").notNull(),
+    rawText: text("raw_text"),
+    processedText: text("processed_text"),
+    summaryText: text("summary_text"),
+    source: text("source").notNull().default("mvp_stub"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique("uq_ai_comment_aggregate_scope").on(
+      table.campaignId,
+      table.subjectEmployeeId,
+      table.competencyId,
+      table.raterGroup,
+    ),
+  ],
+);
+
 export const notificationOutbox = pgTable(
   "notification_outbox",
   {

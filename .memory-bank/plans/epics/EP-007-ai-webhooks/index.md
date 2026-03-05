@@ -1,5 +1,5 @@
 # EP-007 — AI processing + webhook security
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-05)
 
 ## Goal
 AI постобработка open text: job orchestration + webhook security (HMAC + idempotency) + retry.
@@ -12,10 +12,10 @@ AI постобработка open text: job orchestration + webhook security (H
 - GS1 (happy path includes AI)
 
 ## Progress report (evidence-based)
-- `as_of`: 2026-03-04
+- `as_of`: 2026-03-05
 - `total_features`: 3
-- `completed_features`: 2
-- `evidence_confirmed_features`: 2
+- `completed_features`: 3
+- `evidence_confirmed_features`: 3
 - verification link:
   - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-007. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
 

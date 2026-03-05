@@ -1,5 +1,5 @@
 # Results visibility
-Status: Draft (2026-03-03)
+Status: Updated (2026-03-05)
 
 Зафиксировано:
 - Результаты видят HR, руководитель, сотрудник (в своём кабинете).
@@ -14,3 +14,8 @@ MVP правила видимости:
 MVP implementation detail (FT-0052):
 - `results.getHrView` возвращает `groupVisibility` и per-competency visibility flags.
 - Для employee/manager витрин эти flags являются источником truth для скрытия/слияния блоков при малых группах.
+
+MVP implementation detail (FT-0073):
+- Если для `(campaign, subject)` есть строки в `ai_comment_aggregates`, HR open-text берётся из них; иначе используется fallback из submitted questionnaires.
+- `results.getMyDashboard` и `results.getTeamDashboard` всегда возвращают open-text без `rawText` поля (только `processedText`/`summaryText`).
+- `results.getHrView` возвращает `rawText` + `processedText` + `summaryText` для HR ролей.

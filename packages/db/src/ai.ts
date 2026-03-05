@@ -2,10 +2,32 @@ import { createOperationError } from "@feedback-360/api-contract";
 import { and, desc, eq } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
-import { aiJobs, aiWebhookReceipts, campaigns } from "./schema";
+import {
+  aiCommentAggregates,
+  aiJobs,
+  aiWebhookReceipts,
+  campaignAssignments,
+  campaigns,
+  questionnaires,
+} from "./schema";
 
 const MVP_STUB_PROVIDER = "mvp_stub";
 const MVP_STUB_IDEMPOTENCY_KEY = "mvp_stub_default";
+
+type AiCommentAggregateGroup = "manager" | "peers" | "subordinates" | "self";
+
+type AiCommentAggregateRowInput = {
+  campaignId: string;
+  companyId: string;
+  subjectEmployeeId: string;
+  competencyId: string;
+  raterGroup: AiCommentAggregateGroup;
+  rawText?: string;
+  processedText?: string;
+  summaryText?: string;
+};
+
+type DbLike = Pick<ReturnType<typeof createDb>, "select" | "insert" | "delete">;
 
 type RunAiForCampaignInput = {
   companyId: string;
@@ -35,6 +57,206 @@ export type ApplyAiWebhookResultOutput = {
   noOp: boolean;
   campaignStatus: string;
   aiJobStatus: string;
+};
+
+const mapAssignmentRoleToAggregateGroup = (
+  value: string | null,
+): AiCommentAggregateGroup | undefined => {
+  if (value === "manager") {
+    return "manager";
+  }
+  if (value === "peer") {
+    return "peers";
+  }
+  if (value === "subordinate") {
+    return "subordinates";
+  }
+  if (value === "self") {
+    return "self";
+  }
+  return undefined;
+};
+
+const normalizeCommentText = (value: unknown): string | undefined => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : undefined;
+};
+
+const extractCommentRecords = (
+  payload: unknown,
+): Array<{
+  competencyId: string;
+  rawText?: string;
+  processedText?: string;
+  summaryText?: string;
+}> => {
+  if (typeof payload !== "object" || payload === null || Array.isArray(payload)) {
+    return [];
+  }
+
+  const competencyComments = (payload as Record<string, unknown>).competencyComments;
+  if (
+    typeof competencyComments !== "object" ||
+    competencyComments === null ||
+    Array.isArray(competencyComments)
+  ) {
+    return [];
+  }
+
+  const records: Array<{
+    competencyId: string;
+    rawText?: string;
+    processedText?: string;
+    summaryText?: string;
+  }> = [];
+  for (const [competencyId, value] of Object.entries(competencyComments)) {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+      continue;
+    }
+    const rawText = normalizeCommentText((value as Record<string, unknown>).rawText);
+    const processedText = normalizeCommentText((value as Record<string, unknown>).processedText);
+    const summaryText = normalizeCommentText((value as Record<string, unknown>).summaryText);
+
+    if (!rawText && !processedText && !summaryText) {
+      continue;
+    }
+
+    records.push({
+      competencyId,
+      ...(rawText ? { rawText } : {}),
+      ...(processedText ? { processedText } : {}),
+      ...(summaryText ? { summaryText } : {}),
+    });
+  }
+
+  return records;
+};
+
+const rebuildAiCommentAggregatesFromQuestionnairesInTx = async (
+  tx: DbLike,
+  input: {
+    companyId: string;
+    campaignId: string;
+    source: string;
+    now: Date;
+  },
+): Promise<number> => {
+  const questionnaireRows = await tx
+    .select({
+      questionnaireId: questionnaires.id,
+      subjectEmployeeId: questionnaires.subjectEmployeeId,
+      draftPayload: questionnaires.draftPayload,
+      raterRole: campaignAssignments.raterRole,
+    })
+    .from(questionnaires)
+    .leftJoin(
+      campaignAssignments,
+      and(
+        eq(campaignAssignments.campaignId, questionnaires.campaignId),
+        eq(campaignAssignments.subjectEmployeeId, questionnaires.subjectEmployeeId),
+        eq(campaignAssignments.raterEmployeeId, questionnaires.raterEmployeeId),
+      ),
+    )
+    .where(
+      and(
+        eq(questionnaires.companyId, input.companyId),
+        eq(questionnaires.campaignId, input.campaignId),
+        eq(questionnaires.status, "submitted"),
+      ),
+    );
+
+  const rowsByScope = new Map<
+    string,
+    {
+      campaignId: string;
+      companyId: string;
+      subjectEmployeeId: string;
+      competencyId: string;
+      raterGroup: AiCommentAggregateGroup;
+      rawTexts: string[];
+      processedTexts: string[];
+      summaryTexts: string[];
+    }
+  >();
+  for (const row of questionnaireRows) {
+    const raterGroup = mapAssignmentRoleToAggregateGroup(row.raterRole);
+    if (!raterGroup) {
+      continue;
+    }
+
+    const commentRecords = extractCommentRecords(row.draftPayload);
+    for (const comment of commentRecords) {
+      const key = `${row.subjectEmployeeId}:${comment.competencyId}:${raterGroup}`;
+      const entry = rowsByScope.get(key) ?? {
+        campaignId: input.campaignId,
+        companyId: input.companyId,
+        subjectEmployeeId: row.subjectEmployeeId,
+        competencyId: comment.competencyId,
+        raterGroup,
+        rawTexts: [],
+        processedTexts: [],
+        summaryTexts: [],
+      };
+      if (comment.rawText) {
+        entry.rawTexts.push(comment.rawText);
+      }
+      if (comment.processedText) {
+        entry.processedTexts.push(comment.processedText);
+      }
+      if (comment.summaryText) {
+        entry.summaryTexts.push(comment.summaryText);
+      }
+      rowsByScope.set(key, entry);
+    }
+  }
+
+  const rowsToInsert = [...rowsByScope.values()].map((entry) => {
+    const row: AiCommentAggregateRowInput = {
+      campaignId: entry.campaignId,
+      companyId: entry.companyId,
+      subjectEmployeeId: entry.subjectEmployeeId,
+      competencyId: entry.competencyId,
+      raterGroup: entry.raterGroup,
+      ...(entry.rawTexts.length > 0 ? { rawText: entry.rawTexts.join("\n\n") } : {}),
+      ...(entry.processedTexts.length > 0
+        ? { processedText: entry.processedTexts.join("\n\n") }
+        : {}),
+      ...(entry.summaryTexts.length > 0 ? { summaryText: entry.summaryTexts.join("\n\n") } : {}),
+    };
+    return row;
+  });
+
+  await tx
+    .delete(aiCommentAggregates)
+    .where(
+      and(
+        eq(aiCommentAggregates.companyId, input.companyId),
+        eq(aiCommentAggregates.campaignId, input.campaignId),
+      ),
+    );
+
+  if (rowsToInsert.length > 0) {
+    await tx.insert(aiCommentAggregates).values(
+      rowsToInsert.map((row) => ({
+        companyId: row.companyId,
+        campaignId: row.campaignId,
+        subjectEmployeeId: row.subjectEmployeeId,
+        competencyId: row.competencyId,
+        raterGroup: row.raterGroup,
+        rawText: row.rawText ?? null,
+        processedText: row.processedText ?? null,
+        summaryText: row.summaryText ?? null,
+        source: input.source,
+        createdAt: input.now,
+        updatedAt: input.now,
+      })),
+    );
+  }
+
+  return rowsToInsert.length;
 };
 
 const mapAiRunOutput = (
@@ -117,6 +339,8 @@ export const runAiForCampaign = async (
         );
       }
 
+      const now = new Date();
+
       const existingRows = await tx
         .select({
           aiJobId: aiJobs.id,
@@ -143,15 +367,20 @@ export const runAiForCampaign = async (
             .update(campaigns)
             .set({
               status: "completed",
-              updatedAt: new Date(),
+              updatedAt: now,
             })
             .where(eq(campaigns.id, input.campaignId));
         }
 
+        await rebuildAiCommentAggregatesFromQuestionnairesInTx(tx, {
+          companyId: input.companyId,
+          campaignId: input.campaignId,
+          source: MVP_STUB_PROVIDER,
+          now,
+        });
+
         return mapAiRunOutput(existingJob, true);
       }
-
-      const now = new Date();
 
       await tx
         .update(campaigns)
@@ -203,6 +432,13 @@ export const runAiForCampaign = async (
           updatedAt: now,
         })
         .where(eq(campaigns.id, input.campaignId));
+
+      await rebuildAiCommentAggregatesFromQuestionnairesInTx(tx, {
+        companyId: input.companyId,
+        campaignId: input.campaignId,
+        source: MVP_STUB_PROVIDER,
+        now,
+      });
 
       return mapAiRunOutput(insertedJob, false);
     });
@@ -308,6 +544,15 @@ export const applyAiWebhookResult = async (
         })
         .where(eq(campaigns.id, input.campaignId));
 
+      if (input.status === "completed") {
+        await rebuildAiCommentAggregatesFromQuestionnairesInTx(tx, {
+          companyId: aiJob.companyId,
+          campaignId: input.campaignId,
+          source: "webhook",
+          now,
+        });
+      }
+
       return {
         applied: true,
         noOp: false,
@@ -394,6 +639,25 @@ export const countAiWebhookReceiptsForDebug = async (idempotencyKey: string): Pr
       })
       .from(aiWebhookReceipts)
       .where(eq(aiWebhookReceipts.idempotencyKey, idempotencyKey));
+
+    return rows.length;
+  } finally {
+    await pool.end();
+  }
+};
+
+export const countAiCommentAggregatesForCampaignForDebug = async (
+  campaignId: string,
+): Promise<number> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const rows = await db
+      .select({
+        aggregateId: aiCommentAggregates.id,
+      })
+      .from(aiCommentAggregates)
+      .where(eq(aiCommentAggregates.campaignId, campaignId));
 
     return rows.length;
   } finally {

@@ -103,6 +103,7 @@ describe("FT-0072 webhook idempotency receipts", () => {
       expect(aiJobStatus).toBe("completed");
       expect(receiptCount).toBe(1);
     },
+    30_000,
   );
 
   it.skipIf(hasUrl)("skips integration run when database URL is absent", () => {

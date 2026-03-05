@@ -13,6 +13,7 @@ import { and, eq, inArray } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
 import {
+  aiCommentAggregates,
   campaignAssignments,
   campaignEmployeeSnapshots,
   campaigns,
@@ -524,7 +525,7 @@ export const getResultsHrView = async (
         score: number;
       }>
     >();
-    const openTextByGroupCompetency = new Map<
+    let openTextByGroupCompetency = new Map<
       string,
       {
         rawTexts: string[];
@@ -665,6 +666,51 @@ export const getResultsHrView = async (
         });
         scoredRowsByGroupCompetency.set(aggregateKey, scoredRows);
       }
+    }
+
+    const aiOpenTextRows = await db
+      .select({
+        competencyId: aiCommentAggregates.competencyId,
+        raterGroup: aiCommentAggregates.raterGroup,
+        rawText: aiCommentAggregates.rawText,
+        processedText: aiCommentAggregates.processedText,
+        summaryText: aiCommentAggregates.summaryText,
+      })
+      .from(aiCommentAggregates)
+      .where(
+        and(
+          eq(aiCommentAggregates.companyId, campaign.companyId),
+          eq(aiCommentAggregates.campaignId, campaign.campaignId),
+          eq(aiCommentAggregates.subjectEmployeeId, input.subjectEmployeeId),
+        ),
+      );
+
+    if (aiOpenTextRows.length > 0) {
+      const aiMap = new Map<
+        string,
+        {
+          rawTexts: string[];
+          processedTexts: string[];
+          summaryTexts: string[];
+        }
+      >();
+      for (const row of aiOpenTextRows) {
+        if (
+          row.raterGroup !== "manager" &&
+          row.raterGroup !== "peers" &&
+          row.raterGroup !== "subordinates" &&
+          row.raterGroup !== "self"
+        ) {
+          continue;
+        }
+
+        aiMap.set(`${row.raterGroup}:${row.competencyId}`, {
+          rawTexts: row.rawText ? [row.rawText] : [],
+          processedTexts: row.processedText ? [row.processedText] : [],
+          summaryTexts: row.summaryText ? [row.summaryText] : [],
+        });
+      }
+      openTextByGroupCompetency = aiMap;
     }
 
     const peersSubmitted = submittedCountByGroup.get("peers") ?? 0;
