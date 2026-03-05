@@ -73,6 +73,8 @@ Status: Template
   - `step-1`: `<ожидание>`
   - `step-2`: `<ожидание>`
   - `step-3`: `<ожидание>`
+- Tooling:
+  - для browser-check используем `$agent-browser` (open/snapshot/interact/screenshot).
 - Notes:
   - cleanup/rollback (если требуется),
   - ограничения проверки.

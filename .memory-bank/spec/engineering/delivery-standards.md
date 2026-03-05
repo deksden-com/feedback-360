@@ -21,6 +21,7 @@ Status: Draft (2026-03-04)
    - preconditions (аккаунт/роль/seed/feature flag),
    - пошаговая инструкция “от начала до конца” + ожидаемый результат каждого шага,
    - пометка `N/A` с обоснованием только для non-user-facing фич.
+   - для user-facing/runtime фич обязательна browser-проверка через skill `$agent-browser` (open/snapshot/interact/screenshot) и фиксация артефактов.
 8) Для runtime/deploy/integration-инфраструктурных изменений зафиксированы CI/CD доказательства:
    - ссылка на GitHub Actions run (или check-runs commit),
    - ссылка на Vercel deployment (preview/beta/prod),
@@ -62,3 +63,9 @@ Status: Draft (2026-03-04)
 - В `Acceptance evidence` указываем список артефактов (путь к скринам) и что именно подтверждает каждый скрин.
 - Скриншоты в markdown-документах вставляем как рендерящиеся изображения: `![caption](relative/path.png)`, а не только plain-link.
 - Перед сохранением обязательно исключить секреты/PII (токены, приватные email, персональные данные).
+
+### Browser automation rule (deployed checks)
+- Для проверок на `beta`/`prod` используем `$agent-browser` как стандартный инструмент browser-smoke:
+  - минимум: `open` → `snapshot -i` → шаги сценария → `screenshot`.
+  - для многошаговых UI фич: скриншоты по шагам (`step-01`, `step-02`, ...).
+- Если `$agent-browser` недоступен, в evidence фиксируем причину и временно выполняем ручной браузерный прогон с тем же чеклистом шагов.
