@@ -5,6 +5,7 @@
 - [System overview](spec/project/system-overview.md): краткая картина продукта, акторов и ключевых ограничений MVP. Читать для быстрого доменного контекста перед реализацией.
 - [Glossary](spec/glossary.md): каноничные определения терминов (campaign, assignment, anonymity, NA/UNSURE и т.д.). Читать, чтобы не путать смыслы в коде/тестах/доках.
 - [Coding style](spec/engineering/coding-style.md): правила кодирования (TS/Node/Next), формат ошибок, соглашения по CLI output. Читать перед началом разработки, чтобы изменения были единообразны.
+- [Frontend UI stack](spec/engineering/frontend-ui-stack.md): зафиксированный baseline `Tailwind v4 + shadcn/ui` для `apps/web` и политика обновления. Читать перед UI-фичами, чтобы не смешивать разные подходы к стилям/компонентам.
 - [Architecture guardrails](spec/engineering/architecture-guardrails.md): границы core/client/web и правила слоёв+vertical slices. Читать перед кодом, чтобы не утащить бизнес-логику в UI/CLI.
 - [Implementation playbook](plans/implementation-playbook.md): пошаговый чеклист реализации фичи (contract→core→db→cli→tests→docs). Читать как рабочую инструкцию полного цикла разработки.
 - [Testing standards](spec/engineering/testing-standards.md): уровни тестов и правило двух гейтов (quality checks + acceptance/GS). Читать перед проверкой фичи, чтобы запускать проверки в правильной последовательности.

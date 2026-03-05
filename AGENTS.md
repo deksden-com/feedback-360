@@ -9,7 +9,7 @@ Status: Draft (2026-03-03)
 Внешние системы: Supabase (Postgres+Auth), Resend (email), Vercel (hosting+cron), AI Processing Service (external), Telegram (позже).
 
 ## Key facts & constraints (from TЗ)
-- Stack: TS/Node, Next.js App Router, Supabase (cloud), Drizzle, Vercel.
+- Stack: TS/Node, Next.js App Router, Tailwind CSS v4 + shadcn/ui (web UI), Supabase (cloud), Drizzle, Vercel.
 - Tooling: Biome, Vitest, Playwright, pnpm workspace.
 - Email: Resend (transactional).
 - CLI: Commander; human-readable + `--json` (AI-friendly), с примерами и расширенной справкой.

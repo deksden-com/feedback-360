@@ -1,5 +1,5 @@
 # EP-008 — Minimal UI (thin)
-Status: Draft (2026-03-03)
+Status: In Progress (2026-03-05)
 
 ## Goal
 Минимальный UI поверх typed client: HR стартует кампанию, сотрудник заполняет анкеты, видит результаты.
@@ -11,10 +11,10 @@ Status: Draft (2026-03-03)
 - Playwright e2e для GS1 (минимально)
 
 ## Progress report (evidence-based)
-- `as_of`: 2026-03-04
+- `as_of`: 2026-03-05
 - `total_features`: 4
-- `completed_features`: 0
-- `evidence_confirmed_features`: 0
+- `completed_features`: 1
+- `evidence_confirmed_features`: 1
 - verification link:
   - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-008. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
 

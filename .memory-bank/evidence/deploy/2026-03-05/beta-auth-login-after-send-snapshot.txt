@@ -1,0 +1,3 @@
+- textbox "Рабочий email" [ref=e1]
+- button "Отправить ссылку" [ref=e2]
+- button "Войти в demo-режиме" [ref=e3]

@@ -16,6 +16,7 @@ HR управляет кампанией: создаёт, настраивает
 - [GS5 Lock semantics](../../../../../spec/testing/scenarios/gs5-lock-semantics.md): lock на draft save. Читать, чтобы UI проверял именно agreed freeze-правило.
 - [AI processing](../../../../../spec/ai/ai-processing.md): retry AI и статусы. Читать, чтобы UI корректно инициировал запуск и отображал ошибки.
 - [Architecture guardrails](../../../../../spec/engineering/architecture-guardrails.md): UI тонкий поверх typed client. Читать, чтобы бизнес-правила не переносились в компоненты.
+- [Stitch design refs for FT-0084](../../../../../spec/ui/design-references-stitch.md#ft-0084-hr-campaign-ui): референсы HR campaign/dashboard таблиц и ограничений по scope. Читать, чтобы использовать единый HR UI паттерн без выхода в non-MVP функции.
 
 ## Acceptance (auto, Playwright)
 ### Setup
@@ -53,3 +54,52 @@ HR управляет кампанией: создаёт, настраивает
 ## Verification (must)
 - Automated test: Playwright HR flow (draft → matrix generate/edit → start → lock → попытка изменить matrix/weights).
 - Must run: Playwright e2e (GS1 minimal) + lock semantics UI assertion (можно как часть GS1).
+- При фиксации evidence: для UI шагов добавлять скриншоты и вставлять их в markdown как изображения (`![...](...)`).
+
+## Manual verification (deployed environment)
+### Beta scenario A — draft/start/matrix
+- Environment:
+  - URL: `https://beta.go360go.ru`
+- Preconditions:
+  - есть пользователь роли `hr_admin`;
+  - есть кампания в `draft` с участниками и моделью;
+  - доступны операции генерации матрицы.
+- Steps:
+  1) Войти как `hr_admin`.
+  2) Открыть кампанию в статусе `draft`.
+  3) Сгенерировать матрицу оценщиков.
+  4) Изменить матрицу вручную (добавить/удалить назначение).
+  5) Стартовать кампанию.
+- Expected:
+  - до старта матрица редактируется;
+  - после старта модель/состав участников изменять нельзя;
+  - статус кампании переключается в `started`.
+
+### Beta scenario B — lock after first draft save
+- Preconditions:
+  - в `started` кампании любой оценивающий сохранил `draft` (это триггер lock).
+- Steps:
+  1) Обновить страницу кампании HR.
+  2) Попробовать изменить матрицу или веса.
+- Expected:
+  - UI блокирует действия редактирования;
+  - при форсированном запросе backend возвращает typed error `campaign_locked`;
+  - в UI отображается понятное сообщение о блокировке.
+
+### Beta scenario C — AI retry button
+- Preconditions:
+  - кампания в `ai_failed` или состояние допускает retry согласно policy.
+- Steps:
+  1) Нажать `Retry AI`.
+  2) Обновить страницу статусов.
+- Expected:
+  - запускается новый AI job;
+  - статус переходит в `processing_ai` (далее — по webhook).
+
+## Design references (stitch)
+- [`stitch_go360go/hr_admin_campaign_dashboard/screen.png`](../../../../../../stitch_go360go/hr_admin_campaign_dashboard/screen.png): HR campaign dashboard (статусы, прогресс, actions). Используем как референс основной кампанийной панели.
+- [`stitch_go360go/hr_admin_employee_directory/screen.png`](../../../../../../stitch_go360go/hr_admin_employee_directory/screen.png): HR table/list паттерны (фильтры, таблица, status chips). Используем для унификации HR list/detail экранов.
+
+## Design constraints (what we do NOT take)
+- Не берем non-MVP действия (`Export`, внешние отчеты, payroll-элементы) до появления соответствующих операций в контракте.
+- Не переносим демо-правила действий: доступность кнопок определяется только нашими lifecycle/matrix lock инвариантами.

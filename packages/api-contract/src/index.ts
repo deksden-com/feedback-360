@@ -63,6 +63,7 @@ export const knownOperations = [
   "seed.run",
   "system.ping",
   "company.updateProfile",
+  "membership.list",
   "model.version.create",
   "campaign.create",
   "campaign.start",
@@ -267,6 +268,18 @@ export type EmployeeListActiveItem = {
 
 export type EmployeeListActiveOutput = {
   items: EmployeeListActiveItem[];
+};
+
+export type MembershipListInput = Record<string, never>;
+
+export type MembershipListItem = {
+  companyId: string;
+  companyName: string;
+  role: MembershipRole;
+};
+
+export type MembershipListOutput = {
+  items: MembershipListItem[];
 };
 
 export type OrgDepartmentMoveInput = {
@@ -1515,6 +1528,40 @@ export const parseEmployeeListActiveOutput = (value: unknown): EmployeeListActiv
     items: ensureArray(record.items, "employee.listActive output.items").map(
       parseEmployeeListActiveItem,
     ),
+  };
+};
+
+const parseMembershipListItem = (value: unknown): MembershipListItem => {
+  const record = ensureObject(value, "membership.list output.items[]");
+  ensureAllowedKeys(record, ["companyId", "companyName", "role"], "membership.list output.items[]");
+
+  const role = ensureStringField(record, "role", "membership.list output.items[]");
+  if (!isMembershipRole(role)) {
+    throw new Error(
+      `membership.list output.items[].role must be one of: ${membershipRoles.join(", ")}`,
+    );
+  }
+
+  return {
+    companyId: ensureStringField(record, "companyId", "membership.list output.items[]"),
+    companyName: ensureStringField(record, "companyName", "membership.list output.items[]"),
+    role,
+  };
+};
+
+export const parseMembershipListInput = (value: unknown): MembershipListInput => {
+  const record = ensureObject(value, "membership.list input");
+  ensureAllowedKeys(record, [], "membership.list input");
+
+  return {};
+};
+
+export const parseMembershipListOutput = (value: unknown): MembershipListOutput => {
+  const record = ensureObject(value, "membership.list output");
+  ensureAllowedKeys(record, ["items"], "membership.list output");
+
+  return {
+    items: ensureArray(record.items, "membership.list output.items").map(parseMembershipListItem),
   };
 };
 

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1e3b8a",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121620",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 md:px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8 flex items-center justify-center bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">task_alt</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">Мои задачи</h2>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+<div class="h-10 w-10 rounded-full bg-primary/20 border-2 border-primary/10 overflow-hidden">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="Portrait of a professional male employee" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCS8ax4RfLyTUqq7ZbyCx22KVMPMOzh2GNYKm_T5FWpv8Y6FF1riA3H_L3dqAKM3xykXDtMLSNxilfxPWqKkwJ9BD13fZz4CVUVX4HZuaMPgv4Rqi3xf7DVdHPq-1FYZJxocHYxyilQzaaP3WDZSZIbBFfcRwZIxmPCRaJKPFVrnrRwDN-Nx7x4R6KcOuG3dsMaLdIVeXcLm15keht7xJJOWkradlzISa9YNpMHE7tiPF6nrEPnSWl4cv0nKfDzZcnvPLG7S5UaLUVA"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 flex-col md:flex-row max-w-[1440px] mx-auto w-full">
+<!-- Sidebar Navigation -->
+<aside class="w-full md:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 shrink-0">
+<div class="flex flex-col gap-6">
+<div class="flex gap-3 items-center px-2 py-3 border-b border-slate-100 dark:border-slate-800">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img alt="User" class="w-full h-full object-cover" data-alt="User profile photo avatar circular" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2g5HvTeMWjFU4Cdc2tBiXKOSDh1cPQc2Db_iCYMZrRuTDoaxS23k5YCXWKKTVQOGmIpwHCU79K2bKJTgLRVzaHtvR6GVbIHB6itwhrzHZYUwCHgagnYMmmjiMtLhg5RhZHaP5YUzv47wtCRpiJ3xzg_yFr_TJZL-KfuY1iEv4er2S8ifonV6oziUIVdYpkA85Poyh863FKrL-nE91RWYrvg0-hclrH7qYNpqoIgTrDT--rNj4yANzXa54ptv1y-NzgOjBmSiLPITQ"/>
+</div>
+<div class="flex flex-col min-w-0">
+<h1 class="text-slate-900 dark:text-white text-sm font-semibold truncate leading-tight">Александр Волков</h1>
+<p class="text-slate-500 text-xs font-normal">Старший дизайнер</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">dashboard</span>
+<span class="text-sm font-medium">Дашборд</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 bg-primary/10 text-primary rounded-lg" href="#">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">assignment_turned_in</span>
+<span class="text-sm font-semibold">Мои задачи</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">group</span>
+<span class="text-sm font-medium">Команда</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+<span class="text-sm font-medium">Настройки</span>
+</a>
+</nav>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 p-4 md:p-8 bg-background-light dark:bg-background-dark">
+<!-- Page Header & Tabs -->
+<div class="mb-8">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Анкеты для заполнения</h2>
+<div class="flex border-b border-slate-200 dark:border-slate-800 gap-8 overflow-x-auto">
+<a class="flex items-center border-b-2 border-primary text-primary pb-3 px-1 transition-colors whitespace-nowrap" href="#">
+<span class="text-sm font-bold">Все задачи</span>
+<span class="ml-2 bg-primary/10 px-2 py-0.5 rounded text-xs font-bold">12</span>
+</a>
+<a class="flex items-center border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 pb-3 px-1 transition-colors whitespace-nowrap" href="#">
+<span class="text-sm font-bold">Ожидают</span>
+<span class="ml-2 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-xs font-bold text-slate-500">5</span>
+</a>
+<a class="flex items-center border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 pb-3 px-1 transition-colors whitespace-nowrap" href="#">
+<span class="text-sm font-bold">Завершенные</span>
+<span class="ml-2 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-xs font-bold text-slate-500">7</span>
+</a>
+</div>
+</div>
+<!-- Filters -->
+<div class="flex gap-3 mb-6 overflow-x-auto pb-2">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary text-white px-5 transition-shadow shadow-sm shadow-primary/20">
+<span class="text-xs font-semibold">Все статусы</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 px-5 hover:border-primary/50 transition-colors">
+<span class="size-2 rounded-full bg-amber-400"></span>
+<span class="text-xs font-medium">Не начато</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 px-5 hover:border-primary/50 transition-colors">
+<span class="size-2 rounded-full bg-blue-500"></span>
+<span class="text-xs font-medium">В процессе</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 px-5 hover:border-primary/50 transition-colors">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-medium">Завершено</span>
+</button>
+</div>
+<!-- Task List -->
+<div class="grid grid-cols-1 gap-4">
+<!-- Task Item 1: In Progress -->
+<div class="group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 hover:border-primary/40 transition-all shadow-sm">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="size-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-2xl">rate_review</span>
+</div>
+<div class="flex flex-col min-w-0">
+<h3 class="text-base font-bold text-slate-900 dark:text-white truncate">Оценка 360: Руководитель отдела</h3>
+<div class="flex items-center gap-2 mt-1">
+<p class="text-sm text-slate-500">Кого оцениваем:</p>
+<div class="flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs font-medium text-slate-700 dark:text-slate-300">
+<div class="size-4 rounded-full bg-slate-300 overflow-hidden">
+<img alt="Reviewee" class="w-full h-full object-cover" data-alt="Avatar of a male professional being reviewed" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZpxUocmRAK7Z0UpALC2apLSHCW31sMjp1pOkGV-2jzvIy8uKgWAr0qntyQOI6ztrN4zIT3VGQqMAsHC20hrDqUgrhiFriI_EOTLu2TOj8oVHLa4ndZP2YnAjy_KcrH2ssSzKqncmABJ3NiMxr4UehIKkcnmBFLTblS2AUhDrA-76QGNDuDPEA89YpFlvdEdiJ26C6YIxMFmPPfA9td1facPjSCvCHr1yiTqU_TIKOtv_34kBVQs1fwzndodCXWEiKajXFSF8d841c"/>
+</div>
+                                            Дмитрий Соколов
+                                        </div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-4 md:pt-0 border-slate-100 dark:border-slate-800">
+<div class="flex flex-col items-start md:items-end">
+<span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Дедлайн</span>
+<span class="text-sm font-semibold text-rose-500">15 мая, 18:00</span>
+</div>
+<div class="flex flex-col items-start md:items-end">
+<span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Статус</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold">
+<span class="size-1.5 rounded-full bg-blue-600"></span>
+                                        В процессе
+                                    </span>
+</div>
+<button class="bg-primary text-white h-10 px-6 rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 whitespace-nowrap">
+                                    Продолжить
+                                </button>
+</div>
+</div>
+</div>
+<!-- Task Item 2: Not Started -->
+<div class="group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 hover:border-primary/40 transition-all shadow-sm">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="size-12 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-2xl">fact_check</span>
+</div>
+<div class="flex flex-col min-w-0">
+<h3 class="text-base font-bold text-slate-900 dark:text-white truncate">Самооценка компетенций Q2</h3>
+<div class="flex items-center gap-2 mt-1">
+<p class="text-sm text-slate-500">Кого оцениваем:</p>
+<div class="flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs font-medium text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-xs">person</span>
+                                            Себя
+                                        </div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-4 md:pt-0 border-slate-100 dark:border-slate-800">
+<div class="flex flex-col items-start md:items-end">
+<span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Дедлайн</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">20 мая, 23:59</span>
+</div>
+<div class="flex flex-col items-start md:items-end">
+<span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Статус</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-bold">
+<span class="size-1.5 rounded-full bg-amber-600"></span>
+                                        Не начато
+                                    </span>
+</div>
+<button class="bg-white dark:bg-slate-800 text-primary border border-primary/20 h-10 px-6 rounded-lg text-sm font-bold hover:bg-primary/5 transition-colors whitespace-nowrap">
+                                    Начать
+                                </button>
+</div>
+</div>
+</div>
+<!-- Task Item 3: Completed -->
+<div class="group bg-slate-50/50 dark:bg-slate-800/20 rounded-xl border border-slate-100 dark:border-slate-800 p-5 transition-all">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-4 opacity-70">
+<div class="size-12 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-2xl">verified</span>
+</div>
+<div class="flex flex-col min-w-0">
+<h3 class="text-base font-bold text-slate-900 dark:text-white truncate">Опрос вовлеченности 2024</h3>
+<div class="flex items-center gap-2 mt-1">
+<p class="text-sm text-slate-500">Кого оцениваем:</p>
+<div class="flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs font-medium text-slate-700 dark:text-slate-300">
+                                            Команда
+                                        </div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-4 md:pt-0 border-slate-100 dark:border-slate-800">
+<div class="flex flex-col items-start md:items-end">
+<span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Завершено</span>
+<span class="text-sm font-semibold text-slate-500">10 мая</span>
+</div>
+<div class="flex flex-col items-start md:items-end">
+<span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Статус</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+<span class="material-symbols-outlined text-xs">check</span>
+                                        Завершено
+                                    </span>
+</div>
+<button class="text-slate-500 h-10 px-4 rounded-lg text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors whitespace-nowrap flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">visibility</span>
+                                    Просмотр
+                                </button>
+</div>
+</div>
+</div>
+<!-- Task Item 4: Not Started (Other Colleague) -->
+<div class="group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 hover:border-primary/40 transition-all shadow-sm">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="size-12 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-2xl">person_search</span>
+</div>
+<div class="flex flex-col min-w-0">
+<h3 class="text-base font-bold text-slate-900 dark:text-white truncate">Коллегиальная оценка (Peer-review)</h3>
+<div class="flex items-center gap-2 mt-1">
+<p class="text-sm text-slate-500">Кого оцениваем:</p>
+<div class="flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs font-medium text-slate-700 dark:text-slate-300">
+<div class="size-4 rounded-full bg-slate-300 overflow-hidden">
+<img alt="Reviewee" class="w-full h-full object-cover" data-alt="Avatar of a female professional peer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGpkxZumFP4k_Iwz3Z-xjwy7Nf2t0nsxQGw5PqC77_F7Mt4Y0X4KQDOrOx1elLTtDDDeZwjo984TyQM0kdCuSwCHKZHh3yMjYVQ2bQfn9RM5sx8KJUZ3HmXj40K0i4mRR_8qVmP3EEriOGQeMz7V7r7YXVSk4JepG8Cfhxz8Y6k5sM0DaV4eVcx-IoPjXvB0M_B_vsSWUAtaibGejMhezxaCCqpjuJIYX2bz1uChXVems9QW2g4GPeLfJ8x8waMcKGx04xol4soPPU"/>
+</div>
+                                            Марина Иванова
+                                        </div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-4 md:pt-0 border-slate-100 dark:border-slate-800">
+<div class="flex flex-col items-start md:items-end">
+<span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Дедлайн</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">22 мая, 12:00</span>
+</div>
+<div class="flex flex-col items-start md:items-end">
+<span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Статус</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-bold">
+<span class="size-1.5 rounded-full bg-amber-600"></span>
+                                        Не начато
+                                    </span>
+</div>
+<button class="bg-white dark:bg-slate-800 text-primary border border-primary/20 h-10 px-6 rounded-lg text-sm font-bold hover:bg-primary/5 transition-colors whitespace-nowrap">
+                                    Начать
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination/Load More -->
+<div class="mt-8 flex justify-center">
+<button class="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary transition-colors py-2 px-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                        Показать еще
+                        <span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+</main>
+</div>
+</div>
+</div>
+</body></html>
