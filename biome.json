@@ -20,7 +20,9 @@
       "node_modules",
       "dist",
       ".next",
-      "coverage"
+      "coverage",
+      "test-results",
+      "playwright-report"
     ]
   }
 }

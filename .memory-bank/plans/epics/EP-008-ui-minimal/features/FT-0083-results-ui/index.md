@@ -1,5 +1,5 @@
 # FT-0083 — Results UI (employee/manager/hr)
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-05)
 
 ## User value
 Пользователь видит результаты в своём кабинете; менеджер и HR видят свои витрины.
@@ -21,11 +21,13 @@ Status: Draft (2026-03-03)
 
 ### Action
 1) Под employee открыть results dashboard.
-2) Под hr_reader открыть HR results view.
+2) Под manager открыть team dashboard.
+3) Под hr_admin/hr_reader открыть HR results view.
 
 ### Assert
 - Employee не видит raw open text.
-- HR reader (MVP) видит raw + processed/summary.
+- Manager не видит raw open text.
+- HR reader/admin (MVP) видит raw + processed/summary.
 
 ## Implementation plan (target repo)
 - Screens:
@@ -38,7 +40,8 @@ Status: Draft (2026-03-03)
 
 ## Tests
 - Playwright: под employee открыть dashboard и проверить отсутствие raw полей (через UI assertion или network intercept).
-- Playwright: под hr_reader открыть HR view и проверить наличие raw+processed.
+- Playwright: под manager открыть team view и проверить отсутствие raw.
+- Playwright: под hr_admin/hr_reader открыть HR view и проверить наличие raw+processed.
 
 ## Memory bank updates
 - Если меняется набор экранов/переходов — обновить: [UI sitemap & flows](../../../../../spec/ui/sitemap-and-flows.md) — SSoT. Читать, чтобы UI соответствовал плану.
@@ -77,6 +80,18 @@ Status: Draft (2026-03-03)
   - employee view не раскрывает raw;
   - отличия в видимости соответствуют policy.
 
+### Beta scenario C — manager team results
+- Preconditions:
+  - есть пользователь роли `manager`, который управляет `subject` в выбранной кампании.
+- Steps:
+  1) Войти как `manager`.
+  2) Открыть `https://beta.go360go.ru/results/team?campaignId=<campaign_id>&subjectEmployeeId=<subject_employee_id>`.
+  3) Проверить текстовые блоки комментариев.
+- Expected:
+  - manager видит агрегаты и processed/summary комментарии;
+  - raw open text отсутствует;
+  - при subject вне своей команды backend возвращает `forbidden`.
+
 ## Design references (stitch)
 - [`stitch_go360go/employee_my_results_report/screen.png`](../../../../../../stitch_go360go/employee_my_results_report/screen.png): employee results dashboard (score, breakdown, AI summary). Используем для структуры личного отчета.
 - [`stitch_go360go/_3/screen.png`](../../../../../../stitch_go360go/_3/screen.png): manager/team dashboard с прогрессом и pending actions. Используем как референс руководительского экрана.
@@ -84,3 +99,30 @@ Status: Draft (2026-03-03)
 ## Design constraints (what we do NOT take)
 - Не показываем `rawText` на employee/manager экранах даже если референс визуально подразумевает детальные цитаты.
 - Не переносим экспорт/report actions, если операция не покрыта контрактом MVP.
+
+## Progress note (2026-03-05)
+- Выполнен вертикальный слайс FT-0083:
+  - web UI: добавлены страницы `/results`, `/results/team`, `/results/hr`.
+  - presentation: добавлены общие секции результатов (`summary`, `group visibility`, `competencies`, `open text`) без доменной логики в компонентах.
+  - navigation: на главной странице добавлены ссылки на результаты по ролям.
+  - automation: добавлен Playwright сценарий `ft-0083-results-ui.spec.ts` с шагами employee → manager → HR.
+
+## Quality checks evidence (2026-03-05)
+- `pnpm --filter @feedback-360/web lint` → passed.
+- `pnpm --filter @feedback-360/web typecheck` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/web test` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/web build` → passed.
+
+## Acceptance evidence (2026-03-05)
+- `set -a; source .env; set +a; cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0083-results-ui.spec.ts` → passed.
+- Covered acceptance:
+  - `S9_campaign_completed_with_ai`: employee dashboard without raw text.
+  - `S9_campaign_completed_with_ai`: manager team dashboard without raw text.
+  - `S9_campaign_completed_with_ai`: HR dashboard with raw + processed + summary text.
+- Artifacts:
+  - step-01: employee results (без raw).
+    ![step-01-employee-results-without-raw](../../../../../evidence/EP-008/FT-0083/2026-03-05/step-01-employee-results-without-raw.png)
+  - step-02: manager team results (без raw).
+    ![step-02-manager-results-without-raw](../../../../../evidence/EP-008/FT-0083/2026-03-05/step-02-manager-results-without-raw.png)
+  - step-03: HR results (с raw+processed+summary).
+    ![step-03-hr-results-with-raw](../../../../../evidence/EP-008/FT-0083/2026-03-05/step-03-hr-results-with-raw.png)

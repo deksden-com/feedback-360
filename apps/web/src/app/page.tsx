@@ -45,6 +45,19 @@ export default async function HomePage() {
             <Button asChild variant="secondary">
               <a href="/questionnaires">Мои анкеты</a>
             </Button>
+            <Button asChild variant="secondary">
+              <a href="/results">Мои результаты</a>
+            </Button>
+            {activeMembership?.role === "manager" ? (
+              <Button asChild variant="secondary">
+                <a href="/results/team">Результаты команды</a>
+              </Button>
+            ) : null}
+            {activeMembership?.role === "hr_admin" || activeMembership?.role === "hr_reader" ? (
+              <Button asChild variant="secondary">
+                <a href="/results/hr">HR результаты</a>
+              </Button>
+            ) : null}
             <Button asChild>
               <a href="/select-company">Сменить компанию</a>
             </Button>
