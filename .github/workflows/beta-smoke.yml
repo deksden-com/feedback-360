@@ -1,0 +1,48 @@
+name: Beta Smoke
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  select-company-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.5.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile=false
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Validate smoke credentials
+        env:
+          BETA_SMOKE_USER_ID: ${{ secrets.BETA_SMOKE_USER_ID }}
+        run: |
+          if [ -z "${BETA_SMOKE_USER_ID}" ]; then
+            echo "BETA_SMOKE_USER_ID GitHub secret is required."
+            exit 1
+          fi
+      - name: Wait for beta health endpoint
+        run: |
+          for i in {1..30}; do
+            if curl -fsS https://beta.go360go.ru/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "beta health endpoint is not ready"
+          exit 1
+      - name: Run beta select-company smoke
+        env:
+          PLAYWRIGHT_BASE_URL: https://beta.go360go.ru
+          BETA_SMOKE_USER_ID: ${{ secrets.BETA_SMOKE_USER_ID }}
+        run: >
+          pnpm --filter @feedback-360/web exec playwright test
+          --config playwright/playwright.config.mjs
+          tests/smoke/select-company-beta.spec.ts

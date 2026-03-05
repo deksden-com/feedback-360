@@ -37,6 +37,12 @@ Status: Draft (2026-03-03)
    - в feature doc: `Quality checks evidence` и `Acceptance evidence`,
    - в verification matrix: `quality_gate` и `acceptance_gate`.
 
+## Deployed-environment smoke (beta)
+- Локальные unit/integration/e2e тесты не гарантируют, что фича работает на реальном `beta` окружении (возможны drift по env/DB/deploy).
+- Для user-facing auth/tenant путей (минимум: `/auth/*`, `/select-company`) обязателен отдельный beta-smoke прогон.
+- Автоматизация: GitHub workflow `.github/workflows/beta-smoke.yml` + Playwright smoke spec `apps/web/playwright/tests/smoke/select-company-beta.spec.ts`.
+- Smoke использует `BETA_SMOKE_USER_ID` и проверяет runtime сценарий именно на `https://beta.go360go.ru`.
+
 Примечание:
 - Для infra/docs-only фич, где нет кодовых изменений, `Quality checks evidence` допускается как `N/A` с обоснованием; acceptance/evidence при этом остаются обязательными.
 
