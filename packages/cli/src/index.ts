@@ -129,6 +129,7 @@ type AiRunOptions = {
 type RemindersGenerateOptions = {
   json?: boolean;
   campaign: string;
+  now?: string;
 };
 
 type NotificationsDispatchOptions = {
@@ -1568,6 +1569,7 @@ Examples:
     .command("generate")
     .description("Generate reminder outbox rows for pending questionnaires.")
     .requiredOption("--campaign <campaign_id>", "Campaign identifier.")
+    .option("--now <iso_timestamp>", "Override current time (ISO) for deterministic checks.")
     .option("--json", "Output machine-readable JSON.")
     .action(async (options: RemindersGenerateOptions) => {
       const client = await getClientWithActiveCompany(options.json);
@@ -1577,6 +1579,7 @@ Examples:
 
       const result = await client.notificationsGenerateReminders({
         campaignId: options.campaign,
+        ...(options.now ? { now: options.now } : {}),
       });
       if (!emitResult(result, options.json)) {
         return;

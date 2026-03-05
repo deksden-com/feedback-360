@@ -174,7 +174,7 @@ Status: Draft (2026-03-03)
   - for `modelKind=levels`: per-competency `*Levels` summaries (`modeLevel`, `distribution`, `nValid`, `nUnsure`)
 
 ## Notifications
-- command: `reminders generate [--campaign <id>]`
+- command: `reminders generate [--campaign <id>] [--now <iso_timestamp>]`
   - op: `notifications.generateReminders`
   - roles: hr_admin
   - idempotency: yes

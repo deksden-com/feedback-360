@@ -33,11 +33,13 @@ describe("FT-0062 notification idempotency and retries", () => {
         companyId,
         role: "hr_admin" as const,
       };
+      const scheduledNow = "2026-01-12T08:05:00.000Z";
 
       const generatedFirst = await dispatchOperation({
         operation: "notifications.generateReminders",
         input: {
           campaignId,
+          now: scheduledNow,
         },
         context: hrContext,
       });
@@ -51,6 +53,7 @@ describe("FT-0062 notification idempotency and retries", () => {
         operation: "notifications.generateReminders",
         input: {
           campaignId,
+          now: scheduledNow,
         },
         context: hrContext,
       });

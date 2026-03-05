@@ -357,6 +357,7 @@ export type CampaignProgressGetOutput = {
 
 export type NotificationsGenerateRemindersInput = {
   campaignId: string;
+  now?: string;
 };
 
 export type NotificationsGenerateRemindersOutput = {
@@ -1865,10 +1866,18 @@ export const parseNotificationsGenerateRemindersInput = (
   value: unknown,
 ): NotificationsGenerateRemindersInput => {
   const record = ensureObject(value, "notifications.generateReminders input");
-  ensureAllowedKeys(record, ["campaignId"], "notifications.generateReminders input");
+  ensureAllowedKeys(record, ["campaignId", "now"], "notifications.generateReminders input");
+
+  const now = record.now;
+  if (now !== undefined) {
+    if (typeof now !== "string" || Number.isNaN(Date.parse(now))) {
+      throw new Error("notifications.generateReminders input.now must be an ISO timestamp.");
+    }
+  }
 
   return {
     campaignId: ensureStringField(record, "campaignId", "notifications.generateReminders input"),
+    ...(typeof now === "string" ? { now } : {}),
   };
 };
 
