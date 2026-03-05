@@ -41,6 +41,8 @@ import {
   type OrgDepartmentMoveOutput,
   type OrgManagerSetInput,
   type OrgManagerSetOutput,
+  type QuestionnaireGetDraftInput,
+  type QuestionnaireGetDraftOutput,
   type QuestionnaireListAssignedInput,
   type QuestionnaireListAssignedOutput,
   type QuestionnaireSaveDraftInput,
@@ -103,6 +105,8 @@ import {
   parseOrgDepartmentMoveOutput,
   parseOrgManagerSetInput,
   parseOrgManagerSetOutput,
+  parseQuestionnaireGetDraftInput,
+  parseQuestionnaireGetDraftOutput,
   parseQuestionnaireListAssignedInput,
   parseQuestionnaireListAssignedOutput,
   parseQuestionnaireSaveDraftInput,
@@ -243,6 +247,10 @@ export type Feedback360Client = {
     input: QuestionnaireListAssignedInput,
     context?: OperationContext,
   ): Promise<OperationResult<QuestionnaireListAssignedOutput>>;
+  questionnaireGetDraft(
+    input: QuestionnaireGetDraftInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<QuestionnaireGetDraftOutput>>;
   questionnaireSaveDraft(
     input: QuestionnaireSaveDraftInput,
     context?: OperationContext,
@@ -773,6 +781,24 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseQuestionnaireListAssignedOutput,
+      });
+    },
+
+    questionnaireGetDraft: async (input, context) => {
+      let parsedInput: QuestionnaireGetDraftInput;
+      try {
+        parsedInput = parseQuestionnaireGetDraftInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid questionnaireGetDraft input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "questionnaire.getDraft",
+        input: parsedInput,
+        context,
+        parseOutput: parseQuestionnaireGetDraftOutput,
       });
     },
 

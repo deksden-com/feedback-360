@@ -1,5 +1,5 @@
 # EP-008 — Minimal UI (thin)
-Status: In Progress (2026-03-05)
+Status: Completed (2026-03-05)
 
 ## Goal
 Минимальный UI поверх typed client: HR стартует кампанию, сотрудник заполняет анкеты, видит результаты.
@@ -13,8 +13,8 @@ Status: In Progress (2026-03-05)
 ## Progress report (evidence-based)
 - `as_of`: 2026-03-05
 - `total_features`: 4
-- `completed_features`: 1
-- `evidence_confirmed_features`: 1
+- `completed_features`: 4
+- `evidence_confirmed_features`: 4
 - verification link:
   - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-008. Читать, чтобы отслеживать подтверждённый прогресс по одному SSoT-источнику.
 
