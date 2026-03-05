@@ -1,5 +1,5 @@
 # FT-0081 — Auth + company switcher UI (thin)
-Status: Draft (2026-03-03)
+Status: In Progress (2026-03-05)
 
 ## User value
 Пользователь входит по magic link и выбирает активную компанию, если memberships > 1.
@@ -7,12 +7,14 @@ Status: Draft (2026-03-03)
 ## Deliverables
 - Экран логина (magic link).
 - Company switcher, который вызывает `client.setActiveCompany` (через typed client).
+- UI foundation для `apps/web`: Tailwind v4 + shadcn/ui bootstrap как базовый стек фич EP-008.
 
 ## Context (SSoT links)
 - [UI sitemap & flows](../../../../../spec/ui/sitemap-and-flows.md): список экранов и переходов. Читать, чтобы UI соответствовал agreed MVP flow.
 - [Auth & identity](../../../../../spec/security/auth-and-identity.md): magic link и users pre-created. Читать, чтобы UI не предполагал публичные регистрации.
 - [Client auth & tenancy](../../../../../spec/client-api/auth-and-tenancy.md): active company как client-local контекст. Читать, чтобы переключение компании было консистентным с CLI.
 - [Architecture guardrails](../../../../../spec/engineering/architecture-guardrails.md): UI не импортирует core. Читать, чтобы бизнес-логика не “утекла” в компоненты.
+- [Frontend UI stack](../../../../../spec/engineering/frontend-ui-stack.md): фиксированный baseline Tailwind/shadcn для `apps/web`. Читать, чтобы UI фича не ушла в альтернативный стек и была совместима с остальными FT EP-008.
 
 ## Acceptance (auto, Playwright)
 ### Setup
@@ -46,3 +48,24 @@ Status: Draft (2026-03-03)
 ## Verification (must)
 - Automated test: Playwright сценарий (часть GS1) покрывает login + company switcher.
 - Must run: Playwright e2e (минимальный happy path) и smoke переключения компаний (multi-tenant).
+
+## Project grounding (2026-03-05)
+- [Tailwind CSS + Next.js guide](https://tailwindcss.com/docs/installation/framework-guides/nextjs): официальный способ подключения Tailwind v4 через `@tailwindcss/postcss`. Используем как baseline, чтобы не заводить legacy-конфиг.
+- [shadcn/ui Next.js installation](https://ui.shadcn.com/docs/installation/next): официальный init-flow, preflight checks и alias requirements. Используем, чтобы bootstrap был reproducible и совместимым с registry.
+- [shadcn/ui CLI](https://ui.shadcn.com/docs/cli): актуальные команды `init`/`add` и доступные флаги. Используем для стандартизированного создания foundation/components вместо ручной генерации.
+
+## Progress note (2026-03-05)
+- Выполнен foundation bootstrap для FT-0081:
+  - подключён Tailwind v4 в `apps/web`,
+  - добавлен `components.json` и shadcn theming baseline,
+  - добавлен первый registry-компонент `ui/button`.
+- Функциональная часть FT-0081 (magic-link UI + company switcher + Playwright acceptance) остаётся в работе.
+
+## Quality checks evidence (2026-03-05)
+- `pnpm --filter @feedback-360/web lint` → passed.
+- `pnpm --filter @feedback-360/web typecheck` → passed.
+- `pnpm --filter @feedback-360/web test` → passed.
+- `pnpm --filter @feedback-360/web build` → passed (with known Sentry/OpenTelemetry warnings, build status = success).
+
+## Acceptance evidence (2026-03-05)
+- Pending: acceptance сценарий FT-0081 (Playwright login + company switcher) будет прогнан после реализации функциональной части auth/switcher.
