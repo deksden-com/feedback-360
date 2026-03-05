@@ -796,6 +796,7 @@ const runNotificationsGenerateReminders = async (
     const output = await generateReminderOutbox({
       companyId: companyIdOrError,
       campaignId: parsedInput.campaignId,
+      ...(parsedInput.now ? { now: new Date(parsedInput.now) } : {}),
     });
     return okResult(parseNotificationsGenerateRemindersOutput(output));
   } catch (error) {

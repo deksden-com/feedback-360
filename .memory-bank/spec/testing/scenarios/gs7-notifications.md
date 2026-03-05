@@ -16,7 +16,7 @@ Status: Active (2026-03-05)
 
 Примечание по покрытию:
 - Idempotency + retry часть закрыта в FT-0062.
-- Timezone + quiet-hours часть закрывается в FT-0063.
+- Timezone + quiet-hours часть закрыта в FT-0063.
 
 ## Client API ops (v1)
 - `notifications.generateReminders`

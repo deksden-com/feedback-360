@@ -1,5 +1,5 @@
 # FT-0063 — Scheduling (timezone + quiet hours)
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-05)
 
 ## User value
 Напоминания приходят “в рабочее время” компании и с корректной частотой.
@@ -52,5 +52,17 @@ Status: Draft (2026-03-03)
 - При изменении default расписания/quiet hours обновить: [Notifications spec](../../../../../spec/notifications/notifications.md) — SSoT. Читать, чтобы ожидания продукта и cron совпадали.
 
 ## Verification (must)
-- Automated test: `packages/core/test/ft/ft-0063-scheduling.test.ts` (unit+integration) прогоняет planner по фиктивным `now` в разных timezone.
+- Automated test: `packages/core/src/ft/ft-0063-scheduling.test.ts` (unit+integration) прогоняет planner по фиктивным `now` в разных timezone.
 - Must run: `pnpm -r test` + набор кейсов quiet hours.
+
+## Execution evidence (2026-03-05)
+- `pnpm --filter @feedback-360/api-contract lint && pnpm --filter @feedback-360/api-contract typecheck` → passed.
+- `pnpm --filter @feedback-360/db lint && pnpm --filter @feedback-360/db typecheck` → passed.
+- `pnpm --filter @feedback-360/core lint && pnpm --filter @feedback-360/core typecheck` → passed.
+- `pnpm --filter @feedback-360/client typecheck` → passed.
+- `pnpm --filter @feedback-360/cli lint && pnpm --filter @feedback-360/cli typecheck` → passed.
+- `set -a; source .env; set +a; pnpm db:migrate` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0061-outbox-dispatch.test.ts src/ft/ft-0062-idempotency-retries.test.ts src/ft/ft-0063-scheduling.test.ts --fileParallelism=false` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/db exec vitest run src/migrations/ft-0003-seed-runner.test.ts` → passed.
+- `pnpm --filter @feedback-360/client exec vitest run src/ft-0061-notifications-client.test.ts` → passed.
+- `pnpm --filter @feedback-360/cli exec vitest run src/ft-0061-notifications-cli.test.ts` → passed.

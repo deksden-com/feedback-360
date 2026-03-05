@@ -4,6 +4,7 @@ import { and, asc, count, eq, isNull, lte, ne, or, sql } from "drizzle-orm";
 import { createDb, createPool } from "./db";
 import {
   campaigns,
+  companies,
   employees,
   notificationAttempts,
   notificationOutbox,
@@ -65,8 +66,134 @@ type EmailSendResult =
 const MAX_ATTEMPTS = 10;
 const BASE_RETRY_DELAY_MS = 60_000;
 const MAX_RETRY_DELAY_MS = 24 * 60 * 60 * 1000;
+const QUIET_HOURS_START = 8;
+const QUIET_HOURS_END = 20;
+const DEFAULT_REMINDER_HOUR = 10;
+const REMINDER_WEEKDAYS = [1, 3, 5] as const;
 
-const toDateBucket = (value: Date): string => value.toISOString().slice(0, 10);
+type ReminderScheduleEvaluationReason =
+  | "ok"
+  | "outside_quiet_hours"
+  | "outside_weekly_schedule"
+  | "outside_scheduled_hour";
+
+export type ReminderScheduleEvaluationOutput = {
+  shouldGenerate: boolean;
+  reason: ReminderScheduleEvaluationReason;
+  timezone: string;
+  localDateBucket: string;
+  localWeekday: number;
+  localHour: number;
+};
+
+const weekdayFromIntl = (value: string): number => {
+  const normalized = value.slice(0, 3).toLowerCase();
+  switch (normalized) {
+    case "mon":
+      return 1;
+    case "tue":
+      return 2;
+    case "wed":
+      return 3;
+    case "thu":
+      return 4;
+    case "fri":
+      return 5;
+    case "sat":
+      return 6;
+    case "sun":
+      return 7;
+    default:
+      return 0;
+  }
+};
+
+const isTimeZoneValid = (value: string): boolean => {
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value }).format(new Date());
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const resolveReminderTimezone = (campaignTimezone: string, companyTimezone: string): string => {
+  const candidateCampaign = campaignTimezone.trim();
+  if (candidateCampaign.length > 0 && isTimeZoneValid(candidateCampaign)) {
+    return candidateCampaign;
+  }
+
+  const candidateCompany = companyTimezone.trim();
+  if (candidateCompany.length > 0 && isTimeZoneValid(candidateCompany)) {
+    return candidateCompany;
+  }
+
+  return "UTC";
+};
+
+export const evaluateReminderSchedule = (input: {
+  now: Date;
+  timezone: string;
+}): ReminderScheduleEvaluationOutput => {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: input.timezone,
+    weekday: "short",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false,
+    hourCycle: "h23",
+  });
+
+  const parts = formatter.formatToParts(input.now);
+  const partRecord = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const localWeekday = weekdayFromIntl(partRecord.weekday ?? "");
+  const localHour = Number(partRecord.hour ?? "0");
+  const localDateBucket = `${partRecord.year ?? "1970"}-${partRecord.month ?? "01"}-${partRecord.day ?? "01"}`;
+
+  if (localHour < QUIET_HOURS_START || localHour >= QUIET_HOURS_END) {
+    return {
+      shouldGenerate: false,
+      reason: "outside_quiet_hours",
+      timezone: input.timezone,
+      localDateBucket,
+      localWeekday,
+      localHour,
+    };
+  }
+
+  if (!REMINDER_WEEKDAYS.includes(localWeekday as (typeof REMINDER_WEEKDAYS)[number])) {
+    return {
+      shouldGenerate: false,
+      reason: "outside_weekly_schedule",
+      timezone: input.timezone,
+      localDateBucket,
+      localWeekday,
+      localHour,
+    };
+  }
+
+  if (localHour !== DEFAULT_REMINDER_HOUR) {
+    return {
+      shouldGenerate: false,
+      reason: "outside_scheduled_hour",
+      timezone: input.timezone,
+      localDateBucket,
+      localWeekday,
+      localHour,
+    };
+  }
+
+  return {
+    shouldGenerate: true,
+    reason: "ok",
+    timezone: input.timezone,
+    localDateBucket,
+    localWeekday,
+    localHour,
+  };
+};
 
 const buildReminderIdempotencyKey = (
   campaignId: string,
@@ -247,7 +374,6 @@ export const generateReminderOutbox = async (
   input: NotificationsGenerateRemindersInput,
 ): Promise<NotificationsGenerateRemindersOutput> => {
   const now = input.now ?? new Date();
-  const dateBucket = toDateBucket(now);
 
   const pool = createPool();
   try {
@@ -258,8 +384,13 @@ export const generateReminderOutbox = async (
           campaignId: campaigns.id,
           status: campaigns.status,
           name: campaigns.name,
+          startAt: campaigns.startAt,
+          endAt: campaigns.endAt,
+          campaignTimezone: campaigns.timezone,
+          companyTimezone: companies.timezone,
         })
         .from(campaigns)
+        .innerJoin(companies, eq(companies.id, campaigns.companyId))
         .where(and(eq(campaigns.id, input.campaignId), eq(campaigns.companyId, input.companyId)))
         .limit(1);
 
@@ -280,6 +411,26 @@ export const generateReminderOutbox = async (
             status: campaign.status,
           },
         );
+      }
+
+      const resolvedTimezone = resolveReminderTimezone(
+        campaign.campaignTimezone,
+        campaign.companyTimezone,
+      );
+      const scheduleEvaluation = evaluateReminderSchedule({
+        now,
+        timezone: resolvedTimezone,
+      });
+      const dateBucket = scheduleEvaluation.localDateBucket;
+
+      if (now < campaign.startAt || now > campaign.endAt || !scheduleEvaluation.shouldGenerate) {
+        return {
+          campaignId: input.campaignId,
+          dateBucket,
+          candidateRecipients: 0,
+          generated: 0,
+          deduplicated: 0,
+        };
       }
 
       const pendingRows = await tx
@@ -333,6 +484,7 @@ export const generateReminderOutbox = async (
               recipientEmployeeId: row.recipientEmployeeId,
               pendingCount: asPositiveInteger(row.pendingCount, 0),
               dateBucket,
+              timezone: resolvedTimezone,
             },
             status: "pending",
             idempotencyKey,

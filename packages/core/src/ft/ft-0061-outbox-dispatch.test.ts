@@ -31,11 +31,13 @@ describe("FT-0061 notifications outbox dispatcher", () => {
         companyId,
         role: "hr_admin" as const,
       };
+      const scheduledNow = "2026-01-12T08:05:00.000Z";
 
       const generatedFirst = await dispatchOperation({
         operation: "notifications.generateReminders",
         input: {
           campaignId,
+          now: scheduledNow,
         },
         context: hrContext,
       });
@@ -51,6 +53,7 @@ describe("FT-0061 notifications outbox dispatcher", () => {
         operation: "notifications.generateReminders",
         input: {
           campaignId,
+          now: scheduledNow,
         },
         context: hrContext,
       });
@@ -81,6 +84,7 @@ describe("FT-0061 notifications outbox dispatcher", () => {
         operation: "notifications.generateReminders",
         input: {
           campaignId,
+          now: scheduledNow,
         },
         context: {
           companyId,

@@ -1,5 +1,5 @@
 # Notification spec (email MVP)
-Status: Draft (2026-03-03)
+Status: Active (2026-03-05)
 
 Каналы:
 - MVP: `email` (Resend).
@@ -15,10 +15,12 @@ Status: Draft (2026-03-03)
 MVP default:
 - 3 раза в неделю в 10:00 по таймзоне кампании (company timezone с override на кампанию).
 - Quiet hours: не отправлять вне 08:00–20:00 локального времени кампании.
+- Дни расписания по умолчанию: Пн/Ср/Пт.
 
 ## Outbox & idempotency
 - Все уведомления создаются как записи в outbox.
 - Idempotency key включает: `campaign_id`, `event_type`, `recipient_employee_id`, `date_bucket`.
+- `date_bucket` для reminders вычисляется по **локальной дате таймзоны кампании** (не UTC).
 
 ## Invite content (agreed)
 Invite/started уведомления содержат magic-link для входа:

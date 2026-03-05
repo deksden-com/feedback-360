@@ -155,7 +155,7 @@ Status: Draft (2026-03-03)
 - `notifications.generateReminders`
   - roles: hr_admin (MVP via core dispatcher)
   - idempotent: yes (by idempotency key)
-  - input options: `campaignId`
+  - input options: `campaignId`, `now?` (ISO timestamp override for deterministic checks/scheduler tests)
   - cli: `reminders generate`
 - `notifications.dispatchOutbox`
   - roles: hr_admin (MVP via core dispatcher)
