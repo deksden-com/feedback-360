@@ -1,5 +1,5 @@
 import { createOperationError } from "@feedback-360/api-contract";
-import { and, asc, count, eq, ne, sql } from "drizzle-orm";
+import { and, asc, count, eq, isNull, lte, ne, or, sql } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
 import {
@@ -43,7 +43,7 @@ export type NotificationsDispatchOutboxOutput = {
   remainingPending: number;
 };
 
-type OutboxStatus = "pending" | "sent" | "failed";
+type OutboxStatus = "pending" | "sent" | "failed" | "dead_letter";
 
 type EmailTemplateRender = {
   subject: string;
@@ -59,7 +59,12 @@ type EmailSendResult =
   | {
       ok: false;
       errorMessage: string;
+      retryable: boolean;
     };
+
+const MAX_ATTEMPTS = 10;
+const BASE_RETRY_DELAY_MS = 60_000;
+const MAX_RETRY_DELAY_MS = 24 * 60 * 60 * 1000;
 
 const toDateBucket = (value: Date): string => value.toISOString().slice(0, 10);
 
@@ -89,6 +94,32 @@ const asPositiveInteger = (value: unknown, fallback = 0): number => {
     }
   }
   return fallback;
+};
+
+const asBoolean = (value: unknown, fallback = false): boolean => {
+  if (typeof value === "boolean") {
+    return value;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "true") {
+      return true;
+    }
+    if (normalized === "false") {
+      return false;
+    }
+  }
+  return fallback;
+};
+
+const buildRetryDelayMs = (attemptNo: number): number => {
+  const exponent = Math.max(attemptNo - 1, 0);
+  const delay = BASE_RETRY_DELAY_MS * 2 ** exponent;
+  return Math.min(delay, MAX_RETRY_DELAY_MS);
+};
+
+const buildNextRetryAt = (now: Date, attemptNo: number): Date => {
+  return new Date(now.getTime() + buildRetryDelayMs(attemptNo));
 };
 
 const renderTemplate = (input: {
@@ -128,8 +159,28 @@ const sendByProvider = async (input: {
   toEmail: string;
   template: EmailTemplateRender;
   outboxId: string;
+  attemptNo: number;
+  payload: Record<string, unknown>;
 }): Promise<EmailSendResult> => {
   if (input.provider === "stub") {
+    const permanentFailure = asBoolean(input.payload.__stubPermanentFailure, false);
+    if (permanentFailure) {
+      return {
+        ok: false,
+        errorMessage: "Stub provider permanent failure.",
+        retryable: false,
+      };
+    }
+
+    const failUntilAttempt = asPositiveInteger(input.payload.__stubFailUntilAttempt, 0);
+    if (input.attemptNo <= failUntilAttempt) {
+      return {
+        ok: false,
+        errorMessage: `Stub provider transient failure at attempt ${input.attemptNo}.`,
+        retryable: true,
+      };
+    }
+
     return {
       ok: true,
       providerMessageId: `stub:${input.outboxId}`,
@@ -144,30 +195,42 @@ const sendByProvider = async (input: {
     return {
       ok: false,
       errorMessage: "Resend API key is not configured.",
+      retryable: false,
     };
   }
 
   const fromAddress = process.env.RESEND_FROM ?? "go360go <noreply@go360go.ru>";
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${resendApiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: fromAddress,
-      to: [input.toEmail],
-      subject: input.template.subject,
-      html: input.template.html,
-      text: input.template.text,
-    }),
-  });
+  let response: Response;
+  try {
+    response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: fromAddress,
+        to: [input.toEmail],
+        subject: input.template.subject,
+        html: input.template.html,
+        text: input.template.text,
+      }),
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      errorMessage: `Resend request failed: ${error instanceof Error ? error.message : String(error)}`,
+      retryable: true,
+    };
+  }
 
   if (!response.ok) {
     const responseText = await response.text();
+    const retryable = response.status >= 500 || response.status === 429;
     return {
       ok: false,
       errorMessage: `Resend send failed (${response.status}): ${responseText.slice(0, 500)}`,
+      retryable,
     };
   }
 
@@ -274,6 +337,7 @@ export const generateReminderOutbox = async (
             status: "pending",
             idempotencyKey,
             attempts: 0,
+            nextRetryAt: null,
             createdAt: now,
             updatedAt: now,
           })
@@ -321,14 +385,29 @@ export const dispatchNotificationOutbox = async (
           toEmail: notificationOutbox.toEmail,
           templateKey: notificationOutbox.templateKey,
           payloadJson: notificationOutbox.payloadJson,
+          status: notificationOutbox.status,
           attempts: notificationOutbox.attempts,
+          nextRetryAt: notificationOutbox.nextRetryAt,
         })
         .from(notificationOutbox)
         .where(
           and(
             eq(notificationOutbox.companyId, input.companyId),
-            eq(notificationOutbox.status, "pending"),
+            or(
+              and(
+                eq(notificationOutbox.status, "pending"),
+                or(
+                  isNull(notificationOutbox.nextRetryAt),
+                  lte(notificationOutbox.nextRetryAt, now),
+                ),
+              ),
+              and(
+                eq(notificationOutbox.status, "failed"),
+                lte(notificationOutbox.nextRetryAt, now),
+              ),
+            ),
             input.campaignId ? eq(notificationOutbox.campaignId, input.campaignId) : undefined,
+            lte(notificationOutbox.attempts, MAX_ATTEMPTS - 1),
           ),
         )
         .orderBy(asc(notificationOutbox.createdAt))
@@ -340,15 +419,18 @@ export const dispatchNotificationOutbox = async (
 
       for (const row of queue) {
         const attemptNo = row.attempts + 1;
+        const payload = parsePayload(row.payloadJson);
         const template = renderTemplate({
           templateKey: row.templateKey,
-          payload: parsePayload(row.payloadJson),
+          payload,
         });
         const sendResult = await sendByProvider({
           provider,
           toEmail: row.toEmail,
           template,
           outboxId: row.outboxId,
+          attemptNo,
+          payload,
         });
 
         if (sendResult.ok) {
@@ -358,6 +440,7 @@ export const dispatchNotificationOutbox = async (
               status: "sent" satisfies OutboxStatus,
               attempts: attemptNo,
               lastError: null,
+              nextRetryAt: null,
               sentAt: now,
               updatedAt: now,
             })
@@ -379,12 +462,21 @@ export const dispatchNotificationOutbox = async (
           continue;
         }
 
+        const isDeadLetter = sendResult.retryable && attemptNo >= MAX_ATTEMPTS;
+        const shouldRetry = sendResult.retryable && !isDeadLetter;
+        const nextRetryAt = shouldRetry ? buildNextRetryAt(now, attemptNo) : null;
+
         await tx
           .update(notificationOutbox)
           .set({
-            status: "failed" satisfies OutboxStatus,
+            status: (isDeadLetter
+              ? "dead_letter"
+              : shouldRetry
+                ? "pending"
+                : "failed") satisfies OutboxStatus,
             attempts: attemptNo,
             lastError: sendResult.errorMessage,
+            nextRetryAt,
             updatedAt: now,
           })
           .where(eq(notificationOutbox.id, row.outboxId));
@@ -394,7 +486,7 @@ export const dispatchNotificationOutbox = async (
           outboxId: row.outboxId,
           attemptNo,
           provider,
-          status: "failed",
+          status: isDeadLetter ? "dead_letter" : shouldRetry ? "retry_scheduled" : "failed",
           errorMessage: sendResult.errorMessage,
           requestedAt: now,
           createdAt: now,
@@ -437,8 +529,18 @@ export type NotificationOutboxDebugRow = {
   toEmail: string;
   status: string;
   attempts: number;
+  nextRetryAt: Date | null;
+  lastError: string | null;
   idempotencyKey: string;
   eventType: string;
+};
+
+export type NotificationAttemptDebugRow = {
+  outboxId: string;
+  attemptNo: number;
+  provider: string;
+  status: string;
+  errorMessage: string | null;
 };
 
 export const listNotificationOutboxForCampaignForDebug = async (
@@ -454,6 +556,8 @@ export const listNotificationOutboxForCampaignForDebug = async (
         toEmail: notificationOutbox.toEmail,
         status: notificationOutbox.status,
         attempts: notificationOutbox.attempts,
+        nextRetryAt: notificationOutbox.nextRetryAt,
+        lastError: notificationOutbox.lastError,
         idempotencyKey: notificationOutbox.idempotencyKey,
         eventType: notificationOutbox.eventType,
       })
@@ -482,6 +586,67 @@ export const countNotificationAttemptsForCampaignForDebug = async (
       .where(eq(notificationOutbox.campaignId, campaignId));
 
     return rows[0]?.value ?? 0;
+  } finally {
+    await pool.end();
+  }
+};
+
+export const listNotificationAttemptsForCampaignForDebug = async (
+  campaignId: string,
+): Promise<NotificationAttemptDebugRow[]> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    return await db
+      .select({
+        outboxId: notificationAttempts.outboxId,
+        attemptNo: notificationAttempts.attemptNo,
+        provider: notificationAttempts.provider,
+        status: notificationAttempts.status,
+        errorMessage: notificationAttempts.errorMessage,
+      })
+      .from(notificationAttempts)
+      .innerJoin(notificationOutbox, eq(notificationOutbox.id, notificationAttempts.outboxId))
+      .where(eq(notificationOutbox.campaignId, campaignId))
+      .orderBy(asc(notificationAttempts.attemptNo), asc(notificationAttempts.createdAt));
+  } finally {
+    await pool.end();
+  }
+};
+
+export const updateNotificationOutboxPayloadForDebug = async (
+  outboxId: string,
+  payloadJson: Record<string, unknown>,
+): Promise<void> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    await db
+      .update(notificationOutbox)
+      .set({
+        payloadJson,
+        updatedAt: new Date(),
+      })
+      .where(eq(notificationOutbox.id, outboxId));
+  } finally {
+    await pool.end();
+  }
+};
+
+export const setNotificationOutboxNextRetryAtForDebug = async (
+  outboxId: string,
+  nextRetryAt: Date | null,
+): Promise<void> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    await db
+      .update(notificationOutbox)
+      .set({
+        nextRetryAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(notificationOutbox.id, outboxId));
   } finally {
     await pool.end();
   }
