@@ -1,5 +1,5 @@
-import { withSentryConfig } from "@sentry/nextjs";
 import { fileURLToPath } from "node:url";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const outputFileTracingRoot = fileURLToPath(new URL("../..", import.meta.url));
 /** @type {import("next").NextConfig} */

@@ -2,9 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import { loginWithCompany, seedScenario } from "./beta-helpers";
 
-test("SMOKE(beta): HR campaign workbench loads ended campaign", async ({
-  page,
-}) => {
+test("SMOKE(beta): HR campaign workbench loads ended campaign", async ({ page }) => {
   const handles = await seedScenario(page.request, "S8_campaign_ended");
   const companyId = handles["company.main"];
   const campaignId = handles["campaign.main"];
