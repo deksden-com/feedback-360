@@ -13,6 +13,7 @@ Status: Draft (2026-03-03)
 - [CLI-first principle](../../../../../spec/project/layers-and-vertical-slices.md): UI тонкий поверх typed client. Читать, чтобы UI повторял CLI/ops, а не добавлял логику.
 - [Architecture guardrails](../../../../../spec/engineering/architecture-guardrails.md): запреты на импорт core в UI. Читать, чтобы все правила оставались в core.
 - [Implementation playbook](../../../../../plans/implementation-playbook.md): как связываем UI с ops и тестами. Читать, чтобы e2e покрывал сквозной сценарий.
+- [Stitch design refs for FT-0082](../../../../../spec/ui/design-references-stitch.md#ft-0082-questionnaire-ui): экраны списка задач и формы анкеты как agreed visual reference. Читать, чтобы ускорить UI реализацию без потери доменных правил.
 
 ## Acceptance (auto, Playwright)
 ### Setup
@@ -47,3 +48,11 @@ Status: Draft (2026-03-03)
 ## Verification (must)
 - Automated test: Playwright сценарий заполнения анкеты (list → draft → submit) + проверка read-only после ended.
 - Must run: Playwright e2e (часть GS1) + ended кейс (можно отдельным e2e, минимально).
+
+## Design references (stitch)
+- [`stitch_go360go/_1/screen.png`](../../../../../../stitch_go360go/_1/screen.png): список “Мои задачи/анкеты” со статусными фильтрами. Используем как референс информационной структуры списка.
+- [`stitch_go360go/employee_feedback_questionnaire/screen.png`](../../../../../../stitch_go360go/employee_feedback_questionnaire/screen.png): форма оценки с прогрессом и секциями компетенций. Используем как референс layout анкеты.
+
+## Design constraints (what we do NOT take)
+- Не переносим поведение, которое конфликтует с read-only после `ended` и freeze-правилами.
+- Не копируем демо-тексты/данные и любые action-кнопки, которых нет в нашем typed API.

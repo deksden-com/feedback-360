@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Редактор модели компетенций</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-6 py-3 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="bg-primary p-2 rounded-lg text-white">
+<span class="material-symbols-outlined block">schema</span>
+</div>
+<h2 class="text-xl font-bold tracking-tight">Редактор модели компетенций</h2>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<label class="relative flex items-center max-w-xs w-full">
+<span class="material-symbols-outlined absolute left-3 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" placeholder="Поиск компетенций..." type="text"/>
+</label>
+<div class="flex gap-2">
+<button class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+</div>
+<div class="h-10 w-px bg-slate-200 dark:bg-slate-700 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-bold">Admin User</p>
+<p class="text-xs text-slate-500">HR Admin</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30" data-alt="User profile avatar icon">
+<span class="material-symbols-outlined text-primary">person</span>
+</div>
+</div>
+</div>
+</header>
+<div class="flex h-[calc(100vh-65px)]">
+<!-- Sidebar -->
+<aside class="w-72 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark p-6 flex flex-col gap-8 overflow-y-auto">
+<div>
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Группы компетенций</h3>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary/10 text-primary font-semibold transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+<span>Soft Skills</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">code</span>
+<span>Technical</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">military_tech</span>
+<span>Leadership</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">diversity_3</span>
+<span>Corporate</span>
+</a>
+</nav>
+</div>
+<div>
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Настройки системы</h3>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span>История изменений</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">cloud_upload</span>
+<span>Импорт/Экспорт</span>
+</a>
+</nav>
+</div>
+</aside>
+<!-- Main Area -->
+<main class="flex-1 overflow-y-auto bg-slate-50 dark:bg-background-dark/50 p-8">
+<div class="max-w-5xl mx-auto">
+<!-- Breadcrumbs -->
+<nav class="flex items-center gap-2 text-sm text-slate-500 mb-6">
+<a class="hover:text-primary transition-colors" href="#">Компетенции</a>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Soft Skills</a>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-slate-900 dark:text-slate-100 font-medium">Стратегическое мышление</span>
+</nav>
+<!-- Header Title Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+<div>
+<h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">Стратегическое мышление</h1>
+<p class="text-slate-500 mt-1">Редактирование параметров и индикаторов компетенции</p>
+</div>
+<div class="flex gap-3">
+<button class="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
+                            Отмена
+                        </button>
+<button class="px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">save</span>
+                            Сохранить изменения
+                        </button>
+</div>
+</div>
+<!-- Settings Card -->
+<div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="col-span-2">
+<label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Описание компетенции</label>
+<textarea class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-4 focus:ring-2 focus:ring-primary/50 outline-none transition-all h-24" placeholder="Введите описание компетенции...">Способность видеть общую картину, прогнозировать развитие событий и определять долгосрочные цели организации.</textarea>
+</div>
+<div>
+<label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Вес в группе (%)</label>
+<div class="relative flex items-center">
+<input class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-4 focus:ring-2 focus:ring-primary/50 outline-none transition-all" type="number" value="25"/>
+<span class="absolute right-4 text-slate-400">%</span>
+</div>
+<p class="text-xs text-slate-400 mt-2 italic">Влияет на итоговый расчет оценки в рамках группы Soft Skills</p>
+</div>
+</div>
+</div>
+<!-- Mode Switcher -->
+<div class="flex p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl w-fit mb-6">
+<button class="px-6 py-2.5 rounded-xl bg-white dark:bg-primary shadow-md font-bold text-sm text-primary dark:text-white transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">checklist</span>
+                        Индикаторы
+                    </button>
+<button class="px-6 py-2.5 rounded-xl text-slate-500 font-bold text-sm hover:text-slate-700 dark:hover:text-slate-300 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">layers</span>
+                        Уровни
+                    </button>
+</div>
+<!-- Indicators Content -->
+<div class="space-y-4">
+<!-- Indicator Item 1 -->
+<div class="group flex items-center justify-between gap-4 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-all">
+<div class="flex items-start gap-4 flex-1">
+<div class="mt-1 w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-xs font-bold text-slate-500">
+                                01
+                            </div>
+<p class="text-slate-700 dark:text-slate-300 leading-relaxed">Выявляет долгосрочные тенденции и закономерности в развитии рынка и отрасли.</p>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+<!-- Indicator Item 2 -->
+<div class="group flex items-center justify-between gap-4 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-all">
+<div class="flex items-start gap-4 flex-1">
+<div class="mt-1 w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-xs font-bold text-slate-500">
+                                02
+                            </div>
+<p class="text-slate-700 dark:text-slate-300 leading-relaxed">Оценивает риски и возможности при принятии решений, выходящих за рамки текущих задач.</p>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+<!-- Indicator Item 3 -->
+<div class="group flex items-center justify-between gap-4 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-all">
+<div class="flex items-start gap-4 flex-1">
+<div class="mt-1 w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-xs font-bold text-slate-500">
+                                03
+                            </div>
+<p class="text-slate-700 dark:text-slate-300 leading-relaxed">Формулирует четкое видение будущего развития своего направления в перспективе 1-3 лет.</p>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+<!-- Add Indicator Field -->
+<div class="mt-8">
+<div class="flex gap-4">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-4 top-4 text-slate-400">add_circle</span>
+<input class="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 bg-transparent focus:border-primary focus:ring-0 outline-none transition-all" placeholder="Добавить новый индикатор..." type="text"/>
+</div>
+<button class="px-8 py-4 bg-slate-900 dark:bg-primary text-white font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all">
+                                Добавить
+                            </button>
+</div>
+</div>
+</div>
+<!-- Levels Grid (Hidden by default in logic, but rendered here for design visibility as per task requirements) -->
+<div class="mt-12">
+<h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">analytics</span>
+                        Описание уровней
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border-t-4 border-slate-300 dark:border-slate-600 shadow-sm">
+<span class="text-xs font-black uppercase text-slate-400">Уровень 1</span>
+<h4 class="font-bold text-lg mt-1 mb-3">Осведомленность</h4>
+<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Понимает важность стратегии, но фокусируется на операционных задачах.</p>
+</div>
+<div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border-t-4 border-primary/40 shadow-sm">
+<span class="text-xs font-black uppercase text-primary/60">Уровень 2</span>
+<h4 class="font-bold text-lg mt-1 mb-3">Применение</h4>
+<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Использует стратегические цели компании для приоритизации своей работы.</p>
+</div>
+<div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border-t-4 border-primary shadow-sm">
+<span class="text-xs font-black uppercase text-primary">Уровень 3</span>
+<h4 class="font-bold text-lg mt-1 mb-3">Мастерство</h4>
+<h4 class="font-bold text-lg mt-1 mb-3"></h4>
+<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Самостоятельно разрабатывает тактические планы для реализации стратегии.</p>
+</div>
+<div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border-t-4 border-slate-900 dark:border-white shadow-sm">
+<span class="text-xs font-black uppercase text-slate-900 dark:text-white">Уровень 4</span>
+<h4 class="font-bold text-lg mt-1 mb-3">Экспертиза</h4>
+<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Определяет стратегию развития всей функции или компании в целом.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

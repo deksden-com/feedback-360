@@ -16,6 +16,7 @@ HR управляет кампанией: создаёт, настраивает
 - [GS5 Lock semantics](../../../../../spec/testing/scenarios/gs5-lock-semantics.md): lock на draft save. Читать, чтобы UI проверял именно agreed freeze-правило.
 - [AI processing](../../../../../spec/ai/ai-processing.md): retry AI и статусы. Читать, чтобы UI корректно инициировал запуск и отображал ошибки.
 - [Architecture guardrails](../../../../../spec/engineering/architecture-guardrails.md): UI тонкий поверх typed client. Читать, чтобы бизнес-правила не переносились в компоненты.
+- [Stitch design refs for FT-0084](../../../../../spec/ui/design-references-stitch.md#ft-0084-hr-campaign-ui): референсы HR campaign/dashboard таблиц и ограничений по scope. Читать, чтобы использовать единый HR UI паттерн без выхода в non-MVP функции.
 
 ## Acceptance (auto, Playwright)
 ### Setup
@@ -53,3 +54,11 @@ HR управляет кампанией: создаёт, настраивает
 ## Verification (must)
 - Automated test: Playwright HR flow (draft → matrix generate/edit → start → lock → попытка изменить matrix/weights).
 - Must run: Playwright e2e (GS1 minimal) + lock semantics UI assertion (можно как часть GS1).
+
+## Design references (stitch)
+- [`stitch_go360go/hr_admin_campaign_dashboard/screen.png`](../../../../../../stitch_go360go/hr_admin_campaign_dashboard/screen.png): HR campaign dashboard (статусы, прогресс, actions). Используем как референс основной кампанийной панели.
+- [`stitch_go360go/hr_admin_employee_directory/screen.png`](../../../../../../stitch_go360go/hr_admin_employee_directory/screen.png): HR table/list паттерны (фильтры, таблица, status chips). Используем для унификации HR list/detail экранов.
+
+## Design constraints (what we do NOT take)
+- Не берем non-MVP действия (`Export`, внешние отчеты, payroll-элементы) до появления соответствующих операций в контракте.
+- Не переносим демо-правила действий: доступность кнопок определяется только нашими lifecycle/matrix lock инвариантами.

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Employee Evaluation - 360-dfb</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1e3b8a",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121620",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 md:px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-6 flex items-center justify-center">
+<span class="material-symbols-outlined text-2xl">360</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">360-dfb</h2>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-slate-200 dark:border-slate-700" data-alt="User avatar profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCRY0X8EaINqVfuR0GVq_pkMaP7I8Oqo9YSZ5Vjj43zI9vx1loWHLxCnm7Hm8-SAmq8sl2BOYo9dez3xiyXPde3JrffYb-lByjoWNKKz0L7BvEtGS4nDhig2r-f24wRWy-hy4XZrXQM_JgQjVlf9JpP9rAJyQUiNmX30ho8Mp9_VZkoXPgoA1igHCfm1kk5zYOuFl9BP62YV8Np_pLv5sivJYL-nKf7ZK74JhrcODKJ_op0HLVpFUw_BwwLLEFS2iuks3rBf23BnH-k");'></div>
+</div>
+</header>
+<main class="flex flex-1 justify-center py-8 px-4 md:px-0">
+<div class="layout-content-container flex flex-col max-w-[800px] flex-1 gap-6">
+<!-- Header & Progress Section -->
+<div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex flex-wrap justify-between items-start gap-4 mb-6">
+<div class="flex flex-col gap-1">
+<h1 class="text-slate-900 dark:text-white text-2xl md:text-3xl font-bold leading-tight">Evaluation for 'Ivan Ivanov'</h1>
+<div class="flex items-center gap-3 text-slate-500 dark:text-slate-400 text-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">badge</span> Role: Peer</span>
+<span class="w-1 h-1 rounded-full bg-slate-300"></span>
+<span class="flex items-center gap-1 text-red-600 dark:text-red-400 font-medium"><span class="material-symbols-outlined text-sm">event</span> Deadline: Oct 30, 2023</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex gap-6 justify-between items-end">
+<p class="text-slate-900 dark:text-slate-100 text-base font-semibold leading-normal">Overall Progress</p>
+<p class="text-primary font-bold text-lg leading-none">35%</p>
+</div>
+<div class="h-3 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+<div class="h-full rounded-full bg-primary" style="width: 35%;"></div>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">4 of 12 competencies completed</p>
+</div>
+</div>
+<!-- Competency List -->
+<div class="flex flex-col gap-4 pb-24">
+<!-- Expanded Competency -->
+<div class="rounded-xl border border-primary/30 bg-white dark:bg-slate-900 shadow-md overflow-hidden">
+<div class="flex items-center justify-between gap-6 p-5 bg-primary/5 border-b border-primary/10">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-lg bg-primary text-white flex items-center justify-center">
+<span class="material-symbols-outlined">psychology</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-lg font-bold">Strategic Thinking</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">In Progress</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400">expand_less</span>
+</div>
+<div class="p-5 flex flex-col gap-8">
+<p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed border-l-4 border-primary/20 pl-4 py-1 italic">
+                                    Assess how the employee anticipates future trends, identifies opportunities, and aligns their work with the organization's long-term goals.
+                                </p>
+<!-- Rating Table Header -->
+<div class="hidden md:grid grid-cols-12 gap-4 pb-2 border-b border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+<div class="col-span-6">Performance Indicator</div>
+<div class="col-span-5 flex justify-between px-2">
+<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+</div>
+<div class="col-span-1 text-center">N/A</div>
+</div>
+<!-- Rating Rows -->
+<div class="flex flex-col gap-6">
+<!-- Indicator 1 -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<div class="md:col-span-6">
+<p class="text-slate-800 dark:text-slate-200 text-sm font-medium">Considers long-term implications when making decisions.</p>
+</div>
+<div class="md:col-span-5 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<span class="md:hidden text-xs text-slate-400 font-bold uppercase">Rate 1-5</span>
+<div class="flex gap-3 md:gap-0 md:justify-between flex-1 md:px-2">
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind1" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind1" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind1" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind1" type="radio"/>
+<input checked="" class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind1" type="radio"/>
+</div>
+</div>
+<div class="md:col-span-1 flex md:justify-center items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<span class="md:hidden text-xs text-slate-400 font-bold uppercase mr-auto">N/A</span>
+<input class="size-5 text-slate-400 border-slate-300 dark:border-slate-700 focus:ring-slate-400" name="ind1" type="radio"/>
+</div>
+</div>
+<!-- Indicator 2 -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<div class="md:col-span-6">
+<p class="text-slate-800 dark:text-slate-200 text-sm font-medium">Understands the impact of external trends on the business.</p>
+</div>
+<div class="md:col-span-5 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<span class="md:hidden text-xs text-slate-400 font-bold uppercase">Rate 1-5</span>
+<div class="flex gap-3 md:gap-0 md:justify-between flex-1 md:px-2">
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind2" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind2" type="radio"/>
+<input checked="" class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind2" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind2" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind2" type="radio"/>
+</div>
+</div>
+<div class="md:col-span-1 flex md:justify-center items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<span class="md:hidden text-xs text-slate-400 font-bold uppercase mr-auto">N/A</span>
+<input class="size-5 text-slate-400 border-slate-300 dark:border-slate-700 focus:ring-slate-400" name="ind2" type="radio"/>
+</div>
+</div>
+<!-- Indicator 3 -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<div class="md:col-span-6">
+<p class="text-slate-800 dark:text-slate-200 text-sm font-medium">Demonstrates ability to prioritize high-impact tasks.</p>
+</div>
+<div class="md:col-span-5 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<span class="md:hidden text-xs text-slate-400 font-bold uppercase">Rate 1-5</span>
+<div class="flex gap-3 md:gap-0 md:justify-between flex-1 md:px-2">
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind3" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind3" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind3" type="radio"/>
+<input checked="" class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind3" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind3" type="radio"/>
+</div>
+</div>
+<div class="md:col-span-1 flex md:justify-center items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<span class="md:hidden text-xs text-slate-400 font-bold uppercase mr-auto">N/A</span>
+<input class="size-5 text-slate-400 border-slate-300 dark:border-slate-700 focus:ring-slate-400" name="ind3" type="radio"/>
+</div>
+</div>
+<!-- Indicator 4 -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<div class="md:col-span-6">
+<p class="text-slate-800 dark:text-slate-200 text-sm font-medium">Contributes to the development of departmental goals.</p>
+</div>
+<div class="md:col-span-5 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<span class="md:hidden text-xs text-slate-400 font-bold uppercase">Rate 1-5</span>
+<div class="flex gap-3 md:gap-0 md:justify-between flex-1 md:px-2">
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind4" type="radio"/>
+<input checked="" class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind4" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind4" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind4" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind4" type="radio"/>
+</div>
+</div>
+<div class="md:col-span-1 flex md:justify-center items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<span class="md:hidden text-xs text-slate-400 font-bold uppercase mr-auto">N/A</span>
+<input class="size-5 text-slate-400 border-slate-300 dark:border-slate-700 focus:ring-slate-400" name="ind4" type="radio"/>
+</div>
+</div>
+<!-- Indicator 5 -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<div class="md:col-span-6">
+<p class="text-slate-800 dark:text-slate-200 text-sm font-medium">Challenges existing processes with better alternatives.</p>
+</div>
+<div class="md:col-span-5 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<span class="md:hidden text-xs text-slate-400 font-bold uppercase">Rate 1-5</span>
+<div class="flex gap-3 md:gap-0 md:justify-between flex-1 md:px-2">
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind5" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind5" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind5" type="radio"/>
+<input class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind5" type="radio"/>
+<input checked="" class="size-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary" name="ind5" type="radio"/>
+</div>
+</div>
+<div class="md:col-span-1 flex md:justify-center items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<span class="md:hidden text-xs text-slate-400 font-bold uppercase mr-auto">N/A</span>
+<input class="size-5 text-slate-400 border-slate-300 dark:border-slate-700 focus:ring-slate-400" name="ind5" type="radio"/>
+</div>
+</div>
+</div>
+<!-- Comment Box -->
+<div class="flex flex-col gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+<label class="text-slate-700 dark:text-slate-300 text-sm font-semibold">Competency Comment</label>
+<textarea class="w-full min-h-[120px] rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:border-primary focus:ring-primary text-sm p-4" placeholder="Share specific examples of Ivan's strategic thinking..."></textarea>
+<p class="text-slate-400 text-xs">Recommended: 100-300 words. Describe behaviors you've observed directly.</p>
+</div>
+</div>
+</div>
+<!-- Collapsed Competency 2 -->
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer">
+<div class="flex items-center justify-between gap-6 p-5">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center">
+<span class="material-symbols-outlined">groups</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-lg font-bold">Team Collaboration</p>
+<p class="text-green-600 dark:text-green-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">check_circle</span> Completed
+                                        </p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400">expand_more</span>
+</div>
+</div>
+<!-- Collapsed Competency 3 -->
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer">
+<div class="flex items-center justify-between gap-6 p-5">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center">
+<span class="material-symbols-outlined">terminal</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-lg font-bold">Technical Proficiency</p>
+<p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Not Started</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400">expand_more</span>
+</div>
+</div>
+<!-- Collapsed Competency 4 -->
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer">
+<div class="flex items-center justify-between gap-6 p-5">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center">
+<span class="material-symbols-outlined">forum</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-lg font-bold">Communication</p>
+<p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Not Started</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400">expand_more</span>
+</div>
+</div>
+<!-- Collapsed Competency 5 -->
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer">
+<div class="flex items-center justify-between gap-6 p-5">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center">
+<span class="material-symbols-outlined">construction</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-lg font-bold">Problem Solving</p>
+<p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Not Started</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky Footer Actions -->
+<footer class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 px-6 md:px-10 flex justify-center z-[100] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<div class="max-w-[800px] w-full flex items-center justify-between gap-4">
+<div class="hidden sm:block text-slate-500 dark:text-slate-400 text-xs font-medium italic">
+                        All changes are auto-saved to cloud.
+                    </div>
+<div class="flex gap-3 w-full sm:w-auto">
+<button class="flex-1 sm:flex-none px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            Save Draft
+                        </button>
+<button class="flex-1 sm:flex-none px-10 py-2.5 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                            Submit Evaluation
+                        </button>
+</div>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

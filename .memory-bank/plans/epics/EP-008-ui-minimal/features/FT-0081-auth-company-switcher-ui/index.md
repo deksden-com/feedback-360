@@ -15,6 +15,7 @@ Status: In Progress (2026-03-05)
 - [Client auth & tenancy](../../../../../spec/client-api/auth-and-tenancy.md): active company как client-local контекст. Читать, чтобы переключение компании было консистентным с CLI.
 - [Architecture guardrails](../../../../../spec/engineering/architecture-guardrails.md): UI не импортирует core. Читать, чтобы бизнес-логика не “утекла” в компоненты.
 - [Frontend UI stack](../../../../../spec/engineering/frontend-ui-stack.md): фиксированный baseline Tailwind/shadcn для `apps/web`. Читать, чтобы UI фича не ушла в альтернативный стек и была совместима с остальными FT EP-008.
+- [Stitch design refs for FT-0081](../../../../../spec/ui/design-references-stitch.md#ft-0081-auth--company-switcher-ui): конкретные экраны для login/company switch и правила их применения. Читать, чтобы использовать согласованные макеты без выхода за MVP scope.
 
 ## Acceptance (auto, Playwright)
 ### Setup
@@ -48,6 +49,14 @@ Status: In Progress (2026-03-05)
 ## Verification (must)
 - Automated test: Playwright сценарий (часть GS1) покрывает login + company switcher.
 - Must run: Playwright e2e (минимальный happy path) и smoke переключения компаний (multi-tenant).
+
+## Design references (stitch)
+- [`stitch_go360go/magic_link/screen.png`](../../../../../../stitch_go360go/magic_link/screen.png): референс структуры login-card и текстовых подсказок. Используем как базу для magic-link экрана.
+- [`stitch_go360go/_5/screen.png`](../../../../../../stitch_go360go/_5/screen.png): референс выбора активной компании после логина. Используем для карточек membership и CTA “войти”.
+
+## Design constraints (what we do NOT take)
+- Не переносим из макетов необязательные профайл/support/footer блоки как обязательный MVP scope.
+- Не копируем `code.html` из stitch; верстаем только на `Tailwind v4 + shadcn/ui` в рамках текущего стека.
 
 ## Project grounding (2026-03-05)
 - [Tailwind CSS + Next.js guide](https://tailwindcss.com/docs/installation/framework-guides/nextjs): официальный способ подключения Tailwind v4 через `@tailwindcss/postcss`. Используем как baseline, чтобы не заводить legacy-конфиг.
