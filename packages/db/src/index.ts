@@ -3,6 +3,7 @@ export * from "./campaigns";
 export * from "./db";
 export * from "./ai";
 export * from "./employees";
+export * from "./identity";
 export * from "./matrix";
 export * from "./models";
 export * from "./memberships";

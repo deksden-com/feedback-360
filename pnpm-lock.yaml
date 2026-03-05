@@ -101,6 +101,9 @@ importers:
       '@feedback-360/core':
         specifier: workspace:*
         version: link:../core
+      '@feedback-360/db':
+        specifier: workspace:*
+        version: link:../db
       commander:
         specifier: 14.0.1
         version: 14.0.1

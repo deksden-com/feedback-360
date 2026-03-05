@@ -39,6 +39,15 @@ Status: Draft (2026-03-03)
   - roles: any authenticated
   - idempotency: yes
 
+## Auth provisioning (ops helper)
+- command: `auth provision-email --target beta|prod --email <email> --user-id <id> --links-json <json>`
+  - op: `N/A (ops helper, not domain typed op)`
+  - roles: platform admin (trusted operator with `SUPABASE_ACCESS_TOKEN` + DB pooler URL)
+  - idempotency: effectively yes (user upsert + membership/link upsert)
+  - notes:
+    - Команда создаёт/обновляет Supabase Auth user через Management API (`service_role` key получаем по `SUPABASE_ACCESS_TOKEN`).
+    - Команда синхронизирует `employees.email`, `company_memberships`, `employee_user_links` для включения magic-link входа.
+
 ## Employees & org
 - command: `employee upsert ...`
   - op: `employee.upsert`

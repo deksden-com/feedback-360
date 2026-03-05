@@ -20,3 +20,12 @@ Status: Draft (2026-03-03)
 ## Public signups (agreed)
 - Публичные регистрации выключены: пускаем только приглашённых/существующих сотрудников.
 - Ограничение по корпоративным доменам email не делаем; достаточно проверки “email есть в HR-справочнике”.
+
+## CLI bootstrap for beta/prod (ops)
+- Для оперативного bootstrap доступа используем CLI-команду `auth provision-email`.
+- Команда:
+  - создаёт/обновляет Supabase Auth user (magic-link identity),
+  - синхронизирует HR-справочник (`employees.email`) и связи (`company_memberships`, `employee_user_links`).
+- Требуемые секреты и доступ:
+  - `SUPABASE_ACCESS_TOKEN` (получение `service_role` key через Management API),
+  - `SUPABASE_BETA_DB_POOLER_URL` или `SUPABASE_PROD_DB_POOLER_URL` (запись в project DB).

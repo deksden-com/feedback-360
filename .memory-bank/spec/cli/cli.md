@@ -16,6 +16,7 @@ Status: Draft (2026-03-03)
 - `company create ...`
 - `company use <company_id> [--role <role>] [--user-id <id>]`
 - `company context`
+- `auth provision-email --target beta|prod --email ... --user-id ... --links-json ...` (ops helper для bootstrap Supabase Auth + HR link/membership)
 - `employee upsert ...`
 - `org department create|move ...`
 - `org set-manager ...`
