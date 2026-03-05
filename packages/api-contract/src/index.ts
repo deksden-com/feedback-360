@@ -373,6 +373,20 @@ export type ResultsHrViewRaterScore = {
   totalIndicatorCount: number;
 };
 
+export type ResultsHrViewLevelDistribution = {
+  level1: number;
+  level2: number;
+  level3: number;
+  level4: number;
+};
+
+export type ResultsHrViewLevelSummary = {
+  modeLevel: 1 | 2 | 3 | 4 | null;
+  distribution: ResultsHrViewLevelDistribution;
+  nValid: number;
+  nUnsure: number;
+};
+
 export type ResultsHrViewCompetencyScore = {
   competencyId: string;
   competencyName: string;
@@ -393,6 +407,11 @@ export type ResultsHrViewCompetencyScore = {
   subordinatesVisibility: ResultsGroupVisibilityState;
   selfVisibility: "shown";
   otherVisibility?: "shown" | "hidden";
+  managerLevels?: ResultsHrViewLevelSummary;
+  peersLevels?: ResultsHrViewLevelSummary;
+  subordinatesLevels?: ResultsHrViewLevelSummary;
+  selfLevels?: ResultsHrViewLevelSummary;
+  otherLevels?: ResultsHrViewLevelSummary;
 };
 
 export type ResultsHrViewGroupOverall = {
@@ -424,7 +443,7 @@ export type ResultsGetHrViewOutput = {
   companyId: string;
   subjectEmployeeId: string;
   modelVersionId: string;
-  modelKind: "indicators";
+  modelKind: "indicators" | "levels";
   anonymityThreshold: number;
   smallGroupPolicy: SmallGroupPolicy;
   groupVisibility: ResultsHrViewGroupVisibility;
@@ -1819,6 +1838,73 @@ const parseOptionalNumberField = (
   return value;
 };
 
+const parseNullableModeLevelField = (
+  record: Record<string, unknown>,
+  field: string,
+  fieldName: string,
+): 1 | 2 | 3 | 4 | null => {
+  const value = record[field];
+  if (value === null) {
+    return null;
+  }
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 1 || value > 4) {
+    throw new Error(`${fieldName}.${field} must be an integer in range 1..4 or null.`);
+  }
+  return value as 1 | 2 | 3 | 4;
+};
+
+const parseResultsHrViewLevelDistribution = (value: unknown): ResultsHrViewLevelDistribution => {
+  const record = ensureObject(value, "results.getHrView output.levelSummary.distribution");
+  ensureAllowedKeys(
+    record,
+    ["level1", "level2", "level3", "level4"],
+    "results.getHrView output.levelSummary.distribution",
+  );
+
+  return {
+    level1: ensureNumberField(
+      record,
+      "level1",
+      "results.getHrView output.levelSummary.distribution",
+    ),
+    level2: ensureNumberField(
+      record,
+      "level2",
+      "results.getHrView output.levelSummary.distribution",
+    ),
+    level3: ensureNumberField(
+      record,
+      "level3",
+      "results.getHrView output.levelSummary.distribution",
+    ),
+    level4: ensureNumberField(
+      record,
+      "level4",
+      "results.getHrView output.levelSummary.distribution",
+    ),
+  };
+};
+
+const parseResultsHrViewLevelSummary = (value: unknown): ResultsHrViewLevelSummary => {
+  const record = ensureObject(value, "results.getHrView output.levelSummary");
+  ensureAllowedKeys(
+    record,
+    ["modeLevel", "distribution", "nValid", "nUnsure"],
+    "results.getHrView output.levelSummary",
+  );
+
+  return {
+    modeLevel: parseNullableModeLevelField(
+      record,
+      "modeLevel",
+      "results.getHrView output.levelSummary",
+    ),
+    distribution: parseResultsHrViewLevelDistribution(record.distribution),
+    nValid: ensureNumberField(record, "nValid", "results.getHrView output.levelSummary"),
+    nUnsure: ensureNumberField(record, "nUnsure", "results.getHrView output.levelSummary"),
+  };
+};
+
 const parseResultsHrViewRaterScore = (value: unknown): ResultsHrViewRaterScore => {
   const record = ensureObject(value, "results.getHrView output.raterScores[]");
   ensureAllowedKeys(
@@ -1893,6 +1979,11 @@ const parseResultsHrViewCompetencyScore = (value: unknown): ResultsHrViewCompete
       "subordinatesVisibility",
       "selfVisibility",
       "otherVisibility",
+      "managerLevels",
+      "peersLevels",
+      "subordinatesLevels",
+      "selfLevels",
+      "otherLevels",
     ],
     "results.getHrView output.competencyScores[]",
   );
@@ -1973,6 +2064,12 @@ const parseResultsHrViewCompetencyScore = (value: unknown): ResultsHrViewCompete
     }
   }
 
+  const managerLevelsValue = record.managerLevels;
+  const peersLevelsValue = record.peersLevels;
+  const subordinatesLevelsValue = record.subordinatesLevels;
+  const selfLevelsValue = record.selfLevels;
+  const otherLevelsValue = record.otherLevels;
+
   return {
     competencyId: ensureStringField(
       record,
@@ -2025,6 +2122,21 @@ const parseResultsHrViewCompetencyScore = (value: unknown): ResultsHrViewCompete
     subordinatesVisibility,
     selfVisibility: "shown",
     ...(otherVisibilityValue ? { otherVisibility: otherVisibilityValue } : {}),
+    ...(managerLevelsValue !== undefined
+      ? { managerLevels: parseResultsHrViewLevelSummary(managerLevelsValue) }
+      : {}),
+    ...(peersLevelsValue !== undefined
+      ? { peersLevels: parseResultsHrViewLevelSummary(peersLevelsValue) }
+      : {}),
+    ...(subordinatesLevelsValue !== undefined
+      ? { subordinatesLevels: parseResultsHrViewLevelSummary(subordinatesLevelsValue) }
+      : {}),
+    ...(selfLevelsValue !== undefined
+      ? { selfLevels: parseResultsHrViewLevelSummary(selfLevelsValue) }
+      : {}),
+    ...(otherLevelsValue !== undefined
+      ? { otherLevels: parseResultsHrViewLevelSummary(otherLevelsValue) }
+      : {}),
   };
 };
 
@@ -2164,8 +2276,8 @@ export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOut
   );
 
   const modelKind = ensureStringField(record, "modelKind", "results.getHrView output");
-  if (modelKind !== "indicators") {
-    throw new Error('results.getHrView output.modelKind must be "indicators".');
+  if (modelKind !== "indicators" && modelKind !== "levels") {
+    throw new Error('results.getHrView output.modelKind must be "indicators" or "levels".');
   }
 
   const smallGroupPolicyValue = ensureStringField(
@@ -2195,7 +2307,7 @@ export const parseResultsGetHrViewOutput = (value: unknown): ResultsGetHrViewOut
     companyId: ensureStringField(record, "companyId", "results.getHrView output"),
     subjectEmployeeId: ensureStringField(record, "subjectEmployeeId", "results.getHrView output"),
     modelVersionId: ensureStringField(record, "modelVersionId", "results.getHrView output"),
-    modelKind: "indicators",
+    modelKind,
     anonymityThreshold,
     smallGroupPolicy: smallGroupPolicyValue,
     groupVisibility: parseResultsHrViewGroupVisibility(record.groupVisibility),

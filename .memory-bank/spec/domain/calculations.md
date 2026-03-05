@@ -20,6 +20,12 @@ UI-ориентированные результаты:
 Tie-break:
 - Если есть ничья за mode — `mode_level = null` и показываем распределение (best practice: не “выдумывать” точность).
 
+MVP implementation note (FT-0054):
+- `results.getHrView` для `modelKind=levels` возвращает per-competency summaries:
+  - `managerLevels|peersLevels|subordinatesLevels|selfLevels|otherLevels`,
+  - в каждом summary: `modeLevel`, `distribution(level1..4)`, `nValid`, `nUnsure`.
+- Для internal numeric aggregation (`groupOverall` / `overallScore`) используются только валидные уровни `1..4`; `UNSURE` исключается.
+
 ## Rater group weights (default + normalization)
 Default (MVP recommended):
 - `manager`: 40%

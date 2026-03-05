@@ -171,6 +171,7 @@ Status: Draft (2026-03-03)
   - roles: hr_admin/hr_reader
   - idempotency: yes
   - output: `groupVisibility`, per-competency visibility flags, `configuredGroupWeights`, `effectiveGroupWeights`, `overallScore`
+  - for `modelKind=levels`: per-competency `*Levels` summaries (`modeLevel`, `distribution`, `nValid`, `nUnsure`)
 
 ## Notifications
 - command: `reminders generate [--campaign <id>]`

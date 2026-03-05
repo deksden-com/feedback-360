@@ -4,6 +4,7 @@ import {
   type ResultsGroupVisibilityState,
   type ResultsHrViewGroupVisibility,
   type ResultsHrViewGroupWeights,
+  type ResultsHrViewLevelSummary,
   type SmallGroupPolicy,
   createOperationError,
 } from "@feedback-360/api-contract";
@@ -71,6 +72,35 @@ const getIndicatorValue = (
     return undefined;
   }
   if (typeof rawValue === "number" && rawValue >= 1 && rawValue <= 5) {
+    return rawValue;
+  }
+
+  return undefined;
+};
+
+const getLevelValue = (
+  payload: Record<string, unknown>,
+  competencyId: string,
+): number | "UNSURE" | undefined => {
+  const levelResponses = payload.levelResponses;
+  if (
+    typeof levelResponses !== "object" ||
+    levelResponses === null ||
+    Array.isArray(levelResponses)
+  ) {
+    return undefined;
+  }
+
+  const rawValue = (levelResponses as Record<string, unknown>)[competencyId];
+  if (rawValue === "UNSURE") {
+    return "UNSURE";
+  }
+  if (
+    typeof rawValue === "number" &&
+    Number.isInteger(rawValue) &&
+    rawValue >= 1 &&
+    rawValue <= 4
+  ) {
     return rawValue;
   }
 
@@ -181,6 +211,73 @@ const buildEffectiveGroupWeights = (params: {
   return effective;
 };
 
+type LevelSummaryState = {
+  level1: number;
+  level2: number;
+  level3: number;
+  level4: number;
+  nUnsure: number;
+};
+
+const buildEmptyLevelSummaryState = (): LevelSummaryState => {
+  return {
+    level1: 0,
+    level2: 0,
+    level3: 0,
+    level4: 0,
+    nUnsure: 0,
+  };
+};
+
+const mergeLevelSummaryStates = (
+  states: Array<LevelSummaryState | undefined>,
+): LevelSummaryState => {
+  return states.reduce<LevelSummaryState>((accumulator, state) => {
+    if (!state) {
+      return accumulator;
+    }
+
+    accumulator.level1 += state.level1;
+    accumulator.level2 += state.level2;
+    accumulator.level3 += state.level3;
+    accumulator.level4 += state.level4;
+    accumulator.nUnsure += state.nUnsure;
+    return accumulator;
+  }, buildEmptyLevelSummaryState());
+};
+
+const buildLevelSummary = (state: LevelSummaryState | undefined): ResultsHrViewLevelSummary => {
+  const safeState = state ?? buildEmptyLevelSummaryState();
+  const levelEntries: Array<{ level: 1 | 2 | 3 | 4; count: number }> = [
+    { level: 1, count: safeState.level1 },
+    { level: 2, count: safeState.level2 },
+    { level: 3, count: safeState.level3 },
+    { level: 4, count: safeState.level4 },
+  ];
+  const nValid = levelEntries.reduce((sum, entry) => sum + entry.count, 0);
+  const maxCount = levelEntries.reduce((max, entry) => Math.max(max, entry.count), 0);
+
+  let modeLevel: 1 | 2 | 3 | 4 | null = null;
+  if (nValid > 0 && maxCount > 0) {
+    const modes = levelEntries.filter((entry) => entry.count === maxCount);
+    if (modes.length === 1) {
+      modeLevel = modes[0]?.level ?? null;
+    }
+  }
+
+  return {
+    modeLevel,
+    distribution: {
+      level1: safeState.level1,
+      level2: safeState.level2,
+      level3: safeState.level3,
+      level4: safeState.level4,
+    },
+    nValid,
+    nUnsure: safeState.nUnsure,
+  };
+};
+
 export const getResultsHrView = async (
   input: GetResultsHrViewInput,
 ): Promise<ResultsGetHrViewOutput> => {
@@ -216,7 +313,7 @@ export const getResultsHrView = async (
     if (!campaign.modelVersionId) {
       throw createOperationError(
         "invalid_input",
-        "Campaign has no competency model and cannot produce indicator results.",
+        "Campaign has no competency model and cannot produce results.",
         {
           campaignId: input.campaignId,
         },
@@ -245,15 +342,11 @@ export const getResultsHrView = async (
       });
     }
 
-    if (model.kind !== "indicators") {
-      throw createOperationError(
-        "invalid_input",
-        "results.getHrView currently supports indicators model only.",
-        {
-          campaignId: input.campaignId,
-          modelKind: model.kind,
-        },
-      );
+    if (model.kind !== "indicators" && model.kind !== "levels") {
+      throw createOperationError("invalid_input", "Unsupported model kind for results.", {
+        campaignId: input.campaignId,
+        modelKind: model.kind,
+      });
     }
 
     const competencyRows = await db
@@ -292,21 +385,23 @@ export const getResultsHrView = async (
     );
 
     const competencyIds = typedCompetencies.map((item) => item.competencyId);
-    const indicatorRows = await db
-      .select({
-        competencyId: competencyIndicators.competencyId,
-        indicatorId: competencyIndicators.id,
-        indicatorOrder: competencyIndicators.order,
-      })
-      .from(competencyIndicators)
-      .where(inArray(competencyIndicators.competencyId, competencyIds))
-      .orderBy(competencyIndicators.competencyId, competencyIndicators.order);
-
     const indicatorIdsByCompetency = new Map<string, string[]>();
-    for (const row of indicatorRows) {
-      const ids = indicatorIdsByCompetency.get(row.competencyId) ?? [];
-      ids.push(row.indicatorId);
-      indicatorIdsByCompetency.set(row.competencyId, ids);
+    if (model.kind === "indicators") {
+      const indicatorRows = await db
+        .select({
+          competencyId: competencyIndicators.competencyId,
+          indicatorId: competencyIndicators.id,
+          indicatorOrder: competencyIndicators.order,
+        })
+        .from(competencyIndicators)
+        .where(inArray(competencyIndicators.competencyId, competencyIds))
+        .orderBy(competencyIndicators.competencyId, competencyIndicators.order);
+
+      for (const row of indicatorRows) {
+        const ids = indicatorIdsByCompetency.get(row.competencyId) ?? [];
+        ids.push(row.indicatorId);
+        indicatorIdsByCompetency.set(row.competencyId, ids);
+      }
     }
 
     const questionnaireRows = await db
@@ -342,6 +437,7 @@ export const getResultsHrView = async (
         ratersWithScore: number;
       }
     >();
+    const levelSummaryByGroupCompetency = new Map<string, LevelSummaryState>();
     const scoredRowsByGroupCompetency = new Map<
       string,
       Array<{
@@ -367,30 +463,75 @@ export const getResultsHrView = async (
           : {};
 
       for (const competency of typedCompetencies) {
-        const indicatorIds = indicatorIdsByCompetency.get(competency.competencyId) ?? [];
-        const numericScores: number[] = [];
+        let score: number | undefined;
+        let validScoreCount = 0;
+        let totalScoreCount = 0;
 
-        for (const indicatorId of indicatorIds) {
-          const value = getIndicatorValue(payload, competency.competencyId, indicatorId);
-          if (value !== undefined) {
-            numericScores.push(value);
+        if (model.kind === "indicators") {
+          const indicatorIds = indicatorIdsByCompetency.get(competency.competencyId) ?? [];
+          const numericScores: number[] = [];
+          totalScoreCount = indicatorIds.length;
+
+          for (const indicatorId of indicatorIds) {
+            const value = getIndicatorValue(payload, competency.competencyId, indicatorId);
+            if (value !== undefined) {
+              numericScores.push(value);
+            }
+          }
+
+          validScoreCount = numericScores.length;
+          score =
+            numericScores.length > 0
+              ? roundScore(
+                  numericScores.reduce((sum, value) => sum + value, 0) / numericScores.length,
+                )
+              : undefined;
+        } else {
+          totalScoreCount = 1;
+          const levelValue = getLevelValue(payload, competency.competencyId);
+          if (typeof levelValue === "number") {
+            score = levelValue;
+            validScoreCount = 1;
+
+            const levelSummaryKey = `${mappedGroup}:${competency.competencyId}`;
+            const existing = levelSummaryByGroupCompetency.get(levelSummaryKey) ?? {
+              level1: 0,
+              level2: 0,
+              level3: 0,
+              level4: 0,
+              nUnsure: 0,
+            };
+            if (levelValue === 1) {
+              existing.level1 += 1;
+            } else if (levelValue === 2) {
+              existing.level2 += 1;
+            } else if (levelValue === 3) {
+              existing.level3 += 1;
+            } else if (levelValue === 4) {
+              existing.level4 += 1;
+            }
+            levelSummaryByGroupCompetency.set(levelSummaryKey, existing);
+          } else if (levelValue === "UNSURE") {
+            const levelSummaryKey = `${mappedGroup}:${competency.competencyId}`;
+            const existing = levelSummaryByGroupCompetency.get(levelSummaryKey) ?? {
+              level1: 0,
+              level2: 0,
+              level3: 0,
+              level4: 0,
+              nUnsure: 0,
+            };
+            existing.nUnsure += 1;
+            levelSummaryByGroupCompetency.set(levelSummaryKey, existing);
           }
         }
-
-        const score =
-          numericScores.length > 0
-            ? roundScore(
-                numericScores.reduce((sum, value) => sum + value, 0) / numericScores.length,
-              )
-            : undefined;
 
         raterScores.push({
           raterEmployeeId: row.raterEmployeeId,
           group: mappedGroup,
           competencyId: competency.competencyId,
           ...(score !== undefined ? { score } : {}),
-          validIndicatorCount: numericScores.length,
-          totalIndicatorCount: indicatorIds.length,
+          validIndicatorCount: validScoreCount,
+          totalIndicatorCount: totalScoreCount,
         });
 
         if (score === undefined) {
@@ -454,6 +595,18 @@ export const getResultsHrView = async (
           `subordinates:${competency.competencyId}`,
         );
         const selfAggregate = aggregateByGroupCompetency.get(`self:${competency.competencyId}`);
+        const managerLevelSummary = levelSummaryByGroupCompetency.get(
+          `manager:${competency.competencyId}`,
+        );
+        const peersLevelSummary = levelSummaryByGroupCompetency.get(
+          `peers:${competency.competencyId}`,
+        );
+        const subordinatesLevelSummary = levelSummaryByGroupCompetency.get(
+          `subordinates:${competency.competencyId}`,
+        );
+        const selfLevelSummary = levelSummaryByGroupCompetency.get(
+          `self:${competency.competencyId}`,
+        );
 
         const managerScore =
           managerAggregate && managerAggregate.ratersWithScore > 0
@@ -505,6 +658,12 @@ export const getResultsHrView = async (
           otherVisibility === "shown" && otherRaters > 0
             ? roundScore(mergedRows.reduce((sum, row) => sum + row.score, 0) / mergedRows.length)
             : undefined;
+        const otherLevelSummary = hasMergedCompetency
+          ? mergeLevelSummaryStates([
+              peersVisibility === "merged" ? peersLevelSummary : undefined,
+              subordinatesVisibility === "merged" ? subordinatesLevelSummary : undefined,
+            ])
+          : undefined;
 
         return {
           competencyId: competency.competencyId,
@@ -526,6 +685,15 @@ export const getResultsHrView = async (
           subordinatesVisibility,
           selfVisibility: "shown",
           ...(otherVisibility ? { otherVisibility } : {}),
+          ...(model.kind === "levels"
+            ? {
+                managerLevels: buildLevelSummary(managerLevelSummary),
+                peersLevels: buildLevelSummary(peersLevelSummary),
+                subordinatesLevels: buildLevelSummary(subordinatesLevelSummary),
+                selfLevels: buildLevelSummary(selfLevelSummary),
+                ...(otherLevelSummary ? { otherLevels: buildLevelSummary(otherLevelSummary) } : {}),
+              }
+            : {}),
         };
       },
     );
@@ -621,7 +789,7 @@ export const getResultsHrView = async (
       companyId: campaign.companyId,
       subjectEmployeeId: input.subjectEmployeeId,
       modelVersionId: model.modelVersionId,
-      modelKind: "indicators",
+      modelKind: model.kind,
       anonymityThreshold,
       smallGroupPolicy,
       groupVisibility,
