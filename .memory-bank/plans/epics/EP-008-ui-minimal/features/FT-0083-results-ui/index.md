@@ -46,6 +46,36 @@ Status: Draft (2026-03-03)
 ## Verification (must)
 - Automated test: Playwright assertions по results screens (employee без raw, HR reader с raw).
 - Must run: Playwright e2e на seed `S9_campaign_completed_with_ai`.
+- При фиксации evidence: для UI шагов добавлять скриншоты и вставлять их в markdown как изображения (`![...](...)`).
+
+## Manual verification (deployed environment)
+### Beta scenario A — employee results
+- Environment:
+  - URL: `https://beta.go360go.ru`
+- Preconditions:
+  - есть сотрудник с доступными обработанными результатами (`completed` кампания);
+  - у результата есть текстовые комментарии (raw + processed в данных).
+- Steps:
+  1) Войти как `employee` через magic link.
+  2) Выбрать компанию.
+  3) Открыть экран результатов сотрудника.
+  4) Проверить блоки оценок и текстовые комментарии.
+- Expected:
+  - отображаются агрегаты/метрики;
+  - raw open text отсутствует;
+  - показываются только разрешённые employee представления (processed/summary).
+
+### Beta scenario B — HR reader results
+- Preconditions:
+  - есть пользователь роли `hr_reader` в той же компании.
+- Steps:
+  1) Войти как `hr_reader`.
+  2) Открыть HR results view по тому же сотруднику.
+  3) Сравнить текстовые блоки с employee view.
+- Expected:
+  - HR view содержит raw + processed/summary (по MVP правилам);
+  - employee view не раскрывает raw;
+  - отличия в видимости соответствуют policy.
 
 ## Design references (stitch)
 - [`stitch_go360go/employee_my_results_report/screen.png`](../../../../../../stitch_go360go/employee_my_results_report/screen.png): employee results dashboard (score, breakdown, AI summary). Используем для структуры личного отчета.

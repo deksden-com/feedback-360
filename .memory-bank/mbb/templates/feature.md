@@ -101,6 +101,9 @@ Status: Template
 - Commands/tests run: …
 - Result: …
 - Artifacts (optional): скриншоты/логи/ссылки на CI run; если есть скриншоты — что именно подтверждает каждый.
+- Для markdown-отчётов скриншоты вставляем как изображения:
+  - `![step-01](relative/path/to/step-01.png)`
+  - `![step-02](relative/path/to/step-02.png)`
 
 ### CI/CD evidence (mandatory for runtime/deploy/integration changes)
 - GitHub:

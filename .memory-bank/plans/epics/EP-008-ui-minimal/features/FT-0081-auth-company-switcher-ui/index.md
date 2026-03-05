@@ -85,10 +85,14 @@ Status: Completed (2026-03-05)
 - `cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs` → passed (`smoke.spec.ts`, `ft-0081-auth-company-switcher.spec.ts`).
 - Сценарий подтверждён: после dev-login пользователь переключает `active company` A→B, root page отражает выбранную компанию, и context остаётся tenant-scoped.
 - Artifacts:
-  - `.memory-bank/evidence/EP-008/FT-0081/2026-03-05/step-01-company-switcher-initial.png` — стартовый экран выбора компании, обе memberships видны.
-  - `.memory-bank/evidence/EP-008/FT-0081/2026-03-05/step-02-active-company-a.png` — после выбора A главная страница показывает `Acme 360 A`.
-  - `.memory-bank/evidence/EP-008/FT-0081/2026-03-05/step-03-company-switcher-before-b.png` — повторный вход в switcher перед переключением на B.
-  - `.memory-bank/evidence/EP-008/FT-0081/2026-03-05/step-04-active-company-b.png` — после выбора B главная страница показывает `Acme 360 B`.
+  - step-01: стартовый экран выбора компании, обе memberships видны.
+    ![step-01-company-switcher-initial](../../../../../evidence/EP-008/FT-0081/2026-03-05/step-01-company-switcher-initial.png)
+  - step-02: после выбора A главная страница показывает `Acme 360 A`.
+    ![step-02-active-company-a](../../../../../evidence/EP-008/FT-0081/2026-03-05/step-02-active-company-a.png)
+  - step-03: повторный вход в switcher перед переключением на B.
+    ![step-03-company-switcher-before-b](../../../../../evidence/EP-008/FT-0081/2026-03-05/step-03-company-switcher-before-b.png)
+  - step-04: после выбора B главная страница показывает `Acme 360 B`.
+    ![step-04-active-company-b](../../../../../evidence/EP-008/FT-0081/2026-03-05/step-04-active-company-b.png)
 
 ## Manual verification (deployed environment)
 ### Beta quick smoke (dev-helper path)
