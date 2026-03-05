@@ -27,6 +27,8 @@ import {
   type MatrixGenerateSuggestedOutput,
   type MatrixSetInput,
   type MatrixSetOutput,
+  type MembershipListInput,
+  type MembershipListOutput,
   type ModelVersionCreateInput,
   type ModelVersionCreateOutput,
   type NotificationsDispatchOutboxInput,
@@ -87,6 +89,8 @@ import {
   parseMatrixGenerateSuggestedOutput,
   parseMatrixSetInput,
   parseMatrixSetOutput,
+  parseMembershipListInput,
+  parseMembershipListOutput,
   parseModelVersionCreateInput,
   parseModelVersionCreateOutput,
   parseNotificationsDispatchOutboxInput,
@@ -191,6 +195,10 @@ export type Feedback360Client = {
     input?: EmployeeListActiveInput,
     context?: OperationContext,
   ): Promise<OperationResult<EmployeeListActiveOutput>>;
+  membershipList(
+    input?: MembershipListInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<MembershipListOutput>>;
   orgDepartmentMove(
     input: OrgDepartmentMoveInput,
     context?: OperationContext,
@@ -547,6 +555,24 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseEmployeeListActiveOutput,
+      });
+    },
+
+    membershipList: async (input, context) => {
+      let parsedInput: MembershipListInput;
+      try {
+        parsedInput = parseMembershipListInput(input ?? {});
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid membershipList input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "membership.list",
+        input: parsedInput,
+        context,
+        parseOutput: parseMembershipListOutput,
       });
     },
 

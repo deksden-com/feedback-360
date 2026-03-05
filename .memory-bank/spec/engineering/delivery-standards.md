@@ -16,7 +16,13 @@ Status: Draft (2026-03-04)
 4) В feature doc есть блок `Quality checks evidence (YYYY-MM-DD)` с результатами `lint/typecheck/test` (+ `build`, где применимо).
 5) В feature doc есть блок `Acceptance evidence (YYYY-MM-DD)` с командами/результатами приемочного сценария и связанных GS.
 6) В verification matrix добавлен/обновлён execution evidence по соответствующему EP.
-7) Для runtime/deploy/integration-инфраструктурных изменений зафиксированы CI/CD доказательства:
+7) В feature doc есть раздел `Manual verification (deployed environment)`:
+   - целевое окружение (обычно `beta`), URL и дата,
+   - preconditions (аккаунт/роль/seed/feature flag),
+   - пошаговая инструкция “от начала до конца” + ожидаемый результат каждого шага,
+   - пометка `N/A` с обоснованием только для non-user-facing фич.
+   - для user-facing/runtime фич обязательна browser-проверка через skill `$agent-browser` (open/snapshot/interact/screenshot) и фиксация артефактов.
+8) Для runtime/deploy/integration-инфраструктурных изменений зафиксированы CI/CD доказательства:
    - ссылка на GitHub Actions run (или check-runs commit),
    - ссылка на Vercel deployment (preview/beta/prod),
    - итоговый статус (`success/ready`) и root-cause заметка, если был fail.
@@ -45,6 +51,7 @@ Status: Draft (2026-03-04)
 - UI/UX фичи (экраны, переходы, состояния до/после действия).
 - Внешние панели/сервисы (Vercel/Supabase/Resend/Sentry), где часть приемки проверяется в интерфейсе провайдера.
 - Многошаговые сценарии, где визуальная динамика важна для понимания.
+- Для user-facing фич EP-008 (UI) — считать скриншоты обязательной частью acceptance evidence.
 
 Когда скриншоты **обычно не нужны**:
 - Чистые core/contract/unit-integration фичи, где достаточно автотестов, JSON-вывода и логов команд.
@@ -54,4 +61,11 @@ Status: Draft (2026-03-04)
 - Именование: `step-01-...`, `step-02-...` (по порядку сценария).
 - Хранение (если кладём в репозиторий): `.memory-bank/evidence/<EP>/<FT>/<YYYY-MM-DD>/`.
 - В `Acceptance evidence` указываем список артефактов (путь к скринам) и что именно подтверждает каждый скрин.
+- Скриншоты в markdown-документах вставляем как рендерящиеся изображения: `![caption](relative/path.png)`, а не только plain-link.
 - Перед сохранением обязательно исключить секреты/PII (токены, приватные email, персональные данные).
+
+### Browser automation rule (deployed checks)
+- Для проверок на `beta`/`prod` используем `$agent-browser` как стандартный инструмент browser-smoke:
+  - минимум: `open` → `snapshot -i` → шаги сценария → `screenshot`.
+  - для многошаговых UI фич: скриншоты по шагам (`step-01`, `step-02`, ...).
+- Если `$agent-browser` недоступен, в evidence фиксируем причину и временно выполняем ручной браузерный прогон с тем же чеклистом шагов.

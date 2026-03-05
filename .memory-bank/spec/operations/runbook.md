@@ -18,6 +18,7 @@ Status: Draft (2026-03-04)
    - app health endpoint
    - auth redirect and magic-link flow
    - core smoke scenarios (seed/migrations/tests)
+   - browser smoke via `$agent-browser` for changed user-facing paths (with screenshots in evidence)
    - Vercel deployment status: `Ready` (без build/runtime errors).
 4. Merge `develop -> main`.
 5. Verify production deployment (`go360go.ru`) with smoke checks:
@@ -37,6 +38,9 @@ Status: Draft (2026-03-04)
   - `vercel list go360go-beta`
   - `vercel list go360go-prod`
   - `vercel inspect <deployment-url> --logs`
+- Browser smoke (`agent-browser`):
+  - `agent-browser open https://beta.go360go.ru && agent-browser wait --load networkidle && agent-browser snapshot -i`
+  - `agent-browser screenshot --full`
 
 ## Check failure handling (fix-loop)
 - Если CI/check-run в GitHub failed: исправляем причину, запускаем новый run, обновляем evidence ссылкой на зелёный run.
@@ -66,6 +70,37 @@ Status: Draft (2026-03-04)
 3. После следующего cloud deploy проверить `200` на `https://beta.go360go.ru/api/health` и `https://go360go.ru/api/health`.
 4. После успешного cloud deploy перепроверить в build logs, что `sentry-cli` шаги (release/sourcemaps) проходят без `401/403`.
 
+### Latest beta smoke check (2026-03-05)
+- Method: `$agent-browser` (`open -> wait networkidle -> snapshot -i -> screenshot`).
+- URL: `https://beta.go360go.ru/auth/login`.
+- Result: страница возвращает 404 (`go360go (beta)` title, no interactive elements).
+- Artifacts:
+  - `.memory-bank/evidence/deploy/2026-03-05/beta-auth-login.png`
+  - `.memory-bank/evidence/deploy/2026-03-05/beta-auth-login-snapshot.txt`
+  - ![beta-auth-login-404](../../evidence/deploy/2026-03-05/beta-auth-login.png)
+
+### Beta recovery check (2026-03-05)
+- Root cause: `beta.go360go.ru` указывал на production deployment `go360go-beta-69vk033ur-deksdens-projects.vercel.app`, где отсутствовали `auth/*` и актуальные API routes.
+- Fix action:
+  - `vercel promote go360go-beta-1qaw2grf4-deksdens-projects.vercel.app --yes`
+  - дождались нового production deployment `go360go-beta-2zcft84pr-deksdens-projects.vercel.app` со статусом `Ready`.
+- Deployment verification:
+  - `vercel inspect beta.go360go.ru` -> `dpl_CGAzED34bAgJAoKiPcfUqVvD4m2C`, status `Ready`.
+  - `curl https://beta.go360go.ru/api/health` -> `200 {"ok":true,"appEnv":"beta"}`.
+  - `curl https://beta.go360go.ru/auth/login` -> `200`.
+  - `POST https://beta.go360go.ru/api/auth/magic-link` (email `deksden@deksden.com`) -> `200` с сообщением об отправке magic link.
+- Browser smoke (`$agent-browser`):
+  - login form содержит интерактивные элементы (`textbox`, `Отправить ссылку`, `Войти в demo-режиме`);
+  - после отправки email отображается сообщение “Если email найден в системе, ссылка для входа отправлена...”.
+- Artifacts:
+  - `.memory-bank/evidence/deploy/2026-03-05/beta-auth-login-fixed.png`
+  - `.memory-bank/evidence/deploy/2026-03-05/beta-auth-login-fixed-snapshot.txt`
+  - `.memory-bank/evidence/deploy/2026-03-05/beta-auth-login-after-send.png`
+  - `.memory-bank/evidence/deploy/2026-03-05/beta-auth-login-after-send-snapshot.txt`
+  - `.memory-bank/evidence/deploy/2026-03-05/beta-auth-login-after-send-body.txt`
+  - ![beta-auth-login-fixed](../../evidence/deploy/2026-03-05/beta-auth-login-fixed.png)
+  - ![beta-auth-login-after-send](../../evidence/deploy/2026-03-05/beta-auth-login-after-send.png)
+
 ## Environment checklist
 - Vercel env vars are present and mapped to the right environment.
 - `AI_WEBHOOK_SECRET` задан в Vercel env для beta/prod и совпадает с секретом подписи на стороне AI сервиса.
@@ -75,6 +110,17 @@ Status: Draft (2026-03-04)
   - SMTP enabled with Resend
 - Resend domain status is `verified`.
 - Sentry DSN/build credentials are configured.
+
+### Bootstrap email login for beta/prod
+- Для предсоздания/обновления аккаунта под magic-link используем CLI:
+  - `pnpm --filter @feedback-360/cli exec tsx src/index.ts -- auth provision-email --target beta --email <email> --user-id <uuid> --links-json '[{"companyId":"...","employeeId":"...","role":"hr_admin"}]' --json`
+- Команда требует:
+  - `SUPABASE_ACCESS_TOKEN` (получение `service_role` key через Supabase Management API),
+  - `SUPABASE_BETA_DB_POOLER_URL` (или `SUPABASE_PROD_DB_POOLER_URL` для `--target prod`).
+- Что проверяем после команды:
+  - Auth user существует и `email_confirmed=true`,
+  - у `employees` в указанных компаниях email обновлён,
+  - `company_memberships` и `employee_user_links` присутствуют для переданного `user_id`.
 
 ## DB / migrations checklist
 - Перед запуском DB-команд убедиться, что выставлен `SUPABASE_DB_POOLER_URL` (preferred) или `DATABASE_URL` (fallback).

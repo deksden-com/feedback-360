@@ -54,6 +54,32 @@ Status: Template
 #### Client API ops (v1)
 - Перечень операций, которые покрывает сценарий.
 
+### Manual verification (deployed environment)
+Обязательный раздел для user-facing/runtime фич (по умолчанию `beta`).
+
+- Environment:
+  - URL: `https://beta.go360go.ru` (или другой target)
+  - Build/commit: `<sha / deployment url>`
+  - Date: `YYYY-MM-DD`
+- Preconditions:
+  - тестовый аккаунт(ы), роли и доступы;
+  - нужные seed/данные;
+  - включённые feature flags (если есть).
+- Steps (start → finish):
+  1. `<Шаг 1>`
+  2. `<Шаг 2>`
+  3. `<Шаг 3>`
+- Expected result per step:
+  - `step-1`: `<ожидание>`
+  - `step-2`: `<ожидание>`
+  - `step-3`: `<ожидание>`
+- Tooling:
+  - для browser-check используем `$agent-browser` (open/snapshot/interact/screenshot).
+- Notes:
+  - cleanup/rollback (если требуется),
+  - ограничения проверки.
+- Если фича non-user-facing: `N/A` + обоснование.
+
 ### Tests
 - Unit: …
 - Integration: …
@@ -77,6 +103,9 @@ Status: Template
 - Commands/tests run: …
 - Result: …
 - Artifacts (optional): скриншоты/логи/ссылки на CI run; если есть скриншоты — что именно подтверждает каждый.
+- Для markdown-отчётов скриншоты вставляем как изображения:
+  - `![step-01](relative/path/to/step-01.png)`
+  - `![step-02](relative/path/to/step-02.png)`
 
 ### CI/CD evidence (mandatory for runtime/deploy/integration changes)
 - GitHub:

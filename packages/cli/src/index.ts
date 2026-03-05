@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { Command } from "commander";
 
+import { parseProvisionLinksJson, provisionAuthEmailAccess } from "./auth-provisioning";
+
 import {
   type MembershipRole,
   type OperationError,
@@ -146,6 +148,15 @@ type EmployeeUpsertOptions = {
   lastName?: string;
   phone?: string;
   isActive?: string;
+};
+
+type AuthProvisionEmailOptions = {
+  json?: boolean;
+  email: string;
+  userId: string;
+  linksJson: string;
+  target?: "beta" | "prod";
+  projectRef?: string;
 };
 
 type CliState = {
@@ -782,6 +793,7 @@ const normalizeLegacySeedArgs = (argv: string[]): string[] => {
     "campaign",
     "matrix",
     "ai",
+    "auth",
     "reminders",
     "notifications",
     "questionnaire",
@@ -819,6 +831,7 @@ Examples:
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign snapshot list --campaign <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants add-departments <campaign_id> --from-departments <department_id>...
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- matrix set <campaign_id> --assignments-json '[{"subjectEmployeeId":"<id>","raterEmployeeId":"<id>","raterRole":"manager"}]' --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- auth provision-email --target beta --email deksden@deksden.com --user-id <user_id> --links-json '[{"companyId":"<company_id>","employeeId":"<employee_id>","role":"hr_admin"}]' --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- reminders generate --campaign <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- notifications dispatch --campaign <campaign_id> --provider stub --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- ai run <campaign_id> --json
@@ -965,6 +978,75 @@ Examples:
       console.log(
         `Active company: ${state.activeCompanyId}${state.activeRole ? `, role=${state.activeRole}` : ""}${state.activeUserId ? `, userId=${state.activeUserId}` : ""}`,
       );
+    });
+
+  const authCommand = program.command("auth").description("Auth provisioning operations.");
+
+  authCommand
+    .command("provision-email")
+    .description(
+      "Provision Supabase Auth user + HR links for email login in beta/prod (ops/admin command).",
+    )
+    .requiredOption("--email <email>", "User email for magic-link login.")
+    .requiredOption("--user-id <userId>", "Supabase Auth user UUID to create/update.")
+    .requiredOption(
+      "--links-json <json>",
+      'JSON array of links: [{"companyId":"...","employeeId":"...","role":"hr_admin|hr_reader|manager|employee"}].',
+    )
+    .option("--target <target>", "Environment target: beta | prod.", "beta")
+    .option("--project-ref <projectRef>", "Override Supabase project ref (optional).")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: AuthProvisionEmailOptions) => {
+      const target = options.target === "prod" ? "prod" : "beta";
+
+      let links: ReturnType<typeof parseProvisionLinksJson>;
+      try {
+        links = parseProvisionLinksJson(options.linksJson);
+      } catch (error: unknown) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Invalid --links-json value."),
+          options.json,
+        );
+        return;
+      }
+
+      try {
+        const result = await provisionAuthEmailAccess({
+          email: options.email,
+          userId: options.userId,
+          links,
+          target,
+          projectRef: options.projectRef,
+        });
+
+        if (options.json) {
+          console.log(
+            JSON.stringify(
+              {
+                ok: true,
+                data: result,
+              },
+              null,
+              2,
+            ),
+          );
+          return;
+        }
+
+        console.log(
+          `Auth provisioned: target=${result.target}, projectRef=${result.projectRef}, userId=${result.userId}, email=${result.email}, action=${result.authAction}, links=${result.links.length}`,
+        );
+        for (const link of result.links) {
+          console.log(
+            `- company=${link.companyId}, employee=${link.employeeId}, role=${link.role}, membership=${link.membershipId}, employeeUserLink=${link.employeeUserLinkId}`,
+          );
+        }
+      } catch (error: unknown) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Failed to provision auth email access."),
+          options.json,
+        );
+      }
     });
 
   const employeeCommand = program.command("employee").description("Employee directory operations.");

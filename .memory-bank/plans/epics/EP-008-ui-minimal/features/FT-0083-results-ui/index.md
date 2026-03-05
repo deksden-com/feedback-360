@@ -13,6 +13,7 @@ Status: Draft (2026-03-03)
 - [Results visibility](../../../../../spec/domain/results-visibility.md): кто видит raw vs processed. Читать, чтобы UI не пытался показывать “что-то лишнее”.
 - [Anonymity policy](../../../../../spec/domain/anonymity-policy.md): hide/merge и edge cases. Читать, чтобы UI показывал “скрыто/объединено” корректно.
 - [Implementation playbook](../../../../../plans/implementation-playbook.md): как UI использует typed client и как тестируем. Читать, чтобы UI не содержал доменных правил.
+- [Stitch design refs for FT-0083](../../../../../spec/ui/design-references-stitch.md#ft-0083-results-ui): визуальные референсы employee/team dashboard с оговоренными ограничениями. Читать, чтобы сохранить UX и не нарушить privacy rules.
 
 ## Acceptance (auto, Playwright)
 ### Setup
@@ -45,3 +46,41 @@ Status: Draft (2026-03-03)
 ## Verification (must)
 - Automated test: Playwright assertions по results screens (employee без raw, HR reader с raw).
 - Must run: Playwright e2e на seed `S9_campaign_completed_with_ai`.
+- При фиксации evidence: для UI шагов добавлять скриншоты и вставлять их в markdown как изображения (`![...](...)`).
+
+## Manual verification (deployed environment)
+### Beta scenario A — employee results
+- Environment:
+  - URL: `https://beta.go360go.ru`
+- Preconditions:
+  - есть сотрудник с доступными обработанными результатами (`completed` кампания);
+  - у результата есть текстовые комментарии (raw + processed в данных).
+- Steps:
+  1) Войти как `employee` через magic link.
+  2) Выбрать компанию.
+  3) Открыть экран результатов сотрудника.
+  4) Проверить блоки оценок и текстовые комментарии.
+- Expected:
+  - отображаются агрегаты/метрики;
+  - raw open text отсутствует;
+  - показываются только разрешённые employee представления (processed/summary).
+
+### Beta scenario B — HR reader results
+- Preconditions:
+  - есть пользователь роли `hr_reader` в той же компании.
+- Steps:
+  1) Войти как `hr_reader`.
+  2) Открыть HR results view по тому же сотруднику.
+  3) Сравнить текстовые блоки с employee view.
+- Expected:
+  - HR view содержит raw + processed/summary (по MVP правилам);
+  - employee view не раскрывает raw;
+  - отличия в видимости соответствуют policy.
+
+## Design references (stitch)
+- [`stitch_go360go/employee_my_results_report/screen.png`](../../../../../../stitch_go360go/employee_my_results_report/screen.png): employee results dashboard (score, breakdown, AI summary). Используем для структуры личного отчета.
+- [`stitch_go360go/_3/screen.png`](../../../../../../stitch_go360go/_3/screen.png): manager/team dashboard с прогрессом и pending actions. Используем как референс руководительского экрана.
+
+## Design constraints (what we do NOT take)
+- Не показываем `rawText` на employee/manager экранах даже если референс визуально подразумевает детальные цитаты.
+- Не переносим экспорт/report actions, если операция не покрыта контрактом MVP.
