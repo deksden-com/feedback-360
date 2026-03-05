@@ -1,5 +1,5 @@
 # FT-0084 — HR campaign UI (draft/start/matrix/progress/AI retry)
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-05)
 
 ## User value
 HR управляет кампанией: создаёт, настраивает матрицу, запускает, мониторит прогресс, перезапускает AI обработку.
@@ -103,3 +103,31 @@ HR управляет кампанией: создаёт, настраивает
 ## Design constraints (what we do NOT take)
 - Не берем non-MVP действия (`Export`, внешние отчеты, payroll-элементы) до появления соответствующих операций в контракте.
 - Не переносим демо-правила действий: доступность кнопок определяется только нашими lifecycle/matrix lock инвариантами.
+
+## Progress note (2026-03-05)
+- Выполнен вертикальный слайс FT-0084:
+  - web UI: добавлен экран `/hr/campaigns` с workbench для кампаний.
+  - transport: добавлен route-handler `/api/hr/campaigns/execute` (тонкий adapter к typed operations).
+  - actions: create/start/stop/end, matrix generate/apply, participants, weights, progress, AI retry.
+  - lock UX: после первого draft-save блокируются matrix/weights кнопки и показывается lock state.
+  - automation: добавлен Playwright сценарий `ft-0084-hr-campaign-ui.spec.ts`.
+
+## Quality checks evidence (2026-03-05)
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/web lint` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/web typecheck` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/web test` → passed.
+- `set -a; source .env; set +a; pnpm --filter @feedback-360/web build` → passed.
+
+## Acceptance evidence (2026-03-05)
+- `set -a; source .env; set +a; cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0084-hr-campaign-ui.spec.ts` → passed.
+- Covered acceptance:
+  - `S4_campaign_draft`: HR открывает workbench, добавляет participants, генерирует/применяет матрицу, стартует кампанию.
+  - `S5_campaign_started_no_answers`: после первого `questionnaire.saveDraft` кампания lock-ится; matrix/weights блокируются; форс-запрос `campaign.weights.set` возвращает `409` + `campaign_locked`.
+  - `S8_campaign_ended`: кнопка `Retry AI` запускает `ai.runForCampaign`.
+- Artifacts:
+  - step-01: draft/start/matrix.
+    ![step-01-hr-campaign-start-and-matrix](../../../../../evidence/EP-008/FT-0084/2026-03-05/step-01-hr-campaign-start-and-matrix.png)
+  - step-02: locked campaign (matrix/weights blocked).
+    ![step-02-hr-campaign-locked](../../../../../evidence/EP-008/FT-0084/2026-03-05/step-02-hr-campaign-locked.png)
+  - step-03: AI retry from ended campaign.
+    ![step-03-hr-campaign-ai-retry](../../../../../evidence/EP-008/FT-0084/2026-03-05/step-03-hr-campaign-ai-retry.png)

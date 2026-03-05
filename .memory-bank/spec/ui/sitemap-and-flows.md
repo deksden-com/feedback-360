@@ -16,6 +16,13 @@ Status: Draft (2026-03-03)
   - reminders settings
   - progress
   - results + AI retry
+- HR campaign workbench (`/hr/campaigns`):
+  - campaign create/start/stop/end
+  - participants add/remove/add-from-departments
+  - matrix generate/apply (до lock)
+  - weights apply (до lock)
+  - progress refresh
+  - AI retry
 
 ## Employee
 - My questionnaires (assigned)
@@ -24,4 +31,3 @@ Status: Draft (2026-03-03)
 
 ## Manager
 - Team results (subject dashboards) с анонимностью
-

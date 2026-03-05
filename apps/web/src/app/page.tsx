@@ -58,6 +58,11 @@ export default async function HomePage() {
                 <a href="/results/hr">HR результаты</a>
               </Button>
             ) : null}
+            {activeMembership?.role === "hr_admin" || activeMembership?.role === "hr_reader" ? (
+              <Button asChild variant="secondary">
+                <a href="/hr/campaigns">HR кампании</a>
+              </Button>
+            ) : null}
             <Button asChild>
               <a href="/select-company">Сменить компанию</a>
             </Button>
