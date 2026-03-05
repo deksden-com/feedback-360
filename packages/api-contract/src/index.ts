@@ -2734,6 +2734,13 @@ const parseResultsDashboardOutput = (
   }
 
   const overallScore = parseOptionalNumberField(record, "overallScore", fieldName);
+  const parseDashboardOpenTextItem = (itemValue: unknown): ResultsOpenTextItem => {
+    const parsedItem = parseResultsOpenTextItem(itemValue);
+    if ("rawText" in parsedItem) {
+      throw new Error(`${fieldName}.openText[] must not contain rawText.`);
+    }
+    return parsedItem;
+  };
 
   return {
     campaignId: ensureStringField(record, "campaignId", fieldName),
@@ -2750,7 +2757,7 @@ const parseResultsDashboardOutput = (
     groupOverall: parseResultsHrViewGroupOverall(record.groupOverall),
     effectiveGroupWeights: parseResultsHrViewGroupWeights(record.effectiveGroupWeights),
     ...(overallScore !== undefined ? { overallScore } : {}),
-    openText: ensureArray(record.openText, `${fieldName}.openText`).map(parseResultsOpenTextItem),
+    openText: ensureArray(record.openText, `${fieldName}.openText`).map(parseDashboardOpenTextItem),
   };
 };
 

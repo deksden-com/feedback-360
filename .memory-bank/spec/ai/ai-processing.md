@@ -10,6 +10,19 @@ AI обрабатывает открытые текстовые коммента
 - Запуск AI job выполняется по `campaign_id` (кампания оценки).
 - AI сервис присылает результат webhook’ом обратно.
 
+## Webhook payload (MVP v1)
+- `status=completed` payload может содержать `questionnaire_comments`:
+  - `questionnaire_comments[]`:
+    - `questionnaire_id` (preferred) **или** пара `subject_employee_id` + `rater_employee_id`,
+    - `competency_comments`:
+      - `<competency_id>`:
+        - `processed_text`,
+        - `summary_text`.
+- Система мержит эти поля в `questionnaires.draft_payload.competencyComments[*]` как:
+  - `processedText`,
+  - `summaryText`,
+  - при этом `rawText` не перезаписывается.
+
 ## MVP mode (agreed)
 - В MVP включён `mvp_stub` режим для `ai.runForCampaign`: внешнего вызова нет.
 - Поведение stub: операция синхронно переводит кампанию `ended -> processing_ai -> completed` в рамках одного запуска и создаёт `ai_job`.
@@ -19,6 +32,7 @@ AI обрабатывает открытые текстовые коммента
 ## Granularity (agreed)
 Результат хранится агрегированно:
 - `(campaign_id, subject_employee_id, competency_id, rater_group)` → `processed_text` + `summary`.
+- На уровне хранения источник данных — questionnaire comments; агрегаты строятся в `results` на чтении.
 
 ## Campaign statuses (agreed)
 `ended -> processing_ai -> (completed | ai_failed)`, доступен retry.
