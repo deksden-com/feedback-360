@@ -1,5 +1,5 @@
 # FT-0094 — Docs and evidence sync
-Status: Draft (2026-03-05)
+Status: Completed (2026-03-05)
 
 ## User value
 Статус фичи в меморибанке соответствует реальности: если фича completed, это подтверждено checks/evidence; если нет, это явно видно. Команда не тратит время на расхождение между кодом, PR и документацией.
@@ -46,3 +46,23 @@ Status: Draft (2026-03-05)
 
 ## Manual verification (deployed environment)
 N/A — документационная/process фича.
+
+## Quality checks evidence (2026-03-05)
+- Checks run:
+  - `pnpm docs:audit`
+- Result:
+  - passed; EP-009 counts, FT statuses and evidence sections синхронизированы одним audit-скриптом.
+
+## Acceptance evidence (2026-03-05)
+- Commands/tests run:
+  - `pnpm docs:audit`
+  - `rg -n '^Status: (Draft|In Progress)' .memory-bank/plans/epics/EP-009-test-release-hardening`
+- Result:
+  - passed; EP/FT docs больше не расходятся со status/index/matrix;
+  - audit гарантирует, что completed FT не остаётся без `Quality checks evidence` / `Acceptance evidence`.
+
+## CI/CD evidence
+- GitHub:
+  - Not applicable — docs/process slice, runtime CI gate подтверждается FT-0092/FT-0093.
+- Vercel:
+  - Not applicable.

@@ -1,5 +1,5 @@
 # EP-009 — Test & release hardening
-Status: Draft (2026-03-05)
+Status: Completed (2026-03-05)
 
 ## Goal
 Сделать поставку фич предсказуемой: убрать flaky тесты, стабилизировать CI/CD гейты и зафиксировать релизный путь так, чтобы merge в `develop` и проверка `beta` были рутинной, а не ручной “экспедицией”.
@@ -15,8 +15,8 @@ Status: Draft (2026-03-05)
 ## Progress report (evidence-based)
 - `as_of`: 2026-03-05
 - `total_features`: 4
-- `completed_features`: 0
-- `evidence_confirmed_features`: 0
+- `completed_features`: 4
+- `evidence_confirmed_features`: 4
 - verification link:
   - [Verification matrix](../../verification-matrix.md) — execution evidence по EP-009. Читать, чтобы прогресс hardening фиксировался так же строго, как продуктовые фичи.
 

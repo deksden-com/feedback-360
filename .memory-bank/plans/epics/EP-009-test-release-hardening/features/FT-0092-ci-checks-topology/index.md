@@ -1,5 +1,5 @@
 # FT-0092 — CI checks topology
-Status: Draft (2026-03-05)
+Status: Completed (2026-03-05)
 
 ## User value
 PR в `develop` проходят через понятный и стабильный merge gate: видно, какие проверки обязательны, что именно упало и как это воспроизвести локально.
@@ -58,3 +58,31 @@ PR в `develop` проходят через понятный и стабильн
   - `checks` присутствует как required status;
   - PR не блокируется “ожидаемым, но отсутствующим” контекстом;
   - после completion merge разрешён.
+
+## Quality checks evidence (2026-03-05)
+- Checks run:
+  - `pnpm -r lint`
+  - `pnpm checks`
+- Result:
+  - passed; локально воспроизводится тот же lane, который запускает GitHub Actions job `checks`.
+
+## Acceptance evidence (2026-03-05)
+- Commands/tests run:
+  - `gh pr checks 26`
+  - `gh run list --workflow ci.yml --limit 3`
+- Result:
+  - passed; PR `#26` показывает required context `checks` и оба актуальных run-а завершены `success`;
+  - push run: `https://github.com/deksden-com/feedback-360/actions/runs/22738343183`
+  - PR run: `https://github.com/deksden-com/feedback-360/actions/runs/22738344260`
+
+## CI/CD evidence
+- GitHub:
+  - Push run: `https://github.com/deksden-com/feedback-360/actions/runs/22738343183`
+  - PR run: `https://github.com/deksden-com/feedback-360/actions/runs/22738344260`
+  - Status: `success`
+- Vercel:
+  - `https://go360go-beta-qjzyzd712-deksdens-projects.vercel.app` — `Ready`
+  - `https://vercel.com/deksdens-projects/go360go-prod/7XxudVMEifns5DnUMckfEMfvwNCz` — `Ready`
+- Root cause before fix:
+  - initial PR lane падал не по логике, а на format/lint drift в `apps/web`;
+  - после фикса форматирования `checks` стабильно совпадает с branch protection context.

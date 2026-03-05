@@ -14,21 +14,28 @@ Status: Draft (2026-03-04)
 2. Verify required GitHub checks for merge commit in `develop` are `success`.
    - минимум: workflow `ci.yml` (`checks`).
    - если появились дополнительные required checks — все должны быть зелёными.
+   - локально воспроизводимый equivalent: `pnpm checks`.
 3. Verify beta deployment (`beta.go360go.ru`):
    - app health endpoint
    - auth redirect and magic-link flow
    - core smoke scenarios (seed/migrations/tests)
    - browser smoke via `$agent-browser` for changed user-facing paths (with screenshots in evidence)
    - Vercel deployment status: `Ready` (без build/runtime errors).
-4. Merge `develop -> main`.
-5. Verify production deployment (`go360go.ru`) with smoke checks:
+   - automated runtime gate: `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web test:smoke:beta`
+4. Verify memory-bank sync for changed FT/EP docs:
+   - `pnpm docs:audit`
+   - verification matrix and epic progress counts are consistent.
+5. Merge `develop -> main`.
+6. Verify production deployment (`go360go.ru`) with smoke checks:
    - required GitHub checks on merge commit in `main` = `success`,
    - Vercel deployment status for `go360go-prod` = `Ready`.
 
 ### Automated beta smoke (mandatory)
 - Workflow: `.github/workflows/beta-smoke.yml` (trigger: push in `develop` + manual dispatch).
-- Scope (MVP baseline): `select-company` loading path on real beta domain via Playwright.
-- Required secret: `BETA_SMOKE_USER_ID` (provisioned user with memberships).
+- Scope (current baseline): `select-company`, questionnaire draft path, results visibility, HR campaign workbench on real beta domain via Playwright.
+- Runtime setup: smoke suite seeds its own scenarios through `/api/dev/seed` and authenticates via `/api/dev/test-login`; отдельный `BETA_SMOKE_USER_ID` не нужен.
+- Command: `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web test:smoke:beta`.
+- Timeout policy: remote beta smoke runs with `90s` Playwright timeout to absorb real DB/network latency without ложных падений.
 - Reason: catches runtime drift between local tests and real beta environment (DB/env/deploy mismatches).
 
 ## CI/CD verification commands (operator quick-check)
@@ -47,6 +54,8 @@ Status: Draft (2026-03-04)
 - Browser smoke (`agent-browser`):
   - `agent-browser open https://beta.go360go.ru && agent-browser wait --load networkidle && agent-browser snapshot -i`
   - `agent-browser screenshot --full`
+- Memory-bank sync:
+  - `pnpm docs:audit`
 
 ## Check failure handling (fix-loop)
 - Если CI/check-run в GitHub failed: исправляем причину, запускаем новый run, обновляем evidence ссылкой на зелёный run.
@@ -106,6 +115,20 @@ Status: Draft (2026-03-04)
   - `.memory-bank/evidence/deploy/2026-03-05/beta-auth-login-after-send-body.txt`
   - ![beta-auth-login-fixed](../../evidence/deploy/2026-03-05/beta-auth-login-fixed.png)
   - ![beta-auth-login-after-send](../../evidence/deploy/2026-03-05/beta-auth-login-after-send.png)
+
+### EP-009 beta smoke baseline (2026-03-05)
+- Automated suite:
+  - `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web test:smoke:beta`
+  - scenarios covered: `select-company`, questionnaire draft, results visibility, HR campaign workbench.
+  - GitHub workflow run: `https://github.com/deksden-com/feedback-360/actions/runs/22738351836` (`success`)
+- Manual browser spot-check via `$agent-browser`:
+  - `https://beta.go360go.ru/auth/login` renders login UI,
+  - demo login reaches `https://beta.go360go.ru/select-company`.
+- Artifacts:
+  - `.memory-bank/evidence/EP-009/FT-0093/2026-03-05/step-01-beta-login.png`
+  - `.memory-bank/evidence/EP-009/FT-0093/2026-03-05/step-02-beta-select-company.png`
+  - ![ep-009-beta-login](../../evidence/EP-009/FT-0093/2026-03-05/step-01-beta-login.png)
+  - ![ep-009-beta-select-company](../../evidence/EP-009/FT-0093/2026-03-05/step-02-beta-select-company.png)
 
 ## Environment checklist
 - Vercel env vars are present and mapped to the right environment.

@@ -1,5 +1,5 @@
 # EP-009 — Feature catalog
-Status: Draft (2026-03-05)
+Status: Completed (2026-03-05)
 
 - [FT-0091 DB integration isolation](FT-0091-db-integration-isolation/index.md): изоляция integration tests и deterministic cleanup/seeds. Читать, чтобы `pnpm -r test` не падал из-за гонок и shared состояния.
 - [FT-0092 CI checks topology](FT-0092-ci-checks-topology/index.md): стабильный GitHub Actions `checks` lane с корректным разделением unit/integration/build. Читать, чтобы merge gate был надёжным и предсказуемым.

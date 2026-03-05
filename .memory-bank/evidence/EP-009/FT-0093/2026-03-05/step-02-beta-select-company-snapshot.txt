@@ -1,0 +1,2 @@
+- button "Войти" [ref=e1]
+- button "Войти" [ref=e2] [nth=1]

@@ -255,6 +255,12 @@ Status: Draft (2026-03-03)
   - Must add test: docs audit / consistency check across FT/EP/index/verification matrix.
   - Must run: manual consistency sweep with zero status drift.
 
+### EP-009 execution evidence (2026-03-05)
+- FT-0091: what=DB integration isolation + deterministic seed replay; where=local + Supabase beta pooler; how=`pnpm test:db`, rerun `pnpm test:db`, `pnpm checks`, targeted `pnpm --filter @feedback-360/db exec vitest run --testTimeout=45000 --maxWorkers=1 --no-file-parallelism src/migrations/ft-0091-db-integration-isolation.test.ts`; quality_gate=passed; acceptance_gate=passed (DB lane green twice подряд, no duplicate/FK drift, seed replay deterministic, curated DB timeouts raised to 45s for cloud latency); ci_run=`https://github.com/deksden-com/feedback-360/actions/runs/22738344260`; result=passed.
+- FT-0092: what=required GitHub `checks` topology + Vercel-ready PR surface; where=GitHub PR `#26` + local repro; how=`pnpm checks`, `gh pr checks 26`, `gh run list --workflow ci.yml --limit 3`; quality_gate=passed; acceptance_gate=passed (`checks` context exists, branch protection sees green status, PR no longer blocked by missing context); ci_run=`https://github.com/deksden-com/feedback-360/actions/runs/22738344260`; deploy=`https://go360go-beta-qjzyzd712-deksdens-projects.vercel.app`; result=passed.
+- FT-0093: what=beta smoke release gates + manual browser evidence; where=real `https://beta.go360go.ru`; how=`PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web test:smoke:beta`, manual `$agent-browser` login→demo→select-company flow; quality_gate=passed; acceptance_gate=passed (5 smoke specs green on beta, manual screenshots captured, workflow dispatch green on updated SHA); browser_smoke=passed; ci_run=`https://github.com/deksden-com/feedback-360/actions/runs/22738351836`; artifacts=`.memory-bank/evidence/EP-009/FT-0093/2026-03-05/step-01-beta-login.png`, `.memory-bank/evidence/EP-009/FT-0093/2026-03-05/step-02-beta-select-company.png`; result=passed.
+- FT-0094: what=docs/evidence sync + epic progress audit; where=local; how=`pnpm docs:audit`, `rg -n "Status: Draft|Status: In Progress" .memory-bank/plans/epics/EP-009-test-release-hardening`; quality_gate=passed; acceptance_gate=passed (EP counts match feature docs, completed FT all have evidence blocks, verification matrix section present); result=passed.
+
 ## EP-010 Production readiness
 - FT-0101
   - Must add test: docs consistency check between retention/privacy, RBAC, results visibility and glossary.

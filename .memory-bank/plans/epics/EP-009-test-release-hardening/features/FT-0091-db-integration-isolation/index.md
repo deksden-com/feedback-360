@@ -1,5 +1,5 @@
 # FT-0091 — DB integration isolation
-Status: Draft (2026-03-05)
+Status: Completed (2026-03-05)
 
 ## User value
 Команда и ИИ-агенты получают надёжные integration tests: тесты либо зелёные по делу, либо падают из-за реальной регрессии, а не из-за параллельных миграций, shared seed state или deadlock.
@@ -53,3 +53,29 @@ Status: Draft (2026-03-05)
 
 ## Manual verification (deployed environment)
 N/A — это инфраструктурная/test-harness фича; ручная проверка идёт через CI logs и локальные rerun.
+
+## Quality checks evidence (2026-03-05)
+- Checks run:
+  - `pnpm test:db`
+  - `pnpm test:db`
+  - `pnpm checks`
+- Result:
+  - passed; curated DB lane дважды подряд отработал без duplicate-key / FK drift / flaky cleanup;
+  - workspace gate тоже зелёный после выделения DB lane из `pnpm -r test`.
+
+## Acceptance evidence (2026-03-05)
+- Commands/tests run:
+  - `pnpm --filter @feedback-360/db test:db`
+  - `pnpm --filter @feedback-360/client test:db`
+  - `pnpm --filter @feedback-360/core test:db`
+  - `pnpm --filter @feedback-360/db exec vitest run --testTimeout=20000 --maxWorkers=1 --no-file-parallelism src/migrations/ft-0091-db-integration-isolation.test.ts`
+- Result:
+  - passed; `FT-0091 DB integration isolation` подтверждает, что canonical seeds воспроизводятся повторно на той же БД;
+  - `ft-0023` автоматически skip-ится на pooled cloud DB, не делая lane ложнопадающим.
+
+## CI/CD evidence
+- GitHub:
+  - PR checks: `https://github.com/deksden-com/feedback-360/actions/runs/22735424128`
+  - Status: `success`
+- Vercel:
+  - Not applicable — фича про test topology, не про runtime UI deploy.
