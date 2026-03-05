@@ -1,5 +1,5 @@
 # EP-005 — Feature catalog
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-05)
 
 - [FT-0051 Indicator aggregations](FT-0051-indicators-aggregations/index.md): per-rater average, исключение NA, group aggregates. **Completed (2026-03-04)**. Читать, чтобы numbers считались правильно.
 - [FT-0052 Anonymity threshold + small groups](FT-0052-anonymity-small-groups/index.md): threshold=3, per-competency threshold, hide/merge. **Completed (2026-03-05)**. Читать, чтобы не допустить deanonymization.

@@ -1,5 +1,5 @@
 # EP-004 — Feature catalog
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 - [FT-0041 Competency models v1](FT-0041-models-v1/index.md): versioning + indicators (и skeleton для levels). **Completed (2026-03-04)**. Читать, чтобы кампании ссылались на версию модели.
 - [FT-0042 Campaign lifecycle](FT-0042-campaign-lifecycle/index.md): create/start/stop/end + statuses. **Completed (2026-03-04)**. Читать, чтобы переходы были строгими и тестируемыми.

@@ -1,5 +1,5 @@
 # EP-002 — Identity, tenancy, RBAC
-Status: Draft (2026-03-03)
+Status: Completed (2026-03-04)
 
 ## Goal
 Безопасный multi-tenant доступ: users vs employees, memberships, роли, signups off.
