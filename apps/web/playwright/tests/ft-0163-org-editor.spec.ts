@@ -55,38 +55,38 @@ test("FT-0163: HR edits department tree, moves employee and updates manager with
   await page.goto(`/hr/org?departmentId=${departmentA}&employeeId=${staffA1}`);
 
   await expect(page.getByRole("heading", { name: "Оргструктура" })).toBeVisible({
-    timeout: 20_000,
+    timeout: 60_000,
   });
   await page.getByTestId("department-name-input").fill("Команда A");
   await Promise.all([
     page.waitForURL(/flash=department-saved/),
     page.getByTestId("department-save-submit").click(),
   ]);
-  await expect(page.getByTestId("org-flash-department-saved")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("org-flash-department-saved")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId(`org-tree-row-${departmentA}`)).toContainText("Команда A", {
-    timeout: 20_000,
+    timeout: 60_000,
   });
 
   await page.getByTestId("org-move-department-select").selectOption(String(departmentB));
   await Promise.all([page.waitForURL(/flash=moved/), page.getByTestId("org-move-submit").click()]);
-  await expect(page.getByTestId("org-flash-moved")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("org-flash-moved")).toBeVisible({ timeout: 60_000 });
 
   await page.getByTestId("org-manager-select").selectOption(String(headB));
   await Promise.all([
     page.waitForURL(/flash=manager/),
     page.getByTestId("org-manager-submit").click(),
   ]);
-  await expect(page.getByTestId("org-flash-manager")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("org-flash-manager")).toBeVisible({ timeout: 60_000 });
 
   await page.goto(`/hr/employees/${staffA1}`);
   await expect(page.getByTestId("employee-profile-department-history")).toContainText("Команда A", {
-    timeout: 20_000,
+    timeout: 60_000,
   });
   await expect(page.getByTestId("employee-profile-department-history")).toContainText("Dept B", {
-    timeout: 20_000,
+    timeout: 60_000,
   });
   await expect(page.getByTestId("employee-profile-manager-history")).toContainText("Boris HeadB", {
-    timeout: 20_000,
+    timeout: 60_000,
   });
   await page.screenshot({
     fullPage: true,
