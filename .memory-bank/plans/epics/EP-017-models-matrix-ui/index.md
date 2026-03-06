@@ -1,5 +1,5 @@
 # EP-017 — Competency models and matrix UI
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## Goal
 Дать HR GUI для моделей компетенций и матрицы оценивания: список версий, редактор моделей и matrix builder с preview freeze behavior.
@@ -19,12 +19,26 @@ Status: Planned (2026-03-06)
 ## Progress report (evidence-based)
 - `as_of`: 2026-03-06
 - `total_features`: 3
-- `completed_features`: 0
-- `evidence_confirmed_features`: 0
+- `completed_features`: 3
+- `evidence_confirmed_features`: 3
 - verification link:
-  - [Verification matrix](../../verification-matrix.md): сюда добавим matrix/model acceptance как только пойдём в реализацию. Читать, чтобы сценарии были привязаны к seed и GS.
+  - [Verification matrix](../../verification-matrix.md): execution evidence для model/matrix GUI, CLI contract coverage и beta acceptance. Читать, чтобы проверить local и deployed acceptance по каждому HR flow.
 
 ## Definition of done
 - HR может создать/редактировать model draft versions и настраивать matrix assignment без CLI.
 - Lock rules и started immutability отражаются в UI корректно.
 - Все editor flows проверяемы локально и на `beta`.
+
+## Current status
+- Closed:
+  - [FT-0171 Model catalog and version hub](features/FT-0171-model-catalog/index.md): HR получил каталог моделей с version statuses, filter flow и clone draft action.
+  - [FT-0172 Model editor](features/FT-0172-model-editor/index.md): draft editor для indicators/levels, weight validation и publish flow работает через GUI.
+  - [FT-0173 Matrix builder with freeze preview](features/FT-0173-matrix-builder/index.md): department-based autogen, matrix save и lock/read-only states доступны из campaign UI.
+
+## Completion note (2026-03-06)
+- EP-017 закрыт полностью:
+  - в `apps/web` появился отдельный `models-matrix` feature area с model catalog, draft editor и matrix builder routes;
+  - typed client API расширен операциями `model.version.get`, `model.version.cloneDraft`, `model.version.upsertDraft`, `model.version.publish`, `matrix.list`;
+  - CLI получил команды `model version get|clone-draft|save-draft|publish` и `matrix list`, чтобы web/cli оставались на одном contract;
+  - local quality gate и acceptance зелёные, beta acceptance подтверждён на `https://beta.go360go.ru`;
+  - PR [#44](https://github.com/deksden-com/feedback-360/pull/44) смержен в `develop`, beta deployment подтверждён после merge commit `5b7cdc5`.
