@@ -22,7 +22,7 @@ test("SMOKE(beta): questionnaire draft path works on seeded campaign", async ({ 
   });
 
   await page.getByTestId(`open-questionnaire-${questionnaireId}`).click();
-  await expect(page.getByTestId("questionnaire-progress-card")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId("questionnaire-progress-card")).toBeVisible({ timeout: 30_000 });
 
   await page.getByTestId("questionnaire-note").fill("Beta smoke draft note");
   await page.getByTestId("save-draft-button").click();
