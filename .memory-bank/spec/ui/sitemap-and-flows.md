@@ -26,13 +26,26 @@ Status: Updated (2026-03-06)
   - save draft / submit
   - explicit read-only for submitted/ended
 - My results dashboard
+  - summary hero + KPI tiles
+  - group visibility cards
+  - competency insight blocks
+  - processed/summary text insights without raw comments
 
 ### Manager
 - Team results
+  - campaign/subject switcher
+  - anonymity-safe group explanations
+  - processed-only open-text insights
+
+### HR
+- HR results workbench
+  - campaign + subject filters
+  - summary hero + diagnostics cards
+  - raw/processed/summary text analysis for `hr_admin`
+  - redacted mode for `hr_reader`
 
 ## Planned GUI expansion (post-MVP wave)
-Ниже — целевая карта экранов для GUI-эпиков EP-011..EP-019. Это не значит “делаем всё сразу”, а означает куда развивается IA приложения.
-EP-014 в этой последовательности — внутренний feature-area refactor: он не добавляет новых экранов, но меняет foundation, на котором строятся последующие UI-эпики.
+Ниже — целевая карта экранов для GUI-эпиков EP-016..EP-019. Это не значит “делаем всё сразу”, а означает куда развивается IA приложения после уже закрытых shell/questionnaires/results волн.
 
 ## Shared
 - Login (magic link)
