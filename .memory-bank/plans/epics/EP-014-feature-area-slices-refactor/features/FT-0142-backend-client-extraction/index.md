@@ -1,5 +1,5 @@
 # FT-0142 — Core/contract/client/cli extraction by feature areas
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## Traceability (mandatory)
 - Epic: [EP-014 — Feature-area slice refactor](../../index.md)
@@ -12,7 +12,7 @@ Status: Planned (2026-03-06)
 ## Deliverables
 - Перенос `api-contract` из общего `index.ts` в versioned slice modules по feature areas.
 - Перенос `core` из перегруженного root dispatcher в slice-oriented modules с thin composition layer.
-- Перенос `client` и `cli` в feature-area modules / command groups с сохранением существующего контракта и поведения.
+- Перенос `client` в feature-area modules и выведение `cli` в thin entrypoint + transitional legacy registry без изменения существующего контракта и поведения.
 - Добавление/обновление architecture smoke tests на import boundaries, representative operations и regression coverage.
 - Legacy paths либо удалены, либо сведены к thin re-export shim с явным планом удаления.
 
@@ -105,17 +105,23 @@ Status: Planned (2026-03-06)
 - [Client API operation catalog](../../../../../spec/client-api/operation-catalog.md)
 
 ## Quality checks evidence (after implementation)
-- Date: `YYYY-MM-DD`
+- Date: `2026-03-06`
 - Checks run:
   - `pnpm checks`
-  - `pnpm test:db`
-  - package-focused regression runs for moved areas
-- Result: planned.
+  - `pnpm --filter @feedback-360/api-contract test`
+  - `pnpm --filter @feedback-360/client test`
+  - `pnpm --filter @feedback-360/cli test`
+- Result: passed.
 
 ## Acceptance evidence (after implementation)
-- Date: `YYYY-MM-DD`
-- Commands/tests run: planned.
-- Result: planned.
+- Date: `2026-03-06`
+- Commands/tests run:
+  - `pnpm checks`
+  - `pnpm --filter @feedback-360/api-contract test`
+  - `pnpm --filter @feedback-360/client test`
+  - `pnpm --filter @feedback-360/cli test`
+  - `pnpm --filter @feedback-360/core test -- --runInBand src/ft/ft-0142-feature-layout-no-db.test.ts`
+- Result: passed.
 - If docs changed: `pnpm docs:audit`
 
 ## CI/CD evidence (mandatory for runtime/deploy/integration changes)

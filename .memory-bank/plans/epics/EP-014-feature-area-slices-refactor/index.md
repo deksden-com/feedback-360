@@ -1,5 +1,5 @@
 # EP-014 — Feature-area slice refactor
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## Goal
 Перестроить кодовую базу под явные feature areas перед следующей волной GUI-эпиков, чтобы будущие изменения были локальнее, безопаснее и быстрее в сопровождении.
@@ -45,8 +45,8 @@ Status: Planned (2026-03-06)
 ## Progress report (evidence-based)
 - `as_of`: 2026-03-06
 - `total_features`: 3
-- `completed_features`: 0
-- `evidence_confirmed_features`: 0
+- `completed_features`: 3
+- `evidence_confirmed_features`: 3
 - verification link:
   - [Verification matrix](../../verification-matrix.md): сюда пойдут regression, docs audit и beta smoke evidence по refactor. Читать, чтобы refactor считался завершённым только после доказуемой стабилизации.
 

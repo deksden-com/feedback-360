@@ -1,5 +1,5 @@
 # Feature-area boundaries
-Status: Draft (2026-03-06)
+Status: Updated (2026-03-06)
 
 Цель: зафиксировать целевые **ownership boundaries** между feature areas после EP-014, чтобы структура кода отвечала не только на вопрос “куда положить файл”, но и на вопрос “почему этот код принадлежит именно этой области”.
 
@@ -92,3 +92,10 @@ Root entrypoints допустимы только как thin composition layer:
 - где WHAT по области,
 - где WHY по границам,
 - где начинается HOW в коде.
+
+Текущая реализация (2026-03-06):
+- `packages/core/src/features/*.ts`
+- `packages/client/src/features/*.ts`
+- `packages/api-contract/src/<area>.ts`
+- `apps/web/src/features/<area>/...`
+- transitional shims: `packages/api-contract/src/v1/legacy.ts`, `packages/cli/src/legacy.ts`, `apps/web/src/lib/*`, `apps/web/src/components/*`

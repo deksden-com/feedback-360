@@ -1,5 +1,5 @@
 # FT-0143 — Web/lib realignment, docs sync and deployment proof
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## Traceability (mandatory)
 - Epic: [EP-014 — Feature-area slice refactor](../../index.md)
@@ -104,18 +104,21 @@ Status: Planned (2026-03-06)
 - [UI assets index](../../../../../assets/ui/index.md)
 
 ## Quality checks evidence (after implementation)
-- Date: `YYYY-MM-DD`
+- Date: `2026-03-06`
 - Checks run:
   - `pnpm checks`
   - `pnpm docs:audit`
-  - targeted Playwright smoke
-- Result: planned.
+  - `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3102 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0143-slice-refactor-regression.spec.ts --workers=1 --reporter=line`
+- Result: passed.
 
 ## Acceptance evidence (after implementation)
-- Date: `YYYY-MM-DD`
-- Commands/tests run: planned.
-- Result: planned.
-- Artifacts: planned screenshots/logs/deployment links.
+- Date: `2026-03-06`
+- Commands/tests run:
+  - `pnpm docs:audit`
+  - `node scripts/audit-memory-bank.mjs --ep EP-014`
+  - `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3102 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0143-slice-refactor-regression.spec.ts --workers=1 --reporter=line`
+- Result: passed.
+- Artifacts: `.memory-bank/evidence/EP-014/FT-0143/2026-03-06/step-01-hr-campaign-list.png`, `.memory-bank/evidence/EP-014/FT-0143/2026-03-06/step-02-hr-campaign-detail.png`, `.memory-bank/evidence/EP-014/FT-0143/2026-03-06/step-03-questionnaire-detail.png`, `.memory-bank/evidence/EP-014/FT-0143/2026-03-06/step-04-results-my-dashboard.png`, `.memory-bank/evidence/EP-014/FT-0143/2026-03-06/step-05-results-team-dashboard.png`.
 
 ## CI/CD evidence (mandatory for runtime/deploy/integration changes)
 - GitHub:

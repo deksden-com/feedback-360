@@ -1,5 +1,5 @@
 # FT-0141 — Feature-area target structure and shared-module policy
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## Traceability (mandatory)
 - Epic: [EP-014 — Feature-area slice refactor](../../index.md)
@@ -97,15 +97,19 @@ N/A: planning/doc slice. Deployed verification требуется в FT-0143 п�
 - [UI design references mapping](../../../../../spec/ui/design-references-stitch.md)
 
 ## Quality checks evidence (after implementation)
-- Date: `YYYY-MM-DD`
+- Date: `2026-03-06`
 - Checks run:
+  - `pnpm --filter @feedback-360/core test -- --runInBand src/ft/ft-0141-feature-area-target-structure.test.ts`
   - `pnpm docs:audit`
-- Result: planned.
+- Result: passed.
 
 ## Acceptance evidence (after implementation)
-- Date: `YYYY-MM-DD`
-- Commands/tests run: planned.
-- Result: planned.
+- Date: `2026-03-06`
+- Commands/tests run:
+  - `pnpm --filter @feedback-360/core test -- --runInBand src/ft/ft-0141-feature-area-target-structure.test.ts`
+  - `rg -n "src/slices|commands/<slice>|v1/<slice>|packages/core/src/slices|packages/cli/src/commands" .memory-bank packages apps/web`
+  - `node scripts/audit-memory-bank.mjs --ep EP-014`
+- Result: passed.
 
 ## CI/CD evidence (mandatory for runtime/deploy/integration changes)
 - GitHub: N/A for planning-only slice unless merged together with executable tooling checks.

@@ -1,0 +1,93 @@
+import {
+  type CampaignParticipantsAddFromDepartmentsInput,
+  type CampaignParticipantsAddFromDepartmentsOutput,
+  type MatrixGenerateSuggestedInput,
+  type MatrixGenerateSuggestedOutput,
+  type MatrixSetInput,
+  type MatrixSetOutput,
+  type OperationContext,
+  type OperationResult,
+  errorFromUnknown,
+  errorResult,
+  parseCampaignParticipantsAddFromDepartmentsInput,
+  parseCampaignParticipantsAddFromDepartmentsOutput,
+  parseMatrixGenerateSuggestedInput,
+  parseMatrixGenerateSuggestedOutput,
+  parseMatrixSetInput,
+  parseMatrixSetOutput,
+} from "@feedback-360/api-contract";
+
+import type { ClientRuntime } from "../shared/runtime";
+
+export type MatrixClientMethods = {
+  campaignParticipantsAddFromDepartments(
+    input: CampaignParticipantsAddFromDepartmentsInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignParticipantsAddFromDepartmentsOutput>>;
+  matrixGenerateSuggested(
+    input: MatrixGenerateSuggestedInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<MatrixGenerateSuggestedOutput>>;
+  matrixSet(
+    input: MatrixSetInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<MatrixSetOutput>>;
+};
+
+export const createMatrixClientMethods = (runtime: ClientRuntime): MatrixClientMethods => ({
+  campaignParticipantsAddFromDepartments: async (input, context) => {
+    let parsedInput: CampaignParticipantsAddFromDepartmentsInput;
+    try {
+      parsedInput = parseCampaignParticipantsAddFromDepartmentsInput(input);
+    } catch (error) {
+      return errorResult(
+        errorFromUnknown(
+          error,
+          "invalid_input",
+          "Invalid campaignParticipantsAddFromDepartments input.",
+        ),
+      );
+    }
+
+    return runtime.invokeOperation({
+      operation: "campaign.participants.addFromDepartments",
+      input: parsedInput,
+      context,
+      parseOutput: parseCampaignParticipantsAddFromDepartmentsOutput,
+    });
+  },
+
+  matrixGenerateSuggested: async (input, context) => {
+    let parsedInput: MatrixGenerateSuggestedInput;
+    try {
+      parsedInput = parseMatrixGenerateSuggestedInput(input);
+    } catch (error) {
+      return errorResult(
+        errorFromUnknown(error, "invalid_input", "Invalid matrixGenerateSuggested input."),
+      );
+    }
+
+    return runtime.invokeOperation({
+      operation: "matrix.generateSuggested",
+      input: parsedInput,
+      context,
+      parseOutput: parseMatrixGenerateSuggestedOutput,
+    });
+  },
+
+  matrixSet: async (input, context) => {
+    let parsedInput: MatrixSetInput;
+    try {
+      parsedInput = parseMatrixSetInput(input);
+    } catch (error) {
+      return errorResult(errorFromUnknown(error, "invalid_input", "Invalid matrixSet input."));
+    }
+
+    return runtime.invokeOperation({
+      operation: "matrix.set",
+      input: parsedInput,
+      context,
+      parseOutput: parseMatrixSetOutput,
+    });
+  },
+});

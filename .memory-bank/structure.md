@@ -1,5 +1,5 @@
 # Project structure (repo layout)
-Status: Draft (2026-03-03)
+Status: Updated (2026-03-06)
 
 Цель: описать структуру репозитория по папкам и границы ответственности, чтобы:
 - слои были соблюдены (core/адаптеры/клиенты),
@@ -25,12 +25,26 @@ Status: Draft (2026-03-03)
 
 ## Apps (delivery)
 - `apps/web/`: Next.js UI + route handlers. UI не содержит доменных правил; вызывает typed client.
+  - `src/features/`: feature-area UI/server helpers (`app-shell`, `identity-tenancy`, `campaigns`, `questionnaires`, `results`).
+  - `src/components/ui/`: UI primitives.
+  - `src/lib/*`, `src/components/*`, `src/app/results/_shared.tsx`: временные compatibility shims, которые только re-export-ят из `src/features/*`.
 
 ## Packages (layers)
 - `packages/core/`: use-cases/policies/state machines/calculators (вся бизнес-логика).
+  - `src/features/*`: owning feature-area handlers.
+  - `src/shared/*`: truly shared dispatch/context helpers.
+  - `src/index.ts`: thin composition/dispatch entrypoint.
 - `packages/api-contract/`: типизированный контракт операций/DTO/ошибок (версионируемый).
+  - `src/<area>.ts`: feature-area contract entrypoints.
+  - `src/v1/legacy.ts`: переходный внутренний runtime/schema layer, пока deeper split не завершён.
+  - `src/index.ts`: thin aggregate export surface.
 - `packages/client/`: typed client поверх contract (HTTP и/или in-proc) для UI/CLI.
+  - `src/features/*`: client methods grouped by feature area.
+  - `src/shared/runtime.ts`: transport/runtime plumbing.
+  - `src/index.ts`: thin composer.
 - `packages/cli/`: Commander CLI поверх client (human + `--json`).
+  - `src/index.ts`: thin CLI entrypoint.
+  - `src/legacy.ts`: переходный registry/module с существующими командами; новые feature slices не должны наращивать его бесконтрольно.
 - `packages/db/`: Drizzle schema/migrations + seed scenarios (fixtures).
 - `packages/testkit/`: builders/fixtures/helpers для тестов (без доменных правил).
 - `packages/config/`: общие конфиги (tsconfig/biome/vitest).
