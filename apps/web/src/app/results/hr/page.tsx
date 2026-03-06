@@ -1,6 +1,10 @@
+import { InternalAppShell } from "@/components/internal-app-shell";
+import { PageEmptyState, PageErrorState, PageStateScreen } from "@/components/page-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { applyDebugPageDelay } from "@/lib/debug-page-delay";
 import { resolveAppOperationContext } from "@/lib/operation-context";
+import { getFriendlyErrorCopy } from "@/lib/page-state";
 import { createInprocClient } from "@feedback-360/client";
 import { redirect } from "next/navigation";
 
@@ -28,6 +32,8 @@ export default async function ResultsHrViewPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = searchParams ? await searchParams : undefined;
+  await applyDebugPageDelay(params?.debugDelayMs);
   const resolved = await resolveAppOperationContext();
   if (!resolved.ok) {
     if (resolved.error.code === "unauthenticated") {
@@ -39,61 +45,91 @@ export default async function ResultsHrViewPage({
   }
 
   if (!resolved.ok) {
+    const state = getFriendlyErrorCopy(resolved.error, {
+      title: "Не удалось открыть HR результаты",
+      description: "Попробуйте обновить страницу или войти заново.",
+    });
+
     return (
-      <ResultsPageLayout title="HR результаты" subtitle="Не удалось определить контекст доступа.">
-        <p className="text-sm text-destructive">{resolved.error.message}</p>
-      </ResultsPageLayout>
+      <PageStateScreen>
+        <PageErrorState
+          title={state.title}
+          description={state.description}
+          actions={[{ href: "/auth/login", label: "Перейти ко входу", variant: "outline" }]}
+        />
+      </PageStateScreen>
     );
   }
 
   const isHrRole = resolved.context.role === "hr_admin" || resolved.context.role === "hr_reader";
   if (!isHrRole) {
     return (
-      <ResultsPageLayout title="HR результаты" subtitle="Доступно только для HR ролей.">
-        <p className="text-sm text-destructive" data-testid="results-hr-forbidden">
-          Текущая роль не может открыть HR view.
-        </p>
-      </ResultsPageLayout>
+      <InternalAppShell
+        context={resolved.context}
+        currentPath="/results/hr"
+        title="HR результаты"
+        subtitle="Доступно только для HR ролей."
+      >
+        <ResultsPageLayout title="HR результаты" subtitle="Доступно только для HR ролей.">
+          <PageErrorState
+            title="Эта витрина доступна только HR-роли"
+            description="Откройте личные результаты или переключите активную компанию, где у вас есть HR-доступ."
+            actions={[{ href: "/results", label: "Открыть мои результаты", variant: "outline" }]}
+            testId="results-hr-forbidden"
+          />
+        </ResultsPageLayout>
+      </InternalAppShell>
     );
   }
 
-  const params = searchParams ? await searchParams : undefined;
   const campaignId = getQueryValue(params?.campaignId);
   const subjectEmployeeId = getQueryValue(params?.subjectEmployeeId);
 
   if (!campaignId || !subjectEmployeeId) {
     return (
-      <ResultsPageLayout
+      <InternalAppShell
+        context={resolved.context}
+        currentPath="/results/hr"
         title="HR результаты"
         subtitle="Укажите campaignId и subjectEmployeeId для загрузки полной HR-витрины."
       >
-        <form
-          className="grid gap-3 rounded-md border p-4"
-          method="get"
-          data-testid="hr-results-form"
+        <ResultsPageLayout
+          title="HR результаты"
+          subtitle="Выберите кампанию и сотрудника, чтобы открыть HR-витрину."
         >
-          <div className="space-y-2">
-            <Label htmlFor="campaignId">Campaign ID</Label>
-            <Input id="campaignId" name="campaignId" defaultValue={campaignId} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="subjectEmployeeId">Subject employee ID</Label>
-            <Input
-              id="subjectEmployeeId"
-              name="subjectEmployeeId"
-              defaultValue={subjectEmployeeId}
-            />
-          </div>
-          <div>
-            <button
-              type="submit"
-              className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
-            >
-              Открыть результаты
-            </button>
-          </div>
-        </form>
-      </ResultsPageLayout>
+          <PageEmptyState
+            title="Нужно выбрать сотрудника и кампанию"
+            description="Укажите campaignId и subjectEmployeeId вручную, чтобы открыть полную HR-витрину."
+            testId="results-hr-empty"
+          />
+          <form
+            className="grid gap-3 rounded-md border p-4"
+            method="get"
+            data-testid="hr-results-form"
+          >
+            <div className="space-y-2">
+              <Label htmlFor="campaignId">Campaign ID</Label>
+              <Input id="campaignId" name="campaignId" defaultValue={campaignId} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="subjectEmployeeId">Subject employee ID</Label>
+              <Input
+                id="subjectEmployeeId"
+                name="subjectEmployeeId"
+                defaultValue={subjectEmployeeId}
+              />
+            </div>
+            <div>
+              <button
+                type="submit"
+                className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+              >
+                Открыть результаты
+              </button>
+            </div>
+          </form>
+        </ResultsPageLayout>
+      </InternalAppShell>
     );
   }
 
@@ -109,12 +145,27 @@ export default async function ResultsHrViewPage({
   );
 
   if (!view.ok) {
+    const state = getFriendlyErrorCopy(view.error, {
+      title: "Не удалось загрузить HR результаты",
+      description: "Проверьте campaignId и subjectEmployeeId или попробуйте позже.",
+    });
+
     return (
-      <ResultsPageLayout title="HR результаты" subtitle="Не удалось загрузить результаты.">
-        <p className="text-sm text-destructive" data-testid="results-hr-error">
-          {view.error.message}
-        </p>
-      </ResultsPageLayout>
+      <InternalAppShell
+        context={resolved.context}
+        currentPath="/results/hr"
+        title="HR результаты"
+        subtitle={state.description}
+      >
+        <ResultsPageLayout title="HR результаты" subtitle={state.description}>
+          <PageErrorState
+            title={state.title}
+            description={state.description}
+            actions={[{ href: "/results/hr", label: "Сбросить фильтры", variant: "outline" }]}
+            testId="results-hr-error"
+          />
+        </ResultsPageLayout>
+      </InternalAppShell>
     );
   }
 
@@ -124,16 +175,23 @@ export default async function ResultsHrViewPage({
     : "HR Reader витрина: processed + summary комментарии без raw текста.";
 
   return (
-    <ResultsPageLayout title="HR результаты" subtitle={subtitle}>
-      <ResultsSummaryCard
-        campaignId={view.data.campaignId}
-        subjectEmployeeId={view.data.subjectEmployeeId}
-        overallScore={view.data.overallScore}
-        modelKind={view.data.modelKind}
-      />
-      <ResultsGroupCard data={view.data} />
-      <ResultsCompetenciesCard data={view.data} />
-      <ResultsOpenTextCard items={view.data.openText} showRawText={showRawText} />
-    </ResultsPageLayout>
+    <InternalAppShell
+      context={resolved.context}
+      currentPath="/results/hr"
+      title="HR результаты"
+      subtitle={subtitle}
+    >
+      <ResultsPageLayout title="HR результаты" subtitle={subtitle}>
+        <ResultsSummaryCard
+          campaignId={view.data.campaignId}
+          subjectEmployeeId={view.data.subjectEmployeeId}
+          overallScore={view.data.overallScore}
+          modelKind={view.data.modelKind}
+        />
+        <ResultsGroupCard data={view.data} />
+        <ResultsCompetenciesCard data={view.data} />
+        <ResultsOpenTextCard items={view.data.openText} showRawText={showRawText} />
+      </ResultsPageLayout>
+    </InternalAppShell>
   );
 }

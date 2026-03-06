@@ -1,3 +1,4 @@
+import { PageEmptyState, PageErrorState, PageStateScreen } from "@/components/page-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAppSession } from "@/lib/app-session";
@@ -27,19 +28,13 @@ export default async function SelectCompanyPage() {
 
   if (!memberships.ok) {
     return (
-      <main className="mx-auto flex min-h-dvh w-full max-w-3xl items-center p-6">
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>Не удалось загрузить компании</CardTitle>
-            <CardDescription>{memberships.error.message}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <a href="/auth/login" className="text-sm text-primary underline">
-              Вернуться к входу
-            </a>
-          </CardContent>
-        </Card>
-      </main>
+      <PageStateScreen>
+        <PageErrorState
+          title="Не удалось загрузить компании"
+          description="Не получилось получить список доступных компаний. Попробуйте снова или выполните вход ещё раз."
+          actions={[{ href: "/auth/login", label: "Вернуться ко входу", variant: "outline" }]}
+        />
+      </PageStateScreen>
     );
   }
 
@@ -54,26 +49,35 @@ export default async function SelectCompanyPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {memberships.data.items.map((item) => (
-            <Card key={item.companyId} data-testid={`company-card-${item.companyId}`}>
-              <CardHeader>
-                <CardTitle className="text-xl">{item.companyName}</CardTitle>
-                <CardDescription>{roleLabels[item.role] ?? item.role}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form action="/api/session/active-company" method="post">
-                  <input type="hidden" name="companyId" value={item.companyId} />
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    data-testid={`select-company-${item.companyId}`}
-                  >
-                    Войти
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          ))}
+          {memberships.data.items.length === 0 ? (
+            <PageEmptyState
+              title="Нет доступных компаний"
+              description="Аккаунт существует, но ещё не привязан ни к одной активной компании. Обратитесь к HR-администратору."
+              actions={[{ href: "/auth/login", label: "Вернуться ко входу", variant: "outline" }]}
+              testId="select-company-empty"
+            />
+          ) : (
+            memberships.data.items.map((item) => (
+              <Card key={item.companyId} data-testid={`company-card-${item.companyId}`}>
+                <CardHeader>
+                  <CardTitle className="text-xl">{item.companyName}</CardTitle>
+                  <CardDescription>{roleLabels[item.role] ?? item.role}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form action="/api/session/active-company" method="post">
+                    <input type="hidden" name="companyId" value={item.companyId} />
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      data-testid={`select-company-${item.companyId}`}
+                    >
+                      Войти
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </div>
     </main>

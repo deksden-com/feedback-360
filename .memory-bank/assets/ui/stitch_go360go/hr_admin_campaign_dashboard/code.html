@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>360-dfb | HR Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1e3b8a",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121620",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shrink-0">
+<div class="p-6 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800">
+<div class="bg-primary rounded-lg p-1.5 text-white flex items-center justify-center">
+<span class="material-symbols-outlined text-2xl">published_with_changes</span>
+</div>
+<div>
+<h1 class="text-slate-900 dark:text-white text-lg font-bold leading-none">360-dfb</h1>
+<p class="text-slate-500 text-xs font-medium mt-1">HR Admin Portal</p>
+</div>
+</div>
+<nav class="flex-1 overflow-y-auto p-4 space-y-6">
+<!-- Directory Section -->
+<div>
+<h3 class="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Directory</h3>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span class="text-sm font-medium">Employees</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm font-medium">Org Structure</span>
+</a>
+</div>
+</div>
+<!-- Models Section -->
+<div>
+<h3 class="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Models</h3>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+<span class="text-sm font-medium">Competency Models</span>
+</a>
+</div>
+</div>
+<!-- Campaigns Section -->
+<div>
+<h3 class="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Campaigns</h3>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary dark:bg-primary/20 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="text-sm font-semibold">Active Campaigns</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">archive</span>
+<span class="text-sm font-medium">Archived</span>
+</a>
+</div>
+</div>
+</nav>
+<div class="p-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+<div class="w-10 h-10 rounded-full bg-slate-200 overflow-hidden shrink-0 border-2 border-white dark:border-slate-700">
+<img alt="User" class="w-full h-full object-cover" data-alt="Admin user profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDth-z7u1hvGbrHr31-vVFuGIOdzk9lqOULJFUWo_dj4AD4nf5-jSh50gNLmNVYFrEqKXLp723nCAvCPX7FNFhQufKKMgvX4fUGiPozHhPYjgnyfaL_wPXkqScfccdOOMBqhJW6C4tWVLhb_yFlzuB-LBqBjG9lMm7FDgR7yqB2yfmknipclIOPYmP3qb53s1x_cVwDdRpJKVoi1bhMtoZl0HjqqeIPln8wLl7iyJIDLUDGBojWMQqZAjel978jIi2elu1E-hzdClKB"/>
+</div>
+<div class="min-w-0">
+<p class="text-sm font-semibold text-slate-900 dark:text-white truncate">Jane Admin</p>
+<p class="text-xs text-slate-500 truncate">HR Director</p>
+</div>
+<button class="ml-auto text-slate-400 hover:text-slate-600">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- Header -->
+<header class="h-16 flex items-center justify-between px-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">Campaign Dashboard</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary">search</span>
+<input class="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm w-64 focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="Search campaigns..." type="text"/>
+</div>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                        Create Campaign
+                    </button>
+</div>
+</header>
+<!-- Scrollable View -->
+<div class="flex-1 overflow-y-auto p-8">
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<span class="text-slate-500 text-sm font-medium">Total Campaigns</span>
+<span class="material-symbols-outlined text-slate-400">layers</span>
+</div>
+<p class="text-3xl font-bold text-slate-900 dark:text-white">24</p>
+<div class="mt-2 flex items-center gap-1 text-emerald-500 text-xs font-semibold">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+4 this month</span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<span class="text-slate-500 text-sm font-medium">Active Reviews</span>
+<span class="material-symbols-outlined text-slate-400">play_circle</span>
+</div>
+<p class="text-3xl font-bold text-slate-900 dark:text-white">8</p>
+<div class="mt-2 flex items-center gap-1 text-slate-500 text-xs font-medium">
+<span>Currently live</span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<span class="text-slate-500 text-sm font-medium">AI Processing</span>
+<span class="material-symbols-outlined text-amber-500">memory</span>
+</div>
+<p class="text-3xl font-bold text-slate-900 dark:text-white">3</p>
+<div class="mt-2 flex items-center gap-1 text-amber-500 text-xs font-semibold">
+<span>Generating insights</span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<span class="text-slate-500 text-sm font-medium">Completion Rate</span>
+<span class="material-symbols-outlined text-slate-400">check_circle</span>
+</div>
+<p class="text-3xl font-bold text-slate-900 dark:text-white">82%</p>
+<div class="mt-2 flex items-center gap-1 text-emerald-500 text-xs font-semibold">
+<span>Avg. participation</span>
+</div>
+</div>
+</div>
+<!-- Table Container -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+<div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<h3 class="font-bold text-slate-900 dark:text-white">Recent Campaigns</h3>
+<div class="flex gap-2">
+<button class="p-2 text-slate-400 hover:text-slate-600 transition-colors">
+<span class="material-symbols-outlined text-xl">filter_list</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50">
+<th class="px-6 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Campaign Name</th>
+<th class="px-6 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Dates</th>
+<th class="px-6 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
+<th class="px-6 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Overall Progress</th>
+<th class="px-6 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1: Started -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-900 dark:text-white">Leadership 360 Q4</span>
+<span class="text-xs text-slate-500">Executive Team Model</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                                            Oct 01 - Dec 31
+                                        </div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                                            Started
+                                        </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3 w-40">
+<div class="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 75%;"></div>
+</div>
+<span class="text-xs font-bold text-slate-900 dark:text-white">75%</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all" title="Edit">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all" title="View Progress">
+<span class="material-symbols-outlined text-xl">insights</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Stop Early">
+<span class="material-symbols-outlined text-xl">timer_off</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Processing AI -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-900 dark:text-white">Manager Feedback Sync</span>
+<span class="text-xs text-slate-500">Core Values Assessment</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                                            Nov 15 - Dec 15
+                                        </div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+<span class="material-symbols-outlined text-[14px] animate-pulse">auto_awesome</span>
+                                            Processing AI
+                                        </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3 w-40">
+<div class="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-amber-500" style="width: 100%;"></div>
+</div>
+<span class="text-xs font-bold text-slate-900 dark:text-white">100%</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all" title="View Progress">
+<span class="material-symbols-outlined text-xl">insights</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Draft -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-900 dark:text-white">Sales Force Core v2</span>
+<span class="text-xs text-slate-500">Competency Mapping</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                                            Jan 01 - Mar 30
+                                        </div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                                            Draft
+                                        </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3 w-40">
+<div class="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-slate-300" style="width: 0%;"></div>
+</div>
+<span class="text-xs font-bold text-slate-900 dark:text-white">0%</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all" title="Edit">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Completed -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-900 dark:text-white">Annual Review 2023</span>
+<span class="text-xs text-slate-500">Global Workforce</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                                            Jan 01 - Dec 31
+                                        </div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                            Completed
+                                        </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3 w-40">
+<div class="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-500" style="width: 100%;"></div>
+</div>
+<span class="text-xs font-bold text-slate-900 dark:text-white">100%</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all" title="View Results">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all" title="Export Reports">
+<span class="material-symbols-outlined text-xl">download</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5: Ended -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-900 dark:text-white">Tech Lead Assessment</span>
+<span class="text-xs text-slate-500">Engineering Level 4+</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                                            Dec 01 - Jan 15
+                                        </div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
+                                            Ended
+                                        </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3 w-40">
+<div class="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-slate-400" style="width: 100%;"></div>
+</div>
+<span class="text-xs font-bold text-slate-900 dark:text-white">100%</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all" title="View History">
+<span class="material-symbols-outlined text-xl">history</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-sm text-slate-500">
+<span>Showing 1 to 5 of 24 campaigns</span>
+<div class="flex gap-2">
+<button class="px-3 py-1 rounded border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50" disabled="">Previous</button>
+<button class="px-3 py-1 rounded border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-colors">Next</button>
+</div>
+</div>
+</div>
+<!-- Footer CTA -->
+<div class="mt-8 flex justify-center">
+<button class="flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-xl font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined">rocket_launch</span>
+                        Launch New Campaign Now
+                    </button>
+</div>
+</div>
+</main>
+</div>
+</body></html>

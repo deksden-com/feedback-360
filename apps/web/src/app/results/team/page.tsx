@@ -1,6 +1,10 @@
+import { InternalAppShell } from "@/components/internal-app-shell";
+import { PageEmptyState, PageErrorState, PageStateScreen } from "@/components/page-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { applyDebugPageDelay } from "@/lib/debug-page-delay";
 import { resolveAppOperationContext } from "@/lib/operation-context";
+import { getFriendlyErrorCopy } from "@/lib/page-state";
 import { createInprocClient } from "@feedback-360/client";
 import { redirect } from "next/navigation";
 
@@ -28,6 +32,8 @@ export default async function ResultsTeamDashboardPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = searchParams ? await searchParams : undefined;
+  await applyDebugPageDelay(params?.debugDelayMs);
   const resolved = await resolveAppOperationContext();
   if (!resolved.ok) {
     if (resolved.error.code === "unauthenticated") {
@@ -39,63 +45,90 @@ export default async function ResultsTeamDashboardPage({
   }
 
   if (!resolved.ok) {
+    const state = getFriendlyErrorCopy(resolved.error, {
+      title: "Не удалось открыть результаты команды",
+      description: "Попробуйте обновить страницу или войти заново.",
+    });
+
     return (
-      <ResultsPageLayout
-        title="Результаты команды"
-        subtitle="Не удалось определить контекст доступа."
-      >
-        <p className="text-sm text-destructive">{resolved.error.message}</p>
-      </ResultsPageLayout>
+      <PageStateScreen>
+        <PageErrorState
+          title={state.title}
+          description={state.description}
+          actions={[{ href: "/auth/login", label: "Перейти ко входу", variant: "outline" }]}
+        />
+      </PageStateScreen>
     );
   }
 
   if (resolved.context.role !== "manager") {
     return (
-      <ResultsPageLayout title="Результаты команды" subtitle="Доступно только для роли Manager.">
-        <p className="text-sm text-destructive" data-testid="results-team-forbidden">
-          Текущая роль не может открыть team dashboard.
-        </p>
-      </ResultsPageLayout>
+      <InternalAppShell
+        context={resolved.context}
+        currentPath="/results/team"
+        title="Результаты команды"
+        subtitle="Доступно только для роли Manager."
+      >
+        <ResultsPageLayout title="Результаты команды" subtitle="Доступно только для роли Manager.">
+          <PageErrorState
+            title="Эта витрина доступна только руководителю"
+            description="Откройте личные результаты или переключите активную компанию, где у вас есть роль manager."
+            actions={[{ href: "/results", label: "Открыть мои результаты", variant: "outline" }]}
+            testId="results-team-forbidden"
+          />
+        </ResultsPageLayout>
+      </InternalAppShell>
     );
   }
 
-  const params = searchParams ? await searchParams : undefined;
   const campaignId = getQueryValue(params?.campaignId);
   const subjectEmployeeId = getQueryValue(params?.subjectEmployeeId);
 
   if (!campaignId || !subjectEmployeeId) {
     return (
-      <ResultsPageLayout
+      <InternalAppShell
+        context={resolved.context}
+        currentPath="/results/team"
         title="Результаты команды"
         subtitle="Укажите campaignId и subjectEmployeeId для загрузки результатов сотрудника."
       >
-        <form
-          className="grid gap-3 rounded-md border p-4"
-          method="get"
-          data-testid="team-results-form"
+        <ResultsPageLayout
+          title="Результаты команды"
+          subtitle="Выберите кампанию и сотрудника, чтобы открыть витрину руководителя."
         >
-          <div className="space-y-2">
-            <Label htmlFor="campaignId">Campaign ID</Label>
-            <Input id="campaignId" name="campaignId" defaultValue={campaignId} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="subjectEmployeeId">Subject employee ID</Label>
-            <Input
-              id="subjectEmployeeId"
-              name="subjectEmployeeId"
-              defaultValue={subjectEmployeeId}
-            />
-          </div>
-          <div>
-            <button
-              type="submit"
-              className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
-            >
-              Открыть результаты
-            </button>
-          </div>
-        </form>
-      </ResultsPageLayout>
+          <PageEmptyState
+            title="Нужно выбрать сотрудника и кампанию"
+            description="Укажите campaignId и subjectEmployeeId вручную, чтобы открыть агрегаты конкретного сотрудника."
+            testId="results-team-empty"
+          />
+          <form
+            className="grid gap-3 rounded-md border p-4"
+            method="get"
+            data-testid="team-results-form"
+          >
+            <div className="space-y-2">
+              <Label htmlFor="campaignId">Campaign ID</Label>
+              <Input id="campaignId" name="campaignId" defaultValue={campaignId} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="subjectEmployeeId">Subject employee ID</Label>
+              <Input
+                id="subjectEmployeeId"
+                name="subjectEmployeeId"
+                defaultValue={subjectEmployeeId}
+              />
+            </div>
+            <div>
+              <button
+                type="submit"
+                className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+              >
+                Открыть результаты
+              </button>
+            </div>
+          </form>
+        </ResultsPageLayout>
+      </InternalAppShell>
     );
   }
 
@@ -111,29 +144,51 @@ export default async function ResultsTeamDashboardPage({
   );
 
   if (!dashboard.ok) {
+    const state = getFriendlyErrorCopy(dashboard.error, {
+      title: "Не удалось загрузить результаты команды",
+      description: "Проверьте campaignId и subjectEmployeeId или попробуйте позже.",
+    });
+
     return (
-      <ResultsPageLayout title="Результаты команды" subtitle="Не удалось загрузить результаты.">
-        <p className="text-sm text-destructive" data-testid="results-team-error">
-          {dashboard.error.message}
-        </p>
-      </ResultsPageLayout>
+      <InternalAppShell
+        context={resolved.context}
+        currentPath="/results/team"
+        title="Результаты команды"
+        subtitle={state.description}
+      >
+        <ResultsPageLayout title="Результаты команды" subtitle={state.description}>
+          <PageErrorState
+            title={state.title}
+            description={state.description}
+            actions={[{ href: "/results/team", label: "Сбросить фильтры", variant: "outline" }]}
+            testId="results-team-error"
+          />
+        </ResultsPageLayout>
+      </InternalAppShell>
     );
   }
 
   return (
-    <ResultsPageLayout
+    <InternalAppShell
+      context={resolved.context}
+      currentPath="/results/team"
       title="Результаты команды"
       subtitle="Витрина руководителя: только агрегаты и обработанные комментарии."
     >
-      <ResultsSummaryCard
-        campaignId={dashboard.data.campaignId}
-        subjectEmployeeId={dashboard.data.subjectEmployeeId}
-        overallScore={dashboard.data.overallScore}
-        modelKind={dashboard.data.modelKind}
-      />
-      <ResultsGroupCard data={dashboard.data} />
-      <ResultsCompetenciesCard data={dashboard.data} />
-      <ResultsOpenTextCard items={dashboard.data.openText} showRawText={false} />
-    </ResultsPageLayout>
+      <ResultsPageLayout
+        title="Результаты команды"
+        subtitle="Витрина руководителя: только агрегаты и обработанные комментарии."
+      >
+        <ResultsSummaryCard
+          campaignId={dashboard.data.campaignId}
+          subjectEmployeeId={dashboard.data.subjectEmployeeId}
+          overallScore={dashboard.data.overallScore}
+          modelKind={dashboard.data.modelKind}
+        />
+        <ResultsGroupCard data={dashboard.data} />
+        <ResultsCompetenciesCard data={dashboard.data} />
+        <ResultsOpenTextCard items={dashboard.data.openText} showRawText={false} />
+      </ResultsPageLayout>
+    </InternalAppShell>
   );
 }

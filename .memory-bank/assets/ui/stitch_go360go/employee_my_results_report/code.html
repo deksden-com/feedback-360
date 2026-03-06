@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My 360 Feedback Results</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1e3b8a",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121620",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Header -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-primary/10 bg-white dark:bg-slate-900 px-6 py-3 lg:px-40">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8 flex items-center justify-center bg-primary text-white rounded-lg">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">360Pulse</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8 items-center">
+<nav class="hidden md:flex items-center gap-9">
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Dashboard</a>
+<a class="text-primary text-sm font-semibold border-b-2 border-primary py-1" href="#">My Reports</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Growth Plan</a>
+</nav>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="User profile avatar of a professional male" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDgt1tVDNFuvp-yJHCDUfzgBkKUjvUcfbMHh-ONiU5-WoLxAMe83ndmu5gsNWY8erQOK_FrfvXnodGBWy9vLz-02TMIAH4biCcyYItQXdR3nyLOo4E2eNKlHw6VukLw-yUxjCopVz3hEE3bgdbD-Jky1lI-ufa1YQmtD_t0c78l8aztjXTiH-X4GGQsB2WYHfAruuBf43G8HjPrs8RlPmtb880i4OAgygF3_Dg0GK-doSIWdM2pqE_evNsTWenpOCnWaO8R04OaJiP1");'></div>
+</div>
+</header>
+<main class="flex-1 px-4 lg:px-40 py-8">
+<div class="max-w-[1200px] mx-auto">
+<!-- Page Title & Status -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
+<div>
+<nav class="flex gap-2 text-xs font-medium text-slate-500 mb-2">
+<span>Campaigns</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-primary">Q4 Leadership Review</span>
+</nav>
+<h1 class="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-slate-100">My 360-Degree Results</h1>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Completed on Oct 24, 2023 • 12 Respondents</p>
+</div>
+<button class="bg-primary text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 hover:bg-primary/90 transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Export PDF Report
+                    </button>
+</div>
+<!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-primary/10 shadow-sm">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Overall Performance Score</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-bold text-slate-900 dark:text-slate-100">4.2</span>
+<span class="text-slate-400 text-lg">/ 5.0</span>
+</div>
+<div class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-sm font-bold">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+0.3 from last review</span>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-primary/10 shadow-sm">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Self-Assessment</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-bold text-slate-900 dark:text-slate-100">3.8</span>
+<span class="text-slate-400 text-lg">/ 5.0</span>
+</div>
+<p class="text-slate-400 text-xs italic">You are slightly more critical than others.</p>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-primary/10 shadow-sm">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Others Average</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-bold text-primary">4.4</span>
+<span class="text-slate-400 text-lg">/ 5.0</span>
+</div>
+<p class="text-slate-400 text-xs">Excluding self-assessment</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Main Feedback Sections -->
+<div class="lg:col-span-2 space-y-8">
+<!-- Competency Comparison Chart -->
+<section class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-primary/10 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Competency Breakdown</h3>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-primary/20 border border-primary"></div>
+<span class="text-xs font-medium text-slate-500">Self</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-primary"></div>
+<span class="text-xs font-medium text-slate-500">Others</span>
+</div>
+</div>
+</div>
+<!-- Visual Bar Chart Component -->
+<div class="space-y-6">
+<!-- Strategic Thinking -->
+<div class="space-y-2">
+<div class="flex justify-between text-sm">
+<span class="font-semibold">Strategic Thinking</span>
+<span class="text-slate-500">Self: 4.0 | Others: 4.5</span>
+</div>
+<div class="relative h-6 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="absolute h-full bg-primary/30 rounded-full" style="width: 80%;"></div>
+<div class="absolute h-full bg-primary rounded-full" style="width: 90%; height: 50%; top: 25%;"></div>
+</div>
+</div>
+<!-- Communication -->
+<div class="space-y-2">
+<div class="flex justify-between text-sm">
+<span class="font-semibold">Team Collaboration</span>
+<span class="text-slate-500">Self: 3.5 | Others: 4.8</span>
+</div>
+<div class="relative h-6 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="absolute h-full bg-primary/30 rounded-full" style="width: 70%;"></div>
+<div class="absolute h-full bg-primary rounded-full" style="width: 96%; height: 50%; top: 25%;"></div>
+</div>
+</div>
+<!-- Execution -->
+<div class="space-y-2">
+<div class="flex justify-between text-sm">
+<span class="font-semibold">Operational Excellence</span>
+<span class="text-slate-500">Self: 4.5 | Others: 4.1</span>
+</div>
+<div class="relative h-6 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="absolute h-full bg-primary/30 rounded-full" style="width: 90%;"></div>
+<div class="absolute h-full bg-primary rounded-full" style="width: 82%; height: 50%; top: 25%;"></div>
+</div>
+</div>
+<!-- Leadership -->
+<div class="space-y-2">
+<div class="flex justify-between text-sm">
+<span class="font-semibold">Leadership &amp; Influence</span>
+<span class="text-slate-500">Self: 3.5 | Others: 4.3</span>
+</div>
+<div class="relative h-6 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="absolute h-full bg-primary/30 rounded-full" style="width: 70%;"></div>
+<div class="absolute h-full bg-primary rounded-full" style="width: 86%; height: 50%; top: 25%;"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- AI Summarized Feedback -->
+<section class="bg-primary/5 dark:bg-primary/10 rounded-xl p-8 border border-primary/20">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">auto_awesome</span>
+<h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">AI Feedback Synthesis</h3>
+</div>
+<div class="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 space-y-4">
+<p class="leading-relaxed">
+                                    Based on the 12 reviews collected, your colleagues overwhelmingly view you as a <strong>highly dependable and technically expert leader</strong>. The core theme across feedback is your ability to "calmly navigate high-pressure situations" and provide clear direction to the team.
+                                </p>
+<div class="bg-white dark:bg-slate-800 p-4 rounded-lg border border-primary/10 italic text-sm">
+                                    "Alex is the bedrock of the product team. His strategic vision has moved our roadmap forward by quarters, not just weeks."
+                                </div>
+<p class="leading-relaxed">
+<strong>Growth Opportunities:</strong> While execution is a strength, several respondents noted that you could delegate more high-level tasks to your direct reports to help them grow. Transitioning from "solving" to "coaching" is your next big milestone.
+                                </p>
+</div>
+<div class="mt-8 flex items-center gap-2 px-3 py-2 bg-primary/10 dark:bg-primary/20 rounded text-[11px] font-medium text-primary">
+<span class="material-symbols-outlined text-xs">info</span>
+<span>Note: Qualitative comments have been processed by AI for anonymity while preserving original sentiment.</span>
+</div>
+</section>
+<!-- Rater Group Breakdown -->
+<section class="space-y-4">
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Rater Group Analysis</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Manager - Named -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/10 shadow-sm">
+<div class="flex items-center gap-3 mb-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Manager profile photo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAKpaVtGcOncPPnoOGvSWxIbSDiB4ZUiGLMRgAvM2HwsvA_qV3TYQYkjNqFFOABqM5pLUaKormXptgPVwiZhkB7zb3nnfYaZIeWreUVgyqPFEZBcfr8XT46GUEM9hYn85KGE05iFZGlOS0pLOe4T5RX2ae_byMSsddMk75HfCN2ZtJX6iOIB7y-fC1MKZWy6G_ZJHbhQWYh_RCHE8cKZZLgA6nFn9oJHJahP4jwhO5fJblC9MTeJAxVdVsfzLmBQvFFQE01iIg76iaC");'></div>
+<div>
+<p class="text-sm font-bold">Sarah Jenkins</p>
+<p class="text-xs text-slate-500">Manager</p>
+</div>
+<div class="ml-auto bg-primary/10 text-primary px-2 py-1 rounded text-xs font-bold">4.8 / 5.0</div>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400 italic">"Alex is ready for the next level. His focus on outcomes rather than just output is exactly what the senior leadership looks for."</p>
+</div>
+<!-- Peer Aggregated - Anonymized -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/10 shadow-sm">
+<div class="flex items-center gap-3 mb-4">
+<div class="flex -space-x-3">
+<div class="size-10 rounded-full border-2 border-white dark:border-slate-900 bg-slate-200 flex items-center justify-center text-xs font-bold">P</div>
+<div class="size-10 rounded-full border-2 border-white dark:border-slate-900 bg-slate-300 flex items-center justify-center text-xs font-bold">P</div>
+<div class="size-10 rounded-full border-2 border-white dark:border-slate-900 bg-slate-400 flex items-center justify-center text-xs font-bold">P</div>
+</div>
+<div>
+<p class="text-sm font-bold">Peers (5)</p>
+<p class="text-xs text-slate-500">Aggregated</p>
+</div>
+<div class="ml-auto bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-1 rounded text-xs font-bold">4.3 / 5.0</div>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400">Consensus: Great cross-functional partner, occasionally difficult to book time with due to a packed schedule.</p>
+</div>
+<!-- Direct Reports Aggregated - Anonymized -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/10 shadow-sm">
+<div class="flex items-center gap-3 mb-4">
+<div class="flex -space-x-3">
+<div class="size-10 rounded-full border-2 border-white dark:border-slate-900 bg-slate-200 flex items-center justify-center text-xs font-bold">DR</div>
+<div class="size-10 rounded-full border-2 border-white dark:border-slate-900 bg-slate-300 flex items-center justify-center text-xs font-bold">DR</div>
+<div class="size-10 rounded-full border-2 border-white dark:border-slate-900 bg-slate-400 flex items-center justify-center text-xs font-bold">DR</div>
+</div>
+<div>
+<p class="text-sm font-bold">Direct Reports (6)</p>
+<p class="text-xs text-slate-500">Aggregated</p>
+</div>
+<div class="ml-auto bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-1 rounded text-xs font-bold">4.1 / 5.0</div>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400">Consensus: Appreciation for technical mentorship, desire for more autonomy in project decision-making.</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Sidebar Stats & Insights -->
+<div class="space-y-6">
+<!-- Strongest Skills -->
+<div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-6 border border-emerald-100 dark:border-emerald-900/30">
+<div class="flex items-center gap-2 mb-4 text-emerald-700 dark:text-emerald-400">
+<span class="material-symbols-outlined">award_star</span>
+<h4 class="font-bold">Strongest Skills</h4>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center gap-3">
+<span class="size-6 bg-emerald-100 dark:bg-emerald-900/40 rounded flex items-center justify-center text-emerald-700 dark:text-emerald-400 text-xs font-bold">1</span>
+<span class="text-sm font-medium">Strategic Product Vision</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="size-6 bg-emerald-100 dark:bg-emerald-900/40 rounded flex items-center justify-center text-emerald-700 dark:text-emerald-400 text-xs font-bold">2</span>
+<span class="text-sm font-medium">Technical Problem Solving</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="size-6 bg-emerald-100 dark:bg-emerald-900/40 rounded flex items-center justify-center text-emerald-700 dark:text-emerald-400 text-xs font-bold">3</span>
+<span class="text-sm font-medium">Reliability &amp; Execution</span>
+</li>
+</ul>
+</div>
+<!-- Growth Areas -->
+<div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-6 border border-amber-100 dark:border-amber-900/30">
+<div class="flex items-center gap-2 mb-4 text-amber-700 dark:text-amber-400">
+<span class="material-symbols-outlined">trending_up</span>
+<h4 class="font-bold">Growth Areas</h4>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center gap-3 text-amber-900 dark:text-amber-100">
+<span class="size-6 bg-amber-100 dark:bg-amber-900/40 rounded flex items-center justify-center text-amber-700 dark:text-amber-400 text-xs font-bold">1</span>
+<span class="text-sm font-medium">Empowerment &amp; Delegation</span>
+</li>
+<li class="flex items-center gap-3 text-amber-900 dark:text-amber-100">
+<span class="size-6 bg-amber-100 dark:bg-amber-900/40 rounded flex items-center justify-center text-amber-700 dark:text-amber-400 text-xs font-bold">2</span>
+<span class="text-sm font-medium">Calendar Accessibility</span>
+</li>
+<li class="flex items-center gap-3 text-amber-900 dark:text-amber-100">
+<span class="size-6 bg-amber-100 dark:bg-amber-900/40 rounded flex items-center justify-center text-amber-700 dark:text-amber-400 text-xs font-bold">3</span>
+<span class="text-sm font-medium">Cross-team Conflict Mgmt</span>
+</li>
+</ul>
+</div>
+<!-- Action Items -->
+<div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-primary/10 shadow-sm">
+<h4 class="font-bold mb-4">Next Steps</h4>
+<div class="space-y-4">
+<div class="flex gap-3">
+<div class="mt-1 flex items-center justify-center size-5 rounded border border-primary text-primary">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+<p class="text-xs text-slate-600 dark:text-slate-400">Review detailed rater comments in Section 3.</p>
+</div>
+<div class="flex gap-3">
+<div class="mt-1 flex items-center justify-center size-5 rounded border border-slate-300"></div>
+<p class="text-xs text-slate-600 dark:text-slate-400">Schedule review meeting with Manager Sarah J.</p>
+</div>
+<div class="flex gap-3">
+<div class="mt-1 flex items-center justify-center size-5 rounded border border-slate-300"></div>
+<p class="text-xs text-slate-600 dark:text-slate-400">Draft your Q1 Growth Plan based on AI synthesis.</p>
+</div>
+</div>
+<button class="w-full mt-6 py-2 bg-primary/10 text-primary font-bold rounded-lg text-sm hover:bg-primary/20 transition-all">
+                                Open Growth Plan Builder
+                            </button>
+</div>
+<!-- Comparison Legend Box -->
+<div class="p-4 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs text-slate-500 flex flex-col gap-2">
+<p class="font-bold text-slate-700 dark:text-slate-300">Understanding your score</p>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>4.5 - 5.0 : Exceptional</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary/60"></span>
+<span>3.5 - 4.4 : Strong</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary/30"></span>
+<span>2.5 - 3.4 : Effective</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="border-t border-primary/10 bg-white dark:bg-slate-900 py-6 px-4 lg:px-40 text-center">
+<p class="text-slate-500 dark:text-slate-400 text-xs">360Pulse Feedback Platform © 2023. All feedback is strictly confidential.</p>
+</footer>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Управление оргструктурой | HR Панель</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1e3b8a",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121620",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .sidebar-item-active {
+            background-color: #1e3b8a15;
+            color: #1e3b8a;
+            border-right: 3px solid #1e3b8a;
+        }
+        .tree-line::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 24px;
+            width: 20px;
+            height: 2px;
+            background-color: #e2e8f0;
+        }
+        .tree-container::after {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col">
+<!-- Top Navigation -->
+<header class="flex h-16 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-8 sticky top-0 z-30">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<div class="bg-primary p-1.5 rounded-lg text-white">
+<span class="material-symbols-outlined text-2xl">account_tree</span>
+</div>
+<h2 class="text-xl font-bold tracking-tight text-primary">HR Core</h2>
+</div>
+<nav class="hidden md:flex items-center gap-6 ml-4">
+<a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="#">Сотрудники</a>
+<a class="text-primary text-sm font-semibold border-b-2 border-primary py-5" href="#">Оргструктура</a>
+<a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="#">Отчеты</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+<input class="h-10 w-64 rounded-lg border-none bg-slate-100 dark:bg-slate-800 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary" placeholder="Поиск по структуре..." type="text"/>
+</div>
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-primary/10 border-2 border-primary/20 overflow-hidden" data-alt="Аватар администратора HR-панели">
+<img alt="Admin" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7OOPNBYUgOxCvewK4M3b7IUJNm-hZjBIgEXlY9sAmUaZaNvf6SpIwqAODqzuw_k2jsD9MdIaybbMKp9bgOZBOvflviT0Msokib8gQIqPJpDXqaDZQlkzimh4-TANICnIZJ97uBM7YYZaun0EY6lzmdfb9DrYbwyeNa1uASv76QSg-RaJ1f4QxsxU_pXQTLK3UyWUya3M-JeLo6FLA2E6jWaEaAhPef7EEvRfxndBZ492yh5ZrGoS_R8pV6ZuiVdsQXne8izWgnuON"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- Sidebar -->
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sticky top-16 h-[calc(100vh-64px)] overflow-y-auto">
+<div class="p-4 space-y-1">
+<p class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Администрирование</p>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Дашборд</span>
+</a>
+<a class="sidebar-item-active flex items-center gap-3 px-3 py-2.5 rounded-lg" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span class="text-sm font-bold">Подразделения</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined">badge</span>
+<span class="text-sm font-medium">Штатное расписание</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="text-sm font-medium">История изменений</span>
+</a>
+</div>
+<div class="mt-auto p-4 border-t border-slate-100 dark:border-slate-800">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Настройки</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark p-8">
+<div class="max-w-6xl mx-auto">
+<!-- Header Actions -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+<div>
+<h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Организационная структура</h1>
+<p class="text-slate-500 mt-1">Визуализация и управление иерархией компании</p>
+</div>
+<div class="flex gap-3">
+<button class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined text-lg">download</span>
+                                Экспорт PDF
+                            </button>
+<button class="bg-primary text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-lg">add</span>
+                                Добавить отдел
+                            </button>
+</div>
+</div>
+<!-- Tabs -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 px-6">
+<div class="flex gap-8">
+<button class="py-4 border-b-2 border-primary text-primary text-sm font-bold">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">schema</span> Дерево
+                                    </span>
+</button>
+<button class="py-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 text-sm font-bold transition-colors">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">history</span> История
+                                    </span>
+</button>
+</div>
+</div>
+<!-- Tree Content Area -->
+<div class="p-8">
+<!-- Global Root -->
+<div class="mb-12 flex flex-col items-center">
+<div class="relative bg-white dark:bg-slate-800 border-2 border-primary p-4 rounded-xl shadow-md w-72 text-center group cursor-pointer hover:shadow-lg transition-shadow">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">Штаб-квартира</div>
+<h4 class="font-black text-slate-900 dark:text-white uppercase tracking-tight">ООО "ТехноКорп"</h4>
+<div class="mt-3 flex items-center justify-center gap-2">
+<div class="h-8 w-8 rounded-full border border-slate-200" data-alt="Генеральный директор компании">
+<img alt="CEO" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjYrlO9flNzefyc2fEafTZWY8KA8hQfbVxaFhHvzW7KNdXxwddsu1Cgr5ak7hA22jqRn2VARKTro5YSO8UOEbHkc0DgfRrl1rOl3N9oQKjlPSyTdO3O-b2zx0WIvrXjwq3h84SY7-4yG-HKRZgVA--6wg10prf7HbXuiBEY2deJTGcHP2-3lXaB28F-wJ7zb-RepMefwr7ROQBGu4uU35-hOOOPyEreGgXjXBmlKJou9Aq87Ys8_Z7ihmn0kDD-CwtJyUkwtAGfFDG"/>
+</div>
+<div class="text-left">
+<p class="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">Александр Волков</p>
+<p class="text-[10px] text-slate-500 uppercase font-medium">Генеральный директор</p>
+</div>
+</div>
+<div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-between text-[10px] font-bold text-slate-400">
+<span>450 сотрудников</span>
+<span class="text-primary hover:underline">Подробнее →</span>
+</div>
+</div>
+<div class="h-10 w-0.5 bg-slate-200 dark:bg-slate-700"></div>
+</div>
+<!-- Level 2 Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+<!-- Connection Horizontal Line (Visual only) -->
+<div class="absolute top-0 left-1/6 right-1/6 h-0.5 bg-slate-200 dark:bg-slate-700 hidden md:block" style="left: 16%; right: 16%;"></div>
+<!-- Dept 1 -->
+<div class="flex flex-col items-center">
+<div class="h-8 w-0.5 bg-slate-200 dark:bg-slate-700 mb-2"></div>
+<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-xl shadow-sm w-full max-w-[280px] hover:border-primary/50 transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-3">
+<div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg text-blue-600">
+<span class="material-symbols-outlined text-xl">payments</span>
+</div>
+<button class="text-slate-300 hover:text-slate-600">
+<span class="material-symbols-outlined text-lg">more_vert</span>
+</button>
+</div>
+<h4 class="font-bold text-slate-900 dark:text-white">Финансовый департамент</h4>
+<p class="text-xs text-slate-500 mb-4">12 сотрудников</p>
+<div class="flex items-center gap-2 mb-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+<div class="h-7 w-7 rounded-full" data-alt="Руководитель финансового департамента">
+<img alt="CFO" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQ9L0gj75-ZXnbOaqZQBC1xOqjHBQSYml-WDOxfzfBb_IOMAlMO6b1tV65ii1Mds4D2lLVeTxLq4fClGMQHGwfWXPKsRsGj1Gl-3EzkZ-jUzz_93pE5zXsfOpvwPZV6a5fl5vEDaNeCu0O1j3DnxJdMtUA_8Fsx0lCuCiO37NpXYcHjfl_ZLXKG9marZ1azmV-ZP4d5nl8_Omj7QaQh6fCA713YsKXvjAljcz8Ld1l8M3R95o5as1smraBBAA7fm6D5EkqnGPyb7Ge"/>
+</div>
+<div class="overflow-hidden">
+<p class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Марина Соколова</p>
+<p class="text-[9px] text-slate-400 uppercase">CFO</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Dept 2 -->
+<div class="flex flex-col items-center">
+<div class="h-8 w-0.5 bg-slate-200 dark:bg-slate-700 mb-2"></div>
+<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-xl shadow-sm w-full max-w-[280px] hover:border-primary/50 transition-colors cursor-pointer ring-2 ring-primary ring-opacity-10">
+<div class="flex justify-between items-start mb-3">
+<div class="bg-indigo-50 dark:bg-indigo-900/30 p-2 rounded-lg text-indigo-600">
+<span class="material-symbols-outlined text-xl">terminal</span>
+</div>
+<button class="text-slate-300 hover:text-slate-600">
+<span class="material-symbols-outlined text-lg">more_vert</span>
+</button>
+</div>
+<h4 class="font-bold text-slate-900 dark:text-white">IT Департамент</h4>
+<p class="text-xs text-slate-500 mb-4">128 сотрудников</p>
+<div class="flex items-center gap-2 mb-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+<div class="h-7 w-7 rounded-full" data-alt="Руководитель ИТ-департамента">
+<img alt="CTO" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDowTD-tSyuNZeliZlpl9FfMHdcldlfS2gV6qk_x7XO-oe7sX2j8x1MXCZzNGPW0tDWObyS3N4O7u4RDEf_kpnpfGFS_LNfIVXkL_3iF9a51rk9pDpGVmpiZaGnfCYtev1G0mvt2qmx--jMsJYkNDhMEUGzsHNqlqoqJEg7ahosDgHyPPSzcUXmvfFVEHiT0kNoBCvPdZn6q5umkEZ9oVmLu3cqRu4sC8j85NyOydnMglg6YYOqGdoCKw4wiksmP_fqWAHIzyrIZYvi"/>
+</div>
+<div class="overflow-hidden">
+<p class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Игорь Кузнецов</p>
+<p class="text-[9px] text-slate-400 uppercase">CTO</p>
+</div>
+</div>
+<!-- Sub-depts indicator -->
+<div class="mt-4 flex justify-center">
+<div class="px-2 py-1 bg-primary/10 text-primary rounded text-[10px] font-black uppercase tracking-wider">4 подотдела ↓</div>
+</div>
+</div>
+</div>
+<!-- Dept 3 -->
+<div class="flex flex-col items-center">
+<div class="h-8 w-0.5 bg-slate-200 dark:bg-slate-700 mb-2"></div>
+<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-xl shadow-sm w-full max-w-[280px] hover:border-primary/50 transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-3">
+<div class="bg-purple-50 dark:bg-purple-900/30 p-2 rounded-lg text-purple-600">
+<span class="material-symbols-outlined text-xl">groups</span>
+</div>
+<button class="text-slate-300 hover:text-slate-600">
+<span class="material-symbols-outlined text-lg">more_vert</span>
+</button>
+</div>
+<h4 class="font-bold text-slate-900 dark:text-white">HR &amp; Культура</h4>
+<p class="text-xs text-slate-500 mb-4">8 сотрудников</p>
+<div class="flex items-center gap-2 mb-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+<div class="h-7 w-7 rounded-full" data-alt="HR Директор компании">
+<img alt="HRD" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0m30uZ8BKHMSs1OwSY9pXGhBLZ5ZZj_uZfjDiS0po3ffslBcjPRmVo7wWDEZAvl-OMuPw8eAbk2pzgJx6HEbyXPZnCZ2KFvrOOnaHF9nUFJ-VYaRtIBLhaR7YJX1Xxdakg1KtP12g5G1n_lrWo4-5ZNdCJF8_EotgrjrxiHgU3BvKMRKQAM0K7BI-n3oiZ3uKMYBUfc73FUqADMgLCvOv-sbM6z9spDEhFbx-7YgkUxUvVBg-qD9glq1Mf8njLazZ0wvRv60hh2gz"/>
+</div>
+<div class="overflow-hidden">
+<p class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Елена Павлова</p>
+<p class="text-[9px] text-slate-400 uppercase">HRD</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Management Sidebar Panel (Preview) -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-black text-lg text-slate-900 dark:text-white uppercase tracking-tight">Актуальные изменения</h3>
+<button class="text-primary text-xs font-bold uppercase tracking-widest hover:underline">Вся история</button>
+</div>
+<div class="space-y-4">
+<div class="flex gap-4 items-start p-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-lg">
+<div class="bg-green-100 text-green-600 p-2 rounded-full">
+<span class="material-symbols-outlined text-xl">person_add</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200">Назначен новый руководитель</p>
+<p class="text-xs text-slate-500">Михаил Белов назначен руководителем "Frontend разработка" в IT Департаменте</p>
+<p class="text-[10px] text-slate-400 mt-1 uppercase font-medium">Сегодня, 10:45 • Админ: Иван И.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start p-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-lg">
+<div class="bg-blue-100 text-blue-600 p-2 rounded-full">
+<span class="material-symbols-outlined text-xl">edit</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200">Отдел переименован</p>
+<p class="text-xs text-slate-500">"Отдел маркетинга" изменен на "Департамент по связям с общественностью"</p>
+<p class="text-[10px] text-slate-400 mt-1 uppercase font-medium">Вчера, 16:20 • Админ: Система</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-primary text-white rounded-xl p-6 shadow-xl shadow-primary/20 flex flex-col justify-between">
+<div>
+<h3 class="font-black text-xl uppercase leading-tight mb-2 italic">Аналитика<br/>Структуры</h3>
+<p class="text-primary-100 text-sm opacity-80">Общее состояние организации</p>
+</div>
+<div class="mt-8 space-y-4">
+<div class="flex justify-between items-center border-b border-white/10 pb-2">
+<span class="text-xs font-medium opacity-80 uppercase tracking-widest">Всего вакансий</span>
+<span class="text-lg font-black tracking-tighter">42</span>
+</div>
+<div class="flex justify-between items-center border-b border-white/10 pb-2">
+<span class="text-xs font-medium opacity-80 uppercase tracking-widest">Руководителей</span>
+<span class="text-lg font-black tracking-tighter">28</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs font-medium opacity-80 uppercase tracking-widest">Текучесть</span>
+<span class="text-lg font-black tracking-tighter">4.2%</span>
+</div>
+</div>
+<button class="mt-8 w-full bg-white text-primary py-3 rounded-lg text-sm font-black uppercase tracking-widest hover:bg-opacity-90 transition-all">Сформировать отчет</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

@@ -22,3 +22,13 @@ Status: Draft (2026-03-03)
 - [EP-008 Minimal UI (thin)](EP-008-ui-minimal/index.md): первые экраны поверх typed client. Читать, чтобы UI не “утёк” в бизнес-логику.
 - [EP-009 Test & release hardening](EP-009-test-release-hardening/index.md): стабилизация DB integration tests, CI checks topology, beta smoke gates и sync evidence. Читать, чтобы поставка фич стала предсказуемой и без flaky merge blockers.
 - [EP-010 Production readiness](EP-010-prod-readiness/index.md): retention/privacy, observability, runbook drill и release rehearsal. Читать, чтобы после MVP система была готова к спокойной эксплуатации.
+
+Эпики (next GUI wave):
+- [EP-011 App shell and navigation](EP-011-app-shell-navigation/index.md): единый shell, navigation и role-aware home dashboards. Читать, чтобы будущие UI slices строились на общем каркасе.
+- [EP-012 HR campaigns UX](EP-012-hr-campaigns-ux/index.md): HR list/create/detail flows для кампаний. Читать, чтобы главный HR surface стал цельным.
+- [EP-013 Questionnaire experience](EP-013-questionnaire-experience/index.md): inbox, structured fill flow и read-only states. Читать, чтобы анкеты стали удобным end-user опытом.
+- [EP-014 Results experience](EP-014-results-experience/index.md): employee/manager/HR results dashboards. Читать, чтобы reporting UI был role-aware и privacy-safe.
+- [EP-015 People and org admin](EP-015-people-org-admin/index.md): employees directory/profile и org editor. Читать, чтобы справочник и оргструктура поддерживались через GUI.
+- [EP-016 Competency models and matrix UI](EP-016-models-matrix-ui/index.md): модели компетенций и matrix builder. Читать, чтобы содержание оценки и assignments были управляемы в web UI.
+- [EP-017 Notification center UI](EP-017-notification-center-ui/index.md): reminders/templates/delivery diagnostics. Читать, чтобы notifications subsystem стал видимым и управляемым.
+- [EP-018 Admin and ops UI](EP-018-admin-ops-ui/index.md): environment health, AI/webhook diagnostics и audit console. Читать, чтобы эксплуатация системы меньше зависела от внешних панелей и CLI.

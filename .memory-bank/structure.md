@@ -12,8 +12,16 @@ Status: Draft (2026-03-03)
 
 ## Top-level
 - `AGENTS.md`: правила для ИИ агентов и краткий системный контекст. Читать перед крупными изменениями, чтобы не нарушить ключевые ограничения.
-- `.memory-bank/`: SSoT документации проекта (spec/adr/plans). Читать/обновлять при изменении требований, решений или планов.
+- `.memory-bank/`: SSoT документации проекта (spec/adr/plans) + assets/evidence. Читать/обновлять при изменении требований, решений, планов и visual references.
 - `README.md`: краткая точка входа для людей (ссылка на меморибанк).
+
+## Memory bank structure
+- `.memory-bank/spec/`: WHAT — нормативные требования и ограничения.
+- `.memory-bank/plans/`: roadmap, эпики/фичи, acceptance сценарии и verification matrix.
+- `.memory-bank/adr/`: WHY — архитектурные решения.
+- `.memory-bank/mbb/`: правила ведения меморибанка и шаблоны.
+- `.memory-bank/assets/`: non-SSoT visual references и вспомогательные материалы.
+- `.memory-bank/evidence/`: доказательства реализации и проверки фич (скриншоты, логи, snapshots).
 
 ## Apps (delivery)
 - `apps/web/`: Next.js UI + route handlers. UI не содержит доменных правил; вызывает typed client.
@@ -31,4 +39,3 @@ Status: Draft (2026-03-03)
 - Core unit: рядом с `packages/core/` (policy/calculator/transitions).
 - Integration: поднимаем БД, прогоняем миграции/seed, проверяем use-cases.
 - E2E: Playwright в `apps/web/` (минимальные golden flows).
-

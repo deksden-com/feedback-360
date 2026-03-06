@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>360-dfb | Employee Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1e3b8a",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121620",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col">
+<div class="p-6 flex items-center gap-3">
+<div class="size-10 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined">corporate_fare</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-slate-100 text-base font-bold leading-none">360-dfb</h1>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium">HR Admin System</p>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<div class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2">Main Menu</div>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm font-semibold">Directory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="text-sm font-medium">Models</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">campaign</span>
+<span class="text-sm font-medium">Campaigns</span>
+</a>
+<div class="pt-6 text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2">Organization</div>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="text-sm font-medium">Structure</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-sm font-medium">Payroll</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden" data-alt="Admin user profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDlUlMpKl_t1Z5GHjNMhWN6HNhS9yBtGSkEL2_KX9U00mKuYSezrJdUWvhhPpNk9_4Ma1zcgm6bNTl-qi_RDBMwXL-NbkoCjmYzMZAEnKbIqsiVOno6q8ouCVNDRMGrk8-YBGH7hMEJrG08CK5JT0cPjpNtuvyjm4VRt_j1-BHYO4vICs5bj5Y5QKQ5NWXeBOieFLkFFYPbNl21W0bKOX6ktRVfZEX2WeUCT_Gk44ek83LIZW9HyJnN7D9eHMuX-wfikI5XeLBt89t7"); background-size: cover;'></div>
+<div class="flex-1 overflow-hidden">
+<p class="text-xs font-bold truncate">Alex Rivera</p>
+<p class="text-[10px] text-slate-500 truncate">System Admin</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-sm">settings</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- Header -->
+<header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 z-10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">badge</span>
+<h2 class="text-lg font-bold tracking-tight">Employee Management</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-sm">search</span>
+</span>
+<input class="block w-64 pl-10 pr-3 py-2 border-none bg-slate-100 dark:bg-slate-800 rounded-lg text-sm focus:ring-2 focus:ring-primary/50 transition-all" placeholder="Global search..." type="text"/>
+</div>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</header>
+<!-- Content -->
+<div class="flex-1 overflow-y-auto p-8 space-y-6">
+<!-- Top Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h3 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Employee Directory</h3>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Centralized view for managing all staff records and professional details.</p>
+</div>
+<button class="bg-primary text-white px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-lg">person_add</span>
+                        Add Employee
+                    </button>
+</div>
+<!-- Filters and Tabs -->
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+<div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+<!-- Navigation Tabs -->
+<div class="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-lg w-full sm:w-auto">
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-md text-sm font-bold shadow-sm">
+<span class="material-symbols-outlined text-sm">list</span>
+                                Employee List
+                            </button>
+<button class="flex items-center gap-2 px-4 py-2 text-slate-500 dark:text-slate-400 rounded-md text-sm font-semibold hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
+<span class="material-symbols-outlined text-sm">account_tree</span>
+                                Org Chart
+                            </button>
+</div>
+<!-- Secondary Filters -->
+<div class="flex items-center gap-2 w-full sm:w-auto">
+<button class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-sm text-slate-400">filter_list</span>
+                                Filter
+                            </button>
+<button class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-sm text-slate-400">download</span>
+                                Export
+                            </button>
+</div>
+</div>
+<!-- Search and Status Pills -->
+<div class="flex flex-col sm:flex-row gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+<div class="relative flex-1">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-sm">search</span>
+</span>
+<input class="block w-full pl-10 pr-3 py-2 border-slate-200 dark:border-slate-700 bg-transparent rounded-lg text-sm focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Search by name, department, or position..." type="text"/>
+</div>
+<div class="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
+<span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full border border-primary/20 flex items-center whitespace-nowrap">All Staff (124)</span>
+<span class="px-3 py-1 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 text-xs font-bold rounded-full border border-emerald-100 dark:border-emerald-900/50 flex items-center whitespace-nowrap">Active (118)</span>
+<span class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-700 flex items-center whitespace-nowrap">Inactive (6)</span>
+</div>
+</div>
+</div>
+<!-- Table Container -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Employee</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Position &amp; Dept</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Reports To</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Employee Row 1 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden" data-alt="Portrait of employee Marcus Taylor" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBDl2uNfqzX4zn_P1p_n6qMrxRnPxrjtoJo4G-GlUubcumkSqMHruMLtXmPOdmExGi0KaELhch9AonYCiQfhXRQ0x-IIoFlzuVtElaoa3M8nyCiaU06_TE0IXqQiaSZQTSIiGq7CUCcod9o1gSQSQcKhuV-zaILo6CGbnR28NhOATftWQ2DBuJq5Oc04SWOV8BkJvOvHm6WXAQ0EeaAqhmB_WVqAop0OxIKVa0N0tyBPpCCCgWZDBwhhl5eXeXhXIlFquY70p0IMjYd"); background-size: cover;'></div>
+<div>
+<p class="text-sm font-bold">Marcus Taylor</p>
+<p class="text-xs text-slate-500">marcus.t@360dfb.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm font-semibold">Lead UI Designer</p>
+<p class="text-xs text-slate-500">Product &amp; Design</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-slate-200 overflow-hidden" data-alt="Portrait of manager Sarah Chen" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB7F3Meg1vOjWLl5h1ncOu3HdAwYX6ARqTDsAHTnjyHtDTBX7JtEFdJJ50nv2sxXH2MLn_KTkGWk86Zr5KEVxowVneMZEbxIOPc18XGXry1Sm3YD44-sqCBacXa1ftwmV0VR5c5eJRXyilmxN7BGM2KECwTvDNtkPbTmXBAPGGeWUJXq0y60XApQ21dp_DQYEPQyOp2GaTPZN4ZnsjUU0H4LzVsP79kuSCszuKhDBdj5kQbnjQMcNkEOI-MXBBJCxqnMkmgotlwCxiA"); background-size: cover;'></div>
+<span class="text-xs font-medium">Sarah Chen</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 uppercase">Active</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Employee Row 2 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden" data-alt="Portrait of employee Elena Rodriguez" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDOJFdeYPBcevzAGeGDlAa4JulUQl7tdRqYF3RWAK2JAdS8lf0azfe84auelF9HdzgBcTUCBNtCzu8SvrPd3j4GyJv9RwQYnNJIwQtk5ZQam5sLqJHoD5sllPoHFkWTfVyDEsbns72tkIifO8Oty1m-obHplHGO9dW8Wu30WVI8jeihhZV0w2xY_9uo6WP7qdb81Vj45-YcLLthhgSvRsGGk1PjUu9hRWlA4evkf2A8CY_75X9Fc75TKnWHe7k_9HhZVAUzSMqAbg4K"); background-size: cover;'></div>
+<div>
+<p class="text-sm font-bold">Elena Rodriguez</p>
+<p class="text-xs text-slate-500">elena.r@360dfb.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm font-semibold">Backend Developer</p>
+<p class="text-xs text-slate-500">Engineering</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-slate-200 overflow-hidden" data-alt="Portrait of manager David Kim" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD3QSBitlRLK1UVUOVXW6m1m95txsazfmCj2IK8dIPnNVf9TFo_EDa0itqD81ZYxaanc7TKXSJVCJv0TRvtEQKtnIiE-xIK_kaEMgW6iBu-CvSw8HgG0JzTTfgfpUbuQusXNuTHiW_2hoqH32yWzfeHrIamPaFbY4fCnNadsBrbOWKDbQnBa4a2iLllH5RcFWd6LVzMLu-ZkaXq2SHBePos-oZ_QGjB7cSbTOHAinYq50pGyL492gPhYuYx3iqOQsCpYHu6GxIBzXVm"); background-size: cover;'></div>
+<span class="text-xs font-medium">David Kim</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 uppercase">Active</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Employee Row 3 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden" data-alt="Portrait of employee Jessica Walsh" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBX_sSUBv6nSPeKCKPsEdZEd3D-50BVF0E-p1L1TzB--YFSgEixT9KX2lp-TCiCVt0Bh5FI5XbslzGR_-1dratc1Gc5iI6PvCplKtj1B21XVoAUM4VmXW06Ovti9ii4PPhxrdRrmUDK4OI62bx91vgm-qeJclMUItk8aXioO-BtI6UWwr60qow_V17yATshjkg3VcFNLecoQ59zULgDO2S_v0RjGFMUYiQNJA-hF-pa-cZbwBxgp6qEvDf79HyOn00yk6z42O_CiJ29"); background-size: cover;'></div>
+<div>
+<p class="text-sm font-bold">Jessica Walsh</p>
+<p class="text-xs text-slate-500">jess.w@360dfb.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm font-semibold">Senior Recruiter</p>
+<p class="text-xs text-slate-500">Human Resources</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-slate-200 overflow-hidden" data-alt="Portrait of manager Alex Rivera" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDLl2qPquVEbUX-8315kASQaSHT9sTLaTuR7lqo9kHLCqTxsV6GRmvvN_PdLYXFjxeP15KaMRdtVRR1b8ZXMX5CW3AsYxErgmWuJY9S4xAzpWzu8zhPirtrsEy-pwmTjv-sva-XBIbRy1lVneSHiA1_UZ52VRjE7KrdCUIdw_7wEe1hrAiG3IoeSLSaeSbLRqw3IOHis6Ti6NxNVT8kpjYt9NlbpCa6li385kSf2N0ukAVAls5XwEij5f9kbXf0AjVho0YSJNguednH"); background-size: cover;'></div>
+<span class="text-xs font-medium">Alex Rivera</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 uppercase">Inactive</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Employee Row 4 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden" data-alt="Portrait of employee Michael Vance" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCNn6xBdR_-cG1yJ7Qyu0zJPuPgBY_D_2NcoqM01kbkr-WqczGQ4LNdVosRMlPbRgfo3qNHQB8HCN_PYX7XfilazfV6FpFlxEHzkCR2Jqe-CTWzD2PeONT7hqwDPsXY8K-HOjEq1sGp19Hyhl6sZsoS4fznwtNPQaignLUZKQ6Tc1abmNlpbD8a_Hsk-BCK2bK4lh3VtkSx8YqiuaH9JJoyIRlLpe4aN5nWOdT0-Dx-ECaSGenfYrohYghpT8fLU8nYa6IZCTfBc0JL"); background-size: cover;'></div>
+<div>
+<p class="text-sm font-bold">Michael Vance</p>
+<p class="text-xs text-slate-500">m.vance@360dfb.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm font-semibold">DevOps Engineer</p>
+<p class="text-xs text-slate-500">Engineering</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-slate-200 overflow-hidden" data-alt="Portrait of manager David Kim" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDEqYnE2-TXsCLAVl2jhae-za90iDRb4angbMoNZmlhzuKqPFxCs3bJKR_rRW7VT68lC6fZtGypAnOrw-Ah22l9X79qDqc-1xXwSO788q4kpGxFdYcQg92b6llnO5hskV29aSORzTwFBqsotpTeL8S_90F4wv119ZJcYvB1jNzHTH-TWeD6dJyCIr83rj7ZFqSZqNGueP3h3uXZvvfSZb3kicvn2m1EXLMKCzqHGXwyQ6qIj52qw6rNxHdvuGgh-WghjuZ8Q6wcEeAb"); background-size: cover;'></div>
+<span class="text-xs font-medium">David Kim</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 uppercase">Active</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<p class="text-xs text-slate-500 font-medium">Showing 1 to 4 of 124 employees</p>
+<div class="flex gap-1">
+<button class="p-1 rounded border border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="px-3 py-1 rounded bg-primary text-white text-xs font-bold">1</button>
+<button class="px-3 py-1 rounded border border-slate-200 dark:border-slate-700 text-slate-500 text-xs font-medium hover:bg-white dark:hover:bg-slate-700 transition-colors">2</button>
+<button class="px-3 py-1 rounded border border-slate-200 dark:border-slate-700 text-slate-500 text-xs font-medium hover:bg-white dark:hover:bg-slate-700 transition-colors">3</button>
+<span class="px-2 py-1 text-slate-400">...</span>
+<button class="p-1 rounded border border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Summary -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+<div class="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">groups</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Total Headcount</p>
+<p class="text-xl font-black">124</p>
+</div>
+</div>
+<div class="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+<div class="size-12 rounded-full bg-emerald-100 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined">trending_up</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Growth This Month</p>
+<p class="text-xl font-black text-emerald-600">+12%</p>
+</div>
+</div>
+<div class="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+<div class="size-12 rounded-full bg-orange-100 dark:bg-orange-950/30 flex items-center justify-center text-orange-600">
+<span class="material-symbols-outlined">work_history</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Open Roles</p>
+<p class="text-xl font-black text-orange-600">8</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

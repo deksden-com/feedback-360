@@ -1,79 +1,116 @@
+import { InternalAppShell } from "@/components/internal-app-shell";
+import { PageEmptyState, PageErrorState, PageStateScreen } from "@/components/page-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAppSession } from "@/lib/app-session";
-import { createInprocClient } from "@feedback-360/client";
+import { applyDebugPageDelay } from "@/lib/debug-page-delay";
+import { loadHomeDashboard } from "@/lib/home-dashboard";
+import { resolveAppOperationContext } from "@/lib/operation-context";
+import { getFriendlyErrorCopy } from "@/lib/page-state";
 import { redirect } from "next/navigation";
 
-export default async function HomePage() {
-  const session = await getAppSession();
-  if (!session.userId) {
-    redirect("/auth/login");
-  }
-  if (!session.activeCompanyId) {
-    redirect("/select-company");
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = searchParams ? await searchParams : undefined;
+  await applyDebugPageDelay(params?.debugDelayMs);
+  const resolved = await resolveAppOperationContext();
+  if (!resolved.ok) {
+    if (resolved.error.code === "unauthenticated") {
+      redirect("/auth/login");
+    }
+    if (resolved.error.code === "active_company_required") {
+      redirect("/select-company");
+    }
   }
 
-  const client = createInprocClient();
-  const memberships = await client.membershipList(
-    {},
-    {
-      userId: session.userId,
-    },
-  );
-  const activeMembership = memberships.ok
-    ? memberships.data.items.find((item) => item.companyId === session.activeCompanyId)
-    : undefined;
+  if (!resolved.ok) {
+    const state = getFriendlyErrorCopy(resolved.error, {
+      title: "Не удалось открыть workspace",
+      description: "Попробуйте обновить страницу или войти в систему снова.",
+    });
+
+    return (
+      <PageStateScreen>
+        <PageErrorState
+          title={state.title}
+          description={state.description}
+          actions={[{ href: "/auth/login", label: "Перейти ко входу", variant: "outline" }]}
+        />
+      </PageStateScreen>
+    );
+  }
+
+  const dashboard = await loadHomeDashboard(resolved.context);
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-3xl items-center p-6">
-      <Card className="w-full">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-3xl font-semibold tracking-tight">go360go</CardTitle>
-          <p className="text-muted-foreground">Staging: beta.go360go.ru</p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="rounded-md border p-4 text-sm">
-            <p className="text-muted-foreground">Текущая компания</p>
-            <p className="font-medium" data-testid="active-company-name">
-              {activeMembership?.companyName ?? session.activeCompanyId}
-            </p>
-            <p className="text-xs text-muted-foreground" data-testid="active-company-id">
-              {session.activeCompanyId}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="secondary">
-              <a href="/questionnaires">Мои анкеты</a>
-            </Button>
-            <Button asChild variant="secondary">
-              <a href="/results">Мои результаты</a>
-            </Button>
-            {activeMembership?.role === "manager" ? (
-              <Button asChild variant="secondary">
-                <a href="/results/team">Результаты команды</a>
-              </Button>
-            ) : null}
-            {activeMembership?.role === "hr_admin" || activeMembership?.role === "hr_reader" ? (
-              <Button asChild variant="secondary">
-                <a href="/results/hr">HR результаты</a>
-              </Button>
-            ) : null}
-            {activeMembership?.role === "hr_admin" || activeMembership?.role === "hr_reader" ? (
-              <Button asChild variant="secondary">
-                <a href="/hr/campaigns">HR кампании</a>
-              </Button>
-            ) : null}
-            <Button asChild>
-              <a href="/select-company">Сменить компанию</a>
-            </Button>
-            <form action="/api/session/logout" method="post">
-              <Button variant="outline" type="submit">
-                Выйти
-              </Button>
-            </form>
-          </div>
-        </CardContent>
-      </Card>
-    </main>
+    <InternalAppShell
+      context={resolved.context}
+      currentPath="/"
+      title={dashboard.title}
+      subtitle={dashboard.subtitle}
+    >
+      <div className="space-y-4" data-testid={`home-role-${resolved.context.role}`}>
+        <Card>
+          <CardHeader className="space-y-2">
+            <CardTitle className="text-2xl font-semibold tracking-tight">
+              {dashboard.introTitle}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-md border p-4 text-sm">
+              <p className="text-muted-foreground">Активная роль</p>
+              <p className="font-medium" data-testid="home-role-label">
+                {dashboard.roleLabel}
+              </p>
+              <p className="mt-2 text-muted-foreground" data-testid="home-intro-description">
+                {dashboard.introDescription}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-4 xl:grid-cols-3">
+          {dashboard.cards.map((card) => (
+            <Card key={card.testId} data-testid={card.testId}>
+              <CardHeader className="space-y-2">
+                <p className="text-sm text-muted-foreground">{card.title}</p>
+                <CardTitle className="text-3xl font-semibold tracking-tight">
+                  {card.value}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">{card.description}</p>
+                <Button asChild data-testid={card.ctaTestId}>
+                  <a href={card.href}>{card.ctaLabel}</a>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Почему это полезно</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-3 text-sm text-muted-foreground">
+            {dashboard.highlights.map((highlight) => (
+              <div key={highlight} className="rounded-md border bg-muted/20 p-3">
+                {highlight}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {dashboard.emptyState ? (
+          <PageEmptyState
+            title={dashboard.emptyState.title}
+            description={dashboard.emptyState.description}
+            testId="home-empty-state"
+          />
+        ) : null}
+      </div>
+    </InternalAppShell>
   );
 }
