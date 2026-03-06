@@ -231,6 +231,36 @@ Status: Draft (2026-03-03)
   - for `modelKind=levels`: per-competency `*Levels` summaries (`modeLevel`, `distribution`, `nValid`, `nUnsure`)
 
 ## Notifications
+- command: `reminders settings [--json]`
+  - op: `notifications.settings.get`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
+- command: `reminders configure --scheduled-hour <0-23> --weekdays <csv> [--quiet-start <0-23>] [--quiet-end <0-23>] [--json]`
+  - op: `notifications.settings.upsert`
+  - roles: hr_admin
+  - idempotency: yes
+
+- command: `reminders preview [--campaign <id>] [--now <iso_timestamp>] [--scheduled-hour <0-23>] [--weekdays <csv>] [--quiet-start <0-23>] [--quiet-end <0-23>] [--json]`
+  - op: `notifications.settings.preview`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
+- command: `notifications templates [--json]`
+  - op: `notifications.templates.list`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
+- command: `notifications template-preview --template-key <key> [--campaign <id>] [--json]`
+  - op: `notifications.templates.preview`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
+- command: `notifications deliveries [--campaign <id>] [--status <status>] [--channel <channel>] [--json]`
+  - op: `notifications.deliveries.list`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
 - command: `reminders generate [--campaign <id>] [--now <iso_timestamp>]`
   - op: `notifications.generateReminders`
   - roles: hr_admin

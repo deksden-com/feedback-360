@@ -12,6 +12,10 @@ Status: Updated (2026-03-06)
 
 ### HR
 - HR campaign workbench (`/hr/campaigns`)
+- Notification center (`/hr/notifications`)
+  - reminder schedule editor with quiet-hours and timezone-aware preview
+  - template catalog + preview with variables and RU v1 metadata
+  - delivery diagnostics with status/channel/campaign filters and attempt drill-down
 - Employee directory (`/hr/employees`)
   - search by name/email
   - filters by department/status

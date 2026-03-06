@@ -1,5 +1,5 @@
 # EP-018 — Notification center UI
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## Goal
 Дать HR/Admin визуальный контроль над reminder schedules, шаблонами и статусом доставки уведомлений.
@@ -19,12 +19,25 @@ Status: Planned (2026-03-06)
 ## Progress report (evidence-based)
 - `as_of`: 2026-03-06
 - `total_features`: 3
-- `completed_features`: 0
-- `evidence_confirmed_features`: 0
+- `completed_features`: 3
+- `evidence_confirmed_features`: 3
 - verification link:
-  - [Verification matrix](../../verification-matrix.md): здесь будут evidence reminder/template/delivery scenarios. Читать, чтобы операционный UI закрывался фактами, а не только состояниями на экране.
+  - [Verification matrix](../../verification-matrix.md): здесь зафиксированы local + beta evidence по reminder/template/delivery scenarios. Читать, чтобы операционный UI закрывался фактами, а не только состояниями на экране.
 
 ## Definition of done
 - HR может настроить reminders и проверить status доставки без CLI.
 - Preview и diagnostics согласованы с outbox/idempotency моделью.
 - Для каждой фичи есть local acceptance и beta walkthrough.
+
+## Current status
+- Closed:
+  - [FT-0181 Reminder schedule editor](features/FT-0181-reminder-schedule-editor/index.md): HR получил GUI для cadence, quiet hours и preview следующей отправки.
+  - [FT-0182 Template catalog and preview](features/FT-0182-template-catalog/index.md): catalog шаблонов и preview письма работают через typed contract.
+  - [FT-0183 Delivery diagnostics and outbox view](features/FT-0183-delivery-diagnostics/index.md): HR видит `sent` / `retry_scheduled` / `failed` и историю попыток в GUI.
+
+## Completion note (2026-03-06)
+- EP-018 закрыт полностью:
+  - в `apps/web` появился `notifications-center` feature area и маршрут `/hr/notifications`;
+  - typed client API и CLI получили операции settings/template-preview/delivery-diagnostics, чтобы GUI и CLI опирались на один контракт;
+  - local quality gate и acceptance зелёные, beta acceptance подтверждён на `https://beta.go360go.ru`;
+  - PR [#46](https://github.com/deksden-com/feedback-360/pull/46) смержен в `develop`, beta deployment подтверждён после merge commit `5218179`.

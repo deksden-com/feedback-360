@@ -85,12 +85,13 @@ Status: Updated (2026-03-06)
 - Take: editor section layout, side summaries, table patterns.
 - Do not take: domain structure of competencies if it conflicts with our versioned model spec.
 
-### EP-018 — Notification center UI
+### EP-018 — Notification center UI (implemented)
 - Прямого stitch-экрана нет; используем общие patterns из:
   - [`hr_admin_campaign_dashboard/screen.png`](../../assets/ui/stitch_go360go/hr_admin_campaign_dashboard/screen.png)
   - [`hr_admin_employee_directory/screen.png`](../../assets/ui/stitch_go360go/hr_admin_employee_directory/screen.png)
 - Take: filters, tables, status cards.
 - Do not take: действия, которых нет в outbox/template subsystem.
+- Implementation note: текущий `/hr/notifications` использует эти references только для operational cards/table hierarchy; behavior целиком определяется notification specs и typed client API.
 
 ### EP-019 — Admin and ops UI
 - Прямого stitch-экрана нет; используем dashboard/status/table language из HR references и локально проектируем diagnostics surfaces.
