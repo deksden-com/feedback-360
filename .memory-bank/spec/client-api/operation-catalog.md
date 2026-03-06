@@ -61,12 +61,29 @@ Status: Draft (2026-03-03)
   - roles: hr_admin
   - idempotent: optional
   - cli: `model version create --kind ...`
+- `model.version.list`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - cli: `model version list`
 
 ## Campaigns
 - `campaign.create`
   - roles: hr_admin
   - idempotent: optional
   - cli: `campaign create`
+- `campaign.list`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - cli: `campaign list`
+- `campaign.get`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - cli: `campaign get`
+- `campaign.updateDraft`
+  - roles: hr_admin
+  - idempotent: yes
+  - constraint: только `draft`, базовая config меняется через authoritative backend validation.
+  - cli: `campaign update-draft`
 - `campaign.setModelVersion`
   - roles: hr_admin
   - idempotent: yes

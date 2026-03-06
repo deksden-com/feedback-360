@@ -71,11 +71,22 @@ Status: Updated (2026-03-06)
 - `/(app)` — internal shell routes.
 - `/home` — role-aware landing.
 - `/hr/campaigns`, `/hr/campaigns/[campaignId]`
+- `/hr/campaigns/new`, `/hr/campaigns/[campaignId]/edit`
 - `/hr/employees`, `/hr/employees/[employeeId]`
 - `/hr/org`
 - `/hr/models`, `/hr/models/[modelId]`
 - `/hr/notifications`
 - `/ops`
+
+## Current implemented HR campaign routes
+- `/hr/campaigns`
+  - HR campaign list/dashboard with status counters, status filters and deep links to detail pages.
+- `/hr/campaigns/new`
+  - Draft-first campaign creation form: model, dates, timezone and weights.
+- `/hr/campaigns/[campaignId]`
+  - Campaign detail dashboard with overview, progress, lock state and operational workbench.
+- `/hr/campaigns/[campaignId]/edit`
+  - Draft-only edit flow for base campaign configuration.
 
 ## Related plans
 - [EP-011 App shell and navigation](../../plans/epics/EP-011-app-shell-navigation/index.md): единый каркас приложения и home dashboards. Читать, чтобы понять ближайший UI слой после MVP.
