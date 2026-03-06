@@ -1,5 +1,5 @@
 # FT-0193 — Audit trail and release console
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## User value
 Команда может проследить, кто и когда менял кампанию, матрицу, уведомления или запускал AI retry.
@@ -45,3 +45,42 @@ Status: Planned (2026-03-06)
 
 ## Docs updates (SSoT)
 - [UI sitemap & flows](../../../../../spec/ui/sitemap-and-flows.md)
+- [Client API operation catalog](../../../../../spec/client-api/operation-catalog.md)
+- [CLI spec](../../../../../spec/cli/cli.md)
+
+## Progress note (2026-03-06)
+- В ops console добавлен `Audit & release console` с filters по event type, actor и campaign.
+- `hr_reader` получает redacted actor metadata для non-release событий.
+- Release/UI/webhook события живут в одной шкале, но redaction obeys role boundary.
+
+## Quality checks evidence (2026-03-06)
+- `pnpm --filter @feedback-360/web lint` → passed.
+- `pnpm --filter @feedback-360/web typecheck` → passed.
+- `pnpm --filter @feedback-360/web build` → passed.
+
+## Acceptance evidence (2026-03-06)
+- Local acceptance:
+  - `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3107 pnpm --filter @feedback-360/web exec playwright test --config playwright/playwright.config.mjs tests/ft-0193-audit-console.spec.ts --workers=1` → passed.
+- Covered acceptance:
+  - `hr_admin` creates an AI audit signal through real `ai.runForCampaign`.
+  - `hr_reader` filters audit console by event type and sees redacted actor/metadata.
+  - audit rows remain ordered and drill-down metadata is readable.
+- Artifacts:
+  - audit console with redacted event detail.
+    ![ft-0193-audit-console](../../../../../evidence/EP-019/FT-0193/2026-03-06/step-01-audit-console.png)
+
+## Manual verification (deployed environment)
+### Beta scenario — audit and release console
+- Environment:
+  - URL: `https://beta.go360go.ru`
+  - accounts: seeded `hr_admin`, `hr_reader`
+- Steps:
+  1. Под `hr_admin` выполнить одно HR действие, которое оставляет audit signal.
+  2. Под `hr_reader` открыть `/ops`.
+  3. В блоке `Audit & release console` отфильтровать event type.
+  4. Раскрыть metadata.
+- Expected:
+  - `hr_reader` видит событие, но actor и metadata redacted для non-release source;
+  - audit order детерминированный и campaign filter работает.
+- Result:
+  - pending beta deploy for EP-019.

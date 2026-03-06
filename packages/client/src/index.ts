@@ -19,6 +19,7 @@ import {
   type NotificationsClientMethods,
   createNotificationsClientMethods,
 } from "./features/notifications";
+import { type OpsClientMethods, createOpsClientMethods } from "./features/ops";
 import { type OrgClientMethods, createOrgClientMethods } from "./features/org";
 import {
   type QuestionnairesClientMethods,
@@ -50,6 +51,7 @@ export type Feedback360Client = BaseClientMethods &
   CampaignsClientMethods &
   OrgClientMethods &
   NotificationsClientMethods &
+  OpsClientMethods &
   MatrixClientMethods &
   AiClientMethods &
   QuestionnairesClientMethods &
@@ -69,6 +71,7 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
     ...createCampaignsClientMethods(runtime),
     ...createOrgClientMethods(runtime),
     ...createNotificationsClientMethods(runtime),
+    ...createOpsClientMethods(runtime),
     ...createMatrixClientMethods(runtime),
     ...createAiClientMethods(runtime),
     ...createQuestionnairesClientMethods(runtime),

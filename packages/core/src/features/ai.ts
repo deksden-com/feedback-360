@@ -12,6 +12,7 @@ import {
 } from "@feedback-360/api-contract";
 import { runAiForCampaign } from "@feedback-360/db";
 
+import { recordAuditEvent } from "../shared/audit";
 import { ensureContextCompany, hasRole } from "../shared/context";
 
 export const runAiRunForCampaign = async (
@@ -43,6 +44,22 @@ export const runAiRunForCampaign = async (
     const output = await runAiForCampaign({
       campaignId: parsedInput.campaignId,
       companyId: companyIdOrError,
+    });
+    await recordAuditEvent(request, {
+      companyId: companyIdOrError,
+      campaignId: output.campaignId,
+      eventType: output.wasAlreadyCompleted ? "ai.job_reused" : "ai.job_completed_stub",
+      objectType: "ai_job",
+      objectId: output.aiJobId,
+      summary: output.wasAlreadyCompleted
+        ? "Использован существующий результат AI job."
+        : "AI job завершён в MVP stub режиме.",
+      metadataJson: {
+        provider: output.provider,
+        status: output.status,
+        completedAt: output.completedAt,
+        wasAlreadyCompleted: output.wasAlreadyCompleted,
+      },
     });
     return okResult(parseAiRunForCampaignOutput(output));
   } catch (error) {

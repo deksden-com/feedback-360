@@ -1,5 +1,5 @@
 import { createOperationError } from "@feedback-360/api-contract";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
 import { aiJobs, aiWebhookReceipts, campaigns, questionnaires } from "./schema";
@@ -35,6 +35,32 @@ export type ApplyAiWebhookResultOutput = {
   noOp: boolean;
   campaignStatus: string;
   aiJobStatus: string;
+};
+
+export type AiDiagnosticsListInput = {
+  companyId: string;
+  campaignId?: string;
+  status?: "queued" | "completed" | "failed";
+};
+
+export type AiDiagnosticsListOutput = {
+  items: Array<{
+    aiJobId: string;
+    campaignId: string;
+    provider: string;
+    status: string;
+    requestedAt: Date;
+    completedAt: Date | null;
+    idempotencyKey: string;
+    receipt: {
+      receiptId: string;
+      idempotencyKey: string;
+      receivedAt: Date;
+      lastReceivedAt: Date;
+      deliveryCount: number;
+      payloadSummary: string;
+    } | null;
+  }>;
 };
 
 type AiCommentPatch = {
@@ -363,6 +389,8 @@ export const applyAiWebhookResult = async (
           idempotencyKey: input.idempotencyKey,
           payload: input.payload,
           receivedAt: now,
+          lastReceivedAt: now,
+          deliveryCount: 1,
           createdAt: now,
         })
         .onConflictDoNothing()
@@ -374,8 +402,10 @@ export const applyAiWebhookResult = async (
       if (!insertedReceipt) {
         const existingReceipts = await tx
           .select({
+            receiptId: aiWebhookReceipts.id,
             campaignId: aiWebhookReceipts.campaignId,
             aiJobId: aiWebhookReceipts.aiJobId,
+            deliveryCount: aiWebhookReceipts.deliveryCount,
           })
           .from(aiWebhookReceipts)
           .where(eq(aiWebhookReceipts.idempotencyKey, input.idempotencyKey))
@@ -391,6 +421,14 @@ export const applyAiWebhookResult = async (
             idempotencyKey: input.idempotencyKey,
           });
         }
+
+        await tx
+          .update(aiWebhookReceipts)
+          .set({
+            lastReceivedAt: now,
+            deliveryCount: (existingReceipt.deliveryCount ?? 1) + 1,
+          })
+          .where(eq(aiWebhookReceipts.id, existingReceipt.receiptId));
 
         return {
           applied: false,
@@ -555,6 +593,95 @@ export const countAiWebhookReceiptsForDebug = async (idempotencyKey: string): Pr
       .where(eq(aiWebhookReceipts.idempotencyKey, idempotencyKey));
 
     return rows.length;
+  } finally {
+    await pool.end();
+  }
+};
+
+const summarizeWebhookPayload = (payload: unknown): string => {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return "Webhook payload";
+  }
+
+  const record = payload as Record<string, unknown>;
+  const commentCount = Array.isArray(record.questionnaire_comments)
+    ? record.questionnaire_comments.length
+    : 0;
+  const status =
+    typeof record.status === "string" && record.status.trim().length > 0 ? record.status : null;
+
+  return status ? `${status} · comments=${commentCount}` : `comments=${commentCount}`;
+};
+
+export const listAiDiagnostics = async (
+  input: AiDiagnosticsListInput,
+): Promise<AiDiagnosticsListOutput> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const jobFilters = [eq(aiJobs.companyId, input.companyId)];
+    if (input.campaignId) {
+      jobFilters.push(eq(aiJobs.campaignId, input.campaignId));
+    }
+    if (input.status) {
+      jobFilters.push(eq(aiJobs.status, input.status));
+    }
+
+    const jobRows = await db
+      .select({
+        aiJobId: aiJobs.id,
+        campaignId: aiJobs.campaignId,
+        provider: aiJobs.provider,
+        status: aiJobs.status,
+        requestedAt: aiJobs.requestedAt,
+        completedAt: aiJobs.completedAt,
+        idempotencyKey: aiJobs.idempotencyKey,
+      })
+      .from(aiJobs)
+      .where(and(...jobFilters))
+      .orderBy(desc(aiJobs.requestedAt), asc(aiJobs.id));
+
+    const receiptRows = await db
+      .select({
+        receiptId: aiWebhookReceipts.id,
+        aiJobId: aiWebhookReceipts.aiJobId,
+        idempotencyKey: aiWebhookReceipts.idempotencyKey,
+        receivedAt: aiWebhookReceipts.receivedAt,
+        lastReceivedAt: aiWebhookReceipts.lastReceivedAt,
+        deliveryCount: aiWebhookReceipts.deliveryCount,
+        payload: aiWebhookReceipts.payload,
+      })
+      .from(aiWebhookReceipts)
+      .where(
+        input.campaignId
+          ? and(
+              eq(aiWebhookReceipts.companyId, input.companyId),
+              eq(aiWebhookReceipts.campaignId, input.campaignId),
+            )
+          : eq(aiWebhookReceipts.companyId, input.companyId),
+      )
+      .orderBy(desc(aiWebhookReceipts.receivedAt), asc(aiWebhookReceipts.id));
+
+    const receiptsByJobId = new Map(
+      receiptRows.map((row) => [
+        row.aiJobId,
+        {
+          receiptId: row.receiptId,
+          idempotencyKey: row.idempotencyKey,
+          receivedAt: row.receivedAt,
+          lastReceivedAt: row.lastReceivedAt,
+          deliveryCount: row.deliveryCount,
+          payloadSummary: summarizeWebhookPayload(row.payload),
+        },
+      ]),
+    );
+
+    return {
+      items: jobRows.map((row) => ({
+        ...row,
+        receipt: receiptsByJobId.get(row.aiJobId) ?? null,
+      })),
+    };
   } finally {
     await pool.end();
   }

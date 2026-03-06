@@ -37,6 +37,9 @@ Status: Updated (2026-03-06)
 - `ai`
   - Владеет: AI jobs, webhook handling, processed text lifecycle, retry/diagnostics.
   - Не владеет: базовыми questionnaire/campaign правилами.
+- `ops`
+  - Владеет: health/release diagnostics, audit/release views, operational read models for support surfaces.
+  - Не владеет: самим бизнес-поведением campaigns/results/notifications/ai, только наблюдаемостью и diagnostics над ними.
 
 ## Shared modules (strict rule)
 `shared` допустим только если модуль:
@@ -98,4 +101,5 @@ Root entrypoints допустимы только как thin composition layer:
 - `packages/client/src/features/*.ts`
 - `packages/api-contract/src/<area>.ts`
 - `apps/web/src/features/<area>/...`
+- `apps/web/src/features/ops/...`
 - transitional shims: `packages/api-contract/src/v1/legacy.ts`, `packages/cli/src/legacy.ts`, `apps/web/src/lib/*`, `apps/web/src/components/*`

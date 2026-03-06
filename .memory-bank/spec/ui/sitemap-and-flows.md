@@ -141,6 +141,10 @@ Status: Updated (2026-03-06)
 - `/hr/models/[modelVersionId]`
   - Version detail/editor: draft editing, published read-only view and clone/publish actions.
 
+## Current implemented ops route
+- `/ops`
+  - HR-only operational console with health/release card, AI diagnostics and audit/release trail.
+
 ## Related plans
 - [EP-011 App shell and navigation](../../plans/epics/EP-011-app-shell-navigation/index.md): единый каркас приложения и home dashboards. Читать, чтобы понять ближайший UI слой после MVP.
 - [EP-012 HR campaigns UX](../../plans/epics/EP-012-hr-campaigns-ux/index.md): HR campaign surfaces поверх текущего workbench. Читать, чтобы связать sitemap с реальными business flows.

@@ -7,6 +7,7 @@ const state = {
 
 vi.mock("@feedback-360/db", () => {
   return {
+    createAuditEvent: async () => undefined,
     getEmployeeIdByUserInCompany: async ({
       companyId,
       userId,

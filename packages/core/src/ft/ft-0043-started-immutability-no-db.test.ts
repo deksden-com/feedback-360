@@ -23,6 +23,7 @@ const ensureDraftCampaign = (campaignId: string): void => {
 
 vi.mock("@feedback-360/db", () => {
   return {
+    createAuditEvent: async () => undefined,
     setCampaignModelVersion: async ({
       campaignId,
       modelVersionId,

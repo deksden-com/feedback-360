@@ -109,6 +109,9 @@ export const knownOperations = [
   "matrix.generateSuggested",
   "matrix.set",
   "ai.runForCampaign",
+  "ops.health.get",
+  "ops.aiDiagnostics.list",
+  "ops.audit.list",
   "client.setActiveCompany",
   "questionnaire.listAssigned",
   "questionnaire.getDraft",
@@ -996,6 +999,72 @@ export type AiRunForCampaignOutput = {
   status: "completed";
   completedAt: string;
   wasAlreadyCompleted: boolean;
+};
+
+export type OpsHealthGetInput = Record<string, never>;
+
+export type OpsHealthGetOutput = {
+  appEnv: string;
+  appVersion: string;
+  gitCommitSha: string | null;
+  gitBranch: string | null;
+  deploymentUrl: string | null;
+  checks: Array<{
+    key: string;
+    label: string;
+    status: "healthy" | "warning" | "error";
+    detail: string;
+  }>;
+};
+
+export type OpsAiDiagnosticsListInput = {
+  campaignId?: string;
+  status?: "queued" | "completed" | "failed";
+};
+
+export type OpsAiDiagnosticsListOutput = {
+  items: Array<{
+    aiJobId: string;
+    campaignId: string;
+    provider: string;
+    status: string;
+    requestedAt: string;
+    completedAt: string | null;
+    idempotencyKey: string;
+    receipt: {
+      receiptId: string;
+      idempotencyKey: string;
+      receivedAt: string;
+      lastReceivedAt: string;
+      deliveryCount: number;
+      payloadSummary: string;
+    } | null;
+  }>;
+};
+
+export type OpsAuditListInput = {
+  campaignId?: string;
+  actorUserId?: string;
+  eventType?: string;
+  source?: "ui" | "system" | "release" | "webhook" | "cron";
+  limit?: number;
+};
+
+export type OpsAuditListOutput = {
+  items: Array<{
+    auditEventId: string;
+    companyId: string;
+    campaignId: string | null;
+    actorUserId: string | null;
+    actorRole: string | null;
+    source: string;
+    eventType: string;
+    objectType: string;
+    objectId: string | null;
+    summary: string;
+    metadataJson: Record<string, unknown>;
+    createdAt: string;
+  }>;
 };
 
 export type ClientSetActiveCompanyInput = {
@@ -5033,6 +5102,243 @@ export const parseAiRunForCampaignOutput = (value: unknown): AiRunForCampaignOut
       "wasAlreadyCompleted",
       "ai.runForCampaign output",
     ),
+  };
+};
+
+export const parseOpsHealthGetInput = (value: unknown): OpsHealthGetInput => {
+  const record = ensureObject(value, "ops.health.get input");
+  ensureAllowedKeys(record, [], "ops.health.get input");
+  return {};
+};
+
+export const parseOpsHealthGetOutput = (value: unknown): OpsHealthGetOutput => {
+  const record = ensureObject(value, "ops.health.get output");
+  ensureAllowedKeys(
+    record,
+    ["appEnv", "appVersion", "gitCommitSha", "gitBranch", "deploymentUrl", "checks"],
+    "ops.health.get output",
+  );
+
+  return {
+    appEnv: ensureStringField(record, "appEnv", "ops.health.get output"),
+    appVersion: ensureStringField(record, "appVersion", "ops.health.get output"),
+    gitCommitSha:
+      record.gitCommitSha === null
+        ? null
+        : ensureStringField(record, "gitCommitSha", "ops.health.get output"),
+    gitBranch:
+      record.gitBranch === null
+        ? null
+        : ensureStringField(record, "gitBranch", "ops.health.get output"),
+    deploymentUrl:
+      record.deploymentUrl === null
+        ? null
+        : ensureStringField(record, "deploymentUrl", "ops.health.get output"),
+    checks: ensureArray(record.checks, "ops.health.get output.checks").map((item) => {
+      const itemRecord = ensureObject(item, "ops.health.get output.checks[]");
+      ensureAllowedKeys(itemRecord, ["key", "label", "status", "detail"], "ops.health.check");
+      const status = ensureStringField(itemRecord, "status", "ops.health.check");
+      if (status !== "healthy" && status !== "warning" && status !== "error") {
+        throw new Error("ops.health.check.status must be healthy|warning|error.");
+      }
+      return {
+        key: ensureStringField(itemRecord, "key", "ops.health.check"),
+        label: ensureStringField(itemRecord, "label", "ops.health.check"),
+        status,
+        detail: ensureStringField(itemRecord, "detail", "ops.health.check"),
+      };
+    }),
+  };
+};
+
+export const parseOpsAiDiagnosticsListInput = (value: unknown): OpsAiDiagnosticsListInput => {
+  const record = ensureObject(value, "ops.aiDiagnostics.list input");
+  ensureAllowedKeys(record, ["campaignId", "status"], "ops.aiDiagnostics.list input");
+  const status =
+    record.status === undefined
+      ? undefined
+      : ensureStringField(record, "status", "ops.aiDiagnostics.list input");
+  if (status && status !== "queued" && status !== "completed" && status !== "failed") {
+    throw new Error("ops.aiDiagnostics.list input.status must be queued|completed|failed.");
+  }
+
+  return {
+    ...(record.campaignId !== undefined
+      ? { campaignId: ensureStringField(record, "campaignId", "ops.aiDiagnostics.list input") }
+      : {}),
+    ...(status ? { status: status as OpsAiDiagnosticsListInput["status"] } : {}),
+  };
+};
+
+export const parseOpsAiDiagnosticsListOutput = (value: unknown): OpsAiDiagnosticsListOutput => {
+  const record = ensureObject(value, "ops.aiDiagnostics.list output");
+  ensureAllowedKeys(record, ["items"], "ops.aiDiagnostics.list output");
+  return {
+    items: ensureArray(record.items, "ops.aiDiagnostics.list output.items").map((item) => {
+      const itemRecord = ensureObject(item, "ops.aiDiagnostics.list output.items[]");
+      ensureAllowedKeys(
+        itemRecord,
+        [
+          "aiJobId",
+          "campaignId",
+          "provider",
+          "status",
+          "requestedAt",
+          "completedAt",
+          "idempotencyKey",
+          "receipt",
+        ],
+        "ops.aiDiagnostics.item",
+      );
+
+      const receiptValue = itemRecord.receipt;
+      let receipt: OpsAiDiagnosticsListOutput["items"][number]["receipt"] = null;
+      if (receiptValue !== null && receiptValue !== undefined) {
+        const receiptRecord = ensureObject(receiptValue, "ops.aiDiagnostics.receipt");
+        ensureAllowedKeys(
+          receiptRecord,
+          [
+            "receiptId",
+            "idempotencyKey",
+            "receivedAt",
+            "lastReceivedAt",
+            "deliveryCount",
+            "payloadSummary",
+          ],
+          "ops.aiDiagnostics.receipt",
+        );
+        receipt = {
+          receiptId: ensureStringField(receiptRecord, "receiptId", "ops.aiDiagnostics.receipt"),
+          idempotencyKey: ensureStringField(
+            receiptRecord,
+            "idempotencyKey",
+            "ops.aiDiagnostics.receipt",
+          ),
+          receivedAt: ensureStringField(receiptRecord, "receivedAt", "ops.aiDiagnostics.receipt"),
+          lastReceivedAt: ensureStringField(
+            receiptRecord,
+            "lastReceivedAt",
+            "ops.aiDiagnostics.receipt",
+          ),
+          deliveryCount: ensureNumberField(
+            receiptRecord,
+            "deliveryCount",
+            "ops.aiDiagnostics.receipt",
+          ),
+          payloadSummary: ensureStringField(
+            receiptRecord,
+            "payloadSummary",
+            "ops.aiDiagnostics.receipt",
+          ),
+        };
+      }
+
+      return {
+        aiJobId: ensureStringField(itemRecord, "aiJobId", "ops.aiDiagnostics.item"),
+        campaignId: ensureStringField(itemRecord, "campaignId", "ops.aiDiagnostics.item"),
+        provider: ensureStringField(itemRecord, "provider", "ops.aiDiagnostics.item"),
+        status: ensureStringField(itemRecord, "status", "ops.aiDiagnostics.item"),
+        requestedAt: ensureStringField(itemRecord, "requestedAt", "ops.aiDiagnostics.item"),
+        completedAt:
+          itemRecord.completedAt === null
+            ? null
+            : ensureStringField(itemRecord, "completedAt", "ops.aiDiagnostics.item"),
+        idempotencyKey: ensureStringField(itemRecord, "idempotencyKey", "ops.aiDiagnostics.item"),
+        receipt,
+      };
+    }),
+  };
+};
+
+export const parseOpsAuditListInput = (value: unknown): OpsAuditListInput => {
+  const record = ensureObject(value, "ops.audit.list input");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "actorUserId", "eventType", "source", "limit"],
+    "ops.audit.list input",
+  );
+  const source =
+    record.source === undefined
+      ? undefined
+      : ensureStringField(record, "source", "ops.audit.list input");
+  if (source && !["ui", "system", "release", "webhook", "cron"].includes(source)) {
+    throw new Error("ops.audit.list input.source must be ui|system|release|webhook|cron.");
+  }
+
+  return {
+    ...(record.campaignId !== undefined
+      ? { campaignId: ensureStringField(record, "campaignId", "ops.audit.list input") }
+      : {}),
+    ...(record.actorUserId !== undefined
+      ? { actorUserId: ensureStringField(record, "actorUserId", "ops.audit.list input") }
+      : {}),
+    ...(record.eventType !== undefined
+      ? { eventType: ensureStringField(record, "eventType", "ops.audit.list input") }
+      : {}),
+    ...(source ? { source: source as OpsAuditListInput["source"] } : {}),
+    ...(record.limit !== undefined
+      ? { limit: ensureNumberField(record, "limit", "ops.audit.list input") }
+      : {}),
+  };
+};
+
+export const parseOpsAuditListOutput = (value: unknown): OpsAuditListOutput => {
+  const record = ensureObject(value, "ops.audit.list output");
+  ensureAllowedKeys(record, ["items"], "ops.audit.list output");
+  return {
+    items: ensureArray(record.items, "ops.audit.list output.items").map((item) => {
+      const itemRecord = ensureObject(item, "ops.audit.list item");
+      ensureAllowedKeys(
+        itemRecord,
+        [
+          "auditEventId",
+          "companyId",
+          "campaignId",
+          "actorUserId",
+          "actorRole",
+          "source",
+          "eventType",
+          "objectType",
+          "objectId",
+          "summary",
+          "metadataJson",
+          "createdAt",
+        ],
+        "ops.audit.list item",
+      );
+      const metadataValue = itemRecord.metadataJson;
+      const metadataRecord =
+        typeof metadataValue === "object" && metadataValue !== null && !Array.isArray(metadataValue)
+          ? (metadataValue as Record<string, unknown>)
+          : {};
+
+      return {
+        auditEventId: ensureStringField(itemRecord, "auditEventId", "ops.audit.list item"),
+        companyId: ensureStringField(itemRecord, "companyId", "ops.audit.list item"),
+        campaignId:
+          itemRecord.campaignId === null
+            ? null
+            : ensureStringField(itemRecord, "campaignId", "ops.audit.list item"),
+        actorUserId:
+          itemRecord.actorUserId === null
+            ? null
+            : ensureStringField(itemRecord, "actorUserId", "ops.audit.list item"),
+        actorRole:
+          itemRecord.actorRole === null
+            ? null
+            : ensureStringField(itemRecord, "actorRole", "ops.audit.list item"),
+        source: ensureStringField(itemRecord, "source", "ops.audit.list item"),
+        eventType: ensureStringField(itemRecord, "eventType", "ops.audit.list item"),
+        objectType: ensureStringField(itemRecord, "objectType", "ops.audit.list item"),
+        objectId:
+          itemRecord.objectId === null
+            ? null
+            : ensureStringField(itemRecord, "objectId", "ops.audit.list item"),
+        summary: ensureStringField(itemRecord, "summary", "ops.audit.list item"),
+        metadataJson: metadataRecord,
+        createdAt: ensureStringField(itemRecord, "createdAt", "ops.audit.list item"),
+      };
+    }),
   };
 };
 

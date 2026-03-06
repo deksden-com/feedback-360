@@ -11,6 +11,7 @@ const ensureCampaignStatus = (campaignId: string): "draft" | "started" | "ended"
 
 vi.mock("@feedback-360/db", () => {
   return {
+    createAuditEvent: async () => undefined,
     startCampaign: async ({
       campaignId,
     }: {

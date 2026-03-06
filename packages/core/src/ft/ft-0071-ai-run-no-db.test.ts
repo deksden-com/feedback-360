@@ -7,6 +7,7 @@ const state = {
 
 vi.mock("@feedback-360/db", () => {
   return {
+    createAuditEvent: async () => undefined,
     runAiForCampaign: async ({ campaignId }: { companyId: string; campaignId: string }) => {
       state.callCount += 1;
       return {

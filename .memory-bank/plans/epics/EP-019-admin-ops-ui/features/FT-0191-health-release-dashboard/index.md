@@ -1,5 +1,5 @@
 # FT-0191 — Health and release dashboard
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## User value
 Команда быстро видит, в каком состоянии beta/prod, какой build задеплоен и прошёл ли последний smoke.
@@ -44,3 +44,41 @@ Status: Planned (2026-03-06)
 
 ## Docs updates (SSoT)
 - [UI sitemap & flows](../../../../../spec/ui/sitemap-and-flows.md)
+- [Client API operation catalog](../../../../../spec/client-api/operation-catalog.md)
+- [CLI spec](../../../../../spec/cli/cli.md)
+
+## Progress note (2026-03-06)
+- Добавлен `/ops` с карточкой `Health & release` для HR ролей.
+- Health card показывает `appEnv`, version, git metadata и состояние базовых integration checks.
+- Навигация в internal shell получила отдельный `Ops` entrypoint.
+
+## Quality checks evidence (2026-03-06)
+- `pnpm --filter @feedback-360/web lint` → passed.
+- `pnpm --filter @feedback-360/web typecheck` → passed.
+- `pnpm --filter @feedback-360/web build` → passed.
+
+## Acceptance evidence (2026-03-06)
+- Local acceptance:
+  - `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3107 pnpm --filter @feedback-360/web exec playwright test --config playwright/playwright.config.mjs tests/ft-0191-health-release-dashboard.spec.ts --workers=1` → passed.
+- Covered acceptance:
+  - HR role открывает `/ops` после seed/login/company selection.
+  - На странице видны `Health & release`, environment, build metadata и operational checks.
+- Artifacts:
+  - health and release dashboard.
+    ![ft-0191-health-release-dashboard](../../../../../evidence/EP-019/FT-0191/2026-03-06/step-01-health-release-dashboard.png)
+
+## Manual verification (deployed environment)
+### Beta scenario — health and release dashboard
+- Environment:
+  - URL: `https://beta.go360go.ru`
+  - account: seeded `hr_admin`
+- Steps:
+  1. Войти по magic link и выбрать активную компанию.
+  2. Открыть `/ops`.
+  3. Проверить блок `Health & release`.
+- Expected:
+  - видны environment/version/commit/branch;
+  - checks для web/db присутствуют;
+  - warning/healthy states читаемы визуально.
+- Result:
+  - pending beta deploy for EP-019.

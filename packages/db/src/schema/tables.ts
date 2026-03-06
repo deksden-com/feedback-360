@@ -255,10 +255,29 @@ export const aiWebhookReceipts = pgTable(
     idempotencyKey: text("idempotency_key").notNull(),
     payload: jsonb("payload").notNull().default({}),
     receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+    lastReceivedAt: timestamp("last_received_at", { withTimezone: true }).notNull().defaultNow(),
+    deliveryCount: integer("delivery_count").notNull().default(1),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [unique("uq_ai_webhook_receipt_idempotency").on(table.idempotencyKey)],
 );
+
+export const auditEvents = pgTable("audit_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  companyId: uuid("company_id")
+    .notNull()
+    .references(() => companies.id, { onDelete: "cascade" }),
+  campaignId: uuid("campaign_id").references(() => campaigns.id, { onDelete: "cascade" }),
+  actorUserId: uuid("actor_user_id"),
+  actorRole: text("actor_role"),
+  source: text("source").notNull().default("ui"),
+  eventType: text("event_type").notNull(),
+  objectType: text("object_type").notNull(),
+  objectId: text("object_id"),
+  summary: text("summary").notNull(),
+  metadataJson: jsonb("metadata_json").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export const notificationOutbox = pgTable(
   "notification_outbox",
