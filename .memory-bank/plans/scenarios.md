@@ -11,3 +11,10 @@ MVP registry (draft):
 - GS1 Happy path (indicators): базовый сквозной путь HR→employee→results→AI (`mvp_stub` на MVP, webhook в следующем этапе).
 - GS2 Small group anonymity: edge case peers=2 и пересчёт весов/видимости.
 - GS3 Webhook security & idempotency: подпись + повторная доставка.
+
+Post-MVP GUI registry (draft):
+- GUI1 App shell traversal: login → company switch → role-aware home → primary navigation.
+- GUI2 HR campaign operation: list → draft create/edit → detail dashboard → start/lock/AI retry.
+- GUI3 Questionnaire experience: inbox → fill → save draft → submit → read-only revisit.
+- GUI4 Results role views: employee → manager → HR dashboards with correct visibility.
+- GUI5 HR admin data maintenance: employee directory/profile/org edit.

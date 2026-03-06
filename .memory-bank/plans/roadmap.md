@@ -17,3 +17,17 @@ Status: Draft (2026-03-03)
 11) Minimal UI (HR flow + employee flow) + Playwright golden e2e.
 12) Test & release hardening (DB integration isolation, CI checks, beta smoke gates, evidence sync).
 13) Production readiness (retention/privacy, observability, runbook drill, release rehearsal).
+
+Порядок (next GUI wave):
+14) App shell + navigation + role-aware home dashboards.
+15) HR campaigns UX (list/create/detail).
+16) Questionnaire experience (inbox/fill/read-only).
+17) Results experience (employee/manager/HR dashboards).
+18) People + org admin.
+19) Competency models + matrix UI.
+20) Notification center UI.
+21) Admin + ops UI.
+
+Отложено после GUI wave:
+- Реальная внешняя AI integration beyond current MVP stub.
+- Telegram notifications / Telegram login / OAuth expansion.
