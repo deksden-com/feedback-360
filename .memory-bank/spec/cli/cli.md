@@ -56,5 +56,8 @@ Status: Draft (2026-03-03)
 - `reminders generate`
 - `ai run <campaign_id>`
   - MVP: работает в `mvp_stub` режиме (без внешнего AI вызова), возвращает completed/idempotent результат.
+- `ops health`
+- `ops ai [--campaign <campaign_id>] [--status queued|completed|failed]`
+- `ops audit [--campaign <campaign_id>] [--actor-user-id <id>] [--event-type <value>] [--limit <n>]`
 
 SSoT маппинга “команда → операция”: [Command catalog](command-catalog.md) — 1:1 соответствие CLI и typed client API. Читать, чтобы не “размазывать” одну команду по нескольким операциям и чтобы тесты повторяли поведение UI.

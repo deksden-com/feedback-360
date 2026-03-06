@@ -1,5 +1,5 @@
 # EP-019 — Admin and ops UI
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## Goal
 Добавить визуальный operational layer для beta/prod: health, release status, AI/webhook diagnostics и audit trail.
@@ -19,8 +19,8 @@ Status: Planned (2026-03-06)
 ## Progress report (evidence-based)
 - `as_of`: 2026-03-06
 - `total_features`: 3
-- `completed_features`: 0
-- `evidence_confirmed_features`: 0
+- `completed_features`: 3
+- `evidence_confirmed_features`: 3
 - verification link:
   - [Verification matrix](../../verification-matrix.md): сюда пойдут checks для ops UI и beta/prod diagnostics. Читать, чтобы эксплуатационный интерфейс тоже был доказуемым.
 
@@ -28,3 +28,9 @@ Status: Planned (2026-03-06)
 - Команда видит состояние окружений и интеграций в UI, а не только в внешних консолях.
 - Audit и diagnostics не раскрывают лишние данные не тем ролям.
 - Для каждой FT есть локальная и beta-проверка.
+
+## Progress note (2026-03-06)
+- EP-019 реализован как единый `/ops` surface для HR ролей.
+- Health/release card показывает runtime environment, build metadata и базовые integration checks.
+- AI diagnostics показывает jobs, webhook receipts и duplicate delivery markers.
+- Audit console даёт фильтры по campaign/event/actor и редактирует чувствительные поля для `hr_reader`.

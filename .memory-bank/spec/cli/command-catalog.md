@@ -278,6 +278,22 @@ Status: Draft (2026-03-03)
   - idempotency: yes (per campaign, unless explicit retry)
   - MVP behavior: `mvp_stub` synchronous completion (no external AI HTTP call).
 
+## Ops
+- command: `ops health [--json]`
+  - op: `ops.health.get`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
+- command: `ops ai [--campaign <id>] [--status queued|completed|failed] [--json]`
+  - op: `ops.aiDiagnostics.list`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
+- command: `ops audit [--campaign <id>] [--actor-user-id <id>] [--event-type <value>] [--limit <n>] [--json]`
+  - op: `ops.audit.list`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
 ## System
 - command: `ping [--json]`
   - op: `system.ping`

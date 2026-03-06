@@ -294,6 +294,23 @@ Status: Draft (2026-03-03)
   - idempotent: yes (by webhook receipt)
   - cli: (test helper)
 
+## Ops / diagnostics
+- `ops.health.get`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - output: environment, build metadata and operational checks for web/db/resend/sentry/ai-webhook config
+  - cli: `ops health`
+- `ops.aiDiagnostics.list`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - output: AI jobs + latest webhook receipt per job with duplicate delivery marker
+  - cli: `ops ai`
+- `ops.audit.list`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - output: audit/release rows with redaction rules for `hr_reader`
+  - cli: `ops audit`
+
 ## System (utility)
 - `system.ping`
   - roles: any (including unauthenticated if we choose)
