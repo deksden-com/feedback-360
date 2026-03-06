@@ -65,6 +65,8 @@ HR поддерживает оргструктуру компании через
 ## Acceptance evidence (2026-03-06)
 - Local acceptance:
   - `cd apps/web && PLAYWRIGHT_BASE_URL=http://localhost:3105 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0163-org-editor.spec.ts --workers=1 --reporter=line` → passed.
+- Beta acceptance:
+  - `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0163-org-editor.spec.ts --workers=1 --reporter=line` → passed after merge commit `4abc86937064cf3086fab1c6ecfc2f8c7b390263`.
 - Covered acceptance:
   - HR создаёт/переименовывает department и видит обновлённое дерево;
   - manager assignment и employee move обновляют current state;
@@ -88,4 +90,4 @@ HR поддерживает оргструктуру компании через
   - selected employee card показывает новую структуру;
   - profile/history синхронно отражает move и manager change.
 - Result:
-  - pending until merge to `develop` and beta deployment.
+  - passed on `https://beta.go360go.ru`.

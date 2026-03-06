@@ -39,4 +39,5 @@ Status: Completed (2026-03-06)
 - EP-016 закрыт полностью:
   - в `apps/web` появился полноценный `people-org` feature area с directory, profile и org editor surfaces;
   - typed client API расширен операциями `employee.directoryList`, `employee.profileGet`, `identity.provisionAccess`, `department.list`, `department.upsert`;
-  - regression acceptance зелёный локально для FT-0161..FT-0163, а beta verification выполняется после merge в `develop`.
+  - regression acceptance зелёный локально и на `https://beta.go360go.ru` для FT-0161..FT-0163;
+  - PR [#42](https://github.com/deksden-com/feedback-360/pull/42) смержен в `develop`, beta deployment подтверждён после merge commit `4abc86937064cf3086fab1c6ecfc2f8c7b390263`.

@@ -63,6 +63,8 @@ HR быстро находит сотрудника по имени, email, от
 ## Acceptance evidence (2026-03-06)
 - Local acceptance:
   - `cd apps/web && PLAYWRIGHT_BASE_URL=http://localhost:3105 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0161-employee-directory.spec.ts --workers=1 --reporter=line` → passed.
+- Beta acceptance:
+  - `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0161-employee-directory.spec.ts --workers=1 --reporter=line` → passed after merge commit `4abc86937064cf3086fab1c6ecfc2f8c7b390263`.
 - Covered acceptance:
   - HR открывает directory и видит текущий состав компании;
   - search и filters сокращают список без потери company scoping;
@@ -86,4 +88,4 @@ HR быстро находит сотрудника по имени, email, от
   - badges показывают status;
   - profile route открывается для нужного employee.
 - Result:
-  - pending until merge to `develop` and beta deployment.
+  - passed on `https://beta.go360go.ru`.

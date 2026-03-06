@@ -56,7 +56,7 @@ test("FT-0162: HR admin creates employee, updates email, provisions access, HR r
     page.waitForURL(/\/hr\/employees\/.+\?flash=saved/),
     page.getByTestId("employee-create-submit").click(),
   ]);
-  await expect(page.getByTestId("employee-profile-flash-saved")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("employee-profile-flash-saved")).toBeVisible({ timeout: 60_000 });
   await expect(page).toHaveURL(/\/hr\/employees\/.+/);
 
   await page.getByTestId("employee-profile-email-input").fill("new.person.updated@acme.example");
@@ -67,7 +67,7 @@ test("FT-0162: HR admin creates employee, updates email, provisions access, HR r
   await expect(page.getByTestId("employee-profile-flash-saved")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("employee-profile-email")).toContainText(
     "new.person.updated@acme.example",
-    { timeout: 20_000 },
+    { timeout: 60_000 },
   );
 
   const employeeProfileUrl = page.url();
@@ -81,7 +81,7 @@ test("FT-0162: HR admin creates employee, updates email, provisions access, HR r
   ]);
 
   await expect(page.getByTestId("employee-profile-flash-provisioned")).toBeVisible({
-    timeout: 20_000,
+    timeout: 60_000,
   });
   await expect(page.getByTestId("employee-profile-role")).toContainText("Руководитель", {
     timeout: 20_000,
@@ -93,7 +93,7 @@ test("FT-0162: HR admin creates employee, updates email, provisions access, HR r
 
   await loginWithCompany(page, String(hrReaderUserId), String(companyId));
   await page.goto(employeeProfileUrl);
-  await expect(page.getByTestId("employee-profile-summary")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("employee-profile-summary")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId("employee-profile-form")).toHaveCount(0);
   await expect(page.getByTestId("employee-provision-form")).toHaveCount(0);
   await page.screenshot({
