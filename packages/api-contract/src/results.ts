@@ -1,0 +1,32 @@
+export {
+  parseResultsGetHrViewInput,
+  parseResultsGetHrViewOutput,
+  parseResultsGetMyDashboardInput,
+  parseResultsGetMyDashboardOutput,
+  parseResultsGetTeamDashboardInput,
+  parseResultsGetTeamDashboardOutput,
+  resultsGroupKeys,
+  resultsGroupVisibilityStates,
+  smallGroupPolicies,
+} from "./v1/legacy";
+
+export type {
+  ResultsGetHrViewInput,
+  ResultsGetHrViewOutput,
+  ResultsGetMyDashboardInput,
+  ResultsGetMyDashboardOutput,
+  ResultsGetTeamDashboardInput,
+  ResultsGetTeamDashboardOutput,
+  ResultsGroupKey,
+  ResultsGroupVisibilityState,
+  ResultsHrViewCompetencyScore,
+  ResultsHrViewGroupOverall,
+  ResultsHrViewGroupVisibility,
+  ResultsHrViewGroupWeights,
+  ResultsHrViewLevelDistribution,
+  ResultsHrViewLevelSummary,
+  ResultsHrViewRaterScore,
+  ResultsOpenTextGroup,
+  ResultsOpenTextItem,
+  SmallGroupPolicy,
+} from "./v1/legacy";

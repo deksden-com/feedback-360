@@ -1,0 +1,33 @@
+export {
+  parseQuestionnaireGetDraftInput,
+  parseQuestionnaireGetDraftOutput,
+  parseQuestionnaireListAssignedInput,
+  parseQuestionnaireListAssignedOutput,
+  parseQuestionnaireSaveDraftInput,
+  parseQuestionnaireSaveDraftOutput,
+  parseQuestionnaireSubmitInput,
+  parseQuestionnaireSubmitOutput,
+  questionnaireCampaignStatuses,
+  questionnaireRaterRoles,
+  questionnaireStatuses,
+} from "./v1/legacy";
+
+export type {
+  QuestionnaireCampaignStatus,
+  QuestionnaireDefinition,
+  QuestionnaireDefinitionCompetency,
+  QuestionnaireDefinitionGroup,
+  QuestionnaireDefinitionIndicator,
+  QuestionnaireDefinitionLevel,
+  QuestionnaireGetDraftInput,
+  QuestionnaireGetDraftOutput,
+  QuestionnaireListAssignedInput,
+  QuestionnaireListAssignedItem,
+  QuestionnaireListAssignedOutput,
+  QuestionnaireRaterRole,
+  QuestionnaireSaveDraftInput,
+  QuestionnaireSaveDraftOutput,
+  QuestionnaireStatus,
+  QuestionnaireSubmitInput,
+  QuestionnaireSubmitOutput,
+} from "./v1/legacy";
