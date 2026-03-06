@@ -46,7 +46,13 @@ Status: Draft (2026-03-03)
 - `questionnaire save-draft ...`
 - `questionnaire submit ...`
 - `results my|team|hr ...`
+- `reminders settings`
+- `reminders configure`
+- `reminders preview`
 - `notifications dispatch`
+- `notifications templates`
+- `notifications template-preview`
+- `notifications deliveries`
 - `reminders generate`
 - `ai run <campaign_id>`
   - MVP: работает в `mvp_stub` режиме (без внешнего AI вызова), возвращает completed/idempotent результат.

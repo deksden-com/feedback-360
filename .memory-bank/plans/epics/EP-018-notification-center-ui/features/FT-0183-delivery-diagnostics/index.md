@@ -1,5 +1,5 @@
 # FT-0183 — Delivery diagnostics and outbox view
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## User value
 HR/Admin видит, были ли отправлены письма, какие упали в retry/fail и почему.
@@ -45,3 +45,47 @@ HR/Admin видит, были ли отправлены письма, какие
 
 ## Docs updates (SSoT)
 - [UI sitemap & flows](../../../../../spec/ui/sitemap-and-flows.md)
+- [Client API operation catalog](../../../../../spec/client-api/operation-catalog.md)
+- [CLI command catalog](../../../../../spec/cli/command-catalog.md)
+
+## Progress note (2026-03-06)
+- Выполнен вертикальный слайс FT-0183:
+  - notification center получил delivery table с filters по status/channel/campaign;
+  - drill-down показывает attempts history, retry markers и terminal failures;
+  - diagnostics читаются тем же contract, что и CLI, поэтому GUI и ops helper не расходятся по данным.
+
+## Quality checks evidence (2026-03-06)
+- `pnpm lint` → passed.
+- `pnpm typecheck` → passed.
+- `pnpm --filter @feedback-360/web test` → passed.
+- `pnpm --filter @feedback-360/cli exec vitest run src/ft-0181-notification-center-cli.test.ts` → passed.
+
+## Acceptance evidence (2026-03-06)
+- Local acceptance:
+  - `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3104 pnpm --filter @feedback-360/web exec playwright test --config playwright/playwright.config.mjs tests/ft-0183-delivery-diagnostics.spec.ts --workers=1` → passed.
+- Beta acceptance:
+  - `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web exec playwright test --config playwright/playwright.config.mjs tests/ft-0183-delivery-diagnostics.spec.ts --workers=1` → passed after merge commit `5218179`.
+- Covered acceptance:
+  - HR видит seeded rows в состояниях `sent`, `retry_scheduled`, `failed`;
+  - filters не ломают diagnostics и позволяют открыть конкретную delivery card;
+  - attempts history различает retryable failure и terminal failure.
+- Artifacts:
+  - delivery diagnostics with retry and failed attempts.
+    ![ft-0183-delivery-diagnostics](../../../../../evidence/EP-018/FT-0183/2026-03-06/step-01-delivery-diagnostics.png)
+
+## Manual verification (deployed environment)
+### Beta scenario — delivery diagnostics
+- Environment:
+  - URL: `https://beta.go360go.ru`
+  - account: seeded `hr_admin`
+- Steps:
+  1. Войти по magic link и выбрать активную компанию.
+  2. Открыть `/hr/notifications`.
+  3. Дождаться fixture cards в diagnostics table.
+  4. Отфильтровать `retry_scheduled` / `failed` и раскрыть attempts history.
+- Expected:
+  - diagnostics показывает campaign, recipient, status badge и scheduled/delivered timestamps;
+  - `retry_scheduled` видно отдельно от terminal `failed`;
+  - attempts history раскрывается без навигации на другой экран.
+- Result:
+  - passed on `https://beta.go360go.ru`.

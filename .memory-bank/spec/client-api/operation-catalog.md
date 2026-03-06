@@ -243,6 +243,35 @@ Status: Draft (2026-03-03)
   - cli: `results hr`
 
 ## Notifications
+- `notifications.settings.get`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - output: effective reminder settings for active company (`scheduledHour`, `weekdays`, `quietHours`, timezone context)
+  - cli: `reminders settings`
+- `notifications.settings.upsert`
+  - roles: hr_admin
+  - idempotent: yes
+  - cli: `reminders configure`
+- `notifications.settings.preview`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - output: timezone-aware next reminder slots for current settings or explicit preview payload
+  - cli: `reminders preview`
+- `notifications.templates.list`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - output: catalog rows with `templateKey`, locale, version, supported placeholders
+  - cli: `notifications templates`
+- `notifications.templates.preview`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - output: canonical preview payload (`subject`, `text`, `html`, `variables`)
+  - cli: `notifications template-preview`
+- `notifications.deliveries.list`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - output: delivery diagnostics rows with attempts, retry markers and recipient/campaign context
+  - cli: `notifications deliveries`
 - `notifications.generateReminders`
   - roles: hr_admin (MVP via core dispatcher)
   - idempotent: yes (by idempotency key)
