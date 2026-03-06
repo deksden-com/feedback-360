@@ -22,10 +22,15 @@ import {
   type IdentityProvisionAccessOutput,
   type KnownOperation,
   type MatrixGenerateSuggestedOutput,
+  type MatrixListOutput,
   type MatrixSetOutput,
   type MembershipListOutput,
+  type ModelVersionCloneDraftOutput,
   type ModelVersionCreateOutput,
+  type ModelVersionGetOutput,
   type ModelVersionListOutput,
+  type ModelVersionPublishOutput,
+  type ModelVersionUpsertDraftOutput,
   type NotificationsDispatchOutboxOutput,
   type NotificationsGenerateRemindersOutput,
   type OperationResult,
@@ -71,9 +76,17 @@ import {
 import {
   runCampaignParticipantsAddFromDepartments,
   runMatrixGenerateSuggested,
+  runMatrixList,
   runMatrixSet,
 } from "./features/matrix";
-import { runModelVersionCreate, runModelVersionList } from "./features/models";
+import {
+  runModelVersionCloneDraft,
+  runModelVersionCreate,
+  runModelVersionGet,
+  runModelVersionList,
+  runModelVersionPublish,
+  runModelVersionUpsertDraft,
+} from "./features/models";
 import {
   runNotificationsDispatchOutbox,
   runNotificationsGenerateReminders,
@@ -129,9 +142,14 @@ type DispatchOutput =
   | CampaignSnapshotListOutput
   | CampaignParticipantsAddFromDepartmentsOutput
   | MatrixGenerateSuggestedOutput
+  | MatrixListOutput
   | MatrixSetOutput
   | AiRunForCampaignOutput
+  | ModelVersionCloneDraftOutput
   | ModelVersionCreateOutput
+  | ModelVersionGetOutput
+  | ModelVersionPublishOutput
+  | ModelVersionUpsertDraftOutput
   | CampaignCreateOutput
   | CampaignUpdateDraftOutput
   | QuestionnaireListAssignedOutput
@@ -150,6 +168,10 @@ const operationHandlers: Partial<Record<KnownOperation, OperationHandler>> = {
   "identity.provisionAccess": runIdentityProvisionAccess,
   "model.version.create": runModelVersionCreate,
   "model.version.list": runModelVersionList,
+  "model.version.get": runModelVersionGet,
+  "model.version.cloneDraft": runModelVersionCloneDraft,
+  "model.version.upsertDraft": runModelVersionUpsertDraft,
+  "model.version.publish": runModelVersionPublish,
   "campaign.list": runCampaignList,
   "campaign.get": runCampaignGet,
   "campaign.create": runCampaignCreate,
@@ -182,6 +204,7 @@ const operationHandlers: Partial<Record<KnownOperation, OperationHandler>> = {
   "notifications.generateReminders": runNotificationsGenerateReminders,
   "notifications.dispatchOutbox": runNotificationsDispatchOutbox,
   "matrix.generateSuggested": runMatrixGenerateSuggested,
+  "matrix.list": runMatrixList,
   "matrix.set": runMatrixSet,
   "ai.runForCampaign": runAiRunForCampaign,
 };

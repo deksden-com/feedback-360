@@ -126,6 +126,16 @@ Status: Updated (2026-03-06)
   - Campaign detail dashboard with overview, progress, lock state and operational workbench.
 - `/hr/campaigns/[campaignId]/edit`
   - Draft-only edit flow for base campaign configuration.
+- `/hr/campaigns/[campaignId]/matrix`
+  - Matrix builder with department-based autogen, manual save and lock-preview/read-only states.
+
+## Current implemented model routes
+- `/hr/models`
+  - Model catalog/version hub with search, kind/status filters and clone/create draft actions.
+- `/hr/models/new`
+  - Draft-first model editor for indicators/levels with weight validation before save.
+- `/hr/models/[modelVersionId]`
+  - Version detail/editor: draft editing, published read-only view and clone/publish actions.
 
 ## Related plans
 - [EP-011 App shell and navigation](../../plans/epics/EP-011-app-shell-navigation/index.md): единый каркас приложения и home dashboards. Читать, чтобы понять ближайший UI слой после MVP.
@@ -134,3 +144,4 @@ Status: Updated (2026-03-06)
 - [EP-014 Feature-area slice refactor](../../plans/epics/EP-014-feature-area-slices-refactor/index.md): структурная реорганизация кода и docs перед следующими GUI-эпиками. Читать, чтобы понимать, почему после EP-013 в roadmap нет новых routes, но есть обязательный refactor step.
 - [EP-015 Results experience](../../plans/epics/EP-015-results-experience/index.md): employee/manager/HR results dashboards. Читать, чтобы корректно развивать reporting surface.
 - [EP-016 People and org admin](../../plans/epics/EP-016-people-org-admin/index.md): employee directory, profile provisioning and org editor. Читать, чтобы понимать HR-admin path для справочника и оргструктуры.
+- [EP-017 Competency models and matrix UI](../../plans/epics/EP-017-models-matrix-ui/index.md): model catalog/editor and campaign matrix builder. Читать, чтобы понимать HR path для настройки содержательной части оценки и assignments.

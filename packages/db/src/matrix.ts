@@ -62,6 +62,16 @@ type MatrixSetInput = {
   assignments: MatrixGeneratedAssignment[];
 };
 
+export type MatrixListOutput = {
+  campaignId: string;
+  assignments: Array<
+    MatrixGeneratedAssignment & {
+      source: "auto" | "manual";
+    }
+  >;
+  totalAssignments: number;
+};
+
 export type MatrixSetOutput = {
   campaignId: string;
   totalAssignments: number;
@@ -741,6 +751,50 @@ export const generateSuggestedMatrix = async (
         totalAssignments: generatedAssignments.length,
       };
     });
+  } finally {
+    await pool.end();
+  }
+};
+
+export const listMatrixAssignments = async (input: {
+  companyId: string;
+  campaignId: string;
+}): Promise<MatrixListOutput> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    await getCampaignState(db, input.companyId, input.campaignId);
+
+    const rows = await db
+      .select({
+        subjectEmployeeId: campaignAssignments.subjectEmployeeId,
+        raterEmployeeId: campaignAssignments.raterEmployeeId,
+        raterRole: campaignAssignments.raterRole,
+        source: campaignAssignments.source,
+      })
+      .from(campaignAssignments)
+      .where(
+        and(
+          eq(campaignAssignments.companyId, input.companyId),
+          eq(campaignAssignments.campaignId, input.campaignId),
+        ),
+      )
+      .orderBy(
+        campaignAssignments.subjectEmployeeId,
+        campaignAssignments.raterRole,
+        campaignAssignments.raterEmployeeId,
+      );
+
+    return {
+      campaignId: input.campaignId,
+      assignments: rows.map((row) => ({
+        subjectEmployeeId: row.subjectEmployeeId,
+        raterEmployeeId: row.raterEmployeeId,
+        raterRole: row.raterRole as MatrixGeneratedAssignment["raterRole"],
+        source: row.source as "auto" | "manual",
+      })),
+      totalAssignments: rows.length,
+    };
   } finally {
     await pool.end();
   }

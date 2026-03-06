@@ -80,6 +80,31 @@ Status: Draft (2026-03-03)
   - roles: hr_admin
   - idempotency: optional
 
+- command: `model version get <model_version_id>`
+  - op: `model.version.get`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
+- command: `model version clone-draft <model_version_id> [--name <name>]`
+  - op: `model.version.cloneDraft`
+  - roles: hr_admin
+  - idempotency: optional
+
+- command: `model version list`
+  - op: `model.version.list`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
+- command: `model version save-draft --payload-json <json> [--model-version <id>]`
+  - op: `model.version.upsertDraft`
+  - roles: hr_admin
+  - idempotency: yes
+
+- command: `model version publish <model_version_id>`
+  - op: `model.version.publish`
+  - roles: hr_admin
+  - idempotency: yes
+
 ## Campaigns
 - command: `campaign create ...`
   - op: `campaign.create`
@@ -108,6 +133,22 @@ Status: Draft (2026-03-03)
 
 - command: `campaign weights set <campaign_id> --manager 40 --peers 30 --subordinates 30`
   - op: `campaign.weights.set`
+  - roles: hr_admin
+  - idempotency: yes
+
+## Matrix
+- command: `matrix generate <campaign_id> --from-departments <dept_id>...`
+  - op: `matrix.generateSuggested`
+  - roles: hr_admin
+  - idempotency: yes
+
+- command: `matrix list <campaign_id>`
+  - op: `matrix.list`
+  - roles: hr_admin/hr_reader
+  - idempotency: yes
+
+- command: `matrix set <campaign_id> --assignments-json <json>`
+  - op: `matrix.set`
   - roles: hr_admin
   - idempotency: yes
 

@@ -1,8 +1,16 @@
 export {
   parseModelVersionCreateInput,
   parseModelVersionCreateOutput,
+  parseModelVersionCloneDraftInput,
+  parseModelVersionCloneDraftOutput,
+  parseModelVersionGetInput,
+  parseModelVersionGetOutput,
   parseModelVersionListInput,
   parseModelVersionListOutput,
+  parseModelVersionPublishInput,
+  parseModelVersionPublishOutput,
+  parseModelVersionUpsertDraftInput,
+  parseModelVersionUpsertDraftOutput,
 } from "./v1/legacy";
 
 export type {
@@ -10,9 +18,18 @@ export type {
   ModelGroupInput,
   ModelIndicatorInput,
   ModelLevelInput,
+  ModelVersionCloneDraftInput,
+  ModelVersionCloneDraftOutput,
   ModelVersionCreateInput,
   ModelVersionCreateOutput,
+  ModelVersionGetInput,
+  ModelVersionGetOutput,
   ModelVersionListInput,
   ModelVersionListItem,
   ModelVersionListOutput,
+  ModelVersionPublishInput,
+  ModelVersionPublishOutput,
+  ModelVersionStatus,
+  ModelVersionUpsertDraftInput,
+  ModelVersionUpsertDraftOutput,
 } from "./v1/legacy";

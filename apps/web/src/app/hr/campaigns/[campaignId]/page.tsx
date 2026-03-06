@@ -213,6 +213,9 @@ export default async function HrCampaignDetailPage({
                   <a href={`/hr/campaigns/${campaignId}/edit`}>Редактировать draft</a>
                 </Button>
               ) : null}
+              <Button asChild variant="outline" data-testid="campaign-detail-open-matrix">
+                <a href={`/hr/campaigns/${campaignId}/matrix`}>Открыть матрицу</a>
+              </Button>
               <Button asChild variant="outline">
                 <a href="/hr/campaigns">К списку кампаний</a>
               </Button>

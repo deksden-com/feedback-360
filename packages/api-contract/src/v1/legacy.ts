@@ -67,6 +67,10 @@ export const knownOperations = [
   "membership.list",
   "model.version.create",
   "model.version.list",
+  "model.version.get",
+  "model.version.cloneDraft",
+  "model.version.upsertDraft",
+  "model.version.publish",
   "campaign.list",
   "campaign.get",
   "campaign.create",
@@ -95,6 +99,7 @@ export const knownOperations = [
   "org.manager.set",
   "campaign.snapshot.list",
   "campaign.participants.addFromDepartments",
+  "matrix.list",
   "matrix.generateSuggested",
   "matrix.set",
   "ai.runForCampaign",
@@ -164,19 +169,71 @@ export type ModelVersionCreateOutput = {
   levelCount: number;
 };
 
-export type ModelVersionListInput = Record<string, never>;
+export type ModelVersionListInput = {
+  kind?: "indicators" | "levels";
+  status?: ModelVersionStatus;
+  search?: string;
+};
+
+export type ModelVersionStatus = "draft" | "published";
 
 export type ModelVersionListItem = {
   modelVersionId: string;
   name: string;
   kind: "indicators" | "levels";
   version: number;
-  status: string;
+  status: ModelVersionStatus;
   createdAt: string;
+  updatedAt?: string;
+  usedByActiveCampaigns?: number;
 };
 
 export type ModelVersionListOutput = {
   items: ModelVersionListItem[];
+};
+
+export type ModelVersionGetInput = {
+  modelVersionId: string;
+};
+
+export type ModelVersionGetOutput = {
+  modelVersionId: string;
+  companyId: string;
+  name: string;
+  kind: "indicators" | "levels";
+  version: number;
+  status: ModelVersionStatus;
+  createdAt: string;
+  updatedAt: string;
+  groups: ModelGroupInput[];
+};
+
+export type ModelVersionCloneDraftInput = {
+  sourceModelVersionId: string;
+  name?: string;
+};
+
+export type ModelVersionCloneDraftOutput = ModelVersionGetOutput;
+
+export type ModelVersionUpsertDraftInput = {
+  modelVersionId?: string;
+  name: string;
+  kind: "indicators" | "levels";
+  groups: ModelGroupInput[];
+};
+
+export type ModelVersionUpsertDraftOutput = ModelVersionGetOutput;
+
+export type ModelVersionPublishInput = {
+  modelVersionId: string;
+};
+
+export type ModelVersionPublishOutput = {
+  modelVersionId: string;
+  name: string;
+  version: number;
+  status: "published";
+  updatedAt: string;
 };
 
 export type CampaignCreateInput = {
@@ -784,6 +841,8 @@ export type MatrixGeneratedAssignment = {
   raterRole: "manager" | "peer" | "subordinate" | "self";
 };
 
+export type MatrixAssignmentSource = "auto" | "manual";
+
 export type MatrixGenerateSuggestedInput = {
   campaignId: string;
   departmentIds?: string[];
@@ -802,6 +861,20 @@ export type MatrixSetInput = {
 
 export type MatrixSetOutput = {
   campaignId: string;
+  totalAssignments: number;
+};
+
+export type MatrixListInput = {
+  campaignId: string;
+};
+
+export type MatrixListAssignment = MatrixGeneratedAssignment & {
+  source: MatrixAssignmentSource;
+};
+
+export type MatrixListOutput = {
+  campaignId: string;
+  assignments: MatrixListAssignment[];
   totalAssignments: number;
 };
 
@@ -1323,6 +1396,14 @@ const parseModelKind = (value: unknown, fieldName: string): "indicators" | "leve
   throw new Error(`${fieldName} must be one of: indicators, levels.`);
 };
 
+const parseModelVersionStatus = (value: unknown, fieldName: string): ModelVersionStatus => {
+  if (value === "draft" || value === "published") {
+    return value;
+  }
+
+  throw new Error(`${fieldName} must be one of: draft, published.`);
+};
+
 const parseCampaignLifecycleStatus = (
   value: unknown,
   fieldName: string,
@@ -1493,9 +1574,34 @@ const parseModelVersionListItem = (value: unknown): ModelVersionListItem => {
   const record = ensureObject(value, "model.version.list output.items[]");
   ensureAllowedKeys(
     record,
-    ["modelVersionId", "name", "kind", "version", "status", "createdAt"],
+    [
+      "modelVersionId",
+      "name",
+      "kind",
+      "version",
+      "status",
+      "createdAt",
+      "updatedAt",
+      "usedByActiveCampaigns",
+    ],
     "model.version.list output.items[]",
   );
+
+  const updatedAt = record.updatedAt;
+  if (updatedAt !== undefined && updatedAt !== null && typeof updatedAt !== "string") {
+    throw new Error("model.version.list output.items[].updatedAt must be a string when provided.");
+  }
+
+  const usedByActiveCampaigns = record.usedByActiveCampaigns;
+  if (
+    usedByActiveCampaigns !== undefined &&
+    usedByActiveCampaigns !== null &&
+    typeof usedByActiveCampaigns !== "number"
+  ) {
+    throw new Error(
+      "model.version.list output.items[].usedByActiveCampaigns must be a number when provided.",
+    );
+  }
 
   return {
     modelVersionId: ensureStringField(
@@ -1506,15 +1612,31 @@ const parseModelVersionListItem = (value: unknown): ModelVersionListItem => {
     name: ensureStringField(record, "name", "model.version.list output.items[]"),
     kind: parseModelKind(record.kind, "model.version.list output.items[].kind"),
     version: ensureNumberField(record, "version", "model.version.list output.items[]"),
-    status: ensureStringField(record, "status", "model.version.list output.items[]"),
+    status: parseModelVersionStatus(record.status, "model.version.list output.items[].status"),
     createdAt: ensureStringField(record, "createdAt", "model.version.list output.items[]"),
+    ...(typeof updatedAt === "string" ? { updatedAt } : {}),
+    ...(typeof usedByActiveCampaigns === "number" ? { usedByActiveCampaigns } : {}),
   };
 };
 
 export const parseModelVersionListInput = (value: unknown): ModelVersionListInput => {
   const record = ensureObject(value, "model.version.list input");
-  ensureAllowedKeys(record, [], "model.version.list input");
-  return {};
+  ensureAllowedKeys(record, ["kind", "status", "search"], "model.version.list input");
+
+  const search = record.search;
+  if (search !== undefined && search !== null && typeof search !== "string") {
+    throw new Error("model.version.list input.search must be a string when provided.");
+  }
+
+  return {
+    ...(record.kind !== undefined
+      ? { kind: parseModelKind(record.kind, "model.version.list input.kind") }
+      : {}),
+    ...(record.status !== undefined
+      ? { status: parseModelVersionStatus(record.status, "model.version.list input.status") }
+      : {}),
+    ...(typeof search === "string" ? { search } : {}),
+  };
 };
 
 export const parseModelVersionListOutput = (value: unknown): ModelVersionListOutput => {
@@ -1525,6 +1647,131 @@ export const parseModelVersionListOutput = (value: unknown): ModelVersionListOut
     items: ensureArray(record.items, "model.version.list output.items").map(
       parseModelVersionListItem,
     ),
+  };
+};
+
+export const parseModelVersionGetInput = (value: unknown): ModelVersionGetInput => {
+  const record = ensureObject(value, "model.version.get input");
+  ensureAllowedKeys(record, ["modelVersionId"], "model.version.get input");
+
+  return {
+    modelVersionId: ensureStringField(record, "modelVersionId", "model.version.get input"),
+  };
+};
+
+export const parseModelVersionGetOutput = (value: unknown): ModelVersionGetOutput => {
+  const record = ensureObject(value, "model.version.get output");
+  ensureAllowedKeys(
+    record,
+    [
+      "modelVersionId",
+      "companyId",
+      "name",
+      "kind",
+      "version",
+      "status",
+      "createdAt",
+      "updatedAt",
+      "groups",
+    ],
+    "model.version.get output",
+  );
+
+  return {
+    modelVersionId: ensureStringField(record, "modelVersionId", "model.version.get output"),
+    companyId: ensureStringField(record, "companyId", "model.version.get output"),
+    name: ensureStringField(record, "name", "model.version.get output"),
+    kind: parseModelKind(record.kind, "model.version.get output.kind"),
+    version: ensureNumberField(record, "version", "model.version.get output"),
+    status: parseModelVersionStatus(record.status, "model.version.get output.status"),
+    createdAt: ensureStringField(record, "createdAt", "model.version.get output"),
+    updatedAt: ensureStringField(record, "updatedAt", "model.version.get output"),
+    groups: ensureArray(record.groups, "model.version.get output.groups").map(parseModelGroupInput),
+  };
+};
+
+export const parseModelVersionCloneDraftInput = (value: unknown): ModelVersionCloneDraftInput => {
+  const record = ensureObject(value, "model.version.cloneDraft input");
+  ensureAllowedKeys(record, ["sourceModelVersionId", "name"], "model.version.cloneDraft input");
+
+  const name = record.name;
+  if (name !== undefined && name !== null && typeof name !== "string") {
+    throw new Error("model.version.cloneDraft input.name must be a string when provided.");
+  }
+
+  return {
+    sourceModelVersionId: ensureStringField(
+      record,
+      "sourceModelVersionId",
+      "model.version.cloneDraft input",
+    ),
+    ...(typeof name === "string" ? { name } : {}),
+  };
+};
+
+export const parseModelVersionCloneDraftOutput = (value: unknown): ModelVersionCloneDraftOutput =>
+  parseModelVersionGetOutput(value);
+
+export const parseModelVersionUpsertDraftInput = (value: unknown): ModelVersionUpsertDraftInput => {
+  const record = ensureObject(value, "model.version.upsertDraft input");
+  ensureAllowedKeys(
+    record,
+    ["modelVersionId", "name", "kind", "groups"],
+    "model.version.upsertDraft input",
+  );
+
+  const modelVersionId = record.modelVersionId;
+  if (
+    modelVersionId !== undefined &&
+    modelVersionId !== null &&
+    typeof modelVersionId !== "string"
+  ) {
+    throw new Error(
+      "model.version.upsertDraft input.modelVersionId must be a string when provided.",
+    );
+  }
+
+  return {
+    ...(typeof modelVersionId === "string" ? { modelVersionId } : {}),
+    name: ensureStringField(record, "name", "model.version.upsertDraft input"),
+    kind: parseModelKind(record.kind, "model.version.upsertDraft input.kind"),
+    groups: ensureArray(record.groups, "model.version.upsertDraft input.groups").map(
+      parseModelGroupInput,
+    ),
+  };
+};
+
+export const parseModelVersionUpsertDraftOutput = (value: unknown): ModelVersionUpsertDraftOutput =>
+  parseModelVersionGetOutput(value);
+
+export const parseModelVersionPublishInput = (value: unknown): ModelVersionPublishInput => {
+  const record = ensureObject(value, "model.version.publish input");
+  ensureAllowedKeys(record, ["modelVersionId"], "model.version.publish input");
+
+  return {
+    modelVersionId: ensureStringField(record, "modelVersionId", "model.version.publish input"),
+  };
+};
+
+export const parseModelVersionPublishOutput = (value: unknown): ModelVersionPublishOutput => {
+  const record = ensureObject(value, "model.version.publish output");
+  ensureAllowedKeys(
+    record,
+    ["modelVersionId", "name", "version", "status", "updatedAt"],
+    "model.version.publish output",
+  );
+
+  const status = parseModelVersionStatus(record.status, "model.version.publish output.status");
+  if (status !== "published") {
+    throw new Error("model.version.publish output.status must be published.");
+  }
+
+  return {
+    modelVersionId: ensureStringField(record, "modelVersionId", "model.version.publish output"),
+    name: ensureStringField(record, "name", "model.version.publish output"),
+    version: ensureNumberField(record, "version", "model.version.publish output"),
+    status,
+    updatedAt: ensureStringField(record, "updatedAt", "model.version.publish output"),
   };
 };
 
@@ -3872,6 +4119,11 @@ const isMatrixRaterRole = (value: string): value is MatrixGeneratedAssignment["r
   return matrixRaterRoles.includes(value as (typeof matrixRaterRoles)[number]);
 };
 
+const matrixAssignmentSources = ["auto", "manual"] as const;
+const isMatrixAssignmentSource = (value: string): value is MatrixAssignmentSource => {
+  return matrixAssignmentSources.includes(value as (typeof matrixAssignmentSources)[number]);
+};
+
 const parseMatrixGeneratedAssignment = (value: unknown): MatrixGeneratedAssignment => {
   const record = ensureObject(value, "matrix.generateSuggested output.generatedAssignments[]");
   ensureAllowedKeys(
@@ -3903,6 +4155,29 @@ const parseMatrixGeneratedAssignment = (value: unknown): MatrixGeneratedAssignme
       "matrix.generateSuggested output.generatedAssignments[]",
     ),
     raterRole,
+  };
+};
+
+const parseMatrixAssignmentSource = (value: unknown, location: string): MatrixAssignmentSource => {
+  const source = ensureStringField({ value }, "value", location);
+  if (!isMatrixAssignmentSource(source)) {
+    throw new Error(`${location} must be one of: ${matrixAssignmentSources.join(", ")}`);
+  }
+
+  return source;
+};
+
+const parseMatrixListAssignment = (value: unknown): MatrixListAssignment => {
+  const record = ensureObject(value, "matrix.list output.assignments[]");
+  ensureAllowedKeys(
+    record,
+    ["subjectEmployeeId", "raterEmployeeId", "raterRole", "source"],
+    "matrix.list output.assignments[]",
+  );
+
+  return {
+    ...parseMatrixGeneratedAssignment(record),
+    source: parseMatrixAssignmentSource(record.source, "matrix.list output.assignments[].source"),
   };
 };
 
@@ -4043,6 +4318,32 @@ export const parseMatrixSetOutput = (value: unknown): MatrixSetOutput => {
   return {
     campaignId: ensureStringField(record, "campaignId", "matrix.set output"),
     totalAssignments: ensureNumberField(record, "totalAssignments", "matrix.set output"),
+  };
+};
+
+export const parseMatrixListInput = (value: unknown): MatrixListInput => {
+  const record = ensureObject(value, "matrix.list input");
+  ensureAllowedKeys(record, ["campaignId"], "matrix.list input");
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "matrix.list input"),
+  };
+};
+
+export const parseMatrixListOutput = (value: unknown): MatrixListOutput => {
+  const record = ensureObject(value, "matrix.list output");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "assignments", "totalAssignments"],
+    "matrix.list output",
+  );
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "matrix.list output"),
+    assignments: ensureArray(record.assignments, "matrix.list output.assignments").map(
+      parseMatrixListAssignment,
+    ),
+    totalAssignments: ensureNumberField(record, "totalAssignments", "matrix.list output"),
   };
 };
 
