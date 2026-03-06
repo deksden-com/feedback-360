@@ -3,10 +3,31 @@ import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const applyAiWebhookResultMock = vi.fn();
+const sentryCaptureExceptionMock = vi.fn(() => "evt-ft-0102");
+const sentryWithScopeMock = vi.fn(
+  (
+    callback: (scope: {
+      setTag: (key: string, value: string) => void;
+      setContext: (key: string, value: Record<string, unknown>) => void;
+    }) => string,
+  ) => {
+    return callback({
+      setTag: vi.fn(),
+      setContext: vi.fn(),
+    });
+  },
+);
 
 vi.mock("@feedback-360/db", () => {
   return {
     applyAiWebhookResult: applyAiWebhookResultMock,
+  };
+});
+
+vi.mock("@sentry/nextjs", () => {
+  return {
+    captureException: sentryCaptureExceptionMock,
+    withScope: sentryWithScopeMock,
   };
 });
 
@@ -55,6 +76,8 @@ describe("FT-0072 AI webhook route", () => {
     };
 
     expect(response.status).toBe(401);
+    expect(response.headers.get("x-request-id")).toBeTruthy();
+    expect(response.headers.get("x-correlation-id")).toBe(response.headers.get("x-request-id"));
     expect(body.ok).toBe(false);
     expect(body.error?.code).toBe("webhook_invalid_signature");
     expect(applyAiWebhookResultMock).toHaveBeenCalledTimes(0);
@@ -89,6 +112,7 @@ describe("FT-0072 AI webhook route", () => {
       new Request("http://localhost/api/webhooks/ai", {
         method: "POST",
         headers: {
+          "x-request-id": "req-ft-0102-webhook",
           "x-ai-timestamp": timestamp,
           "x-ai-signature": signature,
           "x-ai-idempotency-key": "idem-ft0072-2",
@@ -116,11 +140,14 @@ describe("FT-0072 AI webhook route", () => {
     };
 
     expect(firstResponse.status).toBe(200);
+    expect(firstResponse.headers.get("x-request-id")).toBe("req-ft-0102-webhook");
+    expect(firstResponse.headers.get("x-correlation-id")).toBe("req-ft-0102-webhook");
     expect(firstBody.ok).toBe(true);
     expect(firstBody.data?.applied).toBe(true);
     expect(firstBody.data?.noOp).toBe(false);
 
     expect(secondResponse.status).toBe(200);
+    expect(secondResponse.headers.get("x-request-id")).toBe("req-ft-0102-webhook");
     expect(secondBody.ok).toBe(true);
     expect(secondBody.data?.applied).toBe(false);
     expect(secondBody.data?.noOp).toBe(true);

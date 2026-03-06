@@ -28,6 +28,19 @@ Status: Draft (2026-03-04)
 - Error monitoring through Sentry.
 - Cron jobs run via Vercel Cron (planned slices for reminders/end/outbox retries).
 
+## Observability topology
+- Sentry projects are environment-split:
+  - `go360go-beta` for `develop` / `beta.go360go.ru`
+  - `go360go-prod` for `main` / `go360go.ru`
+- Critical runtime routes emit request correlation headers:
+  - `x-request-id`
+  - `x-correlation-id`
+- Structured logs are the first-line trace source for:
+  - HR campaign mutations,
+  - questionnaire draft/submit writes,
+  - AI webhook ingestion,
+  - controlled Sentry drill endpoint.
+
 ## Config ownership
 - Vercel is the source of truth for runtime env vars.
 - Local `.env` is only for operator convenience and bootstrap.

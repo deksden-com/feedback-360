@@ -118,11 +118,13 @@ export default async function ResultsHrViewPage({
     );
   }
 
+  const showRawText = resolved.context.role === "hr_admin";
+  const subtitle = showRawText
+    ? "Полная HR-витрина: raw + processed + summary комментарии."
+    : "HR Reader витрина: processed + summary комментарии без raw текста.";
+
   return (
-    <ResultsPageLayout
-      title="HR результаты"
-      subtitle="Полная HR-витрина: raw + processed + summary комментарии."
-    >
+    <ResultsPageLayout title="HR результаты" subtitle={subtitle}>
       <ResultsSummaryCard
         campaignId={view.data.campaignId}
         subjectEmployeeId={view.data.subjectEmployeeId}
@@ -131,7 +133,7 @@ export default async function ResultsHrViewPage({
       />
       <ResultsGroupCard data={view.data} />
       <ResultsCompetenciesCard data={view.data} />
-      <ResultsOpenTextCard items={view.data.openText} showRawText />
+      <ResultsOpenTextCard items={view.data.openText} showRawText={showRawText} />
     </ResultsPageLayout>
   );
 }

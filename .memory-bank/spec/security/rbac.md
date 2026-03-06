@@ -9,7 +9,7 @@ Status: Draft (2026-03-03)
 
 Принципы:
 - Доступ к данным всегда scoped на `company_id`.
-- HR Reader в MVP имеет доступ к raw-комментариям (считаем это осознанным риском/компромиссом).
+- HR Reader остаётся read-only HR ролью, но не получает raw-комментарии; raw open text доступен только `hr_admin`.
 
 Ссылки (аннотированные):
 - [Operation catalog](../client-api/operation-catalog.md): SSoT списка операций и их roles. Читать, чтобы права были привязаны к конкретным ops, а не к “словесным” действиям.
@@ -34,7 +34,7 @@ Status: Draft (2026-03-03)
 - `hr_admin`:
   - разрешено: все action groups.
 - `hr_reader`:
-  - разрешено: `view_results_hr` (включая raw open text в MVP), `view_results_team` (если нужно), `view_results_self` (как обычный пользователь).
+  - разрешено: `view_results_hr` (без raw open text), `view_results_team` (если нужно), `view_results_self` (как обычный пользователь).
   - запрещено: любые `manage_*`, `run_ai`.
 - `manager`:
   - разрешено: `fill_questionnaires`, `view_results_self`, `view_results_team`.

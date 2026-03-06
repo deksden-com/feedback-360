@@ -55,6 +55,7 @@ import {
   type ResultsGetMyDashboardOutput,
   type ResultsGetTeamDashboardInput,
   type ResultsGetTeamDashboardOutput,
+  type ResultsOpenTextItem,
   type SystemPingOutput,
   createOperationError,
   errorFromUnknown,
@@ -960,7 +961,25 @@ const runResultsGetHrView = async (
       smallGroupPolicy: parsedInput.smallGroupPolicy,
       anonymityThreshold: parsedInput.anonymityThreshold,
     });
-    return okResult(parseResultsGetHrViewOutput(output));
+    const role = request.context?.role;
+    const hrViewOutput =
+      role === "hr_reader"
+        ? {
+            ...output,
+            openText: output.openText?.map((item): ResultsOpenTextItem => {
+              return {
+                competencyId: item.competencyId,
+                group: item.group,
+                count: item.count,
+                ...(typeof item.processedText === "string"
+                  ? { processedText: item.processedText }
+                  : {}),
+                ...(typeof item.summaryText === "string" ? { summaryText: item.summaryText } : {}),
+              };
+            }),
+          }
+        : output;
+    return okResult(parseResultsGetHrViewOutput(hrViewOutput));
   } catch (error) {
     return errorResult(errorFromUnknown(error, "invalid_input", "Failed to get HR results."));
   }

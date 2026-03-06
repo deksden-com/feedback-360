@@ -1,5 +1,13 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+import {
+  captureRequestException,
+  createRequestTrace,
+  extendRequestTrace,
+  jsonWithRequestTrace,
+  logError,
+  logInfo,
+} from "@/lib/observability";
 import { createOperationError, errorFromUnknown } from "@feedback-360/api-contract";
 import { applyAiWebhookResult } from "@feedback-360/db";
 
@@ -105,6 +113,10 @@ const toHttpStatus = (code: string): number => {
 };
 
 export async function POST(request: Request) {
+  let trace = createRequestTrace(request, {
+    route: "/api/webhooks/ai",
+  });
+
   try {
     const timestampHeader = request.headers.get("x-ai-timestamp");
     const signatureHeader = request.headers.get("x-ai-signature");
@@ -123,6 +135,12 @@ export async function POST(request: Request) {
     validateSignature(rawBody, timestampHeader, signatureHeader);
 
     const parsedPayload = parseAiWebhookPayload(JSON.parse(rawBody) as unknown);
+    trace = extendRequestTrace(trace, {
+      aiJobId: parsedPayload.aiJobId,
+      campaignId: parsedPayload.campaignId,
+      idempotencyKey: idempotencyKey.trim(),
+      webhookStatus: parsedPayload.status,
+    });
 
     const result = await applyAiWebhookResult({
       campaignId: parsedPayload.campaignId,
@@ -133,7 +151,15 @@ export async function POST(request: Request) {
       receivedAt: new Date(),
     });
 
-    return Response.json(
+    logInfo(trace, "ai_webhook_processed", {
+      applied: result.applied,
+      noOp: result.noOp,
+      campaignStatus: result.campaignStatus,
+      aiJobStatus: result.aiJobStatus,
+    });
+
+    return jsonWithRequestTrace(
+      trace,
       {
         ok: true,
         data: result,
@@ -142,7 +168,21 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     const opError = errorFromUnknown(error, "invalid_input", "Failed to process AI webhook.");
-    return Response.json(
+    logError(trace, "ai_webhook_failed", error, {
+      errorCode: opError.code,
+    });
+    if (
+      !["invalid_input", "webhook_invalid_signature", "webhook_timestamp_invalid"].includes(
+        opError.code,
+      )
+    ) {
+      captureRequestException(trace, error, {
+        errorCode: opError.code,
+      });
+    }
+
+    return jsonWithRequestTrace(
+      trace,
       {
         ok: false,
         error: opError,

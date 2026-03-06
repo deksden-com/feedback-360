@@ -2,7 +2,7 @@
 Status: Completed (2026-03-04)
 
 ## User value
-Каждый видит и делает только то, что положено по роли; HR Reader в MVP читает raw open text, но не может менять данные.
+Каждый видит и делает только то, что положено по роли; HR Reader остаётся read-only и не может менять данные.
 
 ## Deliverables
 - RBAC checks на операциях (server-side).
@@ -10,7 +10,7 @@ Status: Completed (2026-03-04)
 
 ## Context (SSoT links)
 - [RBAC spec](../../../../../spec/security/rbac.md): роли и принципиальная матрица. Читать, чтобы тесты и реализация проверяли одни и те же “права”.
-- [Results visibility](../../../../../spec/domain/results-visibility.md): кто видит raw open text vs processed. Читать, чтобы исключение “HR Reader видит raw (MVP)” было реализовано осознанно.
+- [Results visibility](../../../../../spec/domain/results-visibility.md): кто видит raw open text vs processed. Читать, чтобы read-only HR доступ не раскрывал raw текст.
 - [Operation catalog](../../../../../spec/client-api/operation-catalog.md): ops и роли доступа (ориентир). Читать, чтобы RBAC применялся на уровне операций, а не в UI/CLI.
 - [Error model](../../../../../spec/client-api/errors.md): `forbidden` и shape ошибок. Читать, чтобы сценарии проверяли коды стабильно.
 - [Implementation playbook](../../../../../plans/implementation-playbook.md): общий чеклист реализации. Читать, чтобы RBAC enforcement был покрыт интеграционными тестами.
@@ -48,8 +48,8 @@ Status: Completed (2026-03-04)
   - Сопоставить op → required roles (SSoT: operation catalog + RBAC doc).
   - При запрете возвращать typed error `code=forbidden` без частичных изменений.
 - Raw open text:
-  - Реализовать “MVP исключение”: `hr_reader` имеет доступ к raw open text в HR-витрине результатов, но не имеет write ops.
-  - Зафиксировать это в тестах (и позже легко отключить/изменить).
+  - `hr_reader` не имеет доступа к raw open text даже в HR-витрине.
+  - `hr_admin` остаётся единственной HR ролью с raw access.
 - Тонкие моменты:
   - Ошибка должна быть одинаковой для HTTP/in-proc/CLI (один источник правды).
   - “Нет membership” и “роль не подходит” маппим в `forbidden` (а не “пустые данные”).
