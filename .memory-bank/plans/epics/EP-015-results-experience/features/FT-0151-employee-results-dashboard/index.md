@@ -1,5 +1,5 @@
 # FT-0151 — Employee results dashboard
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## User value
 Сотрудник понимает свои результаты 360 в одном экране без доступа к raw comments.
@@ -44,3 +44,41 @@ Status: Planned (2026-03-06)
 
 ## Docs updates (SSoT)
 - [UI sitemap & flows](../../../../../spec/ui/sitemap-and-flows.md)
+
+## Progress note (2026-03-06)
+- Выполнен вертикальный слайс FT-0151:
+  - `/results` пересобрана в dashboard с summary card, KPI tiles, group breakdown и competency insights;
+  - employee видит только processed/summary text, а raw comments остаются недоступными;
+  - legacy privacy acceptance FT-0083 сохранён и теперь проходит поверх нового UI.
+
+## Quality checks evidence (2026-03-06)
+- `pnpm --filter @feedback-360/web lint` → passed.
+- `pnpm --filter @feedback-360/web typecheck` → passed.
+- `pnpm --filter @feedback-360/web test` → passed.
+- `pnpm --filter @feedback-360/web build` → passed.
+
+## Acceptance evidence (2026-03-06)
+- Local acceptance:
+  - `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3101 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0083-results-ui.spec.ts tests/ft-0151-employee-results-dashboard.spec.ts --workers=1 --reporter=line` → passed.
+- Covered acceptance:
+  - employee открывает completed campaign и получает structured dashboard;
+  - processed text виден, raw text отсутствует;
+  - group cards и competency sections объясняют visibility state без раскрытия лишних данных.
+- Artifacts:
+  - employee results dashboard.
+    ![ft-0151-employee-results-dashboard](../../../../../evidence/EP-015/FT-0151/2026-03-06/step-01-employee-results-dashboard.png)
+
+## Manual verification (deployed environment)
+### Beta scenario — employee results dashboard
+- Environment:
+  - URL: `https://beta.go360go.ru`
+  - account: employee with completed campaign (`deksden@deksden.com` через CLI-prepared seed)
+- Steps:
+  1. Войти по magic link и выбрать активную компанию.
+  2. Открыть `/results?campaignId=<completed_campaign_id>`.
+  3. Проверить summary card, group cards и competency blocks.
+  4. Убедиться, что в open-text секции нет `Raw:`.
+- Expected:
+  - summary/KPI cards видимы;
+  - processed/summary text есть там, где данные готовы;
+  - raw comments не раскрываются.

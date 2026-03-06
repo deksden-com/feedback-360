@@ -1,5 +1,7 @@
 import { InternalAppShell } from "@/components/internal-app-shell";
 import { PageEmptyState, PageErrorState, PageStateScreen } from "@/components/page-state";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { applyDebugPageDelay } from "@/lib/debug-page-delay";
@@ -83,6 +85,42 @@ export default async function ResultsTeamDashboardPage({
 
   const campaignId = getQueryValue(params?.campaignId);
   const subjectEmployeeId = getQueryValue(params?.subjectEmployeeId);
+  const client = createInprocClient();
+  const assignedQuestionnaires = await client.questionnaireListAssigned({}, resolved.context);
+  const managerAssignments = assignedQuestionnaires.ok
+    ? assignedQuestionnaires.data.items.filter((item) => item.raterRole === "manager")
+    : [];
+  const fallbackAssignments =
+    assignedQuestionnaires.ok && managerAssignments.length === 0
+      ? assignedQuestionnaires.data.items
+      : [];
+  const availableAssignments =
+    managerAssignments.length > 0 ? managerAssignments : fallbackAssignments;
+  const campaignOptions = Array.from(
+    new Map(
+      availableAssignments.map((item) => [
+        item.campaignId,
+        {
+          campaignId: item.campaignId,
+          label: item.campaignName ?? item.campaignId,
+        },
+      ]),
+    ).values(),
+  ).sort((left, right) => left.label.localeCompare(right.label));
+  const subjectOptions = Array.from(
+    new Map(
+      availableAssignments
+        .filter((item) => !campaignId || item.campaignId === campaignId)
+        .map((item) => [
+          item.subjectEmployeeId,
+          {
+            subjectEmployeeId: item.subjectEmployeeId,
+            label: item.subjectDisplayName ?? item.subjectEmployeeId,
+            campaignId: item.campaignId,
+          },
+        ]),
+    ).values(),
+  ).sort((left, right) => left.label.localeCompare(right.label));
 
   if (!campaignId || !subjectEmployeeId) {
     return (
@@ -127,12 +165,53 @@ export default async function ResultsTeamDashboardPage({
               </button>
             </div>
           </form>
+          {campaignOptions.length > 0 ? (
+            <Card data-testid="results-team-campaign-switcher">
+              <CardHeader>
+                <CardTitle className="text-lg">Доступные кампании</CardTitle>
+                <CardDescription>
+                  Берём кампании из ваших manager-назначений, чтобы сразу перейти к нужному отчёту.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                {campaignOptions.map((campaign) => (
+                  <Button key={campaign.campaignId} asChild variant="outline">
+                    <a href={`/results/team?campaignId=${encodeURIComponent(campaign.campaignId)}`}>
+                      {campaign.label}
+                    </a>
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+          ) : null}
+          {subjectOptions.length > 0 ? (
+            <Card data-testid="results-team-subject-switcher">
+              <CardHeader>
+                <CardTitle className="text-lg">Подчинённые с результатами</CardTitle>
+                <CardDescription>
+                  Видны только сотрудники, которые уже встречаются в ваших manager-назначениях.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                {subjectOptions.map((subject) => (
+                  <Button key={subject.subjectEmployeeId} asChild variant="outline">
+                    <a
+                      href={`/results/team?campaignId=${encodeURIComponent(
+                        subject.campaignId,
+                      )}&subjectEmployeeId=${encodeURIComponent(subject.subjectEmployeeId)}`}
+                    >
+                      {subject.label}
+                    </a>
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+          ) : null}
         </ResultsPageLayout>
       </InternalAppShell>
     );
   }
 
-  const client = createInprocClient();
   const dashboard = await client.resultsGetTeamDashboard(
     {
       campaignId,
@@ -179,11 +258,76 @@ export default async function ResultsTeamDashboardPage({
         title="Результаты команды"
         subtitle="Витрина руководителя: только агрегаты и обработанные комментарии."
       >
+        <Card data-testid="results-team-toolbar">
+          <CardHeader>
+            <CardTitle className="text-lg">Навигация по команде</CardTitle>
+            <CardDescription>
+              Переключайте кампанию и сотрудника без ручного ввода идентификаторов.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {campaignOptions.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {campaignOptions.map((campaign) => (
+                  <Button
+                    key={campaign.campaignId}
+                    asChild
+                    variant={campaign.campaignId === campaignId ? "secondary" : "outline"}
+                    data-testid={`results-team-campaign-${campaign.campaignId}`}
+                  >
+                    <a
+                      href={`/results/team?campaignId=${encodeURIComponent(campaign.campaignId)}${
+                        campaign.campaignId === campaignId && subjectEmployeeId
+                          ? `&subjectEmployeeId=${encodeURIComponent(subjectEmployeeId)}`
+                          : ""
+                      }`}
+                    >
+                      {campaign.label}
+                    </a>
+                  </Button>
+                ))}
+              </div>
+            ) : null}
+            {subjectOptions.length > 0 ? (
+              <div className="flex flex-wrap gap-2" data-testid="results-team-subject-switcher">
+                {subjectOptions.map((subject) => (
+                  <Button
+                    key={subject.subjectEmployeeId}
+                    asChild
+                    variant={
+                      subject.subjectEmployeeId === subjectEmployeeId ? "secondary" : "outline"
+                    }
+                    data-testid={`results-team-subject-${subject.subjectEmployeeId}`}
+                  >
+                    <a
+                      href={`/results/team?campaignId=${encodeURIComponent(
+                        campaignId,
+                      )}&subjectEmployeeId=${encodeURIComponent(subject.subjectEmployeeId)}`}
+                    >
+                      {subject.label}
+                    </a>
+                  </Button>
+                ))}
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
         <ResultsSummaryCard
           campaignId={dashboard.data.campaignId}
           subjectEmployeeId={dashboard.data.subjectEmployeeId}
+          campaignLabel={
+            campaignOptions.find((item) => item.campaignId === dashboard.data.campaignId)?.label
+          }
+          subjectLabel={
+            subjectOptions.find(
+              (item) => item.subjectEmployeeId === dashboard.data.subjectEmployeeId,
+            )?.label
+          }
           overallScore={dashboard.data.overallScore}
           modelKind={dashboard.data.modelKind}
+          anonymityThreshold={dashboard.data.anonymityThreshold}
+          openTextCount={dashboard.data.openText.length}
+          viewerLabel="Витрина руководителя"
         />
         <ResultsGroupCard data={dashboard.data} />
         <ResultsCompetenciesCard data={dashboard.data} />

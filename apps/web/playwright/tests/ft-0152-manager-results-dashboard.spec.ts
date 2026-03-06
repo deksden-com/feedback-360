@@ -5,7 +5,7 @@ import { type Page, expect, test } from "@playwright/test";
 const artifactsDir = resolve(
   process.cwd(),
   "../..",
-  ".memory-bank/evidence/EP-010/FT-0101/2026-03-06",
+  ".memory-bank/evidence/EP-015/FT-0152/2026-03-06",
 );
 
 const loginWithCompany = async (page: Page, userId: string, companyId: string) => {
@@ -28,7 +28,9 @@ test.beforeAll(async () => {
   await mkdir(artifactsDir, { recursive: true });
 });
 
-test("FT-0101: hr_reader is redacted, hr_admin keeps raw comments", async ({ page }) => {
+test("FT-0152: manager sees structured team results with merge explanations and no raw text", async ({
+  page,
+}) => {
   test.setTimeout(120_000);
 
   const seededResponse = await page.request.post("/api/dev/seed", {
@@ -46,38 +48,27 @@ test("FT-0101: hr_reader is redacted, hr_admin keeps raw comments", async ({ pag
   const campaignId = seeded.handles?.["campaign.main"];
   const companyId = seeded.handles?.["company.main"];
   const subjectEmployeeId = seeded.handles?.["employee.subject_main"];
-  const hrReaderUserId = seeded.handles?.["user.hr_reader"];
-  const hrAdminUserId = seeded.handles?.["user.hr_admin"];
+  const managerUserId = seeded.handles?.["user.head_a"];
 
   expect(campaignId).toBeTruthy();
   expect(companyId).toBeTruthy();
   expect(subjectEmployeeId).toBeTruthy();
-  expect(hrReaderUserId).toBeTruthy();
-  expect(hrAdminUserId).toBeTruthy();
+  expect(managerUserId).toBeTruthy();
 
-  await loginWithCompany(page, String(hrReaderUserId), String(companyId));
-  await page.goto(`/results/hr?campaignId=${campaignId}&subjectEmployeeId=${subjectEmployeeId}`);
-  await expect(page.getByRole("heading", { name: "HR результаты" })).toBeVisible();
-  await expect(page.getByTestId("results-layout-context")).toContainText(
-    "processed + summary комментарии без raw текста.",
-  );
+  await loginWithCompany(page, String(managerUserId), String(companyId));
+  await page.goto(`/results/team?campaignId=${campaignId}&subjectEmployeeId=${subjectEmployeeId}`);
+
+  await expect(page.getByRole("heading", { name: "Результаты команды" })).toBeVisible();
+  await expect(page.getByTestId("results-team-toolbar")).toBeVisible();
+  await expect(page.getByTestId("results-team-subject-switcher")).toBeVisible();
+  await expect(page.getByTestId(`results-team-subject-${subjectEmployeeId}`)).toBeVisible();
+  await expect(page.getByTestId("results-group-card-peers")).toContainText("Объединено");
+  await expect(page.getByTestId("results-group-card-other")).toBeVisible();
   await expect(page.getByTestId(/^open-text-raw-/)).toHaveCount(0);
   await expect(page.getByTestId(/^open-text-processed-/).first()).toBeVisible();
-  await page.screenshot({
-    fullPage: true,
-    path: `${artifactsDir}/step-01-hr-reader-results-redacted.png`,
-  });
 
-  await loginWithCompany(page, String(hrAdminUserId), String(companyId));
-  await page.goto(`/results/hr?campaignId=${campaignId}&subjectEmployeeId=${subjectEmployeeId}`);
-  await expect(page.getByRole("heading", { name: "HR результаты" })).toBeVisible();
-  await expect(page.getByTestId("results-layout-context")).toContainText(
-    "raw + processed + summary комментарии.",
-  );
-  await expect(page.getByTestId(/^open-text-raw-/).first()).toBeVisible();
-  await expect(page.getByTestId(/^open-text-processed-/).first()).toBeVisible();
   await page.screenshot({
     fullPage: true,
-    path: `${artifactsDir}/step-02-hr-admin-results-with-raw.png`,
+    path: `${artifactsDir}/step-01-manager-team-results-dashboard.png`,
   });
 });
