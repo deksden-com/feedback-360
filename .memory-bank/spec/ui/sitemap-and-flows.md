@@ -12,6 +12,22 @@ Status: Updated (2026-03-06)
 
 ### HR
 - HR campaign workbench (`/hr/campaigns`)
+- Employee directory (`/hr/employees`)
+  - search by name/email
+  - filters by department/status
+  - profile deep links
+- Employee profile (`/hr/employees/[employeeId]`)
+  - summary card
+  - contact/profile edit for `hr_admin`
+  - provisioning block and role update
+  - department / manager / position history
+- Employee create (`/hr/employees/new`)
+  - create employee form with contact fields
+- Org editor (`/hr/org`)
+  - department tree
+  - department create/edit
+  - selected employee card
+  - move employee / set manager flows
 
 ### Employee
 - My questionnaires:
@@ -117,3 +133,4 @@ Status: Updated (2026-03-06)
 - [EP-013 Questionnaire experience](../../plans/epics/EP-013-questionnaire-experience/index.md): эволюция inbox/fill/read-only flow. Читать, чтобы questionnaire screens оставались user-centered.
 - [EP-014 Feature-area slice refactor](../../plans/epics/EP-014-feature-area-slices-refactor/index.md): структурная реорганизация кода и docs перед следующими GUI-эпиками. Читать, чтобы понимать, почему после EP-013 в roadmap нет новых routes, но есть обязательный refactor step.
 - [EP-015 Results experience](../../plans/epics/EP-015-results-experience/index.md): employee/manager/HR results dashboards. Читать, чтобы корректно развивать reporting surface.
+- [EP-016 People and org admin](../../plans/epics/EP-016-people-org-admin/index.md): employee directory, profile provisioning and org editor. Читать, чтобы понимать HR-admin path для справочника и оргструктуры.

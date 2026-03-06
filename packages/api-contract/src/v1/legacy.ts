@@ -86,6 +86,11 @@ export const knownOperations = [
   "results.getHrView",
   "employee.upsert",
   "employee.listActive",
+  "employee.directoryList",
+  "employee.profileGet",
+  "identity.provisionAccess",
+  "department.list",
+  "department.upsert",
   "org.department.move",
   "org.manager.set",
   "campaign.snapshot.list",
@@ -321,6 +326,8 @@ export type EmployeeUpsertInput = {
   firstName?: string;
   lastName?: string;
   phone?: string;
+  telegramUserId?: string;
+  telegramChatId?: string;
   isActive?: boolean;
 };
 
@@ -347,6 +354,140 @@ export type EmployeeListActiveItem = {
 
 export type EmployeeListActiveOutput = {
   items: EmployeeListActiveItem[];
+};
+
+export type EmployeeDirectoryStatus = "active" | "inactive" | "deleted" | "all";
+
+export type EmployeeDirectoryListInput = {
+  companyId?: string;
+  search?: string;
+  departmentId?: string;
+  status?: EmployeeDirectoryStatus;
+};
+
+export type EmployeeDirectoryListItem = {
+  employeeId: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  telegramUserId?: string;
+  telegramChatId?: string;
+  isActive: boolean;
+  deletedAt?: string;
+  departmentId?: string;
+  departmentName?: string;
+  managerEmployeeId?: string;
+  managerName?: string;
+  positionTitle?: string;
+  positionLevel?: number;
+  userId?: string;
+  membershipRole?: MembershipRole;
+};
+
+export type EmployeeDirectoryListOutput = {
+  items: EmployeeDirectoryListItem[];
+};
+
+export type EmployeeProfileGetInput = {
+  employeeId: string;
+};
+
+export type EmployeeProfileDepartmentHistoryItem = {
+  departmentId: string;
+  departmentName?: string;
+  startAt: string;
+  endAt?: string;
+};
+
+export type EmployeeProfileManagerHistoryItem = {
+  managerEmployeeId: string;
+  managerName?: string;
+  startAt: string;
+  endAt?: string;
+};
+
+export type EmployeeProfilePositionHistoryItem = {
+  title: string;
+  level?: number;
+  startAt: string;
+  endAt?: string;
+};
+
+export type EmployeeProfileGetOutput = {
+  employeeId: string;
+  companyId: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  telegramUserId?: string;
+  telegramChatId?: string;
+  isActive: boolean;
+  deletedAt?: string;
+  currentDepartmentId?: string;
+  currentDepartmentName?: string;
+  currentManagerEmployeeId?: string;
+  currentManagerName?: string;
+  currentPositionTitle?: string;
+  currentPositionLevel?: number;
+  userId?: string;
+  membershipRole?: MembershipRole;
+  departmentHistory: EmployeeProfileDepartmentHistoryItem[];
+  managerHistory: EmployeeProfileManagerHistoryItem[];
+  positionHistory: EmployeeProfilePositionHistoryItem[];
+};
+
+export type IdentityProvisionAccessInput = {
+  employeeId: string;
+  userId: string;
+  email: string;
+  role: MembershipRole;
+};
+
+export type IdentityProvisionAccessOutput = {
+  employeeId: string;
+  userId: string;
+  email: string;
+  role: MembershipRole;
+  membershipId: string;
+  employeeUserLinkId: string;
+};
+
+export type DepartmentListInput = {
+  companyId?: string;
+  includeInactive?: boolean;
+};
+
+export type DepartmentListItem = {
+  departmentId: string;
+  name: string;
+  parentDepartmentId?: string;
+  isActive: boolean;
+  deletedAt?: string;
+  memberCount: number;
+};
+
+export type DepartmentListOutput = {
+  items: DepartmentListItem[];
+};
+
+export type DepartmentUpsertInput = {
+  departmentId: string;
+  name: string;
+  parentDepartmentId?: string;
+  isActive?: boolean;
+};
+
+export type DepartmentUpsertOutput = {
+  departmentId: string;
+  companyId: string;
+  name: string;
+  parentDepartmentId?: string;
+  isActive: boolean;
+  deletedAt?: string;
+  updatedAt: string;
+  created: boolean;
 };
 
 export type MembershipListInput = Record<string, never>;
@@ -1845,7 +1986,16 @@ export const parseEmployeeUpsertInput = (value: unknown): EmployeeUpsertInput =>
   const record = ensureObject(value, "employee.upsert input");
   ensureAllowedKeys(
     record,
-    ["employeeId", "email", "firstName", "lastName", "phone", "isActive"],
+    [
+      "employeeId",
+      "email",
+      "firstName",
+      "lastName",
+      "phone",
+      "telegramUserId",
+      "telegramChatId",
+      "isActive",
+    ],
     "employee.upsert input",
   );
 
@@ -1885,6 +2035,26 @@ export const parseEmployeeUpsertInput = (value: unknown): EmployeeUpsertInput =>
     input.phone = phone.trim();
   }
 
+  const telegramUserId = record.telegramUserId;
+  if (telegramUserId !== undefined) {
+    if (typeof telegramUserId !== "string" || telegramUserId.trim().length === 0) {
+      throw new Error(
+        "employee.upsert input.telegramUserId must be a non-empty string when provided.",
+      );
+    }
+    input.telegramUserId = telegramUserId.trim();
+  }
+
+  const telegramChatId = record.telegramChatId;
+  if (telegramChatId !== undefined) {
+    if (typeof telegramChatId !== "string" || telegramChatId.trim().length === 0) {
+      throw new Error(
+        "employee.upsert input.telegramChatId must be a non-empty string when provided.",
+      );
+    }
+    input.telegramChatId = telegramChatId.trim();
+  }
+
   const isActive = record.isActive;
   if (isActive !== undefined) {
     if (typeof isActive !== "boolean") {
@@ -1894,6 +2064,101 @@ export const parseEmployeeUpsertInput = (value: unknown): EmployeeUpsertInput =>
   }
 
   return input;
+};
+
+const employeeDirectoryStatuses = ["active", "inactive", "deleted", "all"] as const;
+const isEmployeeDirectoryStatus = (value: string): value is EmployeeDirectoryStatus =>
+  (employeeDirectoryStatuses as readonly string[]).includes(value);
+
+const parseEmployeeDirectoryListItem = (value: unknown): EmployeeDirectoryListItem => {
+  const record = ensureObject(value, "employee.directoryList output.items[]");
+  ensureAllowedKeys(
+    record,
+    [
+      "employeeId",
+      "email",
+      "firstName",
+      "lastName",
+      "phone",
+      "telegramUserId",
+      "telegramChatId",
+      "isActive",
+      "deletedAt",
+      "departmentId",
+      "departmentName",
+      "managerEmployeeId",
+      "managerName",
+      "positionTitle",
+      "positionLevel",
+      "userId",
+      "membershipRole",
+    ],
+    "employee.directoryList output.items[]",
+  );
+
+  const membershipRole = record.membershipRole;
+  if (
+    membershipRole !== undefined &&
+    membershipRole !== null &&
+    (typeof membershipRole !== "string" || !isMembershipRole(membershipRole))
+  ) {
+    throw new Error(
+      `employee.directoryList output.items[].membershipRole must be one of: ${membershipRoles.join(", ")}`,
+    );
+  }
+
+  const optionalStringFields = [
+    "firstName",
+    "lastName",
+    "phone",
+    "telegramUserId",
+    "telegramChatId",
+    "deletedAt",
+    "departmentId",
+    "departmentName",
+    "managerEmployeeId",
+    "managerName",
+    "positionTitle",
+    "userId",
+  ] as const;
+
+  for (const field of optionalStringFields) {
+    const fieldValue = record[field];
+    if (fieldValue !== undefined && fieldValue !== null && typeof fieldValue !== "string") {
+      throw new Error(
+        `employee.directoryList output.items[].${field} must be a string when provided.`,
+      );
+    }
+  }
+
+  const positionLevel = record.positionLevel;
+  if (positionLevel !== undefined && positionLevel !== null && typeof positionLevel !== "number") {
+    throw new Error(
+      "employee.directoryList output.items[].positionLevel must be a number when provided.",
+    );
+  }
+
+  return {
+    employeeId: ensureStringField(record, "employeeId", "employee.directoryList output.items[]"),
+    email: ensureStringField(record, "email", "employee.directoryList output.items[]"),
+    ...(typeof record.firstName === "string" ? { firstName: record.firstName } : {}),
+    ...(typeof record.lastName === "string" ? { lastName: record.lastName } : {}),
+    ...(typeof record.phone === "string" ? { phone: record.phone } : {}),
+    ...(typeof record.telegramUserId === "string" ? { telegramUserId: record.telegramUserId } : {}),
+    ...(typeof record.telegramChatId === "string" ? { telegramChatId: record.telegramChatId } : {}),
+    isActive: ensureBooleanField(record, "isActive", "employee.directoryList output.items[]"),
+    ...(typeof record.deletedAt === "string" ? { deletedAt: record.deletedAt } : {}),
+    ...(typeof record.departmentId === "string" ? { departmentId: record.departmentId } : {}),
+    ...(typeof record.departmentName === "string" ? { departmentName: record.departmentName } : {}),
+    ...(typeof record.managerEmployeeId === "string"
+      ? { managerEmployeeId: record.managerEmployeeId }
+      : {}),
+    ...(typeof record.managerName === "string" ? { managerName: record.managerName } : {}),
+    ...(typeof record.positionTitle === "string" ? { positionTitle: record.positionTitle } : {}),
+    ...(typeof positionLevel === "number" ? { positionLevel } : {}),
+    ...(typeof record.userId === "string" ? { userId: record.userId } : {}),
+    ...(typeof membershipRole === "string" ? { membershipRole } : {}),
+  };
 };
 
 export const parseEmployeeUpsertOutput = (value: unknown): EmployeeUpsertOutput => {
@@ -1968,6 +2233,397 @@ export const parseEmployeeListActiveOutput = (value: unknown): EmployeeListActiv
     items: ensureArray(record.items, "employee.listActive output.items").map(
       parseEmployeeListActiveItem,
     ),
+  };
+};
+
+export const parseEmployeeDirectoryListInput = (value: unknown): EmployeeDirectoryListInput => {
+  const record = ensureObject(value, "employee.directoryList input");
+  ensureAllowedKeys(
+    record,
+    ["companyId", "search", "departmentId", "status"],
+    "employee.directoryList input",
+  );
+
+  const companyId = record.companyId;
+  if (companyId !== undefined && typeof companyId !== "string") {
+    throw new Error("employee.directoryList input.companyId must be a string when provided.");
+  }
+
+  const search = record.search;
+  if (search !== undefined && typeof search !== "string") {
+    throw new Error("employee.directoryList input.search must be a string when provided.");
+  }
+
+  const departmentId = record.departmentId;
+  if (departmentId !== undefined && typeof departmentId !== "string") {
+    throw new Error("employee.directoryList input.departmentId must be a string when provided.");
+  }
+
+  const status = record.status;
+  if (status !== undefined && (typeof status !== "string" || !isEmployeeDirectoryStatus(status))) {
+    throw new Error(
+      `employee.directoryList input.status must be one of: ${employeeDirectoryStatuses.join(", ")}`,
+    );
+  }
+
+  return {
+    ...(typeof companyId === "string" ? { companyId: companyId.trim() } : {}),
+    ...(typeof search === "string" && search.trim().length > 0 ? { search: search.trim() } : {}),
+    ...(typeof departmentId === "string" && departmentId.trim().length > 0
+      ? { departmentId: departmentId.trim() }
+      : {}),
+    ...(typeof status === "string" ? { status } : {}),
+  };
+};
+
+export const parseEmployeeDirectoryListOutput = (value: unknown): EmployeeDirectoryListOutput => {
+  const record = ensureObject(value, "employee.directoryList output");
+  ensureAllowedKeys(record, ["items"], "employee.directoryList output");
+
+  return {
+    items: ensureArray(record.items, "employee.directoryList output.items").map(
+      parseEmployeeDirectoryListItem,
+    ),
+  };
+};
+
+const parseEmployeeProfileDepartmentHistoryItem = (
+  value: unknown,
+): EmployeeProfileDepartmentHistoryItem => {
+  const record = ensureObject(value, "employee.profileGet output.departmentHistory[]");
+  ensureAllowedKeys(
+    record,
+    ["departmentId", "departmentName", "startAt", "endAt"],
+    "employee.profileGet output.departmentHistory[]",
+  );
+
+  return {
+    departmentId: ensureStringField(
+      record,
+      "departmentId",
+      "employee.profileGet output.departmentHistory[]",
+    ),
+    ...(typeof record.departmentName === "string" ? { departmentName: record.departmentName } : {}),
+    startAt: ensureStringField(record, "startAt", "employee.profileGet output.departmentHistory[]"),
+    ...(typeof record.endAt === "string" ? { endAt: record.endAt } : {}),
+  };
+};
+
+const parseEmployeeProfileManagerHistoryItem = (
+  value: unknown,
+): EmployeeProfileManagerHistoryItem => {
+  const record = ensureObject(value, "employee.profileGet output.managerHistory[]");
+  ensureAllowedKeys(
+    record,
+    ["managerEmployeeId", "managerName", "startAt", "endAt"],
+    "employee.profileGet output.managerHistory[]",
+  );
+
+  return {
+    managerEmployeeId: ensureStringField(
+      record,
+      "managerEmployeeId",
+      "employee.profileGet output.managerHistory[]",
+    ),
+    ...(typeof record.managerName === "string" ? { managerName: record.managerName } : {}),
+    startAt: ensureStringField(record, "startAt", "employee.profileGet output.managerHistory[]"),
+    ...(typeof record.endAt === "string" ? { endAt: record.endAt } : {}),
+  };
+};
+
+const parseEmployeeProfilePositionHistoryItem = (
+  value: unknown,
+): EmployeeProfilePositionHistoryItem => {
+  const record = ensureObject(value, "employee.profileGet output.positionHistory[]");
+  ensureAllowedKeys(
+    record,
+    ["title", "level", "startAt", "endAt"],
+    "employee.profileGet output.positionHistory[]",
+  );
+
+  const level = record.level;
+  if (level !== undefined && level !== null && typeof level !== "number") {
+    throw new Error(
+      "employee.profileGet output.positionHistory[].level must be a number when provided.",
+    );
+  }
+
+  return {
+    title: ensureStringField(record, "title", "employee.profileGet output.positionHistory[]"),
+    ...(typeof level === "number" ? { level } : {}),
+    startAt: ensureStringField(record, "startAt", "employee.profileGet output.positionHistory[]"),
+    ...(typeof record.endAt === "string" ? { endAt: record.endAt } : {}),
+  };
+};
+
+export const parseEmployeeProfileGetInput = (value: unknown): EmployeeProfileGetInput => {
+  const record = ensureObject(value, "employee.profileGet input");
+  ensureAllowedKeys(record, ["employeeId"], "employee.profileGet input");
+
+  return {
+    employeeId: ensureStringField(record, "employeeId", "employee.profileGet input"),
+  };
+};
+
+export const parseEmployeeProfileGetOutput = (value: unknown): EmployeeProfileGetOutput => {
+  const record = ensureObject(value, "employee.profileGet output");
+  ensureAllowedKeys(
+    record,
+    [
+      "employeeId",
+      "companyId",
+      "email",
+      "firstName",
+      "lastName",
+      "phone",
+      "telegramUserId",
+      "telegramChatId",
+      "isActive",
+      "deletedAt",
+      "currentDepartmentId",
+      "currentDepartmentName",
+      "currentManagerEmployeeId",
+      "currentManagerName",
+      "currentPositionTitle",
+      "currentPositionLevel",
+      "userId",
+      "membershipRole",
+      "departmentHistory",
+      "managerHistory",
+      "positionHistory",
+    ],
+    "employee.profileGet output",
+  );
+
+  const membershipRole = record.membershipRole;
+  if (
+    membershipRole !== undefined &&
+    membershipRole !== null &&
+    (typeof membershipRole !== "string" || !isMembershipRole(membershipRole))
+  ) {
+    throw new Error(
+      `employee.profileGet output.membershipRole must be one of: ${membershipRoles.join(", ")}`,
+    );
+  }
+
+  const currentPositionLevel = record.currentPositionLevel;
+  if (
+    currentPositionLevel !== undefined &&
+    currentPositionLevel !== null &&
+    typeof currentPositionLevel !== "number"
+  ) {
+    throw new Error(
+      "employee.profileGet output.currentPositionLevel must be a number when provided.",
+    );
+  }
+
+  return {
+    employeeId: ensureStringField(record, "employeeId", "employee.profileGet output"),
+    companyId: ensureStringField(record, "companyId", "employee.profileGet output"),
+    email: ensureStringField(record, "email", "employee.profileGet output"),
+    ...(typeof record.firstName === "string" ? { firstName: record.firstName } : {}),
+    ...(typeof record.lastName === "string" ? { lastName: record.lastName } : {}),
+    ...(typeof record.phone === "string" ? { phone: record.phone } : {}),
+    ...(typeof record.telegramUserId === "string" ? { telegramUserId: record.telegramUserId } : {}),
+    ...(typeof record.telegramChatId === "string" ? { telegramChatId: record.telegramChatId } : {}),
+    isActive: ensureBooleanField(record, "isActive", "employee.profileGet output"),
+    ...(typeof record.deletedAt === "string" ? { deletedAt: record.deletedAt } : {}),
+    ...(typeof record.currentDepartmentId === "string"
+      ? { currentDepartmentId: record.currentDepartmentId }
+      : {}),
+    ...(typeof record.currentDepartmentName === "string"
+      ? { currentDepartmentName: record.currentDepartmentName }
+      : {}),
+    ...(typeof record.currentManagerEmployeeId === "string"
+      ? { currentManagerEmployeeId: record.currentManagerEmployeeId }
+      : {}),
+    ...(typeof record.currentManagerName === "string"
+      ? { currentManagerName: record.currentManagerName }
+      : {}),
+    ...(typeof record.currentPositionTitle === "string"
+      ? { currentPositionTitle: record.currentPositionTitle }
+      : {}),
+    ...(typeof currentPositionLevel === "number" ? { currentPositionLevel } : {}),
+    ...(typeof record.userId === "string" ? { userId: record.userId } : {}),
+    ...(typeof membershipRole === "string" ? { membershipRole } : {}),
+    departmentHistory: ensureArray(
+      record.departmentHistory,
+      "employee.profileGet output.departmentHistory",
+    ).map(parseEmployeeProfileDepartmentHistoryItem),
+    managerHistory: ensureArray(
+      record.managerHistory,
+      "employee.profileGet output.managerHistory",
+    ).map(parseEmployeeProfileManagerHistoryItem),
+    positionHistory: ensureArray(
+      record.positionHistory,
+      "employee.profileGet output.positionHistory",
+    ).map(parseEmployeeProfilePositionHistoryItem),
+  };
+};
+
+export const parseIdentityProvisionAccessInput = (value: unknown): IdentityProvisionAccessInput => {
+  const record = ensureObject(value, "identity.provisionAccess input");
+  ensureAllowedKeys(
+    record,
+    ["employeeId", "userId", "email", "role"],
+    "identity.provisionAccess input",
+  );
+
+  const role = ensureStringField(record, "role", "identity.provisionAccess input");
+  if (!isMembershipRole(role)) {
+    throw new Error(
+      `identity.provisionAccess input.role must be one of: ${membershipRoles.join(", ")}`,
+    );
+  }
+
+  return {
+    employeeId: ensureStringField(record, "employeeId", "identity.provisionAccess input"),
+    userId: ensureStringField(record, "userId", "identity.provisionAccess input"),
+    email: ensureStringField(record, "email", "identity.provisionAccess input").trim(),
+    role,
+  };
+};
+
+export const parseIdentityProvisionAccessOutput = (
+  value: unknown,
+): IdentityProvisionAccessOutput => {
+  const record = ensureObject(value, "identity.provisionAccess output");
+  ensureAllowedKeys(
+    record,
+    ["employeeId", "userId", "email", "role", "membershipId", "employeeUserLinkId"],
+    "identity.provisionAccess output",
+  );
+
+  const role = ensureStringField(record, "role", "identity.provisionAccess output");
+  if (!isMembershipRole(role)) {
+    throw new Error(
+      `identity.provisionAccess output.role must be one of: ${membershipRoles.join(", ")}`,
+    );
+  }
+
+  return {
+    employeeId: ensureStringField(record, "employeeId", "identity.provisionAccess output"),
+    userId: ensureStringField(record, "userId", "identity.provisionAccess output"),
+    email: ensureStringField(record, "email", "identity.provisionAccess output"),
+    role,
+    membershipId: ensureStringField(record, "membershipId", "identity.provisionAccess output"),
+    employeeUserLinkId: ensureStringField(
+      record,
+      "employeeUserLinkId",
+      "identity.provisionAccess output",
+    ),
+  };
+};
+
+const parseDepartmentListItem = (value: unknown): DepartmentListItem => {
+  const record = ensureObject(value, "department.list output.items[]");
+  ensureAllowedKeys(
+    record,
+    ["departmentId", "name", "parentDepartmentId", "isActive", "deletedAt", "memberCount"],
+    "department.list output.items[]",
+  );
+
+  return {
+    departmentId: ensureStringField(record, "departmentId", "department.list output.items[]"),
+    name: ensureStringField(record, "name", "department.list output.items[]"),
+    ...(typeof record.parentDepartmentId === "string"
+      ? { parentDepartmentId: record.parentDepartmentId }
+      : {}),
+    isActive: ensureBooleanField(record, "isActive", "department.list output.items[]"),
+    ...(typeof record.deletedAt === "string" ? { deletedAt: record.deletedAt } : {}),
+    memberCount: ensureNumberField(record, "memberCount", "department.list output.items[]"),
+  };
+};
+
+export const parseDepartmentListInput = (value: unknown): DepartmentListInput => {
+  const record = ensureObject(value, "department.list input");
+  ensureAllowedKeys(record, ["companyId", "includeInactive"], "department.list input");
+
+  const companyId = record.companyId;
+  if (companyId !== undefined && typeof companyId !== "string") {
+    throw new Error("department.list input.companyId must be a string when provided.");
+  }
+
+  const includeInactive = record.includeInactive;
+  if (includeInactive !== undefined && typeof includeInactive !== "boolean") {
+    throw new Error("department.list input.includeInactive must be boolean when provided.");
+  }
+
+  return {
+    ...(typeof companyId === "string" ? { companyId: companyId.trim() } : {}),
+    ...(typeof includeInactive === "boolean" ? { includeInactive } : {}),
+  };
+};
+
+export const parseDepartmentListOutput = (value: unknown): DepartmentListOutput => {
+  const record = ensureObject(value, "department.list output");
+  ensureAllowedKeys(record, ["items"], "department.list output");
+
+  return {
+    items: ensureArray(record.items, "department.list output.items").map(parseDepartmentListItem),
+  };
+};
+
+export const parseDepartmentUpsertInput = (value: unknown): DepartmentUpsertInput => {
+  const record = ensureObject(value, "department.upsert input");
+  ensureAllowedKeys(
+    record,
+    ["departmentId", "name", "parentDepartmentId", "isActive"],
+    "department.upsert input",
+  );
+
+  const parentDepartmentId = record.parentDepartmentId;
+  if (
+    parentDepartmentId !== undefined &&
+    parentDepartmentId !== null &&
+    typeof parentDepartmentId !== "string"
+  ) {
+    throw new Error("department.upsert input.parentDepartmentId must be a string when provided.");
+  }
+
+  const isActive = record.isActive;
+  if (isActive !== undefined && typeof isActive !== "boolean") {
+    throw new Error("department.upsert input.isActive must be boolean when provided.");
+  }
+
+  return {
+    departmentId: ensureStringField(record, "departmentId", "department.upsert input"),
+    name: ensureStringField(record, "name", "department.upsert input"),
+    ...(typeof parentDepartmentId === "string" && parentDepartmentId.trim().length > 0
+      ? { parentDepartmentId: parentDepartmentId.trim() }
+      : {}),
+    ...(typeof isActive === "boolean" ? { isActive } : {}),
+  };
+};
+
+export const parseDepartmentUpsertOutput = (value: unknown): DepartmentUpsertOutput => {
+  const record = ensureObject(value, "department.upsert output");
+  ensureAllowedKeys(
+    record,
+    [
+      "departmentId",
+      "companyId",
+      "name",
+      "parentDepartmentId",
+      "isActive",
+      "deletedAt",
+      "updatedAt",
+      "created",
+    ],
+    "department.upsert output",
+  );
+
+  return {
+    departmentId: ensureStringField(record, "departmentId", "department.upsert output"),
+    companyId: ensureStringField(record, "companyId", "department.upsert output"),
+    name: ensureStringField(record, "name", "department.upsert output"),
+    ...(typeof record.parentDepartmentId === "string"
+      ? { parentDepartmentId: record.parentDepartmentId }
+      : {}),
+    isActive: ensureBooleanField(record, "isActive", "department.upsert output"),
+    ...(typeof record.deletedAt === "string" ? { deletedAt: record.deletedAt } : {}),
+    updatedAt: ensureStringField(record, "updatedAt", "department.upsert output"),
+    created: ensureBooleanField(record, "created", "department.upsert output"),
   };
 };
 

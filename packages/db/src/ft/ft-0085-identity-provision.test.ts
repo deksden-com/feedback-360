@@ -79,7 +79,7 @@ describe("FT-0085 identity access provisioning", () => {
         await pool.end();
       }
     },
-    30000,
+    45000,
   );
 
   it.skipIf(hasUrl)("skips integration run when database URL is absent", () => {

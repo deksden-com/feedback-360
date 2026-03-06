@@ -1,10 +1,14 @@
 import {
+  type IdentityProvisionAccessInput,
+  type IdentityProvisionAccessOutput,
   type MembershipListInput,
   type MembershipListOutput,
   type OperationContext,
   type OperationResult,
   errorFromUnknown,
   errorResult,
+  parseIdentityProvisionAccessInput,
+  parseIdentityProvisionAccessOutput,
   parseMembershipListInput,
   parseMembershipListOutput,
 } from "@feedback-360/api-contract";
@@ -16,6 +20,10 @@ export type IdentityTenancyClientMethods = {
     input?: MembershipListInput,
     context?: OperationContext,
   ): Promise<OperationResult<MembershipListOutput>>;
+  identityProvisionAccess(
+    input: IdentityProvisionAccessInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<IdentityProvisionAccessOutput>>;
 };
 
 export const createIdentityTenancyClientMethods = (
@@ -34,6 +42,24 @@ export const createIdentityTenancyClientMethods = (
       input: parsedInput,
       context,
       parseOutput: parseMembershipListOutput,
+    });
+  },
+
+  identityProvisionAccess: async (input, context) => {
+    let parsedInput: IdentityProvisionAccessInput;
+    try {
+      parsedInput = parseIdentityProvisionAccessInput(input);
+    } catch (error) {
+      return errorResult(
+        errorFromUnknown(error, "invalid_input", "Invalid identityProvisionAccess input."),
+      );
+    }
+
+    return runtime.invokeOperation({
+      operation: "identity.provisionAccess",
+      input: parsedInput,
+      context,
+      parseOutput: parseIdentityProvisionAccessOutput,
     });
   },
 });

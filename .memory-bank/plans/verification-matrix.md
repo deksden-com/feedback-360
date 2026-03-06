@@ -383,14 +383,16 @@ Status: Draft (2026-03-03)
   - Must add test: `apps/web/playwright/tests/ft-0161-employee-directory.spec.ts`
   - Must run: employee search/filter/open profile flow.
 - FT-0162
-  - Must add test: `apps/web/playwright/tests/ft-0162-employee-profile.spec.ts`
+  - Must add test: `apps/web/playwright/tests/ft-0162-employee-profile-provisioning.spec.ts`
   - Must run: create employee + provision/update user email and role.
 - FT-0163
   - Must add test: `apps/web/playwright/tests/ft-0163-org-editor.spec.ts`
   - Must run: create/update department + move employee + history check.
 
 ### EP-016 execution evidence
-- Planned: evidence будет добавлено после реализации FT-0161..FT-0163.
+- FT-0161: what=employee directory with search, department/status filters and profile deep links; where=local workspace + `https://beta.go360go.ru`; how=`pnpm lint`, `pnpm typecheck`, `pnpm --filter @feedback-360/web test`, `pnpm --filter @feedback-360/web build`, `cd apps/web && PLAYWRIGHT_BASE_URL=http://localhost:3105 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0161-employee-directory.spec.ts --workers=1 --reporter=line`, `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0161-employee-directory.spec.ts --workers=1 --reporter=line`; quality_gate=passed locally; acceptance_gate=passed locally, beta pending until deploy; artifacts=`.memory-bank/evidence/EP-016/FT-0161/2026-03-06/`; result=in_progress.
+- FT-0162: what=employee create/edit profile and account provisioning flow with role-aware controls; where=local workspace + `https://beta.go360go.ru`; how=`pnpm lint`, `pnpm typecheck`, `pnpm --filter @feedback-360/web test`, `pnpm --filter @feedback-360/web build`, `cd apps/web && PLAYWRIGHT_BASE_URL=http://localhost:3105 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0162-employee-profile-provisioning.spec.ts --workers=1 --reporter=line`, `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0162-employee-profile-provisioning.spec.ts --workers=1 --reporter=line`; quality_gate=passed locally; acceptance_gate=passed locally, beta pending until deploy; artifacts=`.memory-bank/evidence/EP-016/FT-0162/2026-03-06/`; result=in_progress.
+- FT-0163: what=department tree, manager assignment and employee move UI with history-aware updates; where=local workspace + `https://beta.go360go.ru`; how=`pnpm lint`, `pnpm typecheck`, `pnpm --filter @feedback-360/web test`, `pnpm --filter @feedback-360/web build`, `cd apps/web && PLAYWRIGHT_BASE_URL=http://localhost:3105 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0163-org-editor.spec.ts --workers=1 --reporter=line`, `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0163-org-editor.spec.ts --workers=1 --reporter=line`; quality_gate=passed locally; acceptance_gate=passed locally, beta pending until deploy; artifacts=`.memory-bank/evidence/EP-016/FT-0163/2026-03-06/`; result=in_progress.
 
 ## EP-017 Competency models and matrix UI
 - FT-0171

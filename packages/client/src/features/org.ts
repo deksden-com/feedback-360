@@ -1,6 +1,14 @@
 import {
+  type DepartmentListInput,
+  type DepartmentListOutput,
+  type DepartmentUpsertInput,
+  type DepartmentUpsertOutput,
+  type EmployeeDirectoryListInput,
+  type EmployeeDirectoryListOutput,
   type EmployeeListActiveInput,
   type EmployeeListActiveOutput,
+  type EmployeeProfileGetInput,
+  type EmployeeProfileGetOutput,
   type EmployeeUpsertInput,
   type EmployeeUpsertOutput,
   type OperationContext,
@@ -11,8 +19,16 @@ import {
   type OrgManagerSetOutput,
   errorFromUnknown,
   errorResult,
+  parseDepartmentListInput,
+  parseDepartmentListOutput,
+  parseDepartmentUpsertInput,
+  parseDepartmentUpsertOutput,
+  parseEmployeeDirectoryListInput,
+  parseEmployeeDirectoryListOutput,
   parseEmployeeListActiveInput,
   parseEmployeeListActiveOutput,
+  parseEmployeeProfileGetInput,
+  parseEmployeeProfileGetOutput,
   parseEmployeeUpsertInput,
   parseEmployeeUpsertOutput,
   parseOrgDepartmentMoveInput,
@@ -32,6 +48,22 @@ export type OrgClientMethods = {
     input?: EmployeeListActiveInput,
     context?: OperationContext,
   ): Promise<OperationResult<EmployeeListActiveOutput>>;
+  employeeDirectoryList(
+    input?: EmployeeDirectoryListInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<EmployeeDirectoryListOutput>>;
+  employeeProfileGet(
+    input: EmployeeProfileGetInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<EmployeeProfileGetOutput>>;
+  departmentList(
+    input?: DepartmentListInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<DepartmentListOutput>>;
+  departmentUpsert(
+    input: DepartmentUpsertInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<DepartmentUpsertOutput>>;
   orgDepartmentMove(
     input: OrgDepartmentMoveInput,
     context?: OperationContext,
@@ -74,6 +106,76 @@ export const createOrgClientMethods = (runtime: ClientRuntime): OrgClientMethods
       input: parsedInput,
       context,
       parseOutput: parseEmployeeListActiveOutput,
+    });
+  },
+
+  employeeDirectoryList: async (input, context) => {
+    let parsedInput: EmployeeDirectoryListInput;
+    try {
+      parsedInput = parseEmployeeDirectoryListInput(input ?? {});
+    } catch (error) {
+      return errorResult(
+        errorFromUnknown(error, "invalid_input", "Invalid employeeDirectoryList input."),
+      );
+    }
+
+    return runtime.invokeOperation({
+      operation: "employee.directoryList",
+      input: parsedInput,
+      context,
+      parseOutput: parseEmployeeDirectoryListOutput,
+    });
+  },
+
+  employeeProfileGet: async (input, context) => {
+    let parsedInput: EmployeeProfileGetInput;
+    try {
+      parsedInput = parseEmployeeProfileGetInput(input);
+    } catch (error) {
+      return errorResult(
+        errorFromUnknown(error, "invalid_input", "Invalid employeeProfileGet input."),
+      );
+    }
+
+    return runtime.invokeOperation({
+      operation: "employee.profileGet",
+      input: parsedInput,
+      context,
+      parseOutput: parseEmployeeProfileGetOutput,
+    });
+  },
+
+  departmentList: async (input, context) => {
+    let parsedInput: DepartmentListInput;
+    try {
+      parsedInput = parseDepartmentListInput(input ?? {});
+    } catch (error) {
+      return errorResult(errorFromUnknown(error, "invalid_input", "Invalid departmentList input."));
+    }
+
+    return runtime.invokeOperation({
+      operation: "department.list",
+      input: parsedInput,
+      context,
+      parseOutput: parseDepartmentListOutput,
+    });
+  },
+
+  departmentUpsert: async (input, context) => {
+    let parsedInput: DepartmentUpsertInput;
+    try {
+      parsedInput = parseDepartmentUpsertInput(input);
+    } catch (error) {
+      return errorResult(
+        errorFromUnknown(error, "invalid_input", "Invalid departmentUpsert input."),
+      );
+    }
+
+    return runtime.invokeOperation({
+      operation: "department.upsert",
+      input: parsedInput,
+      context,
+      parseOutput: parseDepartmentUpsertOutput,
     });
   },
 

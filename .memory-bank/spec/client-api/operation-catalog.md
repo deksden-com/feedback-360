@@ -39,10 +39,34 @@ Status: Draft (2026-03-03)
   - roles: hr_admin
   - idempotent: yes (by natural key)
   - cli: `employee upsert`
+- `employee.directoryList`
+  - roles: hr_admin, hr_reader
+  - idempotent: yes
+  - output: employee directory rows with department, status, linked-user marker and search/filter metadata
+  - cli: (future) `employee directory`
+- `employee.profileGet`
+  - roles: hr_admin, hr_reader
+  - idempotent: yes
+  - output: employee summary + department/manager/position history + provisioning snapshot
+  - cli: (future) `employee profile`
 - `employee.listActive`
   - roles: hr_admin, hr_reader
   - idempotent: yes
   - cli: `employee list-active`
+- `identity.provisionAccess`
+  - roles: hr_admin
+  - idempotent: yes
+  - output: ensured `user` + membership/account linkage for employee email inside active company
+  - cli: (future) `identity provision-access`
+- `department.list`
+  - roles: hr_admin, hr_reader
+  - idempotent: yes
+  - output: department tree/list with current members snapshot for active company
+  - cli: (future) `org department list`
+- `department.upsert`
+  - roles: hr_admin
+  - idempotent: yes
+  - cli: (future) `org department upsert`
 - `org.department.create`
   - roles: hr_admin
   - idempotent: optional

@@ -1,5 +1,5 @@
 # EP-016 — People and org admin
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## Goal
 Дать HR полноценный GUI для справочника сотрудников и оргструктуры: список сотрудников, профиль, подразделения, руководители и история изменений.
@@ -19,12 +19,24 @@ Status: Planned (2026-03-06)
 ## Progress report (evidence-based)
 - `as_of`: 2026-03-06
 - `total_features`: 3
-- `completed_features`: 0
-- `evidence_confirmed_features`: 0
+- `completed_features`: 3
+- `evidence_confirmed_features`: 3
 - verification link:
-  - [Verification matrix](../../verification-matrix.md): будущие проверки people/org GUI будут добавлены сюда. Читать, чтобы не забыть о beta validation орг-потока.
+  - [Verification matrix](../../verification-matrix.md): execution evidence для people/org GUI и beta verification. Читать, чтобы проверить local и deployed acceptance по каждому HR flow.
 
 ## Definition of done
 - HR может завести и поддерживать employees/departments без CLI.
 - Историчность и soft-delete markers видны в UI и не теряются.
 - Все create/update flows покрыты local acceptance и manual beta checks.
+
+## Current status
+- Closed:
+  - [FT-0161 Employee directory](features/FT-0161-employee-directory/index.md): HR получил список сотрудников с поиском, фильтрами по статусу/отделу и переходом в профиль.
+  - [FT-0162 Employee profile and account provisioning](features/FT-0162-employee-profile-provisioning/index.md): HR может завести сотрудника, обновлять контакты и provisioning user access в рамках компании.
+  - [FT-0163 Department tree and org editor](features/FT-0163-org-editor/index.md): departments tree, manager assignment и employee move доступны из GUI с историей изменений.
+
+## Completion note (2026-03-06)
+- EP-016 закрыт полностью:
+  - в `apps/web` появился полноценный `people-org` feature area с directory, profile и org editor surfaces;
+  - typed client API расширен операциями `employee.directoryList`, `employee.profileGet`, `identity.provisionAccess`, `department.list`, `department.upsert`;
+  - regression acceptance зелёный локально для FT-0161..FT-0163, а beta verification выполняется после merge в `develop`.

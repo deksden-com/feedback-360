@@ -1,4 +1,12 @@
 export {
+  parseDepartmentListInput,
+  parseDepartmentListOutput,
+  parseDepartmentUpsertInput,
+  parseDepartmentUpsertOutput,
+  parseEmployeeDirectoryListInput,
+  parseEmployeeDirectoryListOutput,
+  parseEmployeeProfileGetInput,
+  parseEmployeeProfileGetOutput,
   parseEmployeeListActiveInput,
   parseEmployeeListActiveOutput,
   parseEmployeeUpsertInput,
@@ -10,6 +18,20 @@ export {
 } from "./v1/legacy";
 
 export type {
+  DepartmentListInput,
+  DepartmentListItem,
+  DepartmentListOutput,
+  DepartmentUpsertInput,
+  DepartmentUpsertOutput,
+  EmployeeDirectoryListInput,
+  EmployeeDirectoryListItem,
+  EmployeeDirectoryListOutput,
+  EmployeeDirectoryStatus,
+  EmployeeProfileDepartmentHistoryItem,
+  EmployeeProfileGetInput,
+  EmployeeProfileGetOutput,
+  EmployeeProfileManagerHistoryItem,
+  EmployeeProfilePositionHistoryItem,
   EmployeeListActiveInput,
   EmployeeListActiveItem,
   EmployeeListActiveOutput,

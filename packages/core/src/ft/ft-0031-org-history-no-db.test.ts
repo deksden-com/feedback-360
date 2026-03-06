@@ -159,7 +159,11 @@ describe("FT-0031 org history + soft delete (no-db acceptance)", () => {
       context,
     });
     expect(moveDepartment.ok).toBe(true);
-    if (moveDepartment.ok && "departmentId" in moveDepartment.data) {
+    if (
+      moveDepartment.ok &&
+      "departmentId" in moveDepartment.data &&
+      "effectiveAt" in moveDepartment.data
+    ) {
       expect(moveDepartment.data.previousDepartmentId).toBe("department-a");
       expect(moveDepartment.data.departmentId).toBe("department-b");
       expect(moveDepartment.data.changed).toBe(true);
@@ -189,7 +193,11 @@ describe("FT-0031 org history + soft delete (no-db acceptance)", () => {
       context,
     });
     expect(deactivateEmployee.ok).toBe(true);
-    if (deactivateEmployee.ok && "isActive" in deactivateEmployee.data) {
+    if (
+      deactivateEmployee.ok &&
+      "isActive" in deactivateEmployee.data &&
+      "updatedAt" in deactivateEmployee.data
+    ) {
       expect(deactivateEmployee.data.isActive).toBe(false);
       expect(deactivateEmployee.data.created).toBe(false);
       expect(deactivateEmployee.data.deletedAt).toBeDefined();

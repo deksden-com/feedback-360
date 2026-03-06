@@ -12,9 +12,14 @@ import {
   type CampaignUpdateDraftOutput,
   type CampaignWeightsSetOutput,
   type CompanyUpdateProfileOutput,
+  type DepartmentListOutput,
+  type DepartmentUpsertOutput,
   type DispatchOperationInput,
+  type EmployeeDirectoryListOutput,
   type EmployeeListActiveOutput,
+  type EmployeeProfileGetOutput,
   type EmployeeUpsertOutput,
+  type IdentityProvisionAccessOutput,
   type KnownOperation,
   type MatrixGenerateSuggestedOutput,
   type MatrixSetOutput,
@@ -59,6 +64,7 @@ import {
 } from "./features/campaigns";
 import {
   runCompanyUpdateProfile,
+  runIdentityProvisionAccess,
   runMembershipList,
   runSystemPing,
 } from "./features/identity-tenancy";
@@ -73,7 +79,11 @@ import {
   runNotificationsGenerateReminders,
 } from "./features/notifications";
 import {
+  runDepartmentList,
+  runDepartmentUpsert,
+  runEmployeeDirectoryList,
   runEmployeeListActive,
+  runEmployeeProfileGet,
   runEmployeeUpsert,
   runOrgDepartmentMove,
   runOrgManagerSet,
@@ -95,7 +105,12 @@ type DispatchOutput =
   | CompanyUpdateProfileOutput
   | EmployeeUpsertOutput
   | EmployeeListActiveOutput
+  | EmployeeDirectoryListOutput
+  | EmployeeProfileGetOutput
+  | IdentityProvisionAccessOutput
   | MembershipListOutput
+  | DepartmentListOutput
+  | DepartmentUpsertOutput
   | ModelVersionListOutput
   | CampaignListOutput
   | CampaignGetOutput
@@ -132,6 +147,7 @@ const operationHandlers: Partial<Record<KnownOperation, OperationHandler>> = {
   "system.ping": (request) => runSystemPing(request.input),
   "company.updateProfile": runCompanyUpdateProfile,
   "membership.list": runMembershipList,
+  "identity.provisionAccess": runIdentityProvisionAccess,
   "model.version.create": runModelVersionCreate,
   "model.version.list": runModelVersionList,
   "campaign.list": runCampaignList,
@@ -150,6 +166,10 @@ const operationHandlers: Partial<Record<KnownOperation, OperationHandler>> = {
   "campaign.participants.addFromDepartments": runCampaignParticipantsAddFromDepartments,
   "employee.upsert": runEmployeeUpsert,
   "employee.listActive": runEmployeeListActive,
+  "employee.directoryList": runEmployeeDirectoryList,
+  "employee.profileGet": runEmployeeProfileGet,
+  "department.list": runDepartmentList,
+  "department.upsert": runDepartmentUpsert,
   "org.department.move": runOrgDepartmentMove,
   "org.manager.set": runOrgManagerSet,
   "questionnaire.listAssigned": runQuestionnaireListAssigned,
