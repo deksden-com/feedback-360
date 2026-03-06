@@ -21,6 +21,13 @@ Started кампания с частично заполненными анкет
 - `questionnaire.main_not_started`
 - `questionnaire.main_in_progress`
 - `questionnaire.main_submitted`
+- `model.version.main`
+- `competency.main`
+- `competency.secondary`
+- `indicator.main_1`
+- `indicator.main_2`
+- `indicator.main_3`
+- `indicator.secondary_1`
 - `employee.subject_main`
 - `employee.head_a` (pending rater x2)
 - `employee.staff_a1`, `employee.staff_a2` (pending subjects)

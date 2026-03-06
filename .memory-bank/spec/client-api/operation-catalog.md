@@ -152,7 +152,8 @@ Status: Draft (2026-03-03)
   - scope:
     - `employee/manager`: только своя анкета (`rater_employee_id` текущего user);
     - `hr_admin/hr_reader`: доступ ко всем анкетам active company.
-  - cli: N/A (используется в web UI).
+  - output: campaign metadata + snapshot subject display fields + resolved questionnaire definition (`groups/competencies/indicators|levels`).
+  - cli: `questionnaire get`
 - `questionnaire.saveDraft`
   - roles: employee/manager/hr_admin
   - idempotent: yes (by questionnaire+item)

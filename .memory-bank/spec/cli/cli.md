@@ -37,6 +37,7 @@ Status: Draft (2026-03-03)
 - `matrix generate <campaign_id> --from-departments ...`
 - `matrix set <campaign_id> ...`
 - `questionnaire list ...`
+- `questionnaire get <questionnaire_id>`
 - `questionnaire save-draft ...`
 - `questionnaire submit ...`
 - `results my|team|hr ...`

@@ -155,6 +155,11 @@ Status: Draft (2026-03-03)
   - roles: employee/manager/hr_*
   - idempotency: yes
 
+- command: `questionnaire get <questionnaire_id>`
+  - op: `questionnaire.getDraft`
+  - roles: employee/manager/hr_*
+  - idempotency: yes
+
 - command: `questionnaire save-draft <questionnaire_id> ...`
   - op: `questionnaire.saveDraft`
   - roles: employee/manager/hr_*

@@ -14,15 +14,25 @@ Status: Updated (2026-03-06)
 - HR campaign workbench (`/hr/campaigns`)
 
 ### Employee
-- My questionnaires
-- Questionnaire fill (draft/save/submit)
+- My questionnaires:
+  - inbox counters (`total / in progress / submitted`)
+  - filters by status and campaign
+  - resume/open CTA per questionnaire
+- Questionnaire fill:
+  - structured indicators/levels sections
+  - progress card
+  - per-competency comments
+  - final comment
+  - save draft / submit
+  - explicit read-only for submitted/ended
 - My results dashboard
 
 ### Manager
 - Team results
 
 ## Planned GUI expansion (post-MVP wave)
-Ниже — целевая карта экранов для GUI-эпиков EP-011..EP-018. Это не значит “делаем всё сразу”, а означает куда развивается IA приложения.
+Ниже — целевая карта экранов для GUI-эпиков EP-011..EP-019. Это не значит “делаем всё сразу”, а означает куда развивается IA приложения.
+EP-014 в этой последовательности — внутренний feature-area refactor: он не добавляет новых экранов, но меняет foundation, на котором строятся последующие UI-эпики.
 
 ## Shared
 - Login (magic link)
@@ -92,4 +102,5 @@ Status: Updated (2026-03-06)
 - [EP-011 App shell and navigation](../../plans/epics/EP-011-app-shell-navigation/index.md): единый каркас приложения и home dashboards. Читать, чтобы понять ближайший UI слой после MVP.
 - [EP-012 HR campaigns UX](../../plans/epics/EP-012-hr-campaigns-ux/index.md): HR campaign surfaces поверх текущего workbench. Читать, чтобы связать sitemap с реальными business flows.
 - [EP-013 Questionnaire experience](../../plans/epics/EP-013-questionnaire-experience/index.md): эволюция inbox/fill/read-only flow. Читать, чтобы questionnaire screens оставались user-centered.
-- [EP-014 Results experience](../../plans/epics/EP-014-results-experience/index.md): employee/manager/HR results dashboards. Читать, чтобы корректно развивать reporting surface.
+- [EP-014 Feature-area slice refactor](../../plans/epics/EP-014-feature-area-slices-refactor/index.md): структурная реорганизация кода и docs перед следующими GUI-эпиками. Читать, чтобы понимать, почему после EP-013 в roadmap нет новых routes, но есть обязательный refactor step.
+- [EP-015 Results experience](../../plans/epics/EP-015-results-experience/index.md): employee/manager/HR results dashboards. Читать, чтобы корректно развивать reporting surface.

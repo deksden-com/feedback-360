@@ -99,6 +99,12 @@ Status: Completed (2026-03-05)
   - web API: добавлены route handlers `/api/questionnaires/draft` и `/api/questionnaires/submit`.
   - security: manager/employee получают только свои анкеты (list/get/save/submit).
 
+## Regression refresh (2026-03-06)
+- FT-0082 сохранён как базовый questionnaire slice, но теперь опирается на richer structured questionnaire form:
+  - indicators/levels рендерятся из resolved questionnaire definition;
+  - save draft / submit routes принимают structured form payload;
+  - acceptance path обновлён и остаётся зелёным как regression для EP-013.
+
 ## Quality checks evidence (2026-03-05)
 - `pnpm --filter @feedback-360/api-contract lint && pnpm --filter @feedback-360/api-contract typecheck` → passed.
 - `pnpm --filter @feedback-360/db lint && pnpm --filter @feedback-360/db typecheck` → passed.
@@ -109,17 +115,17 @@ Status: Completed (2026-03-05)
 - `pnpm --filter @feedback-360/client exec vitest run src/ft-0082-questionnaire-get-draft-client.test.ts` → passed.
 - `set -a; source .env; set +a; pnpm --filter @feedback-360/web test` → passed.
 
-## Acceptance evidence (2026-03-05)
-- `set -a; source .env; set +a; cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0082-questionnaire-ui.spec.ts` → passed.
+## Acceptance evidence (2026-03-06)
+- `PLAYWRIGHT_BASE_URL=http://localhost:3111 cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0082-questionnaire-ui.spec.ts --workers=1 --reporter=line` → passed.
 - Covered acceptance:
-  - `S5_campaign_started_no_answers`: список анкет → открыть анкету → save draft → submit → статус `submitted`.
+  - `S5_campaign_started_no_answers`: questionnaire inbox → structured draft save → submit → status `submitted`.
   - `S8_campaign_ended`: UI read-only + backend `campaign_ended_readonly` на попытке save.
 - Artifacts:
-  - step-01: список анкет.
-    ![step-01-questionnaire-list](../../../../../evidence/EP-008/FT-0082/2026-03-05/step-01-questionnaire-list.png)
-  - step-02: draft сохранён и восстановлен в форме.
-    ![step-02-questionnaire-draft-saved](../../../../../evidence/EP-008/FT-0082/2026-03-05/step-02-questionnaire-draft-saved.png)
-  - step-03: анкета отправлена, статус в списке обновлён.
-    ![step-03-questionnaire-submitted](../../../../../evidence/EP-008/FT-0082/2026-03-05/step-03-questionnaire-submitted.png)
-  - step-04: `ended`-кампания в read-only.
-    ![step-04-ended-readonly-view](../../../../../evidence/EP-008/FT-0082/2026-03-05/step-04-ended-readonly-view.png)
+  - step-01: questionnaire inbox.
+    ![step-01-questionnaire-inbox](../../../../../evidence/EP-008/FT-0082/2026-03-06/step-01-questionnaire-inbox.png)
+  - step-02: structured draft saved.
+    ![step-02-questionnaire-draft-saved](../../../../../evidence/EP-008/FT-0082/2026-03-06/step-02-questionnaire-draft-saved.png)
+  - step-03: questionnaire submitted.
+    ![step-03-questionnaire-submitted](../../../../../evidence/EP-008/FT-0082/2026-03-06/step-03-questionnaire-submitted.png)
+  - step-04: `ended` campaign in read-only.
+    ![step-04-ended-readonly-view](../../../../../evidence/EP-008/FT-0082/2026-03-06/step-04-ended-readonly-view.png)

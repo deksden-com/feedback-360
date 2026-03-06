@@ -8,6 +8,18 @@ Started campaign, где уже был draft save → campaign locked.
 - `S5_campaign_started_no_answers`
 
 ## Creates
-- one questionnaire in `in_progress` with saved draft answers
+- one questionnaire in `in_progress` with saved structured draft answers (`indicatorResponses`, `competencyComments`, `finalComment`)
 - sets `campaign.locked_at`
 
+## Handles
+- `company.main`
+- `campaign.main`
+- `questionnaire.main`
+- `questionnaire.main_in_progress`
+- `model.version.main`
+- `competency.main`
+- `competency.secondary`
+- `indicator.main_1`
+- `indicator.main_2`
+- `indicator.main_3`
+- `indicator.secondary_1`
