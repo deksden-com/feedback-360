@@ -156,8 +156,7 @@ const truncateSql = sql.raw(`
   restart identity cascade
 `);
 
-const seedAdvisoryLockSql = sql.raw("select pg_advisory_lock(360360360)");
-const seedAdvisoryUnlockSql = sql.raw("select pg_advisory_unlock(360360360)");
+const seedAdvisoryXactLockSql = sql.raw("select pg_advisory_xact_lock(360360360)");
 
 const resetDatabase = async (db: ReturnType<typeof createDb>): Promise<void> => {
   await db.execute(truncateSql);
@@ -2310,63 +2309,50 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
   }
 
   const pool = createPool();
-  const client = await pool.connect();
 
   try {
-    const db = createDb(client);
-    await db.execute(seedAdvisoryLockSql);
-    await resetDatabase(db);
+    const db = createDb(pool);
 
-    let handles: Record<string, string>;
-    switch (parsed.scenario) {
-      case "S0_empty":
-        handles = {};
-        break;
-      case "S1_company_min":
-        handles = await insertS1(db);
-        break;
-      case "S1_multi_tenant_min":
-        handles = await insertS1MultiTenant(db);
-        break;
-      case "S2_org_basic":
-        handles = await insertS2(db);
-        break;
-      case "S4_campaign_draft":
-        handles = await insertS4(db, {
-          variant: parsed.variant,
-        });
-        break;
-      case "S5_campaign_started_no_answers":
-        handles = await insertS5(db);
-        break;
-      case "S6_campaign_started_some_drafts":
-        handles = await insertS6(db);
-        break;
-      case "S7_campaign_started_some_submitted":
-        handles = await insertS7(db, {
-          variant: parsed.variant,
-        });
-        break;
-      case "S8_campaign_ended":
-        handles = await insertS8(db);
-        break;
-      case "S9_campaign_completed_with_ai":
-        handles = await insertS9(db);
-        break;
-      default:
-        throw new Error(`Unsupported seed scenario: ${parsed.scenario}`);
-    }
+    const handles = await db.transaction(async (tx) => {
+      const txDb = tx as unknown as ReturnType<typeof createDb>;
+      await tx.execute(seedAdvisoryXactLockSql);
+      await resetDatabase(txDb);
+
+      switch (parsed.scenario) {
+        case "S0_empty":
+          return {};
+        case "S1_company_min":
+          return insertS1(txDb);
+        case "S1_multi_tenant_min":
+          return insertS1MultiTenant(txDb);
+        case "S2_org_basic":
+          return insertS2(txDb);
+        case "S4_campaign_draft":
+          return insertS4(txDb, {
+            variant: parsed.variant,
+          });
+        case "S5_campaign_started_no_answers":
+          return insertS5(txDb);
+        case "S6_campaign_started_some_drafts":
+          return insertS6(txDb);
+        case "S7_campaign_started_some_submitted":
+          return insertS7(txDb, {
+            variant: parsed.variant,
+          });
+        case "S8_campaign_ended":
+          return insertS8(txDb);
+        case "S9_campaign_completed_with_ai":
+          return insertS9(txDb);
+        default:
+          throw new Error(`Unsupported seed scenario: ${parsed.scenario}`);
+      }
+    });
 
     return parseSeedRunOutput({
       scenario: parsed.scenario,
       handles,
     });
   } finally {
-    try {
-      const db = createDb(client);
-      await db.execute(seedAdvisoryUnlockSql);
-    } catch {}
-    client.release();
     await pool.end();
   }
 };
