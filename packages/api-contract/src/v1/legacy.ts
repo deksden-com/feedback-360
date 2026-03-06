@@ -85,6 +85,12 @@ export const knownOperations = [
   "campaign.progress.get",
   "notifications.generateReminders",
   "notifications.dispatchOutbox",
+  "notifications.settings.get",
+  "notifications.settings.upsert",
+  "notifications.settings.preview",
+  "notifications.templates.list",
+  "notifications.templates.preview",
+  "notifications.deliveries.list",
   "results.getMyDashboard",
   "results.getTeamDashboard",
   "results.getHrView",
@@ -673,6 +679,107 @@ export type NotificationsDispatchOutboxOutput = {
   failed: number;
   attemptsLogged: number;
   remainingPending: number;
+};
+
+export type NotificationReminderSettingsOutput = {
+  companyId: string;
+  reminderScheduledHour: number;
+  quietHoursStart: number;
+  quietHoursEnd: number;
+  reminderWeekdays: number[];
+  locale: "ru";
+  updatedAt: string;
+};
+
+export type NotificationReminderSettingsGetInput = Record<string, never>;
+
+export type NotificationReminderSettingsUpsertInput = {
+  reminderScheduledHour: number;
+  quietHoursStart: number;
+  quietHoursEnd: number;
+  reminderWeekdays: number[];
+};
+
+export type NotificationReminderPreviewInput = {
+  campaignId?: string;
+  now?: string;
+  reminderScheduledHour?: number;
+  quietHoursStart?: number;
+  quietHoursEnd?: number;
+  reminderWeekdays?: number[];
+};
+
+export type NotificationReminderPreviewOutput = {
+  companyId: string;
+  campaignId?: string;
+  effectiveTimezone: string;
+  companyTimezone: string;
+  campaignTimezone?: string;
+  reminderScheduledHour: number;
+  quietHoursStart: number;
+  quietHoursEnd: number;
+  reminderWeekdays: number[];
+  nextRunAt: string | null;
+  localDateBucket: string;
+  localWeekday: number;
+  localHour: number;
+};
+
+export type NotificationTemplateCatalogItem = {
+  templateKey: "campaign_invite@v1" | "campaign_reminder@v1";
+  locale: "ru";
+  version: "v1";
+  channel: "email";
+  title: string;
+  description: string;
+  variables: string[];
+};
+
+export type NotificationTemplateCatalogOutput = {
+  items: NotificationTemplateCatalogItem[];
+};
+
+export type NotificationTemplatePreviewInput = {
+  templateKey: NotificationTemplateCatalogItem["templateKey"];
+  campaignId?: string;
+};
+
+export type NotificationTemplatePreviewOutput = NotificationTemplateCatalogItem & {
+  subject: string;
+  text: string;
+  html: string;
+};
+
+export type NotificationDeliveryDiagnosticsInput = {
+  campaignId?: string;
+  status?: "pending" | "sent" | "failed" | "dead_letter" | "retry_scheduled";
+  channel?: "email";
+};
+
+export type NotificationDeliveryDiagnosticsOutput = {
+  items: Array<{
+    outboxId: string;
+    campaignId: string;
+    campaignName: string;
+    recipientEmployeeId: string;
+    recipientLabel: string;
+    toEmail: string;
+    eventType: string;
+    templateKey: string;
+    channel: "email";
+    status: string;
+    attempts: number;
+    nextRetryAt: string | null;
+    lastError: string | null;
+    idempotencyKey: string;
+    attemptsHistory: Array<{
+      attemptNo: number;
+      provider: string;
+      status: string;
+      errorMessage: string | null;
+      requestedAt: string;
+    }>;
+  }>;
 };
 
 export const resultsGroupKeys = ["manager", "peers", "subordinates", "self"] as const;
@@ -3360,6 +3467,547 @@ export const parseNotificationsDispatchOutboxOutput = (
       record,
       "remainingPending",
       "notifications.dispatchOutbox output",
+    ),
+  };
+};
+
+const parseReminderWeekdays = (value: unknown, location: string): number[] => {
+  return ensureArray(value, location).map((item, index) => {
+    if (!Number.isInteger(item) || Number(item) < 1 || Number(item) > 7) {
+      throw new Error(`${location}[${index}] must be an integer between 1 and 7.`);
+    }
+    return Number(item);
+  });
+};
+
+export const parseNotificationReminderSettingsGetInput = (
+  value: unknown,
+): NotificationReminderSettingsGetInput => {
+  const record = ensureObject(value, "notifications.settings.get input");
+  ensureAllowedKeys(record, [], "notifications.settings.get input");
+  return {};
+};
+
+export const parseNotificationReminderSettingsOutput = (
+  value: unknown,
+): NotificationReminderSettingsOutput => {
+  const record = ensureObject(value, "notifications.settings output");
+  ensureAllowedKeys(
+    record,
+    [
+      "companyId",
+      "reminderScheduledHour",
+      "quietHoursStart",
+      "quietHoursEnd",
+      "reminderWeekdays",
+      "locale",
+      "updatedAt",
+    ],
+    "notifications.settings output",
+  );
+
+  const locale = ensureStringField(record, "locale", "notifications.settings output");
+  if (locale !== "ru") {
+    throw new Error('notifications.settings output.locale must be "ru".');
+  }
+
+  return {
+    companyId: ensureStringField(record, "companyId", "notifications.settings output"),
+    reminderScheduledHour: ensureNumberField(
+      record,
+      "reminderScheduledHour",
+      "notifications.settings output",
+    ),
+    quietHoursStart: ensureNumberField(record, "quietHoursStart", "notifications.settings output"),
+    quietHoursEnd: ensureNumberField(record, "quietHoursEnd", "notifications.settings output"),
+    reminderWeekdays: parseReminderWeekdays(
+      record.reminderWeekdays,
+      "notifications.settings output.reminderWeekdays",
+    ),
+    locale,
+    updatedAt: ensureStringField(record, "updatedAt", "notifications.settings output"),
+  };
+};
+
+export const parseNotificationReminderSettingsUpsertInput = (
+  value: unknown,
+): NotificationReminderSettingsUpsertInput => {
+  const record = ensureObject(value, "notifications.settings.upsert input");
+  ensureAllowedKeys(
+    record,
+    ["reminderScheduledHour", "quietHoursStart", "quietHoursEnd", "reminderWeekdays"],
+    "notifications.settings.upsert input",
+  );
+
+  return {
+    reminderScheduledHour: ensureNumberField(
+      record,
+      "reminderScheduledHour",
+      "notifications.settings.upsert input",
+    ),
+    quietHoursStart: ensureNumberField(
+      record,
+      "quietHoursStart",
+      "notifications.settings.upsert input",
+    ),
+    quietHoursEnd: ensureNumberField(
+      record,
+      "quietHoursEnd",
+      "notifications.settings.upsert input",
+    ),
+    reminderWeekdays: parseReminderWeekdays(
+      record.reminderWeekdays,
+      "notifications.settings.upsert input.reminderWeekdays",
+    ),
+  };
+};
+
+export const parseNotificationReminderPreviewInput = (
+  value: unknown,
+): NotificationReminderPreviewInput => {
+  const record = ensureObject(value, "notifications.settings.preview input");
+  ensureAllowedKeys(
+    record,
+    [
+      "campaignId",
+      "now",
+      "reminderScheduledHour",
+      "quietHoursStart",
+      "quietHoursEnd",
+      "reminderWeekdays",
+    ],
+    "notifications.settings.preview input",
+  );
+
+  const now = record.now;
+  if (now !== undefined) {
+    if (typeof now !== "string" || Number.isNaN(Date.parse(now))) {
+      throw new Error("notifications.settings.preview input.now must be an ISO timestamp.");
+    }
+  }
+
+  return {
+    ...(record.campaignId !== undefined
+      ? {
+          campaignId: ensureStringField(
+            record,
+            "campaignId",
+            "notifications.settings.preview input",
+          ),
+        }
+      : {}),
+    ...(typeof now === "string" ? { now } : {}),
+    ...(typeof record.reminderScheduledHour === "number"
+      ? { reminderScheduledHour: record.reminderScheduledHour }
+      : {}),
+    ...(typeof record.quietHoursStart === "number"
+      ? { quietHoursStart: record.quietHoursStart }
+      : {}),
+    ...(typeof record.quietHoursEnd === "number" ? { quietHoursEnd: record.quietHoursEnd } : {}),
+    ...(record.reminderWeekdays !== undefined
+      ? {
+          reminderWeekdays: parseReminderWeekdays(
+            record.reminderWeekdays,
+            "notifications.settings.preview input.reminderWeekdays",
+          ),
+        }
+      : {}),
+  };
+};
+
+export const parseNotificationReminderPreviewOutput = (
+  value: unknown,
+): NotificationReminderPreviewOutput => {
+  const record = ensureObject(value, "notifications.settings.preview output");
+  ensureAllowedKeys(
+    record,
+    [
+      "companyId",
+      "campaignId",
+      "effectiveTimezone",
+      "companyTimezone",
+      "campaignTimezone",
+      "reminderScheduledHour",
+      "quietHoursStart",
+      "quietHoursEnd",
+      "reminderWeekdays",
+      "nextRunAt",
+      "localDateBucket",
+      "localWeekday",
+      "localHour",
+    ],
+    "notifications.settings.preview output",
+  );
+
+  const nextRunAt = record.nextRunAt;
+  if (nextRunAt !== undefined && nextRunAt !== null && typeof nextRunAt !== "string") {
+    throw new Error("notifications.settings.preview output.nextRunAt must be a string or null.");
+  }
+
+  return {
+    companyId: ensureStringField(record, "companyId", "notifications.settings.preview output"),
+    ...(record.campaignId !== undefined
+      ? {
+          campaignId: ensureStringField(
+            record,
+            "campaignId",
+            "notifications.settings.preview output",
+          ),
+        }
+      : {}),
+    effectiveTimezone: ensureStringField(
+      record,
+      "effectiveTimezone",
+      "notifications.settings.preview output",
+    ),
+    companyTimezone: ensureStringField(
+      record,
+      "companyTimezone",
+      "notifications.settings.preview output",
+    ),
+    ...(record.campaignTimezone !== undefined
+      ? {
+          campaignTimezone: ensureStringField(
+            record,
+            "campaignTimezone",
+            "notifications.settings.preview output",
+          ),
+        }
+      : {}),
+    reminderScheduledHour: ensureNumberField(
+      record,
+      "reminderScheduledHour",
+      "notifications.settings.preview output",
+    ),
+    quietHoursStart: ensureNumberField(
+      record,
+      "quietHoursStart",
+      "notifications.settings.preview output",
+    ),
+    quietHoursEnd: ensureNumberField(
+      record,
+      "quietHoursEnd",
+      "notifications.settings.preview output",
+    ),
+    reminderWeekdays: parseReminderWeekdays(
+      record.reminderWeekdays,
+      "notifications.settings.preview output.reminderWeekdays",
+    ),
+    ...(typeof nextRunAt === "string" ? { nextRunAt } : { nextRunAt: null }),
+    localDateBucket: ensureStringField(
+      record,
+      "localDateBucket",
+      "notifications.settings.preview output",
+    ),
+    localWeekday: ensureNumberField(
+      record,
+      "localWeekday",
+      "notifications.settings.preview output",
+    ),
+    localHour: ensureNumberField(record, "localHour", "notifications.settings.preview output"),
+  };
+};
+
+const parseNotificationTemplateCatalogItem = (
+  value: unknown,
+  extraAllowedKeys: string[] = [],
+): NotificationTemplateCatalogItem => {
+  const record = ensureObject(value, "notifications.templates item");
+  ensureAllowedKeys(
+    record,
+    [
+      "templateKey",
+      "locale",
+      "version",
+      "channel",
+      "title",
+      "description",
+      "variables",
+      ...extraAllowedKeys,
+    ],
+    "notifications.templates item",
+  );
+  const templateKey = ensureStringField(record, "templateKey", "notifications.templates item");
+  if (templateKey !== "campaign_invite@v1" && templateKey !== "campaign_reminder@v1") {
+    throw new Error("notifications.templates item.templateKey must be a supported template key.");
+  }
+  const locale = ensureStringField(record, "locale", "notifications.templates item");
+  const version = ensureStringField(record, "version", "notifications.templates item");
+  const channel = ensureStringField(record, "channel", "notifications.templates item");
+  if (locale !== "ru" || version !== "v1" || channel !== "email") {
+    throw new Error("notifications.templates item locale/version/channel must be ru/v1/email.");
+  }
+
+  return {
+    templateKey,
+    locale,
+    version,
+    channel,
+    title: ensureStringField(record, "title", "notifications.templates item"),
+    description: ensureStringField(record, "description", "notifications.templates item"),
+    variables: ensureArray(record.variables, "notifications.templates item.variables").map(
+      (item, index) =>
+        ensureStringField(
+          { value: item },
+          "value",
+          `notifications.templates item.variables[${index}]`,
+        ),
+    ),
+  };
+};
+
+export const parseNotificationTemplateCatalogOutput = (
+  value: unknown,
+): NotificationTemplateCatalogOutput => {
+  const record = ensureObject(value, "notifications.templates.list output");
+  ensureAllowedKeys(record, ["items"], "notifications.templates.list output");
+  return {
+    items: ensureArray(record.items, "notifications.templates.list output.items").map((item) =>
+      parseNotificationTemplateCatalogItem(item),
+    ),
+  };
+};
+
+export const parseNotificationTemplatePreviewInput = (
+  value: unknown,
+): NotificationTemplatePreviewInput => {
+  const record = ensureObject(value, "notifications.templates.preview input");
+  ensureAllowedKeys(record, ["templateKey", "campaignId"], "notifications.templates.preview input");
+  const templateKey = ensureStringField(
+    record,
+    "templateKey",
+    "notifications.templates.preview input",
+  );
+  if (templateKey !== "campaign_invite@v1" && templateKey !== "campaign_reminder@v1") {
+    throw new Error(
+      "notifications.templates.preview input.templateKey must be a supported template key.",
+    );
+  }
+  return {
+    templateKey,
+    ...(record.campaignId !== undefined
+      ? {
+          campaignId: ensureStringField(
+            record,
+            "campaignId",
+            "notifications.templates.preview input",
+          ),
+        }
+      : {}),
+  };
+};
+
+export const parseNotificationTemplatePreviewOutput = (
+  value: unknown,
+): NotificationTemplatePreviewOutput => {
+  const record = ensureObject(value, "notifications.templates.preview output");
+  ensureAllowedKeys(
+    record,
+    [
+      "templateKey",
+      "locale",
+      "version",
+      "channel",
+      "title",
+      "description",
+      "variables",
+      "subject",
+      "text",
+      "html",
+    ],
+    "notifications.templates.preview output",
+  );
+  const base = parseNotificationTemplateCatalogItem(record, ["subject", "text", "html"]);
+  return {
+    ...base,
+    subject: ensureStringField(record, "subject", "notifications.templates.preview output"),
+    text: ensureStringField(record, "text", "notifications.templates.preview output"),
+    html: ensureStringField(record, "html", "notifications.templates.preview output"),
+  };
+};
+
+export const parseNotificationDeliveryDiagnosticsInput = (
+  value: unknown,
+): NotificationDeliveryDiagnosticsInput => {
+  const record = ensureObject(value, "notifications.deliveries.list input");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "status", "channel"],
+    "notifications.deliveries.list input",
+  );
+  const status = record.status;
+  if (
+    status !== undefined &&
+    status !== "pending" &&
+    status !== "sent" &&
+    status !== "failed" &&
+    status !== "dead_letter" &&
+    status !== "retry_scheduled"
+  ) {
+    throw new Error(
+      "notifications.deliveries.list input.status must be a supported outbox status.",
+    );
+  }
+  const channel = record.channel;
+  if (channel !== undefined && channel !== "email") {
+    throw new Error('notifications.deliveries.list input.channel must be "email".');
+  }
+
+  return {
+    ...(record.campaignId !== undefined
+      ? {
+          campaignId: ensureStringField(
+            record,
+            "campaignId",
+            "notifications.deliveries.list input",
+          ),
+        }
+      : {}),
+    ...(typeof status === "string" ? { status } : {}),
+    ...(typeof channel === "string" ? { channel } : {}),
+  };
+};
+
+export const parseNotificationDeliveryDiagnosticsOutput = (
+  value: unknown,
+): NotificationDeliveryDiagnosticsOutput => {
+  const record = ensureObject(value, "notifications.deliveries.list output");
+  ensureAllowedKeys(record, ["items"], "notifications.deliveries.list output");
+
+  return {
+    items: ensureArray(record.items, "notifications.deliveries.list output.items").map(
+      (item, index) => {
+        const row = ensureObject(item, `notifications.deliveries.list output.items[${index}]`);
+        ensureAllowedKeys(
+          row,
+          [
+            "outboxId",
+            "campaignId",
+            "campaignName",
+            "recipientEmployeeId",
+            "recipientLabel",
+            "toEmail",
+            "eventType",
+            "templateKey",
+            "channel",
+            "status",
+            "attempts",
+            "nextRetryAt",
+            "lastError",
+            "idempotencyKey",
+            "attemptsHistory",
+          ],
+          `notifications.deliveries.list output.items[${index}]`,
+        );
+        const channel = ensureStringField(
+          row,
+          "channel",
+          `notifications.deliveries.list output.items[${index}]`,
+        );
+        if (channel !== "email") {
+          throw new Error("notifications.deliveries.list output.item.channel must be email.");
+        }
+        const nextRetryAt = row.nextRetryAt;
+        const lastError = row.lastError;
+        return {
+          outboxId: ensureStringField(
+            row,
+            "outboxId",
+            `notifications.deliveries.list output.items[${index}]`,
+          ),
+          campaignId: ensureStringField(
+            row,
+            "campaignId",
+            `notifications.deliveries.list output.items[${index}]`,
+          ),
+          campaignName: ensureStringField(
+            row,
+            "campaignName",
+            `notifications.deliveries.list output.items[${index}]`,
+          ),
+          recipientEmployeeId: ensureStringField(
+            row,
+            "recipientEmployeeId",
+            `notifications.deliveries.list output.items[${index}]`,
+          ),
+          recipientLabel: ensureStringField(
+            row,
+            "recipientLabel",
+            `notifications.deliveries.list output.items[${index}]`,
+          ),
+          toEmail: ensureStringField(
+            row,
+            "toEmail",
+            `notifications.deliveries.list output.items[${index}]`,
+          ),
+          eventType: ensureStringField(
+            row,
+            "eventType",
+            `notifications.deliveries.list output.items[${index}]`,
+          ),
+          templateKey: ensureStringField(
+            row,
+            "templateKey",
+            `notifications.deliveries.list output.items[${index}]`,
+          ),
+          channel,
+          status: ensureStringField(
+            row,
+            "status",
+            `notifications.deliveries.list output.items[${index}]`,
+          ),
+          attempts: ensureNumberField(
+            row,
+            "attempts",
+            `notifications.deliveries.list output.items[${index}]`,
+          ),
+          nextRetryAt: typeof nextRetryAt === "string" ? nextRetryAt : null,
+          lastError: typeof lastError === "string" ? lastError : null,
+          idempotencyKey: ensureStringField(
+            row,
+            "idempotencyKey",
+            `notifications.deliveries.list output.items[${index}]`,
+          ),
+          attemptsHistory: ensureArray(
+            row.attemptsHistory,
+            `notifications.deliveries.list output.items[${index}].attemptsHistory`,
+          ).map((attempt, attemptIndex) => {
+            const attemptRecord = ensureObject(
+              attempt,
+              `notifications.deliveries.list output.items[${index}].attemptsHistory[${attemptIndex}]`,
+            );
+            ensureAllowedKeys(
+              attemptRecord,
+              ["attemptNo", "provider", "status", "errorMessage", "requestedAt"],
+              `notifications.deliveries.list output.items[${index}].attemptsHistory[${attemptIndex}]`,
+            );
+            const errorMessage = attemptRecord.errorMessage;
+            return {
+              attemptNo: ensureNumberField(
+                attemptRecord,
+                "attemptNo",
+                `notifications.deliveries.list output.items[${index}].attemptsHistory[${attemptIndex}]`,
+              ),
+              provider: ensureStringField(
+                attemptRecord,
+                "provider",
+                `notifications.deliveries.list output.items[${index}].attemptsHistory[${attemptIndex}]`,
+              ),
+              status: ensureStringField(
+                attemptRecord,
+                "status",
+                `notifications.deliveries.list output.items[${index}].attemptsHistory[${attemptIndex}]`,
+              ),
+              errorMessage: typeof errorMessage === "string" ? errorMessage : null,
+              requestedAt: ensureStringField(
+                attemptRecord,
+                "requestedAt",
+                `notifications.deliveries.list output.items[${index}].attemptsHistory[${attemptIndex}]`,
+              ),
+            };
+          }),
+        };
+      },
     ),
   };
 };

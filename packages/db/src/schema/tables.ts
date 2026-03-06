@@ -312,6 +312,24 @@ export const notificationAttempts = pgTable(
   (table) => [unique("uq_notification_attempt_outbox_attempt").on(table.outboxId, table.attemptNo)],
 );
 
+export const notificationSettings = pgTable(
+  "notification_settings",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    reminderScheduledHour: integer("reminder_scheduled_hour").notNull().default(10),
+    quietHoursStart: integer("quiet_hours_start").notNull().default(8),
+    quietHoursEnd: integer("quiet_hours_end").notNull().default(20),
+    reminderWeekdays: jsonb("reminder_weekdays").notNull().default([1, 3, 5]),
+    locale: text("locale").notNull().default("ru"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique("uq_notification_settings_company").on(table.companyId)],
+);
+
 export const campaignEmployeeSnapshots = pgTable(
   "campaign_employee_snapshots",
   {

@@ -9,6 +9,11 @@ import { parseProvisionLinksJson, provisionAuthEmailAccess } from "./auth-provis
 import {
   type CampaignLifecycleStatus,
   type MembershipRole,
+  type NotificationDeliveryDiagnosticsOutput,
+  type NotificationReminderPreviewOutput,
+  type NotificationReminderSettingsOutput,
+  type NotificationTemplateCatalogOutput,
+  type NotificationTemplatePreviewOutput,
   type OperationError,
   type OperationResult,
   type QuestionnaireStatus,
@@ -187,6 +192,40 @@ type NotificationsDispatchOptions = {
   provider?: "stub" | "resend";
 };
 
+type ReminderSettingsOptions = {
+  json?: boolean;
+};
+
+type ReminderConfigureOptions = {
+  json?: boolean;
+  scheduledHour: string;
+  quietStart: string;
+  quietEnd: string;
+  weekdays: string;
+};
+
+type ReminderPreviewOptions = {
+  json?: boolean;
+  campaign?: string;
+  now?: string;
+  scheduledHour?: string;
+  quietStart?: string;
+  quietEnd?: string;
+  weekdays?: string;
+};
+
+type NotificationTemplatePreviewOptions = {
+  json?: boolean;
+  campaign?: string;
+};
+
+type NotificationDeliveriesOptions = {
+  json?: boolean;
+  campaign?: string;
+  status?: "pending" | "sent" | "failed" | "dead_letter" | "retry_scheduled";
+  channel?: "email";
+};
+
 type EmployeeUpsertOptions = {
   json?: boolean;
   email?: string;
@@ -248,6 +287,13 @@ const saveCliState = async (state: CliState): Promise<void> => {
   const directory = join(homedir(), ".feedback360");
   await mkdir(directory, { recursive: true });
   await writeFile(cliStateFilePath, JSON.stringify(state, null, 2), "utf8");
+};
+
+const parseCsvList = (value: string): string[] => {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
 };
 
 const emitError = (error: OperationError, asJson?: boolean): void => {
@@ -562,6 +608,44 @@ const formatNotificationsDispatchHuman = (data: {
   remainingPending: number;
 }): string => {
   return `Notification dispatch: provider=${data.provider}, processed=${data.processed}, sent=${data.sent}, failed=${data.failed}, attempts=${data.attemptsLogged}, remainingPending=${data.remainingPending}`;
+};
+
+const formatReminderSettingsHuman = (data: NotificationReminderSettingsOutput): string => {
+  return `Reminder settings: scheduledHour=${data.reminderScheduledHour}, quietHours=${data.quietHoursStart}-${data.quietHoursEnd}, weekdays=${data.reminderWeekdays.join(",")}, locale=${data.locale}, updatedAt=${data.updatedAt}`;
+};
+
+const formatReminderPreviewHuman = (data: NotificationReminderPreviewOutput): string => {
+  return `Reminder preview: timezone=${data.effectiveTimezone}, nextRunAt=${data.nextRunAt ?? "none"}, local=${data.localDateBucket} ${String(data.localHour).padStart(2, "0")}:00, weekdays=${data.reminderWeekdays.join(",")}`;
+};
+
+const formatTemplateCatalogHuman = (data: NotificationTemplateCatalogOutput): string => {
+  return [
+    `Notification templates: ${data.items.length}`,
+    ...data.items.map(
+      (item) =>
+        `- ${item.templateKey} [${item.locale}/${item.version}/${item.channel}] vars=${item.variables.join(",")}`,
+    ),
+  ].join("\n");
+};
+
+const formatTemplatePreviewHuman = (data: NotificationTemplatePreviewOutput): string => {
+  return [
+    `Template preview: ${data.templateKey} [${data.locale}/${data.version}/${data.channel}]`,
+    `Title: ${data.title}`,
+    `Variables: ${data.variables.join(", ")}`,
+    `Subject: ${data.subject}`,
+    `Text: ${data.text}`,
+  ].join("\n");
+};
+
+const formatDeliveryDiagnosticsHuman = (data: NotificationDeliveryDiagnosticsOutput): string => {
+  return [
+    `Delivery diagnostics: ${data.items.length}`,
+    ...data.items.map(
+      (item) =>
+        `- ${item.status} ${item.templateKey} campaign=${item.campaignName} to=${item.toEmail} attempts=${item.attempts} nextRetryAt=${item.nextRetryAt ?? "none"}`,
+    ),
+  ].join("\n");
 };
 
 const formatModelVersionCreateHuman = (data: {
@@ -1079,7 +1163,13 @@ Examples:
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants add-departments <campaign_id> --from-departments <department_id>...
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- matrix set <campaign_id> --assignments-json '[{"subjectEmployeeId":"<id>","raterEmployeeId":"<id>","raterRole":"manager"}]' --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- auth provision-email --target beta --email deksden@deksden.com --user-id <user_id> --links-json '[{"companyId":"<company_id>","employeeId":"<employee_id>","role":"hr_admin"}]' --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- reminders settings --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- reminders configure --scheduled-hour 10 --quiet-start 8 --quiet-end 20 --weekdays 1,3,5 --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- reminders preview --campaign <campaign_id> --scheduled-hour 10 --quiet-start 8 --quiet-end 20 --weekdays 1,3,5 --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- reminders generate --campaign <campaign_id> --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- notifications templates --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- notifications template-preview --template-key campaign_reminder@v1 --campaign <campaign_id> --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- notifications deliveries --status retry_scheduled --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- notifications dispatch --campaign <campaign_id> --provider stub --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- ai run <campaign_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- questionnaire list --campaign <campaign_id> --json
@@ -2128,6 +2218,137 @@ Examples:
     .description("Reminder generation operations.");
 
   remindersCommand
+    .command("settings")
+    .description("Show current reminder settings for the active company.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: ReminderSettingsOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.notificationReminderSettingsGet();
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatReminderSettingsHuman(result.data));
+      }
+    });
+
+  remindersCommand
+    .command("configure")
+    .description("Update reminder schedule settings for the active company.")
+    .requiredOption("--scheduled-hour <hour>", "Reminder hour in local company time (0..23).")
+    .requiredOption("--quiet-start <hour>", "Quiet hours start (0..23).")
+    .requiredOption("--quiet-end <hour>", "Quiet hours end (1..23, must be > quiet-start).")
+    .requiredOption("--weekdays <list>", "Comma-separated weekdays using ISO numbers 1..7.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: ReminderConfigureOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const reminderScheduledHour = Number(options.scheduledHour);
+      const quietHoursStart = Number(options.quietStart);
+      const quietHoursEnd = Number(options.quietEnd);
+      const reminderWeekdays = parseCsvList(options.weekdays).map((item) => Number(item));
+      if (
+        !Number.isInteger(reminderScheduledHour) ||
+        !Number.isInteger(quietHoursStart) ||
+        !Number.isInteger(quietHoursEnd) ||
+        reminderWeekdays.some((item) => !Number.isInteger(item))
+      ) {
+        emitError(
+          createOperationError("invalid_input", "Reminder configure options must be integers."),
+          options.json,
+        );
+        return;
+      }
+
+      const result = await client.notificationReminderSettingsUpsert({
+        reminderScheduledHour,
+        quietHoursStart,
+        quietHoursEnd,
+        reminderWeekdays,
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatReminderSettingsHuman(result.data));
+      }
+    });
+
+  remindersCommand
+    .command("preview")
+    .description("Preview next reminder run with optional draft settings.")
+    .option("--campaign <campaign_id>", "Campaign identifier.")
+    .option("--now <iso_timestamp>", "Override current time (ISO) for deterministic preview.")
+    .option("--scheduled-hour <hour>", "Draft reminder hour in local company time (0..23).")
+    .option("--quiet-start <hour>", "Draft quiet hours start (0..23).")
+    .option("--quiet-end <hour>", "Draft quiet hours end (1..23).")
+    .option("--weekdays <list>", "Draft comma-separated weekdays using ISO numbers 1..7.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: ReminderPreviewOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const maybeNumber = (value: string | undefined): number | undefined => {
+        if (value === undefined) {
+          return undefined;
+        }
+        const parsed = Number(value);
+        return Number.isInteger(parsed) ? parsed : Number.NaN;
+      };
+
+      const reminderScheduledHour = maybeNumber(options.scheduledHour);
+      const quietHoursStart = maybeNumber(options.quietStart);
+      const quietHoursEnd = maybeNumber(options.quietEnd);
+      const reminderWeekdays =
+        options.weekdays !== undefined
+          ? parseCsvList(options.weekdays).map((item) => Number(item))
+          : undefined;
+
+      if (
+        [reminderScheduledHour, quietHoursStart, quietHoursEnd].some(
+          (item) => item !== undefined && Number.isNaN(item),
+        ) ||
+        reminderWeekdays?.some((item) => !Number.isInteger(item))
+      ) {
+        emitError(
+          createOperationError(
+            "invalid_input",
+            "Reminder preview numeric options must be integers.",
+          ),
+          options.json,
+        );
+        return;
+      }
+
+      const result = await client.notificationReminderPreview({
+        ...(options.campaign ? { campaignId: options.campaign } : {}),
+        ...(options.now ? { now: options.now } : {}),
+        ...(reminderScheduledHour !== undefined ? { reminderScheduledHour } : {}),
+        ...(quietHoursStart !== undefined ? { quietHoursStart } : {}),
+        ...(quietHoursEnd !== undefined ? { quietHoursEnd } : {}),
+        ...(reminderWeekdays !== undefined ? { reminderWeekdays } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatReminderPreviewHuman(result.data));
+      }
+    });
+
+  remindersCommand
     .command("generate")
     .description("Generate reminder outbox rows for pending questionnaires.")
     .requiredOption("--campaign <campaign_id>", "Campaign identifier.")
@@ -2155,6 +2376,81 @@ Examples:
   const notificationsCommand = program
     .command("notifications")
     .description("Notification outbox dispatch operations.");
+
+  notificationsCommand
+    .command("templates")
+    .description("List notification templates available in the current locale.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: JsonFlagOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.notificationTemplateCatalog();
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatTemplateCatalogHuman(result.data));
+      }
+    });
+
+  notificationsCommand
+    .command("template-preview")
+    .description("Preview a notification template with sample/campaign data.")
+    .requiredOption("--template-key <template_key>", "Template key.")
+    .option("--campaign <campaign_id>", "Campaign identifier for contextual preview.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: NotificationTemplatePreviewOptions & { templateKey: string }) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.notificationTemplatePreview({
+        templateKey: options.templateKey as "campaign_invite@v1" | "campaign_reminder@v1",
+        ...(options.campaign ? { campaignId: options.campaign } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatTemplatePreviewHuman(result.data));
+      }
+    });
+
+  notificationsCommand
+    .command("deliveries")
+    .description("Inspect notification delivery diagnostics from the outbox.")
+    .option("--campaign <campaign_id>", "Campaign identifier filter.")
+    .option(
+      "--status <status>",
+      "Delivery status filter: pending | sent | failed | dead_letter | retry_scheduled.",
+    )
+    .option("--channel <channel>", 'Channel filter. Currently only "email".')
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: NotificationDeliveriesOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.notificationDeliveryDiagnostics({
+        ...(options.campaign ? { campaignId: options.campaign } : {}),
+        ...(options.status ? { status: options.status } : {}),
+        ...(options.channel ? { channel: options.channel } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatDeliveryDiagnosticsHuman(result.data));
+      }
+    });
 
   notificationsCommand
     .command("dispatch")
