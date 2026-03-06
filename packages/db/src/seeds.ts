@@ -156,6 +156,9 @@ const truncateSql = sql.raw(`
   restart identity cascade
 `);
 
+const seedAdvisoryLockSql = sql.raw("select pg_advisory_lock(360360360)");
+const seedAdvisoryUnlockSql = sql.raw("select pg_advisory_unlock(360360360)");
+
 const resetDatabase = async (db: ReturnType<typeof createDb>): Promise<void> => {
   await db.execute(truncateSql);
 };
@@ -469,8 +472,22 @@ const buildS2Handles = (): Record<string, string> => {
 const buildS5Handles = (): Record<string, string> => {
   return {
     ...buildS2Handles(),
+    "model.version.main": ids.modelVersionMainIndicators,
+    "competency.main": ids.competencyMain,
+    "competency.secondary": ids.competencySecondary,
+    "indicator.main_1": ids.competencyIndicatorMain1,
+    "indicator.main_2": ids.competencyIndicatorMain2,
+    "indicator.main_3": ids.competencyIndicatorMain3,
+    "indicator.secondary_1": ids.competencyIndicatorSecondary1,
     "campaign.main": ids.campaignMain,
     "questionnaire.main": ids.questionnaireMain,
+  };
+};
+
+const buildS6Handles = (): Record<string, string> => {
+  return {
+    ...buildS5Handles(),
+    "questionnaire.main_in_progress": ids.questionnaireMain,
   };
 };
 
@@ -559,7 +576,7 @@ const buildS7LevelsTieHandles = (): Record<string, string> => {
 };
 
 const buildS8Handles = (): Record<string, string> => {
-  return buildS5Handles();
+  return buildS6Handles();
 };
 
 const buildS9Handles = (): Record<string, string> => {
@@ -924,16 +941,124 @@ const insertS2 = async (db: ReturnType<typeof createDb>): Promise<Record<string,
   return buildS2Handles();
 };
 
+const insertQuestionnaireModelIndicators = async (
+  db: ReturnType<typeof createDb>,
+  options?: {
+    modelName?: string;
+    modelCreatedAt?: Date;
+  },
+): Promise<void> => {
+  const modelCreatedAt = options?.modelCreatedAt ?? new Date("2026-01-10T08:00:00.000Z");
+
+  await db.insert(competencyModelVersions).values({
+    id: ids.modelVersionMainIndicators,
+    companyId: ids.companyMain,
+    name: options?.modelName ?? "Q1 Questionnaire Model",
+    kind: "indicators",
+    version: 1,
+    status: "published",
+    createdAt: modelCreatedAt,
+    updatedAt: modelCreatedAt,
+  });
+
+  await db.insert(competencyGroups).values({
+    id: ids.competencyGroupMain,
+    companyId: ids.companyMain,
+    modelVersionId: ids.modelVersionMainIndicators,
+    name: "Core",
+    weight: 100,
+    order: 1,
+    createdAt: modelCreatedAt,
+    updatedAt: modelCreatedAt,
+  });
+
+  await db.insert(competencies).values([
+    {
+      id: ids.competencyMain,
+      companyId: ids.companyMain,
+      modelVersionId: ids.modelVersionMainIndicators,
+      groupId: ids.competencyGroupMain,
+      name: "Leadership",
+      order: 1,
+      createdAt: modelCreatedAt,
+      updatedAt: modelCreatedAt,
+    },
+    {
+      id: ids.competencySecondary,
+      companyId: ids.companyMain,
+      modelVersionId: ids.modelVersionMainIndicators,
+      groupId: ids.competencyGroupMain,
+      name: "Collaboration",
+      order: 2,
+      createdAt: modelCreatedAt,
+      updatedAt: modelCreatedAt,
+    },
+  ]);
+
+  await db.insert(competencyIndicators).values([
+    {
+      id: ids.competencyIndicatorMain1,
+      companyId: ids.companyMain,
+      competencyId: ids.competencyMain,
+      text: "Sets clear direction",
+      order: 1,
+      createdAt: modelCreatedAt,
+      updatedAt: modelCreatedAt,
+    },
+    {
+      id: ids.competencyIndicatorMain2,
+      companyId: ids.companyMain,
+      competencyId: ids.competencyMain,
+      text: "Supports team members",
+      order: 2,
+      createdAt: modelCreatedAt,
+      updatedAt: modelCreatedAt,
+    },
+    {
+      id: ids.competencyIndicatorMain3,
+      companyId: ids.companyMain,
+      competencyId: ids.competencyMain,
+      text: "Delivers feedback",
+      order: 3,
+      createdAt: modelCreatedAt,
+      updatedAt: modelCreatedAt,
+    },
+    {
+      id: ids.competencyIndicatorSecondary1,
+      companyId: ids.companyMain,
+      competencyId: ids.competencySecondary,
+      text: "Collaborates with peers",
+      order: 1,
+      createdAt: modelCreatedAt,
+      updatedAt: modelCreatedAt,
+    },
+  ]);
+};
+
+const clearQuestionnaireModelSeed = async (db: ReturnType<typeof createDb>): Promise<void> => {
+  await db.delete(competencyLevels).where(eq(competencyLevels.companyId, ids.companyMain));
+  await db.delete(competencyIndicators).where(eq(competencyIndicators.companyId, ids.companyMain));
+  await db.delete(competencies).where(eq(competencies.companyId, ids.companyMain));
+  await db.delete(competencyGroups).where(eq(competencyGroups.companyId, ids.companyMain));
+  await db
+    .delete(competencyModelVersions)
+    .where(eq(competencyModelVersions.companyId, ids.companyMain));
+};
+
 const insertS5 = async (db: ReturnType<typeof createDb>): Promise<Record<string, string>> => {
   await insertS2(db);
 
   const campaignStartAt = new Date("2026-01-10T09:00:00.000Z");
   const campaignEndAt = new Date("2026-01-20T18:00:00.000Z");
+  await insertQuestionnaireModelIndicators(db, {
+    modelName: "S5 Questionnaire Model",
+  });
 
   await db.insert(campaigns).values({
     id: ids.campaignMain,
     companyId: ids.companyMain,
     name: "Q1 360 Campaign",
+    modelVersionId: ids.modelVersionMainIndicators,
     status: "started",
     timezone: "Europe/Kaliningrad",
     startAt: campaignStartAt,
@@ -964,8 +1089,47 @@ const insertS5 = async (db: ReturnType<typeof createDb>): Promise<Record<string,
   return buildS5Handles();
 };
 
-const insertS8 = async (db: ReturnType<typeof createDb>): Promise<Record<string, string>> => {
+const insertS6 = async (db: ReturnType<typeof createDb>): Promise<Record<string, string>> => {
   await insertS5(db);
+
+  const firstDraftAt = new Date("2026-01-11T10:00:00.000Z");
+  await db
+    .update(questionnaires)
+    .set({
+      status: "in_progress",
+      draftPayload: {
+        indicatorResponses: {
+          [ids.competencyMain]: {
+            [ids.competencyIndicatorMain1]: 4,
+            [ids.competencyIndicatorMain2]: 3,
+          },
+          [ids.competencySecondary]: {
+            [ids.competencyIndicatorSecondary1]: "NA",
+          },
+        },
+        competencyComments: {
+          [ids.competencyMain]: "Уже замечаю устойчивую постановку приоритетов.",
+        },
+        finalComment: "Нужны ещё примеры взаимодействия с коллегами.",
+      },
+      firstDraftAt,
+      updatedAt: firstDraftAt,
+    })
+    .where(eq(questionnaires.id, ids.questionnaireMain));
+
+  await db
+    .update(campaigns)
+    .set({
+      lockedAt: firstDraftAt,
+      updatedAt: firstDraftAt,
+    })
+    .where(eq(campaigns.id, ids.campaignMain));
+
+  return buildS6Handles();
+};
+
+const insertS8 = async (db: ReturnType<typeof createDb>): Promise<Record<string, string>> => {
+  await insertS6(db);
 
   await db
     .update(campaigns)
@@ -1950,18 +2114,22 @@ const insertS7 = async (
   }
 
   if (options?.variant === "na_heavy_peer") {
+    await clearQuestionnaireModelSeed(db);
     return insertS7NaHeavyPeer(db);
   }
 
   if (options?.variant === "peers2") {
+    await clearQuestionnaireModelSeed(db);
     return insertS7Peers2(db);
   }
 
   if (options?.variant === "no_subordinates") {
+    await clearQuestionnaireModelSeed(db);
     return insertS7NoSubordinates(db);
   }
 
   if (options?.variant === "levels_tie") {
+    await clearQuestionnaireModelSeed(db);
     return insertS7LevelsTie(db);
   }
 
@@ -1978,9 +2146,19 @@ const insertS7 = async (
       raterEmployeeId: ids.employeeHeadA,
       status: "in_progress",
       draftPayload: {
-        answers: {
-          leadership: 4,
+        indicatorResponses: {
+          [ids.competencyMain]: {
+            [ids.competencyIndicatorMain1]: 4,
+            [ids.competencyIndicatorMain2]: 3,
+          },
+          [ids.competencySecondary]: {
+            [ids.competencyIndicatorSecondary1]: "NA",
+          },
         },
+        competencyComments: {
+          [ids.competencyMain]: "Черновик: уверенно ведёт команду по приоритетам.",
+        },
+        finalComment: "Нужно добавить кейсы по взаимодействию с коллегами.",
       },
       firstDraftAt: firstDraftAtInProgress,
       submittedAt: null,
@@ -1995,9 +2173,21 @@ const insertS7 = async (
       raterEmployeeId: ids.employeeHeadB,
       status: "submitted",
       draftPayload: {
-        answers: {
-          leadership: 5,
+        indicatorResponses: {
+          [ids.competencyMain]: {
+            [ids.competencyIndicatorMain1]: 5,
+            [ids.competencyIndicatorMain2]: 4,
+            [ids.competencyIndicatorMain3]: 5,
+          },
+          [ids.competencySecondary]: {
+            [ids.competencyIndicatorSecondary1]: 4,
+          },
         },
+        competencyComments: {
+          [ids.competencyMain]: "Сильная постановка целей и обратная связь.",
+          [ids.competencySecondary]: "Хорошо держит контакт с другими командами.",
+        },
+        finalComment: "В целом уверенный и зрелый стиль руководства.",
       },
       firstDraftAt: firstDraftAtSubmitted,
       submittedAt,
@@ -2124,6 +2314,7 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
 
   try {
     const db = createDb(client);
+    await db.execute(seedAdvisoryLockSql);
     await resetDatabase(db);
 
     let handles: Record<string, string>;
@@ -2148,6 +2339,9 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
       case "S5_campaign_started_no_answers":
         handles = await insertS5(db);
         break;
+      case "S6_campaign_started_some_drafts":
+        handles = await insertS6(db);
+        break;
       case "S7_campaign_started_some_submitted":
         handles = await insertS7(db, {
           variant: parsed.variant,
@@ -2168,6 +2362,10 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
       handles,
     });
   } finally {
+    try {
+      const db = createDb(client);
+      await db.execute(seedAdvisoryUnlockSql);
+    } catch {}
     client.release();
     await pool.end();
   }

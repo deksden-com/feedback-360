@@ -237,7 +237,7 @@ Status: Draft (2026-03-03)
 
 ### EP-008 execution evidence (2026-03-05)
 - FT-0081: what=auth + company switcher thin UI (`/auth/login`, `/auth/callback`, `/select-company`) + typed `membership.list`; where=local; how=`pnpm --filter @feedback-360/api-contract lint && pnpm --filter @feedback-360/api-contract typecheck && pnpm --filter @feedback-360/api-contract test`, `pnpm --filter @feedback-360/db lint && pnpm --filter @feedback-360/db typecheck`, `pnpm --filter @feedback-360/client lint && pnpm --filter @feedback-360/client typecheck && pnpm --filter @feedback-360/client exec vitest run src/ft-0081-membership-list-client.test.ts`, `pnpm --filter @feedback-360/core lint && pnpm --filter @feedback-360/core typecheck && set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0081-membership-list-no-db.test.ts src/ft/ft-0081-membership-list.test.ts --fileParallelism=false`, `pnpm --filter @feedback-360/web lint && pnpm --filter @feedback-360/web typecheck && pnpm --filter @feedback-360/web test && pnpm --filter @feedback-360/web build`, `cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs`; quality_gate=passed; acceptance_gate=passed (Playwright подтверждает login context + switch A→B и корректный active company на root); artifacts=`.memory-bank/evidence/EP-008/FT-0081/2026-03-05/step-01-company-switcher-initial.png`, `.memory-bank/evidence/EP-008/FT-0081/2026-03-05/step-02-active-company-a.png`, `.memory-bank/evidence/EP-008/FT-0081/2026-03-05/step-03-company-switcher-before-b.png`, `.memory-bank/evidence/EP-008/FT-0081/2026-03-05/step-04-active-company-b.png`; result=passed.
-- FT-0082: what=questionnaire UI thin slice (`/questionnaires`, `/questionnaires/[questionnaireId]`) + typed ops `questionnaire.listAssigned|getDraft|saveDraft|submit` with rater-scoped access; where=local + Supabase beta pooler; how=`pnpm --filter @feedback-360/api-contract lint && pnpm --filter @feedback-360/api-contract typecheck`, `pnpm --filter @feedback-360/db lint && pnpm --filter @feedback-360/db typecheck`, `pnpm --filter @feedback-360/core lint && pnpm --filter @feedback-360/core typecheck`, `pnpm --filter @feedback-360/client lint && pnpm --filter @feedback-360/client typecheck`, `pnpm --filter @feedback-360/web lint && pnpm --filter @feedback-360/web typecheck`, `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0013-questionnaires.test.ts src/ft/ft-0082-questionnaire-access.test.ts --fileParallelism=false`, `pnpm --filter @feedback-360/client exec vitest run src/ft-0082-questionnaire-get-draft-client.test.ts`, `set -a; source .env; set +a; pnpm --filter @feedback-360/web test`, `set -a; source .env; set +a; cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0082-questionnaire-ui.spec.ts`; quality_gate=passed; acceptance_gate=passed (`S5`: list→draft→submit, `S8`: ended read-only + `campaign_ended_readonly`); artifacts=`.memory-bank/evidence/EP-008/FT-0082/2026-03-05/step-01-questionnaire-list.png`, `.memory-bank/evidence/EP-008/FT-0082/2026-03-05/step-02-questionnaire-draft-saved.png`, `.memory-bank/evidence/EP-008/FT-0082/2026-03-05/step-03-questionnaire-submitted.png`, `.memory-bank/evidence/EP-008/FT-0082/2026-03-05/step-04-ended-readonly-view.png`; result=passed.
+- FT-0082: what=questionnaire UI thin slice (`/questionnaires`, `/questionnaires/[questionnaireId]`) + typed ops `questionnaire.listAssigned|getDraft|saveDraft|submit` with rater-scoped access; where=local (`localhost:3111`) + Supabase beta pooler; how=`pnpm --filter @feedback-360/api-contract test`, `pnpm --filter @feedback-360/db test -- --runInBand`, `pnpm --filter @feedback-360/cli typecheck`, `pnpm --filter @feedback-360/cli test`, `pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `pnpm --filter @feedback-360/web test`, `pnpm --filter @feedback-360/web build`, `PLAYWRIGHT_BASE_URL=http://localhost:3111 cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0082-questionnaire-ui.spec.ts --workers=1 --reporter=line`; quality_gate=passed; acceptance_gate=passed (`S5`: inbox→structured draft save→submit, `S8`: ended read-only + `campaign_ended_readonly`); artifacts=`.memory-bank/evidence/EP-008/FT-0082/2026-03-06/step-01-questionnaire-inbox.png`, `.memory-bank/evidence/EP-008/FT-0082/2026-03-06/step-02-questionnaire-draft-saved.png`, `.memory-bank/evidence/EP-008/FT-0082/2026-03-06/step-03-questionnaire-submitted.png`, `.memory-bank/evidence/EP-008/FT-0082/2026-03-06/step-04-ended-readonly-view.png`; result=passed.
 - FT-0083: what=results dashboards thin slice (`/results`, `/results/team`, `/results/hr`) + typed ops `results.getMyDashboard|getTeamDashboard|getHrView`; where=local + Supabase beta pooler; how=`pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `set -a; source .env; set +a; pnpm --filter @feedback-360/web test`, `set -a; source .env; set +a; pnpm --filter @feedback-360/web build`, `set -a; source .env; set +a; cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0083-results-ui.spec.ts`; quality_gate=passed; acceptance_gate=passed (`S9`: employee/manager dashboards hide raw comments, `hr_reader` dashboard hides raw, `hr_admin` dashboard shows raw+processed+summary); artifacts=`.memory-bank/evidence/EP-008/FT-0083/2026-03-05/step-01-employee-results-without-raw.png`, `.memory-bank/evidence/EP-008/FT-0083/2026-03-05/step-02-manager-results-without-raw.png`, `.memory-bank/evidence/EP-008/FT-0083/2026-03-05/step-03-hr-results-with-raw.png`; result=passed.
 - FT-0084: what=HR campaign workbench thin UI (`/hr/campaigns`) + typed adapter `/api/hr/campaigns/execute` for campaign lifecycle/matrix/progress/AI retry; where=local + Supabase beta pooler; how=`set -a; source .env; set +a; pnpm --filter @feedback-360/web lint`, `set -a; source .env; set +a; pnpm --filter @feedback-360/web typecheck`, `set -a; source .env; set +a; pnpm --filter @feedback-360/web test`, `set -a; source .env; set +a; pnpm --filter @feedback-360/web build`, `set -a; source .env; set +a; cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0084-hr-campaign-ui.spec.ts`; quality_gate=passed; acceptance_gate=passed (`S4`: HR create/start/matrix, `S5`: first draft-save lock with `campaign_locked`, `S8`: AI retry button runs `ai.runForCampaign`); artifacts=`.memory-bank/evidence/EP-008/FT-0084/2026-03-05/step-01-hr-campaign-start-and-matrix.png`, `.memory-bank/evidence/EP-008/FT-0084/2026-03-05/step-02-hr-campaign-locked.png`, `.memory-bank/evidence/EP-008/FT-0084/2026-03-05/step-03-hr-campaign-ai-retry.png`; result=passed.
 
@@ -339,74 +339,92 @@ Status: Draft (2026-03-03)
   - Must run: submitted + ended read-only behavior on local and `beta`.
 
 ### EP-013 execution evidence
-- Planned: evidence будет добавлено после реализации FT-0131..FT-0133.
+- FT-0131: what=questionnaire inbox with counters, filters and resume-draft CTA; where=local (`localhost:3111`); how=`pnpm --filter @feedback-360/api-contract test`, `pnpm --filter @feedback-360/db test -- --runInBand`, `pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `pnpm --filter @feedback-360/web test`, `pnpm --filter @feedback-360/web build`, `PLAYWRIGHT_BASE_URL=http://localhost:3111 cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0131-questionnaire-inbox.spec.ts --workers=1 --reporter=line`; quality_gate=passed; acceptance_gate=passed (`S7_campaign_started_some_submitted`: counters, filters, resume flow); artifacts=`.memory-bank/evidence/EP-013/FT-0131/2026-03-06/step-01-inbox-all-statuses.png`, `.memory-bank/evidence/EP-013/FT-0131/2026-03-06/step-02-inbox-filtered-drafts.png`, `.memory-bank/evidence/EP-013/FT-0131/2026-03-06/step-03-resume-draft.png`; result=passed.
+- FT-0132: what=structured questionnaire form with progress, draft restore/save and submit; where=local (`localhost:3111`); how=`pnpm --filter @feedback-360/api-contract test`, `pnpm --filter @feedback-360/db test -- --runInBand`, `pnpm --filter @feedback-360/cli typecheck`, `pnpm --filter @feedback-360/cli test`, `pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `pnpm --filter @feedback-360/web test`, `pnpm --filter @feedback-360/web build`, `PLAYWRIGHT_BASE_URL=http://localhost:3111 cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0132-questionnaire-fill-flow.spec.ts --workers=1 --reporter=line`; quality_gate=passed; acceptance_gate=passed (`S6_campaign_started_some_drafts`: restore draft, progress `4/4`, submit success banner); artifacts=`.memory-bank/evidence/EP-013/FT-0132/2026-03-06/step-01-draft-restored-and-saved.png`, `.memory-bank/evidence/EP-013/FT-0132/2026-03-06/step-02-questionnaire-submitted.png`; result=passed.
+- FT-0133: what=explicit read-only and re-entry states for submitted/ended questionnaires; where=local (`localhost:3111`); how=`pnpm --filter @feedback-360/db test -- --runInBand`, `pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `pnpm --filter @feedback-360/web test`, `pnpm --filter @feedback-360/web build`, `PLAYWRIGHT_BASE_URL=http://localhost:3111 cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0133-questionnaire-readonly.spec.ts --workers=1 --reporter=line`; quality_gate=passed; acceptance_gate=passed (`S7_campaign_started_some_submitted`: submitted readonly, `S8_campaign_ended`: UI readonly + backend `409 campaign_ended_readonly`); artifacts=`.memory-bank/evidence/EP-013/FT-0133/2026-03-06/step-01-submitted-readonly.png`, `.memory-bank/evidence/EP-013/FT-0133/2026-03-06/step-02-ended-readonly.png`; result=passed.
 
-## EP-014 Results experience
+## EP-014 Feature-area slice refactor
 - FT-0141
-  - Must add test: `apps/web/playwright/tests/ft-0141-employee-results-dashboard.spec.ts`
-  - Must run: employee completed-results dashboard without raw comments.
+  - Must add test: `packages/core/src/ft/ft-0141-feature-area-target-structure.test.ts`
+  - Must run: feature-area map + shared-module policy audit + stale numbering/path scan + `pnpm docs:audit`.
 - FT-0142
-  - Must add test: `apps/web/playwright/tests/ft-0142-manager-results-dashboard.spec.ts`
-  - Must run: manager team results with anonymity/hide-merge behavior.
+  - Must add test: `packages/core/src/ft/ft-0142-feature-area-regression.test.ts`
+  - Must add test: `packages/client/src/ft-0142-feature-area-client-regression.test.ts`
+  - Must add test: `packages/cli/src/ft-0142-feature-area-cli-regression.test.ts`
+  - Must run: representative campaigns/questionnaires/results/notifications/ai flows before/after extraction with stable DTO/error parity.
 - FT-0143
-  - Must add test: `apps/web/playwright/tests/ft-0143-hr-results-workbench.spec.ts`
-  - Must run: `hr_admin` vs `hr_reader` visibility comparison with processed/raw shaping.
+  - Must add test: `apps/web/playwright/tests/ft-0143-slice-refactor-regression.spec.ts`
+  - Must run: login/company switch -> HR campaigns -> questionnaire -> results smoke on local and `beta`, plus `build` and deploy proof.
 
 ### EP-014 execution evidence
 - Planned: evidence будет добавлено после реализации FT-0141..FT-0143.
 
-## EP-015 People and org admin
+## EP-015 Results experience
 - FT-0151
-  - Must add test: `apps/web/playwright/tests/ft-0151-employee-directory.spec.ts`
-  - Must run: employee search/filter/open profile flow.
+  - Must add test: `apps/web/playwright/tests/ft-0151-employee-results-dashboard.spec.ts`
+  - Must run: employee completed-results dashboard without raw comments.
 - FT-0152
-  - Must add test: `apps/web/playwright/tests/ft-0152-employee-profile.spec.ts`
-  - Must run: create employee + provision/update user email and role.
+  - Must add test: `apps/web/playwright/tests/ft-0152-manager-results-dashboard.spec.ts`
+  - Must run: manager team results with anonymity/hide-merge behavior.
 - FT-0153
-  - Must add test: `apps/web/playwright/tests/ft-0153-org-editor.spec.ts`
-  - Must run: create/update department + move employee + history check.
+  - Must add test: `apps/web/playwright/tests/ft-0153-hr-results-workbench.spec.ts`
+  - Must run: `hr_admin` vs `hr_reader` visibility comparison with processed/raw shaping.
 
 ### EP-015 execution evidence
 - Planned: evidence будет добавлено после реализации FT-0151..FT-0153.
 
-## EP-016 Competency models and matrix UI
+## EP-016 People and org admin
 - FT-0161
-  - Must add test: `apps/web/playwright/tests/ft-0161-model-catalog.spec.ts`
-  - Must run: model list/filter/clone draft flow.
+  - Must add test: `apps/web/playwright/tests/ft-0161-employee-directory.spec.ts`
+  - Must run: employee search/filter/open profile flow.
 - FT-0162
-  - Must add test: `apps/web/playwright/tests/ft-0162-model-editor.spec.ts`
-  - Must run: edit model draft, validate structure/weights, publish version.
+  - Must add test: `apps/web/playwright/tests/ft-0162-employee-profile.spec.ts`
+  - Must run: create employee + provision/update user email and role.
 - FT-0163
-  - Must add test: `apps/web/playwright/tests/ft-0163-matrix-builder.spec.ts`
-  - Must run: autogenerate matrix -> manual edit -> lock preview/lock state.
+  - Must add test: `apps/web/playwright/tests/ft-0163-org-editor.spec.ts`
+  - Must run: create/update department + move employee + history check.
 
 ### EP-016 execution evidence
 - Planned: evidence будет добавлено после реализации FT-0161..FT-0163.
 
-## EP-017 Notification center UI
+## EP-017 Competency models and matrix UI
 - FT-0171
-  - Must add test: `apps/web/playwright/tests/ft-0171-reminder-schedule-editor.spec.ts`
-  - Must run: reminder schedule edit with timezone/quiet-hours preview.
+  - Must add test: `apps/web/playwright/tests/ft-0171-model-catalog.spec.ts`
+  - Must run: model list/filter/clone draft flow.
 - FT-0172
-  - Must add test: `apps/web/playwright/tests/ft-0172-template-catalog.spec.ts`
-  - Must run: template preview and variable inspection flow.
+  - Must add test: `apps/web/playwright/tests/ft-0172-model-editor.spec.ts`
+  - Must run: edit model draft, validate structure/weights, publish version.
 - FT-0173
-  - Must add test: `apps/web/playwright/tests/ft-0173-delivery-diagnostics.spec.ts`
-  - Must run: outbox/delivery diagnostics filters and failed-attempt drill-down.
+  - Must add test: `apps/web/playwright/tests/ft-0173-matrix-builder.spec.ts`
+  - Must run: autogenerate matrix -> manual edit -> lock preview/lock state.
 
 ### EP-017 execution evidence
 - Planned: evidence будет добавлено после реализации FT-0171..FT-0173.
 
-## EP-018 Admin and ops UI
+## EP-018 Notification center UI
 - FT-0181
-  - Must add test: `apps/web/playwright/tests/ft-0181-health-release-dashboard.spec.ts`
-  - Must run: health/build/smoke indicators against mocked local data + `beta` browser-smoke.
+  - Must add test: `apps/web/playwright/tests/ft-0181-reminder-schedule-editor.spec.ts`
+  - Must run: reminder schedule edit with timezone/quiet-hours preview.
 - FT-0182
-  - Must add test: `apps/web/playwright/tests/ft-0182-ai-diagnostics.spec.ts`
-  - Must run: AI job/webhook diagnostics with idempotency markers.
+  - Must add test: `apps/web/playwright/tests/ft-0182-template-catalog.spec.ts`
+  - Must run: template preview and variable inspection flow.
 - FT-0183
-  - Must add test: `apps/web/playwright/tests/ft-0183-audit-console.spec.ts`
-  - Must run: audit trail filters by campaign/actor/action and release-event traceability.
+  - Must add test: `apps/web/playwright/tests/ft-0183-delivery-diagnostics.spec.ts`
+  - Must run: outbox/delivery diagnostics filters and failed-attempt drill-down.
 
 ### EP-018 execution evidence
 - Planned: evidence будет добавлено после реализации FT-0181..FT-0183.
+
+## EP-019 Admin and ops UI
+- FT-0191
+  - Must add test: `apps/web/playwright/tests/ft-0191-health-release-dashboard.spec.ts`
+  - Must run: health/build/smoke indicators against mocked local data + `beta` browser-smoke.
+- FT-0192
+  - Must add test: `apps/web/playwright/tests/ft-0192-ai-diagnostics.spec.ts`
+  - Must run: AI job/webhook diagnostics with idempotency markers.
+- FT-0193
+  - Must add test: `apps/web/playwright/tests/ft-0193-audit-console.spec.ts`
+  - Must run: audit trail filters by campaign/actor/action and release-event traceability.
+
+### EP-019 execution evidence
+- Planned: evidence будет добавлено после реализации FT-0191..FT-0193.

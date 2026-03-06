@@ -5,6 +5,7 @@ export const seedScenarios = [
   "S2_org_basic",
   "S4_campaign_draft",
   "S5_campaign_started_no_answers",
+  "S6_campaign_started_some_drafts",
   "S7_campaign_started_some_submitted",
   "S8_campaign_ended",
   "S9_campaign_completed_with_ai",
@@ -686,6 +687,53 @@ export type ClientSetActiveCompanyOutput = {
 
 export const questionnaireStatuses = ["not_started", "in_progress", "submitted"] as const;
 export type QuestionnaireStatus = (typeof questionnaireStatuses)[number];
+export const questionnaireRaterRoles = ["manager", "peer", "subordinate", "self"] as const;
+export type QuestionnaireRaterRole = (typeof questionnaireRaterRoles)[number];
+export const questionnaireCampaignStatuses = [
+  "draft",
+  "started",
+  "ended",
+  "processing_ai",
+  "ai_failed",
+  "completed",
+] as const;
+export type QuestionnaireCampaignStatus = (typeof questionnaireCampaignStatuses)[number];
+
+export type QuestionnaireDefinitionIndicator = {
+  indicatorId: string;
+  text: string;
+  order: number;
+};
+
+export type QuestionnaireDefinitionLevel = {
+  levelId: string;
+  level: number;
+  text: string;
+};
+
+export type QuestionnaireDefinitionCompetency = {
+  competencyId: string;
+  name: string;
+  order: number;
+  indicators?: QuestionnaireDefinitionIndicator[];
+  levels?: QuestionnaireDefinitionLevel[];
+};
+
+export type QuestionnaireDefinitionGroup = {
+  groupId: string;
+  name: string;
+  weight: number;
+  order: number;
+  competencies: QuestionnaireDefinitionCompetency[];
+};
+
+export type QuestionnaireDefinition = {
+  modelVersionId: string;
+  modelName?: string;
+  modelKind: "indicators" | "levels";
+  groups: QuestionnaireDefinitionGroup[];
+  totalPrompts: number;
+};
 
 export type QuestionnaireListAssignedInput = {
   campaignId?: string;
@@ -699,6 +747,13 @@ export type QuestionnaireListAssignedItem = {
   subjectEmployeeId: string;
   raterEmployeeId: string;
   status: QuestionnaireStatus;
+  campaignName?: string;
+  campaignStatus?: QuestionnaireCampaignStatus;
+  campaignEndAt?: string;
+  subjectDisplayName?: string;
+  subjectPositionTitle?: string;
+  raterRole?: QuestionnaireRaterRole;
+  firstDraftAt?: string;
   submittedAt?: string;
 };
 
@@ -717,8 +772,14 @@ export type QuestionnaireGetDraftOutput = {
   subjectEmployeeId: string;
   raterEmployeeId: string;
   status: QuestionnaireStatus;
-  campaignStatus: "draft" | "started" | "ended" | "processing_ai" | "ai_failed" | "completed";
+  campaignStatus: QuestionnaireCampaignStatus;
   draft: Record<string, unknown>;
+  campaignName?: string;
+  campaignEndAt?: string;
+  subjectDisplayName?: string;
+  subjectPositionTitle?: string;
+  raterRole?: QuestionnaireRaterRole;
+  definition?: QuestionnaireDefinition;
   firstDraftAt?: string;
   submittedAt?: string;
 };
@@ -841,6 +902,10 @@ const isMembershipRole = (value: string): value is MembershipRole => {
 
 const isQuestionnaireStatus = (value: string): value is QuestionnaireStatus => {
   return questionnaireStatuses.includes(value as QuestionnaireStatus);
+};
+
+const isQuestionnaireCampaignStatus = (value: string): value is QuestionnaireCampaignStatus => {
+  return questionnaireCampaignStatuses.includes(value as QuestionnaireCampaignStatus);
 };
 
 const isPendingQuestionnaireStatus = (
@@ -3424,6 +3489,13 @@ const parseQuestionnaireListAssignedItem = (value: unknown): QuestionnaireListAs
       "subjectEmployeeId",
       "raterEmployeeId",
       "status",
+      "campaignName",
+      "campaignStatus",
+      "campaignEndAt",
+      "subjectDisplayName",
+      "subjectPositionTitle",
+      "raterRole",
+      "firstDraftAt",
       "submittedAt",
     ],
     "questionnaire.listAssigned output.items[]",
@@ -3439,6 +3511,65 @@ const parseQuestionnaireListAssignedItem = (value: unknown): QuestionnaireListAs
   const submittedAt = record.submittedAt;
   if (submittedAt !== undefined && submittedAt !== null && typeof submittedAt !== "string") {
     throw new Error("questionnaire.listAssigned output.items[].submittedAt must be a string.");
+  }
+
+  const campaignName = record.campaignName;
+  if (campaignName !== undefined && campaignName !== null && typeof campaignName !== "string") {
+    throw new Error("questionnaire.listAssigned output.items[].campaignName must be a string.");
+  }
+
+  const campaignStatus = record.campaignStatus;
+  if (
+    campaignStatus !== undefined &&
+    campaignStatus !== null &&
+    (typeof campaignStatus !== "string" || !isQuestionnaireCampaignStatus(campaignStatus))
+  ) {
+    throw new Error(
+      `questionnaire.listAssigned output.items[].campaignStatus must be one of: ${questionnaireCampaignStatuses.join(", ")}`,
+    );
+  }
+
+  const campaignEndAt = record.campaignEndAt;
+  if (campaignEndAt !== undefined && campaignEndAt !== null && typeof campaignEndAt !== "string") {
+    throw new Error("questionnaire.listAssigned output.items[].campaignEndAt must be a string.");
+  }
+
+  const subjectDisplayName = record.subjectDisplayName;
+  if (
+    subjectDisplayName !== undefined &&
+    subjectDisplayName !== null &&
+    typeof subjectDisplayName !== "string"
+  ) {
+    throw new Error(
+      "questionnaire.listAssigned output.items[].subjectDisplayName must be a string.",
+    );
+  }
+
+  const subjectPositionTitle = record.subjectPositionTitle;
+  if (
+    subjectPositionTitle !== undefined &&
+    subjectPositionTitle !== null &&
+    typeof subjectPositionTitle !== "string"
+  ) {
+    throw new Error(
+      "questionnaire.listAssigned output.items[].subjectPositionTitle must be a string.",
+    );
+  }
+
+  const raterRole = record.raterRole;
+  if (
+    raterRole !== undefined &&
+    raterRole !== null &&
+    (typeof raterRole !== "string" || !questionnaireRaterRoles.includes(raterRole as never))
+  ) {
+    throw new Error(
+      `questionnaire.listAssigned output.items[].raterRole must be one of: ${questionnaireRaterRoles.join(", ")}`,
+    );
+  }
+
+  const firstDraftAt = record.firstDraftAt;
+  if (firstDraftAt !== undefined && firstDraftAt !== null && typeof firstDraftAt !== "string") {
+    throw new Error("questionnaire.listAssigned output.items[].firstDraftAt must be a string.");
   }
 
   return {
@@ -3464,6 +3595,13 @@ const parseQuestionnaireListAssignedItem = (value: unknown): QuestionnaireListAs
       "questionnaire.listAssigned output.items[]",
     ),
     status,
+    ...(typeof campaignName === "string" ? { campaignName } : {}),
+    ...(typeof campaignStatus === "string" ? { campaignStatus } : {}),
+    ...(typeof campaignEndAt === "string" ? { campaignEndAt } : {}),
+    ...(typeof subjectDisplayName === "string" ? { subjectDisplayName } : {}),
+    ...(typeof subjectPositionTitle === "string" ? { subjectPositionTitle } : {}),
+    ...(typeof raterRole === "string" ? { raterRole: raterRole as QuestionnaireRaterRole } : {}),
+    ...(typeof firstDraftAt === "string" ? { firstDraftAt } : {}),
     ...(typeof submittedAt === "string" ? { submittedAt } : {}),
   };
 };
@@ -3483,25 +3621,109 @@ export const parseQuestionnaireListAssignedOutput = (
   };
 };
 
-const campaignStatuses = [
-  "draft",
-  "started",
-  "ended",
-  "processing_ai",
-  "ai_failed",
-  "completed",
-] as const;
-type CampaignStatus = (typeof campaignStatuses)[number];
-const isCampaignStatus = (value: string): value is CampaignStatus => {
-  return campaignStatuses.includes(value as CampaignStatus);
-};
-
 export const parseQuestionnaireGetDraftInput = (value: unknown): QuestionnaireGetDraftInput => {
   const record = ensureObject(value, "questionnaire.getDraft input");
   ensureAllowedKeys(record, ["questionnaireId"], "questionnaire.getDraft input");
 
   return {
     questionnaireId: ensureStringField(record, "questionnaireId", "questionnaire.getDraft input"),
+  };
+};
+
+const parseQuestionnaireDefinitionIndicator = (
+  value: unknown,
+): QuestionnaireDefinitionIndicator => {
+  const record = ensureObject(value, "questionnaire definition indicator");
+  ensureAllowedKeys(record, ["indicatorId", "text", "order"], "questionnaire definition indicator");
+
+  return {
+    indicatorId: ensureStringField(record, "indicatorId", "questionnaire definition indicator"),
+    text: ensureStringField(record, "text", "questionnaire definition indicator"),
+    order: ensureNumberField(record, "order", "questionnaire definition indicator"),
+  };
+};
+
+const parseQuestionnaireDefinitionLevel = (value: unknown): QuestionnaireDefinitionLevel => {
+  const record = ensureObject(value, "questionnaire definition level");
+  ensureAllowedKeys(record, ["levelId", "level", "text"], "questionnaire definition level");
+
+  return {
+    levelId: ensureStringField(record, "levelId", "questionnaire definition level"),
+    level: ensureNumberField(record, "level", "questionnaire definition level"),
+    text: ensureStringField(record, "text", "questionnaire definition level"),
+  };
+};
+
+const parseQuestionnaireDefinitionCompetency = (
+  value: unknown,
+): QuestionnaireDefinitionCompetency => {
+  const record = ensureObject(value, "questionnaire definition competency");
+  ensureAllowedKeys(
+    record,
+    ["competencyId", "name", "order", "indicators", "levels"],
+    "questionnaire definition competency",
+  );
+
+  const indicators = record.indicators;
+  const levels = record.levels;
+
+  return {
+    competencyId: ensureStringField(record, "competencyId", "questionnaire definition competency"),
+    name: ensureStringField(record, "name", "questionnaire definition competency"),
+    order: ensureNumberField(record, "order", "questionnaire definition competency"),
+    ...(Array.isArray(indicators)
+      ? { indicators: indicators.map(parseQuestionnaireDefinitionIndicator) }
+      : {}),
+    ...(Array.isArray(levels) ? { levels: levels.map(parseQuestionnaireDefinitionLevel) } : {}),
+  };
+};
+
+const parseQuestionnaireDefinitionGroup = (value: unknown): QuestionnaireDefinitionGroup => {
+  const record = ensureObject(value, "questionnaire definition group");
+  ensureAllowedKeys(
+    record,
+    ["groupId", "name", "weight", "order", "competencies"],
+    "questionnaire definition group",
+  );
+
+  return {
+    groupId: ensureStringField(record, "groupId", "questionnaire definition group"),
+    name: ensureStringField(record, "name", "questionnaire definition group"),
+    weight: ensureNumberField(record, "weight", "questionnaire definition group"),
+    order: ensureNumberField(record, "order", "questionnaire definition group"),
+    competencies: ensureArray(
+      record.competencies,
+      "questionnaire definition group.competencies",
+    ).map(parseQuestionnaireDefinitionCompetency),
+  };
+};
+
+const parseQuestionnaireDefinition = (value: unknown): QuestionnaireDefinition => {
+  const record = ensureObject(value, "questionnaire definition");
+  ensureAllowedKeys(
+    record,
+    ["modelVersionId", "modelName", "modelKind", "groups", "totalPrompts"],
+    "questionnaire definition",
+  );
+
+  const modelName = record.modelName;
+  if (modelName !== undefined && modelName !== null && typeof modelName !== "string") {
+    throw new Error("questionnaire definition.modelName must be a string.");
+  }
+
+  const modelKind = record.modelKind;
+  if (modelKind !== "indicators" && modelKind !== "levels") {
+    throw new Error('questionnaire definition.modelKind must be "indicators" or "levels".');
+  }
+
+  return {
+    modelVersionId: ensureStringField(record, "modelVersionId", "questionnaire definition"),
+    ...(typeof modelName === "string" ? { modelName } : {}),
+    modelKind,
+    groups: ensureArray(record.groups, "questionnaire definition.groups").map(
+      parseQuestionnaireDefinitionGroup,
+    ),
+    totalPrompts: ensureNumberField(record, "totalPrompts", "questionnaire definition"),
   };
 };
 
@@ -3518,6 +3740,12 @@ export const parseQuestionnaireGetDraftOutput = (value: unknown): QuestionnaireG
       "status",
       "campaignStatus",
       "draft",
+      "campaignName",
+      "campaignEndAt",
+      "subjectDisplayName",
+      "subjectPositionTitle",
+      "raterRole",
+      "definition",
       "firstDraftAt",
       "submittedAt",
     ],
@@ -3532,9 +3760,9 @@ export const parseQuestionnaireGetDraftOutput = (value: unknown): QuestionnaireG
   }
 
   const campaignStatus = record.campaignStatus;
-  if (typeof campaignStatus !== "string" || !isCampaignStatus(campaignStatus)) {
+  if (typeof campaignStatus !== "string" || !isQuestionnaireCampaignStatus(campaignStatus)) {
     throw new Error(
-      `questionnaire.getDraft output.campaignStatus must be one of: ${campaignStatuses.join(", ")}`,
+      `questionnaire.getDraft output.campaignStatus must be one of: ${questionnaireCampaignStatuses.join(", ")}`,
     );
   }
 
@@ -3553,6 +3781,51 @@ export const parseQuestionnaireGetDraftOutput = (value: unknown): QuestionnaireG
     throw new Error("questionnaire.getDraft output.submittedAt must be a string.");
   }
 
+  const campaignName = record.campaignName;
+  if (campaignName !== undefined && campaignName !== null && typeof campaignName !== "string") {
+    throw new Error("questionnaire.getDraft output.campaignName must be a string.");
+  }
+
+  const campaignEndAt = record.campaignEndAt;
+  if (campaignEndAt !== undefined && campaignEndAt !== null && typeof campaignEndAt !== "string") {
+    throw new Error("questionnaire.getDraft output.campaignEndAt must be a string.");
+  }
+
+  const subjectDisplayName = record.subjectDisplayName;
+  if (
+    subjectDisplayName !== undefined &&
+    subjectDisplayName !== null &&
+    typeof subjectDisplayName !== "string"
+  ) {
+    throw new Error("questionnaire.getDraft output.subjectDisplayName must be a string.");
+  }
+
+  const subjectPositionTitle = record.subjectPositionTitle;
+  if (
+    subjectPositionTitle !== undefined &&
+    subjectPositionTitle !== null &&
+    typeof subjectPositionTitle !== "string"
+  ) {
+    throw new Error("questionnaire.getDraft output.subjectPositionTitle must be a string.");
+  }
+
+  const raterRole = record.raterRole;
+  if (
+    raterRole !== undefined &&
+    raterRole !== null &&
+    (typeof raterRole !== "string" || !questionnaireRaterRoles.includes(raterRole as never))
+  ) {
+    throw new Error(
+      `questionnaire.getDraft output.raterRole must be one of: ${questionnaireRaterRoles.join(", ")}`,
+    );
+  }
+
+  const definitionValue = record.definition;
+  const definition =
+    definitionValue !== undefined && definitionValue !== null
+      ? parseQuestionnaireDefinition(definitionValue)
+      : undefined;
+
   return {
     questionnaireId: ensureStringField(record, "questionnaireId", "questionnaire.getDraft output"),
     campaignId: ensureStringField(record, "campaignId", "questionnaire.getDraft output"),
@@ -3566,6 +3839,12 @@ export const parseQuestionnaireGetDraftOutput = (value: unknown): QuestionnaireG
     status,
     campaignStatus,
     draft,
+    ...(typeof campaignName === "string" ? { campaignName } : {}),
+    ...(typeof campaignEndAt === "string" ? { campaignEndAt } : {}),
+    ...(typeof subjectDisplayName === "string" ? { subjectDisplayName } : {}),
+    ...(typeof subjectPositionTitle === "string" ? { subjectPositionTitle } : {}),
+    ...(typeof raterRole === "string" ? { raterRole: raterRole as QuestionnaireRaterRole } : {}),
+    ...(definition ? { definition } : {}),
     ...(typeof firstDraftAt === "string" ? { firstDraftAt } : {}),
     ...(typeof submittedAt === "string" ? { submittedAt } : {}),
   };

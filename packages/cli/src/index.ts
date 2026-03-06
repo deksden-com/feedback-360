@@ -41,6 +41,10 @@ type QuestionnaireListOptions = {
   status?: QuestionnaireStatus;
 };
 
+type QuestionnaireGetOptions = {
+  json?: boolean;
+};
+
 type QuestionnaireSaveDraftOptions = {
   json?: boolean;
   draftJson?: string;
@@ -333,6 +337,10 @@ const formatQuestionnaireListHuman = (data: {
     status: string;
     subjectEmployeeId: string;
     raterEmployeeId: string;
+    campaignName?: string;
+    subjectDisplayName?: string;
+    raterRole?: string;
+    firstDraftAt?: string;
     submittedAt?: string;
   }>;
 }): string => {
@@ -343,7 +351,33 @@ const formatQuestionnaireListHuman = (data: {
   const lines = [`Questionnaires: ${data.items.length}`];
   for (const item of data.items) {
     lines.push(
-      `- ${item.questionnaireId}: status=${item.status}, subject=${item.subjectEmployeeId}, rater=${item.raterEmployeeId}${item.submittedAt ? `, submittedAt=${item.submittedAt}` : ""}`,
+      `- ${item.questionnaireId}: status=${item.status}, subject=${item.subjectDisplayName ?? item.subjectEmployeeId}, rater=${item.raterEmployeeId}${item.raterRole ? `, role=${item.raterRole}` : ""}${item.campaignName ? `, campaign=${item.campaignName}` : ""}${item.firstDraftAt ? `, firstDraftAt=${item.firstDraftAt}` : ""}${item.submittedAt ? `, submittedAt=${item.submittedAt}` : ""}`,
+    );
+  }
+
+  return lines.join("\n");
+};
+
+const formatQuestionnaireGetHuman = (data: {
+  questionnaireId: string;
+  status: string;
+  campaignStatus: string;
+  campaignName?: string;
+  subjectDisplayName?: string;
+  raterRole?: string;
+  definition?: { modelKind: string; groups: Array<{ competencies: unknown[] }> };
+}): string => {
+  const lines = [
+    `Questionnaire: ${data.questionnaireId}`,
+    `Status: ${data.status} · Campaign: ${data.campaignStatus}`,
+    `Campaign name: ${data.campaignName ?? "n/a"}`,
+    `Subject: ${data.subjectDisplayName ?? "n/a"}`,
+    `Rater role: ${data.raterRole ?? "n/a"}`,
+  ];
+
+  if (data.definition) {
+    lines.push(
+      `Definition: kind=${data.definition.modelKind}, groups=${data.definition.groups.length}, competencies=${data.definition.groups.reduce((sum, group) => sum + group.competencies.length, 0)}`,
     );
   }
 
@@ -1962,6 +1996,27 @@ Examples:
   const questionnaireCommand = program
     .command("questionnaire")
     .description("Questionnaire operations.");
+
+  questionnaireCommand
+    .command("get")
+    .description("Get questionnaire detail and resolved model definition.")
+    .argument("<questionnaire_id>", "Questionnaire identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (questionnaireId: string, options: QuestionnaireGetOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.questionnaireGetDraft({ questionnaireId });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatQuestionnaireGetHuman(result.data));
+      }
+    });
 
   questionnaireCommand
     .command("list")
