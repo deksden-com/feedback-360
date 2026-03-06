@@ -60,6 +60,8 @@ Status: Completed (2026-03-06)
 ## Acceptance evidence (2026-03-06)
 - Local acceptance:
   - `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3101 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0083-results-ui.spec.ts tests/ft-0152-manager-results-dashboard.spec.ts --workers=1 --reporter=line` → passed.
+- Beta acceptance:
+  - `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0083-results-ui.spec.ts tests/ft-0152-manager-results-dashboard.spec.ts --workers=1 --reporter=line` → passed after merge commit `82eb507975ceda162f29e53c42cfd0ba8fb2bcaf`.
 - Covered acceptance:
   - manager может открыть results для подчинённого и переключать subject внутри campaign context;
   - `peers/subordinates` при `merge_to_other` отображаются как merged, а `other` раскрывается безопасно;
@@ -82,3 +84,5 @@ Status: Completed (2026-03-06)
   - manager видит только разрешённый subject;
   - merged/hidden states объяснены явно;
   - open-text ограничен processed/summary данными.
+- Result:
+  - passed on `https://beta.go360go.ru`.

@@ -39,4 +39,5 @@ Status: Completed (2026-03-06)
 - EP-015 закрыт полностью:
   - все три results surfaces теперь используют единый, более продуктовый presentation layer поверх существующих typed operations;
   - privacy и anonymity rules остались доменно-управляемыми, а UI лишь объясняет `shown|hidden|merged` и redaction behavior;
-  - regression acceptance зелёный локально для legacy FT-0083/FT-0101 и новых FT-0151..FT-0153.
+  - regression acceptance зелёный локально для legacy FT-0083/FT-0101 и новых FT-0151..FT-0153;
+  - PR [#40](https://github.com/deksden-com/feedback-360/pull/40) смержен в `develop`, а production deployment `https://beta.go360go.ru` подтверждён после merge commit `82eb507975ceda162f29e53c42cfd0ba8fb2bcaf`.
