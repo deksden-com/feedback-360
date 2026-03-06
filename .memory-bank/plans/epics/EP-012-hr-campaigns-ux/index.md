@@ -6,7 +6,7 @@ Status: Completed (2026-03-06)
 
 ## Scope
 - In scope: campaigns list, create/edit draft flow, campaign detail/dashboard, progress and lifecycle controls.
-- Out of scope: отдельный matrix builder editor и competency model editor — они идут в EP-016.
+- Out of scope: отдельный matrix builder editor и competency model editor — они идут в EP-017.
 
 ## Features (vertical slices)
 - [Feature catalog](features/index.md): FT-0121..FT-0123 с end-to-end сценариями HR Admin. Читать, чтобы построить один из главных business surfaces системы.

@@ -22,11 +22,12 @@ Status: Draft (2026-03-03)
 14) App shell + navigation + role-aware home dashboards.
 15) HR campaigns UX (list/create/detail).
 16) Questionnaire experience (inbox/fill/read-only).
-17) Results experience (employee/manager/HR dashboards).
-18) People + org admin.
-19) Competency models + matrix UI.
-20) Notification center UI.
-21) Admin + ops UI.
+17) Feature-area slice refactor (core/contract/client/cli/web realignment + docs sync + regression proof).
+18) Results experience (employee/manager/HR dashboards).
+19) People + org admin.
+20) Competency models + matrix UI.
+21) Notification center UI.
+22) Admin + ops UI.
 
 Отложено после GUI wave:
 - Реальная внешняя AI integration beyond current MVP stub.

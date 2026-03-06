@@ -27,8 +27,9 @@ Status: Draft (2026-03-03)
 - [EP-011 App shell and navigation](EP-011-app-shell-navigation/index.md): единый shell, navigation и role-aware home dashboards. Читать, чтобы будущие UI slices строились на общем каркасе.
 - [EP-012 HR campaigns UX](EP-012-hr-campaigns-ux/index.md): HR list/create/detail flows для кампаний. Читать, чтобы главный HR surface стал цельным.
 - [EP-013 Questionnaire experience](EP-013-questionnaire-experience/index.md): inbox, structured fill flow и read-only states. Читать, чтобы анкеты стали удобным end-user опытом.
-- [EP-014 Results experience](EP-014-results-experience/index.md): employee/manager/HR results dashboards. Читать, чтобы reporting UI был role-aware и privacy-safe.
-- [EP-015 People and org admin](EP-015-people-org-admin/index.md): employees directory/profile и org editor. Читать, чтобы справочник и оргструктура поддерживались через GUI.
-- [EP-016 Competency models and matrix UI](EP-016-models-matrix-ui/index.md): модели компетенций и matrix builder. Читать, чтобы содержание оценки и assignments были управляемы в web UI.
-- [EP-017 Notification center UI](EP-017-notification-center-ui/index.md): reminders/templates/delivery diagnostics. Читать, чтобы notifications subsystem стал видимым и управляемым.
-- [EP-018 Admin and ops UI](EP-018-admin-ops-ui/index.md): environment health, AI/webhook diagnostics и audit console. Читать, чтобы эксплуатация системы меньше зависела от внешних панелей и CLI.
+- [EP-014 Feature-area slice refactor](EP-014-feature-area-slices-refactor/index.md): реорганизация кода и документации под явные feature areas перед следующими GUI-эпиками. Читать, чтобы будущая delivery шла по устойчивой структуре, а не через growing god-files.
+- [EP-015 Results experience](EP-015-results-experience/index.md): employee/manager/HR results dashboards. Читать, чтобы reporting UI был role-aware и privacy-safe.
+- [EP-016 People and org admin](EP-016-people-org-admin/index.md): employees directory/profile и org editor. Читать, чтобы справочник и оргструктура поддерживались через GUI.
+- [EP-017 Competency models and matrix UI](EP-017-models-matrix-ui/index.md): модели компетенций и matrix builder. Читать, чтобы содержание оценки и assignments были управляемы в web UI.
+- [EP-018 Notification center UI](EP-018-notification-center-ui/index.md): reminders/templates/delivery diagnostics. Читать, чтобы notifications subsystem стал видимым и управляемым.
+- [EP-019 Admin and ops UI](EP-019-admin-ops-ui/index.md): environment health, AI/webhook diagnostics и audit console. Читать, чтобы эксплуатация системы меньше зависела от внешних панелей и CLI.

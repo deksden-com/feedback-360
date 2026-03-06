@@ -22,8 +22,11 @@ Status: Draft (2026-03-03)
 - `packages/core/src/slices/<slice>/...` — use-cases и политики, сгруппированные по доменным слайсам (campaign, questionnaires, org, notifications, ai).
 - `packages/api-contract/src/v1/<slice>/...` — операции/DTO, сгруппированные по тем же слайсам.
 
+Подробная логика ownership boundaries и правил для `shared` живёт в:
+- [Feature-area boundaries](feature-area-boundaries.md): какие области считаются canonical, где проходит граница ответственности и почему `shared` ограничен. Читать перед переносом модулей, чтобы не превратить slicing в хаотичную перекладку файлов.
+- [ADR 0004 — Feature-area slicing boundaries](../../adr/0004-feature-area-slicing-boundaries.md): rationale, почему выбраны именно такие области и почему root files должны быть thin composition points. Читать перед архитектурными изменениями, чтобы помнить WHY решения.
+
 При этом “общие” вещи остаются общими:
 - `ports/` (интерфейсы внешних зависимостей),
 - `errors/` (общие коды ошибок),
 - `policies/` (если политика меж-слайсовая, иначе держим рядом со слайсом).
-

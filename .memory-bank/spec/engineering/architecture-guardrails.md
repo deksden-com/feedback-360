@@ -19,3 +19,6 @@ Status: Draft (2026-03-03)
 - `packages/api-contract/src/v1/<slice>/...`
 - `packages/cli/src/commands/<slice>/...`
 
+Границы ownership и исключения для `shared` фиксируются отдельно:
+- [Feature-area boundaries](../project/feature-area-boundaries.md): canonical feature areas, root composition points и boundary heuristics. Читать перед переносом модулей и добавлением новых slices.
+- [ADR 0004 — Feature-area slicing boundaries](../../adr/0004-feature-area-slicing-boundaries.md): почему именно такие границы выбраны и почему не используем “folder per FT” или growing flat root files.

@@ -16,6 +16,12 @@ Status: Draft (2026-03-03)
 - `plans/` — как делаем по шагам (что в каком порядке и как проверяем).
 Код — HOW (детали реализации), и не должен копироваться в меморибанк (кроме ссылок).
 
+Для structural refactor и code-organization решений это правило применяется жёстко:
+- target boundaries, ownership rules и invariants — в `spec/`,
+- rationale выбора именно этих boundaries — в `adr/`,
+- шаги миграции и проверки — в `plans/`,
+- concrete files/imports/entrypoints — в коде с cross-links.
+
 ## 5) No duplication with code
 Не копируем в меморибанк “названия таблиц/полей/файлов” как единственную ценность. Если нужно — даём ссылку на код/миграции и фиксируем смысл/инварианты (почему так, какие гарантии).
 
@@ -73,3 +79,16 @@ SSoT поведения системы остаётся в `spec/` и `plans/`. 
 Связанные правила:
 - [Visual references](visual-references.md): где хранить макеты, как их аннотировать и что из них можно/нельзя брать. Читать перед добавлением новых UI источников.
 - [Stitch design mapping](../spec/ui/design-references-stitch.md): текущий каталог `stitch_go360go` и его привязка к GUI-эпикам. Читать перед планированием или реализацией GUI, чтобы все агенты опирались на один и тот же набор референсов.
+
+## 14) Boundary rationale must be documented
+Если проект вводит новые архитектурные границы (feature areas, shared modules, root composition points, subsystem ownership), меморибанк обязан отвечать на два вопроса:
+1) **что** является границей и где она проходит,
+2) **почему** граница проведена именно так.
+
+Минимум для таких изменений:
+- `spec/*` документ с target boundaries и ownership rules,
+- `adr/*` документ с rationale,
+- кросс-ссылки из индексов и связанных implementation/playbook документов,
+- docs ↔ code navigation для ключевых entrypoints.
+
+Идея простая: агент не должен восстанавливать архитектурный смысл “по git blame” или по структуре папок.

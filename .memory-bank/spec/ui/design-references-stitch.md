@@ -61,33 +61,38 @@ Status: Updated (2026-03-06)
 - Take: progress visibility, section grouping, action placement.
 - Do not take: any behavior that overrides submit/read-only domain rules.
 
-### EP-014 — Results experience
+### EP-014 — Feature-area slice refactor
+- No direct stitch mapping: эпик внутренний и не вводит новые user-facing screens.
+- Take: N/A.
+- Do not take: refactor не должен рождать новые UI assumptions вне уже описанных EP-011..EP-013 и последующих GUI-эпиков.
+
+### EP-015 — Results experience
 - [`employee_my_results_report/screen.png`](../../assets/ui/stitch_go360go/employee_my_results_report/screen.png): employee report hierarchy.
 - [`_3/screen.png`](../../assets/ui/stitch_go360go/_3/screen.png): manager dashboard entry patterns.
 - [`_5/screen.png`](../../assets/ui/stitch_go360go/_5/screen.png): summary/score card patterns.
 - Take: report hierarchy, card layout, section decomposition.
 - Do not take: showing raw comments to actors who must not see them.
 
-### EP-015 — People and org admin
+### EP-016 — People and org admin
 - [`hr_admin_employee_directory/screen.png`](../../assets/ui/stitch_go360go/hr_admin_employee_directory/screen.png): employee directory/list patterns.
 - [`_2/screen.png`](../../assets/ui/stitch_go360go/_2/screen.png): org/departments editing patterns.
 - Take: filters/table layout/tree affordances.
 - Do not take: any assumptions about bulk ops or HR permissions not defined in RBAC.
 
-### EP-016 — Competency models and matrix UI
+### EP-017 — Competency models and matrix UI
 - [`_4/screen.png`](../../assets/ui/stitch_go360go/_4/screen.png): competency model editor direction.
 - [`hr_admin_campaign_dashboard/screen.png`](../../assets/ui/stitch_go360go/hr_admin_campaign_dashboard/screen.png): operational side panels and action groups for matrix builder.
 - Take: editor section layout, side summaries, table patterns.
 - Do not take: domain structure of competencies if it conflicts with our versioned model spec.
 
-### EP-017 — Notification center UI
+### EP-018 — Notification center UI
 - Прямого stitch-экрана нет; используем общие patterns из:
   - [`hr_admin_campaign_dashboard/screen.png`](../../assets/ui/stitch_go360go/hr_admin_campaign_dashboard/screen.png)
   - [`hr_admin_employee_directory/screen.png`](../../assets/ui/stitch_go360go/hr_admin_employee_directory/screen.png)
 - Take: filters, tables, status cards.
 - Do not take: действия, которых нет в outbox/template subsystem.
 
-### EP-018 — Admin and ops UI
+### EP-019 — Admin and ops UI
 - Прямого stitch-экрана нет; используем dashboard/status/table language из HR references и локально проектируем diagnostics surfaces.
 - Take: compact operational cards and status labeling.
 - Do not take: any deployment/ops semantics not confirmed in runbook and observability docs.

@@ -10,6 +10,7 @@ Status: Draft (2026-03-03)
 - [EP-010 Production readiness](epics/EP-010-prod-readiness/index.md) — следующий слой после MVP: observability, retention/privacy, runbook и release rehearsal. Читать, чтобы готовить систему к реальной эксплуатации.
 - [EP-011 App shell and navigation](epics/EP-011-app-shell-navigation/index.md) — старт post-MVP GUI wave: общий shell, navigation и role-aware home. Читать, чтобы видеть, как текущий thin UI превратится в цельное приложение.
 - [EP-012 HR campaigns UX](epics/EP-012-hr-campaigns-ux/index.md) — следующий HR business surface поверх существующего campaign workbench. Читать, чтобы эволюция HR UI шла от самых частых операций.
+- [EP-014 Feature-area slice refactor](epics/EP-014-feature-area-slices-refactor/index.md) — структурный refactor кода и документации сразу после EP-013. Читать, чтобы будущие GUI-эпики строились поверх явных feature areas, а не поверх случайно сложившейся структуры.
 - [Implementation playbook](implementation-playbook.md) — как превращаем FT-документы в код (contract/core/db/cli/tests) и как обновляем меморибанк по итогу. Читать, чтобы реализация была одинаковой и без “утечки логики” в клиенты.
 - [Feature template](feature-template.md) — ссылка на каноничный шаблон фичи (vertical slice) в MBB templates. Читать, чтобы новые фичи описывались единообразно и без дублей.
 - [How we plan](how-we-plan.md) — правила планирования и DoD фичи + связь с seed и тестами. Читать, чтобы план был исполнимым и проверяемым.
