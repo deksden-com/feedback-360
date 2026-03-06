@@ -126,8 +126,9 @@ Status: Completed (2026-03-06)
 
 ## CI/CD evidence (mandatory for runtime/deploy/integration changes)
 - GitHub:
-  - CI run URL / check-runs URL
-  - Status: planned
+  - `https://github.com/deksden-com/feedback-360/actions/runs/22770711899`
+  - `https://github.com/deksden-com/feedback-360/actions/runs/22770722046`
+  - Status: passed
 - Vercel:
-  - Deployment URL
-  - Status: planned
+  - Verified together with FT-0143 deployment proof on beta preview/develop deployment.
+  - Status: passed
