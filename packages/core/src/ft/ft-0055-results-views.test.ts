@@ -109,7 +109,7 @@ describe("FT-0055 results views shaping", () => {
         expect(blockedTeamResult.error.code).toBe("forbidden");
       }
 
-      const hrResult = await dispatchOperation({
+      const hrReaderResult = await dispatchOperation({
         operation: "results.getHrView",
         input: {
           campaignId,
@@ -122,9 +122,34 @@ describe("FT-0055 results views shaping", () => {
         },
       });
 
-      expect(hrResult.ok).toBe(true);
-      if (hrResult.ok && "openText" in hrResult.data) {
-        const items = hrResult.data.openText ?? [];
+      expect(hrReaderResult.ok).toBe(true);
+      if (hrReaderResult.ok && "openText" in hrReaderResult.data) {
+        const items = hrReaderResult.data.openText ?? [];
+        expect(items.length).toBeGreaterThan(0);
+        const hasRaw = items.some((item: { rawText?: string }) => typeof item.rawText === "string");
+        const hasProcessed = items.some(
+          (item: { processedText?: string }) => typeof item.processedText === "string",
+        );
+        expect(hasRaw).toBe(false);
+        expect(hasProcessed).toBe(true);
+      }
+
+      const hrAdminResult = await dispatchOperation({
+        operation: "results.getHrView",
+        input: {
+          campaignId,
+          subjectEmployeeId,
+          smallGroupPolicy: "merge_to_other",
+        },
+        context: {
+          companyId,
+          role: "hr_admin",
+        },
+      });
+
+      expect(hrAdminResult.ok).toBe(true);
+      if (hrAdminResult.ok && "openText" in hrAdminResult.data) {
+        const items = hrAdminResult.data.openText ?? [];
         expect(items.length).toBeGreaterThan(0);
         const hasRaw = items.some((item: { rawText?: string }) => typeof item.rawText === "string");
         const hasProcessed = items.some(

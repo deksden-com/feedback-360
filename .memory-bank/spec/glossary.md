@@ -26,6 +26,8 @@ Status: Draft (2026-03-03)
 - **Anonymity threshold**: минимальное число submitted оценщиков в группе, чтобы показывать агрегаты группе (по умолчанию 3).
 - **NA**: “не могу оценить” (не участвует в числовых агрегациях indicators).
 - **UNSURE**: “затруднился ответить” (не участвует в числовых агрегациях levels).
+- **Raw comment**: оригинальный свободный текст из анкеты до AI-постобработки; доступен только `hr_admin` и подлежит сокращённому retention window.
+- **Retention window**: срок хранения конкретного класса данных до удаления/архивации. Для MVP baseline: raw comments `180 days`, processed/summary/aggregates/campaign data `24 months`.
 
 ## Notifications & ops
 - **Outbox**: таблица/очередь исходящих уведомлений (email/telegram), куда записываем “что надо отправить”, а отдельный dispatcher делает фактическую отправку.

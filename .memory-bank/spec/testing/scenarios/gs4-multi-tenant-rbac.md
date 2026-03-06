@@ -6,12 +6,12 @@ Status: Draft (2026-03-03)
 
 ## Action
 1) User в контексте company A пытается читать/менять сущности company B.
-2) HR Reader читает результаты и raw-комментарии (MVP исключение).
+2) HR Reader читает результаты, но не получает raw-комментарии.
 3) HR Reader пытается менять матрицу/кампанию.
 
 ## Assertions
 - Доступ к company B запрещён (403/404).
-- HR Reader: read-only, но raw видит (MVP).
+- HR Reader: read-only и без raw open text.
 - Любые write операции для HR Reader запрещены.
 
 ## Execution slicing

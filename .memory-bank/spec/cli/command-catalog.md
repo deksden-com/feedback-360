@@ -181,6 +181,7 @@ Status: Draft (2026-03-03)
   - roles: hr_admin/hr_reader
   - idempotency: yes
   - output: `groupVisibility`, per-competency visibility flags, `configuredGroupWeights`, `effectiveGroupWeights`, `overallScore`
+  - privacy note: `hr_admin` видит raw + processed + summary open text; `hr_reader` — только processed + summary
   - for `modelKind=levels`: per-competency `*Levels` summaries (`modeLevel`, `distribution`, `nValid`, `nUnsure`)
 
 ## Notifications

@@ -37,4 +37,5 @@ MVP implementation note (FT-0052):
 
 ## Open text
 - Employee/Manager видят **только AI-агрегированный текст** (summary/processed), и только если выполняется threshold для соответствующей группы.
-- HR роли видят raw-комментарии без анонимизации (MVP решение: HR Reader тоже видит raw).
+- `hr_admin` видит raw-комментарии для operational HR review.
+- `hr_reader` видит только processed/summary без raw, даже в HR view.

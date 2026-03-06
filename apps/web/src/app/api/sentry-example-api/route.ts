@@ -1,15 +1,46 @@
+import {
+  captureRequestException,
+  createRequestTrace,
+  jsonWithRequestTrace,
+  logError,
+} from "@/lib/observability";
+
 export const dynamic = "force-dynamic";
 
 class SentryExampleAPIError extends Error {
-  constructor(message: string | undefined) {
+  constructor(message: string) {
     super(message);
     this.name = "SentryExampleAPIError";
   }
 }
 
-// A faulty API route to test Sentry's error monitoring
-export function GET() {
-  throw new SentryExampleAPIError(
-    "This error is raised on the backend called by the example page.",
+export function GET(request: Request) {
+  const trace = createRequestTrace(request, {
+    route: "/api/sentry-example-api",
+  });
+  const url = new URL(request.url);
+  const message =
+    url.searchParams.get("message")?.trim() || "Controlled backend error for observability drill.";
+  const error = new SentryExampleAPIError(message);
+  const eventId = captureRequestException(trace, error, {
+    controlled: true,
+  });
+
+  logError(trace, "sentry_example_api_error", error, {
+    eventId,
+  });
+
+  return jsonWithRequestTrace(
+    trace,
+    {
+      ok: false,
+      error: {
+        code: "controlled_backend_error",
+        message,
+      },
+      eventId,
+      requestId: trace.requestId,
+    },
+    { status: 500 },
   );
 }

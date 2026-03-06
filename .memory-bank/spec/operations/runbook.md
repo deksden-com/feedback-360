@@ -57,6 +57,45 @@ Status: Draft (2026-03-04)
 - Memory-bank sync:
   - `pnpm docs:audit`
 
+## Observability investigation
+### Request correlation baseline
+- API responses for critical write/runtime routes return:
+  - `x-request-id`
+  - `x-correlation-id`
+- Current baseline routes:
+  - `/api/hr/campaigns/execute`
+  - `/api/questionnaires/draft`
+  - `/api/questionnaires/submit`
+  - `/api/webhooks/ai`
+  - `/api/sentry-example-api`
+- Structured logs include at least:
+  - `event`, `route`, `method`, `requestId`,
+  - plus route-specific keys such as `campaignId`, `questionnaireId`, `aiJobId`, `idempotencyKey`, `role`, `userId`.
+
+### Controlled backend error drill
+- Endpoint: `GET /api/sentry-example-api?message=<text>`
+- Expected behavior:
+  - returns `500` with JSON body containing `eventId` and `requestId`,
+  - returns `x-request-id` / `x-correlation-id` headers,
+  - creates a Sentry event in the environment-specific project.
+- Quick check:
+  - `curl -i "https://beta.go360go.ru/api/sentry-example-api?message=EP-010-check"`
+  - verify response headers/body,
+  - verify matching event in Sentry by `request_id`.
+
+### AI webhook investigation path
+- For any AI webhook receipt:
+  1. collect `x-ai-idempotency-key`, `ai_job_id`, `campaign_id`,
+  2. inspect app logs by `requestId` or `idempotencyKey`,
+  3. verify webhook result in DB/application status,
+  4. if needed, cross-check Sentry using `request_id` tag.
+- Success log shape includes:
+  - `event=ai_webhook_processed`
+  - `requestId`, `aiJobId`, `campaignId`, `idempotencyKey`, `webhookStatus`
+- Failure log shape includes:
+  - `event=ai_webhook_failed`
+  - `requestId`, `errorCode`, and domain identifiers if parsed.
+
 ## Check failure handling (fix-loop)
 - Если CI/check-run в GitHub failed: исправляем причину, запускаем новый run, обновляем evidence ссылкой на зелёный run.
 - Если deployment в Vercel failed: читаем `vercel inspect --logs`, фиксируем root cause, исправляем конфигурацию/код, повторяем deploy до `Ready`.
@@ -169,3 +208,54 @@ Status: Draft (2026-03-04)
 - Beta incident: revert PR in `develop`.
 - Prod incident: revert PR in `main`, then sync `main -> develop`.
 - Post-incident: add operator note in relevant operations doc (git flow, deployment architecture, dns).
+
+## Recovery drill (beta)
+### Goal
+Подтвердить, что команда может проверить и вернуть `beta` в healthy state без устных договорённостей.
+
+### Walkthrough
+1. Confirm current deployment and alias:
+   - `vercel inspect beta.go360go.ru`
+2. Confirm app health:
+   - `curl -sS https://beta.go360go.ru/api/health`
+3. Confirm auth entrypoint:
+   - `curl -I https://beta.go360go.ru/auth/login`
+4. Confirm runtime/browser smoke:
+   - `$agent-browser` open login page → snapshot → screenshot
+   - `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web test:smoke:beta`
+5. If alias/drift is broken:
+   - find known-good deployment via `vercel list go360go-beta`,
+   - promote it with `vercel promote <deployment-url> --yes`,
+   - re-run health + smoke.
+6. If the issue comes from a bad merge:
+   - revert the PR into `develop`,
+   - wait for beta redeploy,
+   - re-run health + smoke.
+
+### Recovery success criteria
+- `api/health` returns `200` with expected `appEnv`,
+- login page loads,
+- smoke suite passes,
+- any runtime error investigation can be tied to `requestId`.
+
+## Release rehearsal (beta-first)
+### Canonical sequence
+1. `pnpm checks`
+2. `pnpm docs:audit`
+3. Push feature branch and open PR to `develop`
+4. Wait for GitHub required checks = `success`
+5. Wait for Vercel preview = `Ready`
+6. Merge into `develop`
+7. Verify `beta`:
+   - `curl https://beta.go360go.ru/api/health`
+   - `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web test:smoke:beta`
+   - browser spot-check with `$agent-browser`
+   - controlled Sentry route check
+8. Record evidence in FT doc + verification matrix
+
+### Rehearsal exit criteria
+- CI green,
+- Vercel deploy `Ready`,
+- beta smoke green,
+- controlled backend error produces Sentry-correlated request evidence,
+- evidence written into memory bank.

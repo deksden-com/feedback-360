@@ -1,4 +1,12 @@
-import { resolveAppOperationContext } from "@/lib/operation-context";
+import {
+  captureRequestException,
+  createRequestTrace,
+  extendRequestTrace,
+  jsonWithRequestTrace,
+  logError,
+  logInfo,
+} from "@/lib/observability";
+import { type AppOperationContext, resolveAppOperationContext } from "@/lib/operation-context";
 import {
   type AiRunForCampaignInput,
   type CampaignCreateInput,
@@ -15,7 +23,6 @@ import {
   createOperationError,
 } from "@feedback-360/api-contract";
 import { createInprocClient } from "@feedback-360/client";
-import { NextResponse } from "next/server";
 
 type HrCampaignAction =
   | "campaign.create"
@@ -75,19 +82,8 @@ const parsePayload = async (request: Request): Promise<ExecutePayload | Operatio
   };
 };
 
-const runAction = async (payload: ExecutePayload) => {
-  const resolved = await resolveAppOperationContext();
-  if (!resolved.ok) {
-    return {
-      ok: false as const,
-      error: createOperationError(
-        resolved.error.code === "unauthenticated" ? "unauthenticated" : "forbidden",
-        resolved.error.message,
-      ),
-    };
-  }
-
-  if (resolved.context.role !== "hr_admin" && resolved.context.role !== "hr_reader") {
+const runAction = async (payload: ExecutePayload, context: AppOperationContext) => {
+  if (context.role !== "hr_admin" && context.role !== "hr_reader") {
     return {
       ok: false as const,
       error: createOperationError(
@@ -102,45 +98,36 @@ const runAction = async (payload: ExecutePayload) => {
 
   switch (payload.action) {
     case "campaign.create":
-      return client.campaignCreate(input as CampaignCreateInput, resolved.context);
+      return client.campaignCreate(input as CampaignCreateInput, context);
     case "campaign.start":
-      return client.campaignStart(input as CampaignTransitionInput, resolved.context);
+      return client.campaignStart(input as CampaignTransitionInput, context);
     case "campaign.stop":
-      return client.campaignStop(input as CampaignTransitionInput, resolved.context);
+      return client.campaignStop(input as CampaignTransitionInput, context);
     case "campaign.end":
-      return client.campaignEnd(input as CampaignTransitionInput, resolved.context);
+      return client.campaignEnd(input as CampaignTransitionInput, context);
     case "campaign.progress.get":
-      return client.campaignProgressGet(input as CampaignProgressGetInput, resolved.context);
+      return client.campaignProgressGet(input as CampaignProgressGetInput, context);
     case "campaign.weights.set":
-      return client.campaignWeightsSet(input as CampaignWeightsSetInput, resolved.context);
+      return client.campaignWeightsSet(input as CampaignWeightsSetInput, context);
     case "campaign.participants.add":
-      return client.campaignParticipantsAdd(
-        input as CampaignParticipantsMutationInput,
-        resolved.context,
-      );
+      return client.campaignParticipantsAdd(input as CampaignParticipantsMutationInput, context);
     case "campaign.participants.remove":
-      return client.campaignParticipantsRemove(
-        input as CampaignParticipantsMutationInput,
-        resolved.context,
-      );
+      return client.campaignParticipantsRemove(input as CampaignParticipantsMutationInput, context);
     case "campaign.participants.addFromDepartments":
       return client.campaignParticipantsAddFromDepartments(
         input as CampaignParticipantsAddFromDepartmentsInput,
-        resolved.context,
+        context,
       );
     case "campaign.snapshot.list":
-      return client.campaignSnapshotList(input as CampaignSnapshotListInput, resolved.context);
+      return client.campaignSnapshotList(input as CampaignSnapshotListInput, context);
     case "matrix.generateSuggested":
-      return client.matrixGenerateSuggested(
-        input as MatrixGenerateSuggestedInput,
-        resolved.context,
-      );
+      return client.matrixGenerateSuggested(input as MatrixGenerateSuggestedInput, context);
     case "matrix.set":
-      return client.matrixSet(input as MatrixSetInput, resolved.context);
+      return client.matrixSet(input as MatrixSetInput, context);
     case "ai.runForCampaign":
-      return client.aiRunForCampaign(input as AiRunForCampaignInput, resolved.context);
+      return client.aiRunForCampaign(input as AiRunForCampaignInput, context);
     case "employee.listActive":
-      return client.employeeListActive(input as EmployeeListActiveInput, resolved.context);
+      return client.employeeListActive(input as EmployeeListActiveInput, context);
     default:
       return {
         ok: false as const,
@@ -150,9 +137,17 @@ const runAction = async (payload: ExecutePayload) => {
 };
 
 export async function POST(request: Request) {
+  let trace = createRequestTrace(request, {
+    route: "/api/hr/campaigns/execute",
+  });
+
   const payload = await parsePayload(request);
   if ("code" in payload) {
-    return NextResponse.json(
+    logError(trace, "hr_campaign_execute_parse_failed", payload, {
+      errorCode: payload.code,
+    });
+    return jsonWithRequestTrace(
+      trace,
       {
         ok: false,
         error: payload,
@@ -161,9 +156,49 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await runAction(payload);
+  trace = extendRequestTrace(trace, {
+    action: payload.action,
+  });
+
+  const resolved = await resolveAppOperationContext();
+  if (!resolved.ok) {
+    const error = createOperationError(
+      resolved.error.code === "unauthenticated" ? "unauthenticated" : "forbidden",
+      resolved.error.message,
+    );
+    logError(trace, "hr_campaign_execute_context_failed", error, {
+      errorCode: error.code,
+    });
+    return jsonWithRequestTrace(
+      trace,
+      {
+        ok: false,
+        error,
+      },
+      { status: mapHttpStatus(error) },
+    );
+  }
+
+  trace = extendRequestTrace(trace, {
+    companyId: resolved.context.companyId,
+    role: resolved.context.role,
+    userId: resolved.context.userId,
+  });
+
+  const result = await runAction(payload, resolved.context);
   if (!result.ok) {
-    return NextResponse.json(
+    logError(trace, "hr_campaign_execute_failed", result.error, {
+      errorCode: result.error.code,
+    });
+    if (
+      !["invalid_input", "forbidden", "not_found", "unauthenticated"].includes(result.error.code)
+    ) {
+      captureRequestException(trace, result.error, {
+        errorCode: result.error.code,
+      });
+    }
+    return jsonWithRequestTrace(
+      trace,
       {
         ok: false,
         error: result.error,
@@ -172,7 +207,8 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({
+  logInfo(trace, "hr_campaign_execute_succeeded");
+  return jsonWithRequestTrace(trace, {
     ok: true,
     data: result.data,
   });

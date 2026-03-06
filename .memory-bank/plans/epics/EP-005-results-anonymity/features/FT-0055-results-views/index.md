@@ -10,7 +10,8 @@ Status: Completed (2026-03-05)
 - `results.getHrView` (hr_admin/hr_reader)
 - Open text:
   - employee/manager: только AI processed/summary
-  - HR: raw + processed (HR reader raw видит в MVP)
+  - hr_reader: только AI processed/summary
+  - hr_admin: raw + processed + summary
 
 ## Context (SSoT links)
 - [Results visibility](../../../../../spec/domain/results-visibility.md): SSoT правил “кто что видит”. Читать, чтобы response shape не раскрывал raw open text не тем ролям.
@@ -27,10 +28,12 @@ Status: Completed (2026-03-05)
 1) Под employee: `results my --campaign <handles.campaign.main> --json`
 2) Под manager: `results team --campaign <handles.campaign.main> --subject <employee_id> --json`
 3) Под hr_reader: `results hr --campaign <handles.campaign.main> --subject <employee_id> --json`
+4) Под hr_admin: `results hr --campaign <handles.campaign.main> --subject <employee_id> --json`
 
 ### Assert
 - Employee/Manager response не содержит raw open text полей.
-- HR view содержит raw open text (MVP) и processed/summary.
+- `hr_reader` response не содержит raw open text полей.
+- `hr_admin` response содержит raw open text и processed/summary.
 
 ## Implementation plan (target repo)
 - Contract:
@@ -43,21 +46,22 @@ Status: Completed (2026-03-05)
   - Общая функция “compute results” (или сервис) возвращает полный internal representation.
   - Затем “view shaping” (role-based) отрезает поля согласно visibility + RBAC.
 - Тонкие моменты:
-  - “HR Reader видит raw (MVP)” — это осознанное исключение; держим его в одном месте (policy), чтобы легко убрать позже.
+  - raw open text остаётся только у `hr_admin`; `hr_reader` получает ту же HR-витрину без `rawText`.
   - При отсутствии AI processed данных employee должен получать пусто/placeholder, но не raw.
 
 ## Tests
 - Integration: один и тот же кампейн:
   - employee results не содержит raw,
   - manager results не содержит raw,
-  - hr_reader/hr_admin results содержит raw.
+  - hr_reader results не содержит raw,
+  - hr_admin results содержит raw.
 - Contract: runtime-схемы гарантируют отсутствие raw полей в employee DTO.
 
 ## Memory bank updates
 - При изменении видимости обновить: [Results visibility](../../../../../spec/domain/results-visibility.md) — SSoT. Читать, чтобы политика приватности была единой во всех витринах.
 
 ## Verification (must)
-- Automated test: `packages/core/src/ft/ft-0055-results-views.test.ts` (integration) проверяет role-based shaping (employee/manager без raw, HR с raw) и анонимность flags.
+- Automated test: `packages/core/src/ft/ft-0055-results-views.test.ts` (integration) проверяет role-based shaping (employee/manager/hr_reader без raw, `hr_admin` с raw) и анонимность flags.
 - Must run: GS1 (happy path) должен оставаться зелёным (включая “кто что видит”).
 
 ## Project grounding (2026-03-05)
@@ -75,7 +79,8 @@ Status: Completed (2026-03-05)
 - CLI scenario (real DB, seed `S9_campaign_completed_with_ai`) via `pnpm --filter @feedback-360/cli exec tsx src/index.ts`:
   - `results my --campaign <campaign_id> --json` → `openText` без `rawText`.
   - `results team --campaign <campaign_id> --subject <employee_id> --json` → `openText` без `rawText`.
-  - `results hr --campaign <campaign_id> --subject <employee_id> --json` → есть `rawText` + `processedText`.
+  - `results hr --campaign <campaign_id> --subject <employee_id> --json` под `hr_reader` → `openText` без `rawText`.
+  - `results hr --campaign <campaign_id> --subject <employee_id> --json` под `hr_admin` → есть `rawText` + `processedText`.
 - GS1 regression subset (real DB, sequential):
   - `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0013-questionnaires.test.ts src/ft/ft-0044-lock-on-draft-save.test.ts src/ft/ft-0045-ended-readonly.test.ts --fileParallelism=false` → passed.
   - `set -a; source .env; set +a; pnpm --filter @feedback-360/core exec vitest run src/ft/ft-0071-ai-run.test.ts --testTimeout 30000` → passed.

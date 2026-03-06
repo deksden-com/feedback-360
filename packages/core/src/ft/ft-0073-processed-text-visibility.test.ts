@@ -139,7 +139,7 @@ describe("FT-0073 processed text visibility", () => {
         ).toBe(true);
       }
 
-      const hrResult = await dispatchOperation({
+      const hrReaderResult = await dispatchOperation({
         operation: "results.getHrView",
         input: {
           campaignId,
@@ -152,9 +152,43 @@ describe("FT-0073 processed text visibility", () => {
         },
       });
 
-      expect(hrResult.ok).toBe(true);
-      if (hrResult.ok && "openText" in hrResult.data) {
-        const items = hrResult.data.openText ?? [];
+      expect(hrReaderResult.ok).toBe(true);
+      if (hrReaderResult.ok && "openText" in hrReaderResult.data) {
+        const items = hrReaderResult.data.openText ?? [];
+        expect(items.length).toBeGreaterThan(0);
+        expect(
+          items.some((item) => {
+            return item.competencyId === competencyId && item.processedText === processedText;
+          }),
+        ).toBe(true);
+        expect(
+          items.some((item) => {
+            return item.competencyId === competencyId && item.summaryText === summaryText;
+          }),
+        ).toBe(true);
+        expect(
+          items.some((item) => {
+            return item.competencyId === competencyId && typeof item.rawText === "string";
+          }),
+        ).toBe(false);
+      }
+
+      const hrAdminResult = await dispatchOperation({
+        operation: "results.getHrView",
+        input: {
+          campaignId,
+          subjectEmployeeId,
+          smallGroupPolicy: "merge_to_other",
+        },
+        context: {
+          companyId,
+          role: "hr_admin",
+        },
+      });
+
+      expect(hrAdminResult.ok).toBe(true);
+      if (hrAdminResult.ok && "openText" in hrAdminResult.data) {
+        const items = hrAdminResult.data.openText ?? [];
         expect(items.length).toBeGreaterThan(0);
         expect(
           items.some((item) => {

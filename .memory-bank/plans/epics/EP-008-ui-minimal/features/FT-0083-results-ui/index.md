@@ -27,13 +27,14 @@ Status: Completed (2026-03-05)
 ### Assert
 - Employee не видит raw open text.
 - Manager не видит raw open text.
-- HR reader/admin (MVP) видит raw + processed/summary.
+- `hr_reader` не видит raw open text.
+- `hr_admin` видит raw + processed/summary.
 
 ## Implementation plan (target repo)
 - Screens:
   - Employee dashboard: `results.getMyDashboard` + визуализация gaps и агрегатов.
   - Manager view: `results.getTeamDashboard` + выбор subject (если нужно).
-  - HR view: `results.getHrView` + raw/processed (MVP).
+  - HR view: `results.getHrView`, где `hr_reader` видит processed/summary, а `hr_admin` — raw/processed/summary.
 - Тонкие моменты:
   - UI не должен “декодировать” анонимность — он отображает `visibility` флаги из API.
   - Open text: если processed нет — показываем “обработка не завершена”, не raw.
@@ -41,13 +42,14 @@ Status: Completed (2026-03-05)
 ## Tests
 - Playwright: под employee открыть dashboard и проверить отсутствие raw полей (через UI assertion или network intercept).
 - Playwright: под manager открыть team view и проверить отсутствие raw.
-- Playwright: под hr_admin/hr_reader открыть HR view и проверить наличие raw+processed.
+- Playwright: под `hr_reader` открыть HR view и проверить отсутствие raw.
+- Playwright: под `hr_admin` открыть HR view и проверить наличие raw+processed.
 
 ## Memory bank updates
 - Если меняется набор экранов/переходов — обновить: [UI sitemap & flows](../../../../../spec/ui/sitemap-and-flows.md) — SSoT. Читать, чтобы UI соответствовал плану.
 
 ## Verification (must)
-- Automated test: Playwright assertions по results screens (employee без raw, HR reader с raw).
+- Automated test: Playwright assertions по results screens (employee/manager/hr_reader без raw, `hr_admin` с raw).
 - Must run: Playwright e2e на seed `S9_campaign_completed_with_ai`.
 - При фиксации evidence: для UI шагов добавлять скриншоты и вставлять их в markdown как изображения (`![...](...)`).
 
@@ -76,7 +78,7 @@ Status: Completed (2026-03-05)
   2) Открыть HR results view по тому же сотруднику.
   3) Сравнить текстовые блоки с employee view.
 - Expected:
-  - HR view содержит raw + processed/summary (по MVP правилам);
+  - HR view содержит только processed/summary;
   - employee view не раскрывает raw;
   - отличия в видимости соответствуют policy.
 
@@ -118,7 +120,8 @@ Status: Completed (2026-03-05)
 - Covered acceptance:
   - `S9_campaign_completed_with_ai`: employee dashboard without raw text.
   - `S9_campaign_completed_with_ai`: manager team dashboard without raw text.
-  - `S9_campaign_completed_with_ai`: HR dashboard with raw + processed + summary text.
+  - `S9_campaign_completed_with_ai`: `hr_reader` dashboard without raw text.
+  - `S9_campaign_completed_with_ai`: `hr_admin` dashboard with raw + processed + summary text.
 - Artifacts:
   - step-01: employee results (без raw).
     ![step-01-employee-results-without-raw](../../../../../evidence/EP-008/FT-0083/2026-03-05/step-01-employee-results-without-raw.png)

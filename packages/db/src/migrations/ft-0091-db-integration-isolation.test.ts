@@ -52,7 +52,7 @@ describe("FT-0091 DB integration isolation", () => {
         campaigns: 1,
         questionnaires: 4,
         snapshots: 2,
-        memberships: 7,
+        memberships: 8,
       });
 
       const secondS1 = await runSeedScenario({ scenario: "S1_multi_tenant_min" });

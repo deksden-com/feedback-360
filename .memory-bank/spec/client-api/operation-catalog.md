@@ -167,6 +167,7 @@ Status: Draft (2026-03-03)
   - output includes: `groupVisibility` + per-competency visibility flags (`peersVisibility/subordinatesVisibility/otherVisibility`)
   - output includes: `configuredGroupWeights`, `effectiveGroupWeights`, `overallScore`
   - output for `modelKind=levels` includes per-competency `*Levels` summaries (`modeLevel`, `distribution`, `nValid`, `nUnsure`)
+  - privacy note: `hr_admin` получает raw + processed + summary open text; `hr_reader` получает только processed + summary
   - cli: `results hr`
 
 ## Notifications

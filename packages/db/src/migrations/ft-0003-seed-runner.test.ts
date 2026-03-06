@@ -32,7 +32,7 @@ describe("FT-0003 seed runner + handles", () => {
       `);
 
         expect(Number(counts.rows[0]?.companies_count)).toBe(1);
-        expect(Number(counts.rows[0]?.employees_count)).toBe(7);
+        expect(Number(counts.rows[0]?.employees_count)).toBe(8);
         expect(Number(counts.rows[0]?.departments_count)).toBe(3);
       } finally {
         await poolAfterS2.end();

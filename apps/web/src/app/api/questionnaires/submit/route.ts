@@ -1,3 +1,11 @@
+import {
+  captureRequestException,
+  createRequestTrace,
+  extendRequestTrace,
+  jsonWithRequestTrace,
+  logError,
+  logInfo,
+} from "@/lib/observability";
 import { resolveAppOperationContext } from "@/lib/operation-context";
 import { type OperationError, createOperationError } from "@feedback-360/api-contract";
 import { createInprocClient } from "@feedback-360/client";
@@ -77,9 +85,17 @@ const parsePayload = async (
 };
 
 export async function POST(request: Request) {
+  let trace = createRequestTrace(request, {
+    route: "/api/questionnaires/submit",
+  });
+
   const payload = await parsePayload(request);
   if ("code" in payload) {
-    return NextResponse.json(
+    logError(trace, "questionnaire_submit_parse_failed", payload, {
+      errorCode: payload.code,
+    });
+    return jsonWithRequestTrace(
+      trace,
       {
         ok: false,
         error: payload,
@@ -88,6 +104,10 @@ export async function POST(request: Request) {
     );
   }
 
+  trace = extendRequestTrace(trace, {
+    questionnaireId: payload.questionnaireId,
+  });
+
   const resolved = await resolveAppOperationContext();
   if (!resolved.ok) {
     const error = createOperationError(
@@ -95,7 +115,11 @@ export async function POST(request: Request) {
       resolved.error.message,
     );
     if (isJsonRequest(request)) {
-      return NextResponse.json(
+      logError(trace, "questionnaire_submit_context_failed", error, {
+        errorCode: error.code,
+      });
+      return jsonWithRequestTrace(
+        trace,
         {
           ok: false,
           error,
@@ -113,6 +137,12 @@ export async function POST(request: Request) {
     );
   }
 
+  trace = extendRequestTrace(trace, {
+    companyId: resolved.context.companyId,
+    role: resolved.context.role,
+    userId: resolved.context.userId,
+  });
+
   const client = createInprocClient();
   const result = await client.questionnaireSubmit(
     {
@@ -123,7 +153,18 @@ export async function POST(request: Request) {
 
   if (!result.ok) {
     if (isJsonRequest(request)) {
-      return NextResponse.json(
+      logError(trace, "questionnaire_submit_failed", result.error, {
+        errorCode: result.error.code,
+      });
+      if (
+        !["invalid_input", "forbidden", "not_found", "unauthenticated"].includes(result.error.code)
+      ) {
+        captureRequestException(trace, result.error, {
+          errorCode: result.error.code,
+        });
+      }
+      return jsonWithRequestTrace(
+        trace,
         {
           ok: false,
           error: result.error,
@@ -142,7 +183,8 @@ export async function POST(request: Request) {
   }
 
   if (isJsonRequest(request)) {
-    return NextResponse.json({
+    logInfo(trace, "questionnaire_submitted");
+    return jsonWithRequestTrace(trace, {
       ok: true,
       data: result.data,
     });
