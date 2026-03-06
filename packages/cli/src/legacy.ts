@@ -96,6 +96,25 @@ type ModelVersionCreateOptions = {
   payloadJson?: string;
 };
 
+type ModelVersionGetOptions = {
+  json?: boolean;
+};
+
+type ModelVersionCloneOptions = {
+  json?: boolean;
+  name?: string;
+};
+
+type ModelVersionSaveDraftOptions = {
+  json?: boolean;
+  modelVersion?: string;
+  payloadJson: string;
+};
+
+type ModelVersionPublishOptions = {
+  json?: boolean;
+};
+
 type CampaignCreateOptions = {
   json?: boolean;
   name: string;
@@ -145,6 +164,10 @@ type CampaignParticipantsMutationOptions = {
 type MatrixSetOptions = {
   json?: boolean;
   assignmentsJson: string;
+};
+
+type MatrixListOptions = {
+  json?: boolean;
 };
 
 type AiRunOptions = {
@@ -577,6 +600,68 @@ const formatModelVersionListHuman = (data: {
   ].join("\n");
 };
 
+const formatModelVersionGetHuman = (data: {
+  modelVersionId: string;
+  companyId: string;
+  name: string;
+  kind: "indicators" | "levels";
+  version: number;
+  status: "draft" | "published";
+  groups: Array<{
+    competencies: Array<{
+      indicators?: Array<unknown>;
+      levels?: Array<unknown>;
+    }>;
+  }>;
+}): string => {
+  const groupCount = data.groups.length;
+  const competencyCount = data.groups.reduce((sum, group) => sum + group.competencies.length, 0);
+  const indicatorCount = data.groups.reduce(
+    (sum, group) =>
+      sum +
+      group.competencies.reduce(
+        (inner, competency) => inner + (competency.indicators?.length ?? 0),
+        0,
+      ),
+    0,
+  );
+  const levelCount = data.groups.reduce(
+    (sum, group) =>
+      sum +
+      group.competencies.reduce((inner, competency) => inner + (competency.levels?.length ?? 0), 0),
+    0,
+  );
+
+  return `Model version detail: id=${data.modelVersionId}, company=${data.companyId}, name=${data.name}, kind=${data.kind}, version=${data.version}, status=${data.status}, groups=${groupCount}, competencies=${competencyCount}, indicators=${indicatorCount}, levels=${levelCount}`;
+};
+
+const formatModelVersionCloneHuman = (data: {
+  modelVersionId: string;
+  companyId: string;
+  name: string;
+  kind: "indicators" | "levels";
+  version: number;
+  status: "draft" | "published";
+  groups: Array<{
+    competencies: Array<{
+      indicators?: Array<unknown>;
+      levels?: Array<unknown>;
+    }>;
+  }>;
+}): string => {
+  return `Model draft cloned: ${formatModelVersionGetHuman(data)}`;
+};
+
+const formatModelVersionPublishHuman = (data: {
+  modelVersionId: string;
+  name: string;
+  version: number;
+  status: "published";
+  updatedAt: string;
+}): string => {
+  return `Model version published: id=${data.modelVersionId}, name=${data.name}, version=${data.version}, status=${data.status}, updatedAt=${data.updatedAt}`;
+};
+
 const formatCampaignCreateHuman = (data: {
   campaignId: string;
   companyId: string;
@@ -692,6 +777,28 @@ const formatCampaignWeightsSetHuman = (data: {
 
 const formatMatrixSetHuman = (data: { campaignId: string; totalAssignments: number }): string => {
   return `Matrix set: campaign=${data.campaignId}, totalAssignments=${data.totalAssignments}`;
+};
+
+const formatMatrixListHuman = (data: {
+  campaignId: string;
+  assignments: Array<{
+    subjectEmployeeId: string;
+    raterEmployeeId: string;
+    raterRole: "manager" | "peer" | "subordinate" | "self";
+    source: "auto" | "manual";
+  }>;
+}): string => {
+  if (data.assignments.length === 0) {
+    return `Matrix assignments: campaign=${data.campaignId}, totalAssignments=0`;
+  }
+
+  return [
+    `Matrix assignments: campaign=${data.campaignId}, totalAssignments=${data.assignments.length}`,
+    ...data.assignments.map(
+      (item) =>
+        `- subject=${item.subjectEmployeeId}, rater=${item.raterEmployeeId}, role=${item.raterRole}, source=${item.source}`,
+    ),
+  ].join("\n");
 };
 
 const formatResultsHrHuman = (data: {
@@ -1288,6 +1395,27 @@ Examples:
     });
 
   modelVersionCommand
+    .command("get")
+    .description("Get competency model version detail.")
+    .argument("<model_version_id>", "Model version identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (modelVersionId: string, options: ModelVersionGetOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.modelVersionGet({ modelVersionId });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatModelVersionGetHuman(result.data));
+      }
+    });
+
+  modelVersionCommand
     .command("create")
     .description("Create competency model version (indicators/levels).")
     .requiredOption("--name <name>", "Model version name.")
@@ -1332,6 +1460,99 @@ Examples:
 
       if (!options.json && result.ok) {
         console.log(formatModelVersionCreateHuman(result.data));
+      }
+    });
+
+  modelVersionCommand
+    .command("clone-draft")
+    .description("Clone existing version into a new draft.")
+    .argument("<model_version_id>", "Source model version identifier.")
+    .option("--name <name>", "Optional name override for the draft.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (modelVersionId: string, options: ModelVersionCloneOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.modelVersionCloneDraft({
+        sourceModelVersionId: modelVersionId,
+        ...(options.name ? { name: options.name } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatModelVersionCloneHuman(result.data));
+      }
+    });
+
+  modelVersionCommand
+    .command("save-draft")
+    .description("Create or update a draft model version from JSON payload.")
+    .requiredOption(
+      "--payload-json <json>",
+      "Full draft payload JSON (name, kind, groups, optionally modelVersionId).",
+    )
+    .option("--model-version <modelVersionId>", "Optional draft model version identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: ModelVersionSaveDraftOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      let payload: unknown;
+      try {
+        payload = JSON.parse(options.payloadJson);
+      } catch (error: unknown) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Invalid --payload-json."),
+          options.json,
+        );
+        return;
+      }
+
+      if (typeof payload !== "object" || payload === null) {
+        emitError(
+          createOperationError("invalid_input", "--payload-json must describe an object."),
+          options.json,
+        );
+        return;
+      }
+
+      const result = await client.modelVersionUpsertDraft({
+        ...(payload as Record<string, unknown>),
+        ...(options.modelVersion ? { modelVersionId: options.modelVersion } : {}),
+      } as never);
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatModelVersionGetHuman(result.data));
+      }
+    });
+
+  modelVersionCommand
+    .command("publish")
+    .description("Publish draft competency model version.")
+    .argument("<model_version_id>", "Draft model version identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (modelVersionId: string, options: ModelVersionPublishOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.modelVersionPublish({ modelVersionId });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatModelVersionPublishHuman(result.data));
       }
     });
 
@@ -1827,6 +2048,27 @@ Examples:
 
       if (!options.json && result.ok) {
         console.log(formatMatrixSuggestionsHuman(result.data));
+      }
+    });
+
+  matrixCommand
+    .command("list")
+    .description("List current matrix assignments for campaign.")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (campaignId: string, options: MatrixListOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.matrixList({ campaignId });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatMatrixListHuman(result.data));
       }
     });
 

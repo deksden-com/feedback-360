@@ -85,10 +85,26 @@ Status: Draft (2026-03-03)
   - roles: hr_admin
   - idempotent: optional
   - cli: `model version create --kind ...`
+- `model.version.get`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - cli: `model version get <model_version_id>`
+- `model.version.cloneDraft`
+  - roles: hr_admin
+  - idempotent: optional
+  - cli: `model version clone-draft <model_version_id>`
 - `model.version.list`
   - roles: hr_admin/hr_reader
   - idempotent: yes
   - cli: `model version list`
+- `model.version.upsertDraft`
+  - roles: hr_admin
+  - idempotent: yes
+  - cli: `model version save-draft --payload-json ...`
+- `model.version.publish`
+  - roles: hr_admin
+  - idempotent: yes
+  - cli: `model version publish <model_version_id>`
 
 ## Campaigns
 - `campaign.create`
@@ -118,6 +134,20 @@ Status: Draft (2026-03-03)
   - cli: `campaign participants add`
 - `campaign.participants.remove`
   - roles: hr_admin
+
+## Matrix
+- `matrix.generateSuggested`
+  - roles: hr_admin
+  - idempotent: yes
+  - cli: `matrix generate <campaign_id>`
+- `matrix.list`
+  - roles: hr_admin/hr_reader
+  - idempotent: yes
+  - cli: `matrix list <campaign_id>`
+- `matrix.set`
+  - roles: hr_admin
+  - idempotent: yes
+  - cli: `matrix set <campaign_id> --assignments-json ...`
   - idempotent: yes
   - cli: `campaign participants remove`
 - `campaign.participants.addFromDepartments`

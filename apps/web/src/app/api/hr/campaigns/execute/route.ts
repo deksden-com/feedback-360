@@ -18,6 +18,7 @@ import {
   type CampaignWeightsSetInput,
   type EmployeeListActiveInput,
   type MatrixGenerateSuggestedInput,
+  type MatrixListInput,
   type MatrixSetInput,
   type OperationError,
   createOperationError,
@@ -36,6 +37,7 @@ type HrCampaignAction =
   | "campaign.participants.addFromDepartments"
   | "campaign.snapshot.list"
   | "matrix.generateSuggested"
+  | "matrix.list"
   | "matrix.set"
   | "ai.runForCampaign"
   | "employee.listActive";
@@ -122,6 +124,8 @@ const runAction = async (payload: ExecutePayload, context: AppOperationContext) 
       return client.campaignSnapshotList(input as CampaignSnapshotListInput, context);
     case "matrix.generateSuggested":
       return client.matrixGenerateSuggested(input as MatrixGenerateSuggestedInput, context);
+    case "matrix.list":
+      return client.matrixList(input as MatrixListInput, context);
     case "matrix.set":
       return client.matrixSet(input as MatrixSetInput, context);
     case "ai.runForCampaign":

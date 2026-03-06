@@ -3,6 +3,8 @@ import {
   type CampaignParticipantsAddFromDepartmentsOutput,
   type MatrixGenerateSuggestedInput,
   type MatrixGenerateSuggestedOutput,
+  type MatrixListInput,
+  type MatrixListOutput,
   type MatrixSetInput,
   type MatrixSetOutput,
   type OperationContext,
@@ -13,6 +15,8 @@ import {
   parseCampaignParticipantsAddFromDepartmentsOutput,
   parseMatrixGenerateSuggestedInput,
   parseMatrixGenerateSuggestedOutput,
+  parseMatrixListInput,
+  parseMatrixListOutput,
   parseMatrixSetInput,
   parseMatrixSetOutput,
 } from "@feedback-360/api-contract";
@@ -28,6 +32,10 @@ export type MatrixClientMethods = {
     input: MatrixGenerateSuggestedInput,
     context?: OperationContext,
   ): Promise<OperationResult<MatrixGenerateSuggestedOutput>>;
+  matrixList(
+    input: MatrixListInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<MatrixListOutput>>;
   matrixSet(
     input: MatrixSetInput,
     context?: OperationContext,
@@ -72,6 +80,22 @@ export const createMatrixClientMethods = (runtime: ClientRuntime): MatrixClientM
       input: parsedInput,
       context,
       parseOutput: parseMatrixGenerateSuggestedOutput,
+    });
+  },
+
+  matrixList: async (input, context) => {
+    let parsedInput: MatrixListInput;
+    try {
+      parsedInput = parseMatrixListInput(input);
+    } catch (error) {
+      return errorResult(errorFromUnknown(error, "invalid_input", "Invalid matrixList input."));
+    }
+
+    return runtime.invokeOperation({
+      operation: "matrix.list",
+      input: parsedInput,
+      context,
+      parseOutput: parseMatrixListOutput,
     });
   },
 

@@ -58,6 +58,11 @@ export const getInternalNavItems = (role: MembershipRole): InternalNavItem[] => 
         testId: "nav-hr-org",
       },
       {
+        href: "/hr/models",
+        label: "Модели",
+        testId: "nav-hr-models",
+      },
+      {
         href: "/results/hr",
         label: "HR результаты",
         testId: "nav-results-hr",

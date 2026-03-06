@@ -21,7 +21,11 @@ Status: Draft (2026-03-03)
 - `org department create|move ...`
 - `org set-manager ...`
 - `model version create --kind indicators|levels ...`
+- `model version get <model_version_id>`
+- `model version clone-draft <model_version_id> [--name <name>]`
 - `model version list`
+- `model version save-draft --payload-json <json> [--model-version <id>]`
+- `model version publish <model_version_id>`
 - `campaign create ...`
 - `campaign list [--status <status>]`
 - `campaign get <campaign_id>`
@@ -35,6 +39,7 @@ Status: Draft (2026-03-03)
 - `campaign end <campaign_id>` (manual helper)
 - `campaign progress <campaign_id>`
 - `matrix generate <campaign_id> --from-departments ...`
+- `matrix list <campaign_id>`
 - `matrix set <campaign_id> ...`
 - `questionnaire list ...`
 - `questionnaire get <questionnaire_id>`

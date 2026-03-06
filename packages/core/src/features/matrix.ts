@@ -4,6 +4,8 @@ import {
   type DispatchOperationInput,
   type MatrixGenerateSuggestedInput,
   type MatrixGenerateSuggestedOutput,
+  type MatrixListInput,
+  type MatrixListOutput,
   type MatrixSetInput,
   type MatrixSetOutput,
   type OperationResult,
@@ -15,12 +17,15 @@ import {
   parseCampaignParticipantsAddFromDepartmentsOutput,
   parseMatrixGenerateSuggestedInput,
   parseMatrixGenerateSuggestedOutput,
+  parseMatrixListInput,
+  parseMatrixListOutput,
   parseMatrixSetInput,
   parseMatrixSetOutput,
 } from "@feedback-360/api-contract";
 import {
   addCampaignParticipantsFromDepartments,
   generateSuggestedMatrix,
+  listMatrixAssignments,
   setMatrixAssignments,
 } from "@feedback-360/db";
 
@@ -106,6 +111,40 @@ export const runMatrixGenerateSuggested = async (
     return errorResult(
       errorFromUnknown(error, "invalid_input", "Failed to generate matrix suggestions."),
     );
+  }
+};
+
+export const runMatrixList = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<MatrixListOutput>> => {
+  if (!hasRole(request, ["hr_admin", "hr_reader"])) {
+    return errorResult(
+      createOperationError("forbidden", "Current role cannot inspect matrix assignments.", {
+        operation: "matrix.list",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: MatrixListInput;
+  try {
+    parsedInput = parseMatrixListInput(request.input);
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Invalid matrix.list input."));
+  }
+
+  try {
+    const output = await listMatrixAssignments({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+    });
+    return okResult(parseMatrixListOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to list matrix."));
   }
 };
 
