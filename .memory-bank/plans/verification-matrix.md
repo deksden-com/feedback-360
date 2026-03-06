@@ -358,7 +358,9 @@ Status: Draft (2026-03-03)
   - Must run: login/company switch -> HR campaigns -> questionnaire -> results smoke on local and `beta`, plus `build` and deploy proof.
 
 ### EP-014 execution evidence
-- Planned: evidence будет добавлено после реализации FT-0141..FT-0143.
+- FT-0141: what=feature-area target map, shared-module policy and thin-root rules fixed in SSoT; where=docs + structure audit; how=`pnpm --filter @feedback-360/core test -- --runInBand src/ft/ft-0141-feature-area-target-structure.test.ts`, `pnpm docs:audit`, `rg -n "src/slices|commands/<slice>|v1/<slice>|packages/core/src/slices|packages/cli/src/commands" .memory-bank packages apps/web`; quality_gate=passed; acceptance_gate=passed; result=passed.
+- FT-0142: what=core/api-contract/client/cli moved to explicit feature-area surfaces with thin roots; where=workspace packages; how=`pnpm checks`, `pnpm --filter @feedback-360/api-contract test`, `pnpm --filter @feedback-360/client test`, `pnpm --filter @feedback-360/cli test`; quality_gate=passed; acceptance_gate=passed; result=passed.
+- FT-0143: what=web/lib feature-area realignment, docs sync and route regression proof; where=local workspace + `beta`; how=`pnpm checks`, `pnpm docs:audit`, `cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0143-slice-refactor-regression.spec.ts --workers=1 --reporter=line`, beta smoke/browser proof after deploy; quality_gate=passed; acceptance_gate=passed locally, beta=planned until deploy; artifacts=`.memory-bank/evidence/EP-014/FT-0143/2026-03-06/`; result=in_progress.
 
 ## EP-015 Results experience
 - FT-0151

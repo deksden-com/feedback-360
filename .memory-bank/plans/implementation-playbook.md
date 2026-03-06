@@ -1,5 +1,5 @@
 # Implementation playbook (vertical slice → code)
-Status: Draft (2026-03-03)
+Status: Updated (2026-03-06)
 
 Цель: единообразно превращать план фичи (FT-*) в реализацию в коде, так чтобы:
 - UI/CLI оставались “тонкими”,
@@ -26,10 +26,10 @@ Status: Draft (2026-03-03)
 4) Зафиксировать в FT, какие именно документы прочитаны и какие слои/файлы будут затронуты (contract/core/db/client/cli/tests/docs).
 
 ## 1) Contract: операция, DTO, ошибки (SSoT)
-Target files (примерно, будем уточнять после scaffold):
-- `packages/api-contract/src/v1/<slice>/ops.ts` — объявление операций (имя, input/output/error).
-- `packages/api-contract/src/v1/<slice>/schemas.ts` — runtime-схемы (zod/valibot).
-- `packages/api-contract/src/v1/errors.ts` — общий список error codes (если расширяем).
+Target files (текущее target-состояние):
+- `packages/api-contract/src/<area>.ts` — feature-area public exports для операций/DTO/errors.
+- `packages/api-contract/src/index.ts` — aggregate export surface.
+- `packages/api-contract/src/v1/legacy.ts` — transitional runtime schema/storage layer, пока deeper internal split не завершён.
 
 Checklist:
 - Добавить/обновить операцию в каталоге (и в контракте).
@@ -37,11 +37,10 @@ Checklist:
 - Ошибки наружу только typed (`code/message/details`), без “сырых” исключений.
 
 ## 2) Core: use-case + policy + инварианты
-Target files (примерно):
-- `packages/core/src/slices/<slice>/use-cases/<op>.ts`
-- `packages/core/src/slices/<slice>/policies/*.ts` (если нужна политика)
-- `packages/core/src/errors/*` (если добавляем доменный error code)
-- `packages/core/src/ports/*` (если нужна внешняя зависимость)
+Target files (текущее target-состояние):
+- `packages/core/src/features/<area>.ts`
+- `packages/core/src/shared/*` (только для truly shared helpers)
+- `packages/core/src/index.ts` (composition/dispatch only)
 
 Checklist:
 - Инварианты (lock/анонимность/переходы статусов) — только в core.
@@ -69,23 +68,25 @@ Checklist:
 - Auth/RBAC проверяем до бизнес-логики (но доменные инварианты всё равно в core).
 
 ## 5) Typed client: транспорт + удобные методы
-Target files (примерно):
-- `packages/client/src/http/*` (fetch adapter)
-- `packages/client/src/inproc/*` (если используем)
-- `packages/client/src/index.ts` (экспорт методов)
+Target files (текущее target-состояние):
+- `packages/client/src/features/<area>.ts`
+- `packages/client/src/shared/runtime.ts`
+- `packages/client/src/index.ts`
 
 Checklist:
 - Один контракт для HTTP/in-proc (одинаковые DTO/ошибки).
 - У клиента нет “скрытых” бизнес-правил: только вызов операции и парсинг ответа.
 
 ## 6) CLI: команда 1:1 к операции
-Target files (примерно):
-- `packages/cli/src/commands/<slice>/<command>.ts`
-- `packages/cli/src/formatters/*` (human и `--json`)
+Target files (текущее target-состояние):
+- `packages/cli/src/index.ts` — thin entrypoint.
+- `packages/cli/src/legacy.ts` — transitional command registry until deeper CLI split.
+- `packages/cli/src/formatters/*` (human и `--json`) — when introduced, без доменной логики.
 
 Checklist:
 - CLI по умолчанию human, `--json` отдаёт стабильную схему.
 - Команда не содержит доменных правил — только сбор аргументов и вызов операции.
+- Новый command behavior добавляем рядом с owning feature-area surface и не размазываем по `legacy.ts` без плана последующего выноса.
 
 ## 7) Tests: от инварианта к уровню
 Минимум:
