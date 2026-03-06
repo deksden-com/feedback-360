@@ -65,8 +65,8 @@ Status: Completed (2026-03-06)
 ## Manual verification (deployed environment)
 - Environment:
   - URL: `https://beta.go360go.ru`
-  - Build/commit: `<sha / deployment url>`
-  - Date: `YYYY-MM-DD`
+  - Build/commit: `f96de679b6720017ec4c5bec36755111a9a5a163` / `https://go360go-beta-8obl8oe7c-deksdens-projects.vercel.app`
+  - Date: `2026-03-06`
 - Preconditions:
   - seeded company and users for `hr_admin`, `employee`, `manager`;
   - test data for questionnaire draft/submitted and completed results;
@@ -109,6 +109,7 @@ Status: Completed (2026-03-06)
   - `pnpm checks`
   - `pnpm docs:audit`
   - `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3102 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0143-slice-refactor-regression.spec.ts --workers=1 --reporter=line`
+  - `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web exec playwright test --config playwright/playwright.config.mjs tests/ft-0143-slice-refactor-regression.spec.ts --workers=1 --reporter=line`
 - Result: passed.
 
 ## Acceptance evidence (after implementation)
@@ -117,13 +118,15 @@ Status: Completed (2026-03-06)
   - `pnpm docs:audit`
   - `node scripts/audit-memory-bank.mjs --ep EP-014`
   - `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3102 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0143-slice-refactor-regression.spec.ts --workers=1 --reporter=line`
+  - `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web exec playwright test --config playwright/playwright.config.mjs tests/ft-0143-slice-refactor-regression.spec.ts --workers=1 --reporter=line`
 - Result: passed.
 - Artifacts: `.memory-bank/evidence/EP-014/FT-0143/2026-03-06/step-01-hr-campaign-list.png`, `.memory-bank/evidence/EP-014/FT-0143/2026-03-06/step-02-hr-campaign-detail.png`, `.memory-bank/evidence/EP-014/FT-0143/2026-03-06/step-03-questionnaire-detail.png`, `.memory-bank/evidence/EP-014/FT-0143/2026-03-06/step-04-results-my-dashboard.png`, `.memory-bank/evidence/EP-014/FT-0143/2026-03-06/step-05-results-team-dashboard.png`.
 
 ## CI/CD evidence (mandatory for runtime/deploy/integration changes)
 - GitHub:
-  - CI run URL / check-runs URL
-  - Status: planned
+  - `https://github.com/deksden-com/feedback-360/actions/runs/22770711899`
+  - `https://github.com/deksden-com/feedback-360/actions/runs/22770722046`
+  - Status: passed
 - Vercel:
-  - Deployment URL
-  - Status: planned
+  - `https://go360go-beta-8obl8oe7c-deksdens-projects.vercel.app`
+  - Status: passed
