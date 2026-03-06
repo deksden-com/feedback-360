@@ -39,4 +39,5 @@ jobs:
       - name: Run beta smoke suite
         env:
           PLAYWRIGHT_BASE_URL: https://beta.go360go.ru
+          SUPABASE_DB_POOLER_URL: ${{ secrets.SUPABASE_DB_POOLER_URL }}
         run: pnpm --filter @feedback-360/web test:smoke:beta

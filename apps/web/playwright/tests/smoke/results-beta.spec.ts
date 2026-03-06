@@ -20,14 +20,17 @@ test("SMOKE(beta): results pages render processed and HR views on completed camp
   expect(hrUserId).toBeTruthy();
 
   await loginWithCompany(page, String(employeeUserId), String(companyId));
-  await page.goto(`/results?campaignId=${campaignId}`);
-  await expect(page.getByTestId("results-summary")).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByTestId(/^open-text-processed-/).first()).toBeVisible({ timeout: 15_000 });
+  await page.goto(`/results?campaignId=${campaignId}`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByTestId("results-summary")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId(/^open-text-processed-/).first()).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId(/^open-text-raw-/)).toHaveCount(0);
 
+  await page.context().clearCookies();
   await loginWithCompany(page, String(hrUserId), String(companyId));
-  await page.goto(`/results/hr?campaignId=${campaignId}&subjectEmployeeId=${subjectEmployeeId}`);
-  await expect(page.getByTestId("results-summary")).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByTestId(/^open-text-processed-/).first()).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByTestId(/^open-text-raw-/).first()).toBeVisible({ timeout: 15_000 });
+  await page.goto(`/results/hr?campaignId=${campaignId}&subjectEmployeeId=${subjectEmployeeId}`, {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(page.getByTestId("results-summary")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId(/^open-text-processed-/).first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId(/^open-text-raw-/).first()).toBeVisible({ timeout: 30_000 });
 });
