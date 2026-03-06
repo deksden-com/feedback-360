@@ -156,8 +156,8 @@ const truncateSql = sql.raw(`
   restart identity cascade
 `);
 
-const seedAdvisoryLockSql = sql.raw(`select pg_advisory_lock(360360360)`);
-const seedAdvisoryUnlockSql = sql.raw(`select pg_advisory_unlock(360360360)`);
+const seedAdvisoryLockSql = sql.raw("select pg_advisory_lock(360360360)");
+const seedAdvisoryUnlockSql = sql.raw("select pg_advisory_unlock(360360360)");
 
 const resetDatabase = async (db: ReturnType<typeof createDb>): Promise<void> => {
   await db.execute(truncateSql);
@@ -1037,9 +1037,7 @@ const insertQuestionnaireModelIndicators = async (
 
 const clearQuestionnaireModelSeed = async (db: ReturnType<typeof createDb>): Promise<void> => {
   await db.delete(competencyLevels).where(eq(competencyLevels.companyId, ids.companyMain));
-  await db
-    .delete(competencyIndicators)
-    .where(eq(competencyIndicators.companyId, ids.companyMain));
+  await db.delete(competencyIndicators).where(eq(competencyIndicators.companyId, ids.companyMain));
   await db.delete(competencies).where(eq(competencies.companyId, ids.companyMain));
   await db.delete(competencyGroups).where(eq(competencyGroups.companyId, ids.companyMain));
   await db
