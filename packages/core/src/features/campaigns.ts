@@ -62,6 +62,7 @@ import {
   updateCampaignDraft,
 } from "@feedback-360/db";
 
+import { recordAuditEvent } from "../shared/audit";
 import { ensureContextCompany, hasRole } from "../shared/context";
 
 export const runCampaignList = async (
@@ -196,6 +197,19 @@ export const runCampaignUpdateDraft = async (
       companyId: companyIdOrError,
       ...parsedInput,
     });
+    await recordAuditEvent(request, {
+      companyId: companyIdOrError,
+      campaignId: output.campaignId,
+      eventType: "campaign.draft_updated",
+      objectType: "campaign",
+      objectId: output.campaignId,
+      summary: `Обновлён draft кампании ${output.name}.`,
+      metadataJson: {
+        startAt: output.startAt,
+        endAt: output.endAt,
+        timezone: output.timezone,
+      },
+    });
     return okResult(parseCampaignUpdateDraftOutput(output));
   } catch (error) {
     return errorResult(
@@ -236,6 +250,18 @@ const runCampaignTransition = async (
     const output = await execute({
       companyId: companyIdOrError,
       campaignId: parsedInput.campaignId,
+    });
+    await recordAuditEvent(request, {
+      companyId: companyIdOrError,
+      campaignId: output.campaignId,
+      eventType: `campaign.${operation.split(".")[1]}`,
+      objectType: "campaign",
+      objectId: output.campaignId,
+      summary: `Кампания переведена в состояние ${output.status}.`,
+      metadataJson: {
+        operation,
+        status: output.status,
+      },
     });
     return okResult(parseCampaignTransitionOutput(output));
   } catch (error) {
@@ -325,6 +351,19 @@ export const runCampaignWeightsSet = async (
       manager: parsedInput.manager,
       peers: parsedInput.peers,
       subordinates: parsedInput.subordinates,
+    });
+    await recordAuditEvent(request, {
+      companyId: companyIdOrError,
+      campaignId: output.campaignId,
+      eventType: "campaign.weights_updated",
+      objectType: "campaign",
+      objectId: output.campaignId,
+      summary: "Обновлены веса групп оценивания.",
+      metadataJson: {
+        manager: output.manager,
+        peers: output.peers,
+        subordinates: output.subordinates,
+      },
     });
     return okResult(parseCampaignWeightsSetOutput(output));
   } catch (error) {

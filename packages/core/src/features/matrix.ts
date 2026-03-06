@@ -29,6 +29,7 @@ import {
   setMatrixAssignments,
 } from "@feedback-360/db";
 
+import { recordAuditEvent } from "../shared/audit";
 import { ensureContextCompany, hasRole } from "../shared/context";
 
 export const runCampaignParticipantsAddFromDepartments = async (
@@ -176,6 +177,17 @@ export const runMatrixSet = async (
       companyId: companyIdOrError,
       campaignId: parsedInput.campaignId,
       assignments: parsedInput.assignments,
+    });
+    await recordAuditEvent(request, {
+      companyId: companyIdOrError,
+      campaignId: output.campaignId,
+      eventType: "matrix.updated",
+      objectType: "matrix",
+      objectId: output.campaignId,
+      summary: "Матрица оценивающих обновлена.",
+      metadataJson: {
+        totalAssignments: output.totalAssignments,
+      },
     });
     return okResult(parseMatrixSetOutput(output));
   } catch (error) {

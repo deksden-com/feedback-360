@@ -29,19 +29,32 @@ export async function POST(request: Request) {
     );
   }
 
-  const seeded = await enqueueSeed(() =>
-    runSeedScenario({
-      scenario: payload.scenario as Parameters<typeof runSeedScenario>[0]["scenario"],
-      ...(typeof payload.variant === "string" && payload.variant.trim().length > 0
-        ? { variant: payload.variant.trim() }
-        : {}),
-    }),
-  );
+  const variant =
+    typeof payload.variant === "string" && payload.variant.trim().length > 0
+      ? payload.variant.trim()
+      : undefined;
 
-  return NextResponse.json({
-    ok: true,
-    scenario: seeded.scenario,
-    ...(seeded.variant ? { variant: seeded.variant } : {}),
-    handles: seeded.handles,
-  });
+  try {
+    const seeded = await enqueueSeed(async () => {
+      return runSeedScenario({
+        scenario: payload.scenario as Parameters<typeof runSeedScenario>[0]["scenario"],
+        ...(variant ? { variant } : {}),
+      });
+    });
+
+    return NextResponse.json({
+      ok: true,
+      scenario: seeded.scenario,
+      ...(seeded.variant ? { variant: seeded.variant } : {}),
+      handles: seeded.handles,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: error instanceof Error ? error.message : "Unexpected seed error.",
+      },
+      { status: 500 },
+    );
+  }
 }

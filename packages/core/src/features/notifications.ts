@@ -44,6 +44,7 @@ import {
   upsertNotificationReminderSettings,
 } from "@feedback-360/db";
 
+import { recordAuditEvent } from "../shared/audit";
 import { ensureContextCompany, hasRole } from "../shared/context";
 
 export const runNotificationsGenerateReminders = async (
@@ -193,6 +194,19 @@ export const runNotificationReminderSettingsUpsert = async (
     const output = await upsertNotificationReminderSettings({
       companyId: companyIdOrError,
       ...parsedInput,
+    });
+    await recordAuditEvent(request, {
+      companyId: companyIdOrError,
+      eventType: "notifications.settings_updated",
+      objectType: "notification_settings",
+      objectId: companyIdOrError,
+      summary: "Обновлены reminder settings компании.",
+      metadataJson: {
+        reminderScheduledHour: output.reminderScheduledHour,
+        quietHoursStart: output.quietHoursStart,
+        quietHoursEnd: output.quietHoursEnd,
+        reminderWeekdays: output.reminderWeekdays,
+      },
     });
     return okResult(
       parseNotificationReminderSettingsOutput({

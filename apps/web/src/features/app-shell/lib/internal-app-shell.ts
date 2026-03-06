@@ -77,6 +77,11 @@ export const getInternalNavItems = (role: MembershipRole): InternalNavItem[] => 
         label: "Уведомления",
         testId: "nav-hr-notifications",
       },
+      {
+        href: "/ops",
+        label: "Ops",
+        testId: "nav-ops",
+      },
     );
   }
 

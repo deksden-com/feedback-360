@@ -16,6 +16,9 @@ import {
   type NotificationTemplatePreviewOutput,
   type OperationError,
   type OperationResult,
+  type OpsAiDiagnosticsListOutput,
+  type OpsAuditListOutput,
+  type OpsHealthGetOutput,
   type QuestionnaireStatus,
   type SeedScenario,
   createOperationError,
@@ -224,6 +227,24 @@ type NotificationDeliveriesOptions = {
   campaign?: string;
   status?: "pending" | "sent" | "failed" | "dead_letter" | "retry_scheduled";
   channel?: "email";
+};
+
+type OpsHealthOptions = {
+  json?: boolean;
+};
+
+type OpsAiOptions = {
+  json?: boolean;
+  campaign?: string;
+  status?: "queued" | "completed" | "failed";
+};
+
+type OpsAuditOptions = {
+  json?: boolean;
+  campaign?: string;
+  actorUserId?: string;
+  eventType?: string;
+  limit?: string;
 };
 
 type EmployeeUpsertOptions = {
@@ -644,6 +665,33 @@ const formatDeliveryDiagnosticsHuman = (data: NotificationDeliveryDiagnosticsOut
     ...data.items.map(
       (item) =>
         `- ${item.status} ${item.templateKey} campaign=${item.campaignName} to=${item.toEmail} attempts=${item.attempts} nextRetryAt=${item.nextRetryAt ?? "none"}`,
+    ),
+  ].join("\n");
+};
+
+const formatOpsHealthHuman = (data: OpsHealthGetOutput): string => {
+  return [
+    `Ops health: env=${data.appEnv}, version=${data.appVersion}, commit=${data.gitCommitSha ?? "n/a"}, branch=${data.gitBranch ?? "n/a"}`,
+    ...data.checks.map((check) => `- ${check.label}: ${check.status} (${check.detail})`),
+  ].join("\n");
+};
+
+const formatOpsAiHuman = (data: OpsAiDiagnosticsListOutput): string => {
+  return [
+    `AI diagnostics: ${data.items.length}`,
+    ...data.items.map(
+      (item) =>
+        `- ${item.status} ${item.provider} campaign=${item.campaignId} job=${item.aiJobId} receiptDeliveries=${item.receipt?.deliveryCount ?? 0}`,
+    ),
+  ].join("\n");
+};
+
+const formatOpsAuditHuman = (data: OpsAuditListOutput): string => {
+  return [
+    `Audit events: ${data.items.length}`,
+    ...data.items.map(
+      (item) =>
+        `- ${item.createdAt} ${item.source}/${item.eventType} object=${item.objectType}:${item.objectId ?? "n/a"} actor=${item.actorUserId ?? "redacted"} summary=${item.summary}`,
     ),
   ].join("\n");
 };
@@ -2528,6 +2576,99 @@ Examples:
 
       if (!options.json && result.ok) {
         console.log(formatAiRunHuman(result.data));
+      }
+    });
+
+  const opsCommand = program
+    .command("ops")
+    .description("Operational diagnostics and release helpers.");
+
+  opsCommand
+    .command("health")
+    .description("Show environment health, release metadata and key operational checks.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: OpsHealthOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.opsHealthGet({});
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatOpsHealthHuman(result.data));
+      }
+    });
+
+  opsCommand
+    .command("ai")
+    .description("List AI jobs and webhook receipt diagnostics.")
+    .option("--campaign <campaign_id>", "Campaign identifier filter.")
+    .option("--status <status>", "Status filter (queued | completed | failed).")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: OpsAiOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.opsAiDiagnosticsList({
+        ...(options.campaign ? { campaignId: options.campaign } : {}),
+        ...(options.status ? { status: options.status } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatOpsAiHuman(result.data));
+      }
+    });
+
+  opsCommand
+    .command("audit")
+    .description("List audit trail and release events for active company.")
+    .option("--campaign <campaign_id>", "Campaign identifier filter.")
+    .option("--actor-user-id <user_id>", "Actor user identifier filter.")
+    .option("--event-type <event_type>", "Exact event type filter.")
+    .option("--limit <n>", "Max audit rows to return (default: 50).")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: OpsAuditOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      let parsedLimit: number | undefined;
+      if (options.limit !== undefined) {
+        const value = Number(options.limit);
+        if (!Number.isInteger(value) || value < 1) {
+          emitError(
+            createOperationError("invalid_input", "--limit must be an integer >= 1.", {
+              value: options.limit,
+            }),
+            options.json,
+          );
+          return;
+        }
+        parsedLimit = value;
+      }
+
+      const result = await client.opsAuditList({
+        ...(options.campaign ? { campaignId: options.campaign } : {}),
+        ...(options.actorUserId ? { actorUserId: options.actorUserId } : {}),
+        ...(options.eventType ? { eventType: options.eventType } : {}),
+        ...(parsedLimit ? { limit: parsedLimit } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatOpsAuditHuman(result.data));
       }
     });
 

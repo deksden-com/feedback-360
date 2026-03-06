@@ -39,6 +39,9 @@ import {
   type NotificationsDispatchOutboxOutput,
   type NotificationsGenerateRemindersOutput,
   type OperationResult,
+  type OpsAiDiagnosticsListOutput,
+  type OpsAuditListOutput,
+  type OpsHealthGetOutput,
   type OrgDepartmentMoveOutput,
   type OrgManagerSetOutput,
   type QuestionnaireGetDraftOutput,
@@ -102,6 +105,7 @@ import {
   runNotificationsDispatchOutbox,
   runNotificationsGenerateReminders,
 } from "./features/notifications";
+import { runOpsAiDiagnosticsList, runOpsAuditList, runOpsHealthGet } from "./features/ops";
 import {
   runDepartmentList,
   runDepartmentUpsert,
@@ -144,6 +148,9 @@ type DispatchOutput =
   | CampaignProgressGetOutput
   | NotificationsGenerateRemindersOutput
   | NotificationsDispatchOutboxOutput
+  | OpsHealthGetOutput
+  | OpsAiDiagnosticsListOutput
+  | OpsAuditListOutput
   | NotificationReminderSettingsOutput
   | NotificationReminderPreviewOutput
   | NotificationTemplateCatalogOutput
@@ -229,6 +236,9 @@ const operationHandlers: Partial<Record<KnownOperation, OperationHandler>> = {
   "matrix.list": runMatrixList,
   "matrix.set": runMatrixSet,
   "ai.runForCampaign": runAiRunForCampaign,
+  "ops.health.get": runOpsHealthGet,
+  "ops.aiDiagnostics.list": runOpsAiDiagnosticsList,
+  "ops.audit.list": runOpsAuditList,
 };
 
 const clientLocalOperationErrors: Record<"client.setActiveCompany" | "seed.run", string> = {

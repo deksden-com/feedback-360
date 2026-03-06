@@ -2,6 +2,7 @@ export * from "./connection-string";
 export * from "./campaigns";
 export * from "./db";
 export * from "./ai";
+export * from "./audit";
 export * from "./employees";
 export * from "./identity";
 export * from "./matrix";
