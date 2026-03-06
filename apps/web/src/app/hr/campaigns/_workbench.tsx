@@ -1,9 +1,11 @@
 "use client";
 
+import { InlineBanner } from "@/components/page-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getFriendlyErrorCopy } from "@/lib/page-state";
 import type {
   CampaignProgressGetOutput,
   EmployeeListActiveOutput,
@@ -95,6 +97,12 @@ export const HrCampaignWorkbench = ({
     }
     return progress.statusCounts.notStarted + progress.statusCounts.inProgress;
   }, [progress]);
+  const friendlyError = error
+    ? getFriendlyErrorCopy(error, {
+        title: "Не удалось выполнить действие",
+        description: "Проверьте параметры формы и попробуйте снова.",
+      })
+    : null;
 
   const execute = useCallback(
     async <T,>(action: HrCampaignAction, input: unknown): Promise<ActionResponse<T>> => {
@@ -706,18 +714,15 @@ export const HrCampaignWorkbench = ({
         </CardContent>
       </Card>
 
-      {message ? (
-        <Card data-testid="hr-campaign-message">
-          <CardContent className="pt-6 text-sm">{message}</CardContent>
-        </Card>
-      ) : null}
+      {message ? <InlineBanner description={message} testId="hr-campaign-message" /> : null}
 
       {error ? (
-        <Card data-testid="hr-campaign-error">
-          <CardContent className="pt-6 text-sm text-destructive">
-            {error.code}: {error.message}
-          </CardContent>
-        </Card>
+        <InlineBanner
+          title={friendlyError?.title}
+          description={friendlyError?.description ?? "Попробуйте снова."}
+          tone="error"
+          testId="hr-campaign-error"
+        />
       ) : null}
     </div>
   );

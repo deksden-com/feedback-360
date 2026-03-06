@@ -46,32 +46,18 @@ export const ResultsPageLayout = ({
   children: ReactNode;
 }) => {
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-6xl p-6">
-      <div className="w-full space-y-4">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-          <p className="text-muted-foreground">{subtitle}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline">
-            <a href="/">На главную</a>
-          </Button>
-          <Button asChild variant="outline">
-            <a href="/questionnaires">Мои анкеты</a>
-          </Button>
-          <Button asChild variant="outline">
-            <a href="/results">Мои результаты</a>
-          </Button>
-          <Button asChild variant="outline">
-            <a href="/results/team">Результаты команды</a>
-          </Button>
-          <Button asChild variant="outline">
-            <a href="/results/hr">HR результаты</a>
-          </Button>
-        </div>
-        {children}
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
+        <p className="text-muted-foreground">{subtitle}</p>
       </div>
-    </main>
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="outline">
+          <a href="/results">Сбросить фильтры</a>
+        </Button>
+      </div>
+      {children}
+    </div>
   );
 };
 

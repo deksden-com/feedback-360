@@ -294,3 +294,117 @@ Status: Draft (2026-03-03)
 - FT-0104
   - Must add test: release rehearsal checklist with CI/deploy/smoke evidence bundle.
   - Must run: one end-to-end rehearsal before `prod` promotion.
+
+## EP-011 App shell and navigation
+- FT-0111
+  - Must add test: `apps/web/playwright/tests/ft-0111-app-shell.spec.ts`
+  - Must run: login -> company select -> internal nav traversal under shared shell.
+- FT-0112
+  - Must add test: `apps/web/playwright/tests/ft-0112-role-home-dashboards.spec.ts`
+  - Must run: employee/manager/hr_admin role-aware home dashboards from seeded states.
+- FT-0113
+  - Must add test: `apps/web/playwright/tests/ft-0113-shared-states.spec.ts`
+  - Must run: empty/loading/error states on local + one browser-smoke on `beta`.
+
+### EP-011 execution evidence
+- FT-0111: what=internal app shell + role-aware navigation across existing internal routes; where=local; how=`pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `pnpm --filter @feedback-360/web test`, `pnpm --filter @feedback-360/web build`, `cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0111-app-shell.spec.ts --reporter=line`; quality_gate=passed; acceptance_gate=passed (`S7_campaign_started_some_submitted`: employee home/questionnaires shell, manager team-results nav, HR campaigns nav, company context preserved); artifacts=`.memory-bank/evidence/EP-011/FT-0111/2026-03-06/step-01-employee-home-shell.png`, `.memory-bank/evidence/EP-011/FT-0111/2026-03-06/step-02-questionnaires-shell.png`, `.memory-bank/evidence/EP-011/FT-0111/2026-03-06/step-03-manager-team-results-shell.png`, `.memory-bank/evidence/EP-011/FT-0111/2026-03-06/step-04-hr-campaigns-shell.png`; result=passed.
+- FT-0112: what=role-aware home dashboards for employee/manager/HR; where=local (dedicated Next dev server on `127.0.0.1:3101` to avoid seed collisions in shared webServer mode); how=`pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `pnpm --filter @feedback-360/web test`, `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3101 cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0111-app-shell.spec.ts tests/ft-0112-role-home-dashboards.spec.ts --workers=1 --reporter=line`; quality_gate=passed (`lint/typecheck/test`), build re-run kept separate from active dev server; acceptance_gate=passed (`2 passed`, employee→questionnaires, manager→results/team, hr_admin→hr/campaigns); artifacts=`.memory-bank/evidence/EP-011/FT-0112/2026-03-06/step-01-employee-home-dashboard.png`, `.memory-bank/evidence/EP-011/FT-0112/2026-03-06/step-02-manager-home-dashboard.png`, `.memory-bank/evidence/EP-011/FT-0112/2026-03-06/step-03-hr-home-dashboard.png`; result=passed.
+- FT-0113: what=shared loading/empty/error states for internal pages with friendly copy and reusable page-state components; where=local (dedicated Next dev server on `127.0.0.1:3101`) + beta manual verification path; how=`pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `pnpm --filter @feedback-360/web test`, `pnpm --filter @feedback-360/web build`, `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3101 cd apps/web && node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0113-shared-states.spec.ts --workers=1 --reporter=line`; quality_gate=passed; acceptance_gate=passed (`3 passed`: questionnaires empty CTA, results friendly error without backend leak, delayed navigation loading state); artifacts=`.memory-bank/evidence/EP-011/FT-0113/2026-03-06/step-01-questionnaires-empty-state.png`, `.memory-bank/evidence/EP-011/FT-0113/2026-03-06/step-02-results-error-state.png`, `.memory-bank/evidence/EP-011/FT-0113/2026-03-06/step-03-shared-loading-state.png`; result=passed.
+
+## EP-012 HR campaigns UX
+- FT-0121
+  - Must add test: `apps/web/playwright/tests/ft-0121-campaign-list.spec.ts`
+  - Must run: HR list/filter/open campaign flow on local + `beta`.
+- FT-0122
+  - Must add test: `apps/web/playwright/tests/ft-0122-campaign-draft-config.spec.ts`
+  - Must run: create/edit draft campaign flow with validation and persistence.
+- FT-0123
+  - Must add test: `apps/web/playwright/tests/ft-0123-campaign-detail-dashboard.spec.ts`
+  - Must run: start -> progress -> lock banner -> AI retry surface.
+
+### EP-012 execution evidence
+- Planned: evidence будет добавлено после реализации FT-0121..FT-0123.
+
+## EP-013 Questionnaire experience
+- FT-0131
+  - Must add test: `apps/web/playwright/tests/ft-0131-questionnaire-inbox.spec.ts`
+  - Must run: questionnaire inbox filters and resume-draft flow.
+- FT-0132
+  - Must add test: `apps/web/playwright/tests/ft-0132-questionnaire-fill-flow.spec.ts`
+  - Must run: fill -> save draft -> reload -> submit.
+- FT-0133
+  - Must add test: `apps/web/playwright/tests/ft-0133-questionnaire-readonly.spec.ts`
+  - Must run: submitted + ended read-only behavior on local and `beta`.
+
+### EP-013 execution evidence
+- Planned: evidence будет добавлено после реализации FT-0131..FT-0133.
+
+## EP-014 Results experience
+- FT-0141
+  - Must add test: `apps/web/playwright/tests/ft-0141-employee-results-dashboard.spec.ts`
+  - Must run: employee completed-results dashboard without raw comments.
+- FT-0142
+  - Must add test: `apps/web/playwright/tests/ft-0142-manager-results-dashboard.spec.ts`
+  - Must run: manager team results with anonymity/hide-merge behavior.
+- FT-0143
+  - Must add test: `apps/web/playwright/tests/ft-0143-hr-results-workbench.spec.ts`
+  - Must run: `hr_admin` vs `hr_reader` visibility comparison with processed/raw shaping.
+
+### EP-014 execution evidence
+- Planned: evidence будет добавлено после реализации FT-0141..FT-0143.
+
+## EP-015 People and org admin
+- FT-0151
+  - Must add test: `apps/web/playwright/tests/ft-0151-employee-directory.spec.ts`
+  - Must run: employee search/filter/open profile flow.
+- FT-0152
+  - Must add test: `apps/web/playwright/tests/ft-0152-employee-profile.spec.ts`
+  - Must run: create employee + provision/update user email and role.
+- FT-0153
+  - Must add test: `apps/web/playwright/tests/ft-0153-org-editor.spec.ts`
+  - Must run: create/update department + move employee + history check.
+
+### EP-015 execution evidence
+- Planned: evidence будет добавлено после реализации FT-0151..FT-0153.
+
+## EP-016 Competency models and matrix UI
+- FT-0161
+  - Must add test: `apps/web/playwright/tests/ft-0161-model-catalog.spec.ts`
+  - Must run: model list/filter/clone draft flow.
+- FT-0162
+  - Must add test: `apps/web/playwright/tests/ft-0162-model-editor.spec.ts`
+  - Must run: edit model draft, validate structure/weights, publish version.
+- FT-0163
+  - Must add test: `apps/web/playwright/tests/ft-0163-matrix-builder.spec.ts`
+  - Must run: autogenerate matrix -> manual edit -> lock preview/lock state.
+
+### EP-016 execution evidence
+- Planned: evidence будет добавлено после реализации FT-0161..FT-0163.
+
+## EP-017 Notification center UI
+- FT-0171
+  - Must add test: `apps/web/playwright/tests/ft-0171-reminder-schedule-editor.spec.ts`
+  - Must run: reminder schedule edit with timezone/quiet-hours preview.
+- FT-0172
+  - Must add test: `apps/web/playwright/tests/ft-0172-template-catalog.spec.ts`
+  - Must run: template preview and variable inspection flow.
+- FT-0173
+  - Must add test: `apps/web/playwright/tests/ft-0173-delivery-diagnostics.spec.ts`
+  - Must run: outbox/delivery diagnostics filters and failed-attempt drill-down.
+
+### EP-017 execution evidence
+- Planned: evidence будет добавлено после реализации FT-0171..FT-0173.
+
+## EP-018 Admin and ops UI
+- FT-0181
+  - Must add test: `apps/web/playwright/tests/ft-0181-health-release-dashboard.spec.ts`
+  - Must run: health/build/smoke indicators against mocked local data + `beta` browser-smoke.
+- FT-0182
+  - Must add test: `apps/web/playwright/tests/ft-0182-ai-diagnostics.spec.ts`
+  - Must run: AI job/webhook diagnostics with idempotency markers.
+- FT-0183
+  - Must add test: `apps/web/playwright/tests/ft-0183-audit-console.spec.ts`
+  - Must run: audit trail filters by campaign/actor/action and release-event traceability.
+
+### EP-018 execution evidence
+- Planned: evidence будет добавлено после реализации FT-0181..FT-0183.

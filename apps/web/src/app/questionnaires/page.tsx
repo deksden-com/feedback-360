@@ -1,6 +1,15 @@
+import { InternalAppShell } from "@/components/internal-app-shell";
+import {
+  InlineBanner,
+  PageEmptyState,
+  PageErrorState,
+  PageStateScreen,
+} from "@/components/page-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { applyDebugPageDelay } from "@/lib/debug-page-delay";
 import { resolveAppOperationContext } from "@/lib/operation-context";
+import { getFriendlyErrorCopy } from "@/lib/page-state";
 import { createInprocClient } from "@feedback-360/client";
 import { redirect } from "next/navigation";
 
@@ -28,6 +37,9 @@ export default async function QuestionnairesPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = searchParams ? await searchParams : undefined;
+  await applyDebugPageDelay(params?.debugDelayMs);
+
   const resolved = await resolveAppOperationContext();
   if (!resolved.ok) {
     if (resolved.error.code === "unauthenticated") {
@@ -39,19 +51,22 @@ export default async function QuestionnairesPage({
   }
 
   if (!resolved.ok) {
+    const state = getFriendlyErrorCopy(resolved.error, {
+      title: "Не удалось загрузить анкеты",
+      description: "Попробуйте обновить страницу или войти заново.",
+    });
+
     return (
-      <main className="mx-auto flex min-h-dvh w-full max-w-3xl items-center p-6">
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>Не удалось загрузить анкеты</CardTitle>
-            <CardDescription>{resolved.error.message}</CardDescription>
-          </CardHeader>
-        </Card>
-      </main>
+      <PageStateScreen>
+        <PageErrorState
+          title={state.title}
+          description={state.description}
+          actions={[{ href: "/auth/login", label: "Перейти ко входу", variant: "outline" }]}
+        />
+      </PageStateScreen>
     );
   }
 
-  const params = searchParams ? await searchParams : undefined;
   const saved = getQueryValue(params?.saved) === "1";
   const submitted = getQueryValue(params?.submitted) === "1";
   const errorCode = getQueryValue(params?.error);
@@ -59,84 +74,78 @@ export default async function QuestionnairesPage({
   const client = createInprocClient();
   const questionnaires = await client.questionnaireListAssigned({}, resolved.context);
   if (!questionnaires.ok) {
+    const state = getFriendlyErrorCopy(questionnaires.error, {
+      title: "Не удалось загрузить анкеты",
+      description: "Список анкет временно недоступен. Попробуйте обновить страницу чуть позже.",
+    });
+
     return (
-      <main className="mx-auto flex min-h-dvh w-full max-w-4xl items-center p-6">
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>Не удалось загрузить анкеты</CardTitle>
-            <CardDescription>{questionnaires.error.message}</CardDescription>
-          </CardHeader>
-        </Card>
-      </main>
+      <PageStateScreen maxWidthClassName="max-w-4xl">
+        <PageErrorState
+          title={state.title}
+          description={state.description}
+          actions={[{ href: "/", label: "Вернуться на главную", variant: "outline" }]}
+        />
+      </PageStateScreen>
     );
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-5xl p-6">
-      <div className="w-full space-y-4">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Мои анкеты</h1>
-          <p className="text-muted-foreground">
-            Заполняйте анкеты, сохраняйте черновик и отправляйте итоговый ответ.
-          </p>
+    <InternalAppShell
+      context={resolved.context}
+      currentPath="/questionnaires"
+      title="Мои анкеты"
+      subtitle="Заполняйте анкеты, сохраняйте черновик и отправляйте итоговый ответ."
+    >
+      {saved ? (
+        <InlineBanner description="Черновик сохранён." tone="success" testId="flash-saved" />
+      ) : null}
+      {submitted ? (
+        <InlineBanner description="Анкета отправлена." tone="success" testId="flash-submitted" />
+      ) : null}
+      {errorCode ? (
+        <InlineBanner
+          description={
+            errorLabels[errorCode] ??
+            "Не удалось выполнить действие. Обновите страницу и попробуйте снова."
+          }
+          tone="error"
+          testId="flash-error"
+        />
+      ) : null}
+
+      {questionnaires.data.items.length === 0 ? (
+        <PageEmptyState
+          title="Нет назначенных анкет"
+          description="Когда вас добавят в матрицу оценивания, анкеты появятся в этом списке."
+          actions={[{ href: "/", label: "Перейти на главную", variant: "outline" }]}
+          testId="questionnaire-empty"
+        />
+      ) : (
+        <div className="grid gap-4">
+          {questionnaires.data.items.map((item) => (
+            <Card
+              key={item.questionnaireId}
+              data-testid={`questionnaire-row-${item.questionnaireId}`}
+            >
+              <CardHeader className="space-y-2">
+                <CardTitle className="text-lg">Анкета #{item.questionnaireId}</CardTitle>
+                <CardDescription>
+                  Статус:{" "}
+                  <span data-testid={`questionnaire-status-${item.questionnaireId}`}>
+                    {statusLabels[item.status] ?? item.status}
+                  </span>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                <Button asChild data-testid={`open-questionnaire-${item.questionnaireId}`}>
+                  <a href={`/questionnaires/${item.questionnaireId}`}>Открыть</a>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-
-        {saved ? (
-          <Card className="border-emerald-300 bg-emerald-50" data-testid="flash-saved">
-            <CardContent className="py-3 text-sm text-emerald-900">Черновик сохранён.</CardContent>
-          </Card>
-        ) : null}
-        {submitted ? (
-          <Card className="border-emerald-300 bg-emerald-50" data-testid="flash-submitted">
-            <CardContent className="py-3 text-sm text-emerald-900">Анкета отправлена.</CardContent>
-          </Card>
-        ) : null}
-        {errorCode ? (
-          <Card className="border-destructive/40 bg-destructive/5" data-testid="flash-error">
-            <CardContent className="py-3 text-sm text-destructive">
-              {errorLabels[errorCode] ?? `Ошибка: ${errorCode}`}
-            </CardContent>
-          </Card>
-        ) : null}
-
-        {questionnaires.data.items.length === 0 ? (
-          <Card data-testid="questionnaire-empty">
-            <CardHeader>
-              <CardTitle className="text-xl">Нет назначенных анкет</CardTitle>
-              <CardDescription>
-                Когда вас добавят в матрицу оценивания, анкеты появятся в этом списке.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {questionnaires.data.items.map((item) => (
-              <Card
-                key={item.questionnaireId}
-                data-testid={`questionnaire-row-${item.questionnaireId}`}
-              >
-                <CardHeader className="space-y-2">
-                  <CardTitle className="text-lg">Анкета #{item.questionnaireId}</CardTitle>
-                  <CardDescription>
-                    Статус:{" "}
-                    <span data-testid={`questionnaire-status-${item.questionnaireId}`}>
-                      {statusLabels[item.status] ?? item.status}
-                    </span>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-wrap gap-2">
-                  <Button asChild data-testid={`open-questionnaire-${item.questionnaireId}`}>
-                    <a href={`/questionnaires/${item.questionnaireId}`}>Открыть</a>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <a href="/">На главную</a>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-    </main>
+      )}
+    </InternalAppShell>
   );
 }

@@ -1,6 +1,10 @@
+import { InternalAppShell } from "@/components/internal-app-shell";
+import { InlineBanner, PageErrorState, PageStateScreen } from "@/components/page-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { applyDebugPageDelay } from "@/lib/debug-page-delay";
 import { resolveAppOperationContext } from "@/lib/operation-context";
+import { getFriendlyErrorCopy } from "@/lib/page-state";
 import { createInprocClient } from "@feedback-360/client";
 import { redirect } from "next/navigation";
 
@@ -57,20 +61,25 @@ export default async function QuestionnaireDetailsPage({
   }
 
   if (!resolved.ok) {
+    const state = getFriendlyErrorCopy(resolved.error, {
+      title: "Не удалось открыть анкету",
+      description: "Попробуйте обновить страницу или вернуться к списку анкет.",
+    });
+
     return (
-      <main className="mx-auto flex min-h-dvh w-full max-w-3xl items-center p-6">
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>Не удалось открыть анкету</CardTitle>
-            <CardDescription>{resolved.error.message}</CardDescription>
-          </CardHeader>
-        </Card>
-      </main>
+      <PageStateScreen>
+        <PageErrorState
+          title={state.title}
+          description={state.description}
+          actions={[{ href: "/questionnaires", label: "К списку анкет", variant: "outline" }]}
+        />
+      </PageStateScreen>
     );
   }
 
   const routeParams = await params;
   const query = searchParams ? await searchParams : undefined;
+  await applyDebugPageDelay(query?.debugDelayMs);
   const saved = getQueryValue(query?.saved) === "1";
   const submitted = getQueryValue(query?.submitted) === "1";
   const errorCode = getQueryValue(query?.error);
@@ -84,20 +93,19 @@ export default async function QuestionnaireDetailsPage({
   );
 
   if (!questionnaire.ok) {
+    const state = getFriendlyErrorCopy(questionnaire.error, {
+      title: "Не удалось открыть анкету",
+      description: "Анкета недоступна, была удалена или не относится к вашей активной компании.",
+    });
+
     return (
-      <main className="mx-auto flex min-h-dvh w-full max-w-3xl items-center p-6">
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>Не удалось открыть анкету</CardTitle>
-            <CardDescription>{questionnaire.error.message}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline">
-              <a href="/questionnaires">К списку анкет</a>
-            </Button>
-          </CardContent>
-        </Card>
-      </main>
+      <PageStateScreen>
+        <PageErrorState
+          title={state.title}
+          description={state.description}
+          actions={[{ href: "/questionnaires", label: "К списку анкет", variant: "outline" }]}
+        />
+      </PageStateScreen>
     );
   }
 
@@ -106,114 +114,104 @@ export default async function QuestionnaireDetailsPage({
   const readonly = isReadonlyState(questionnaire.data.status, questionnaire.data.campaignStatus);
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-4xl p-6">
-      <div className="w-full space-y-4">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Анкета #{questionnaire.data.questionnaireId}
-          </h1>
-          <p className="text-muted-foreground">
-            Статус анкеты:{" "}
-            {questionnaireStatusLabels[questionnaire.data.status] ?? questionnaire.data.status}
-            {" · "}
-            Кампания:{" "}
-            {campaignStatusLabels[questionnaire.data.campaignStatus] ??
-              questionnaire.data.campaignStatus}
-          </p>
-        </div>
+    <InternalAppShell
+      context={resolved.context}
+      currentPath="/questionnaires"
+      title={`Анкета #${questionnaire.data.questionnaireId}`}
+      subtitle={`Статус анкеты: ${
+        questionnaireStatusLabels[questionnaire.data.status] ?? questionnaire.data.status
+      } · Кампания: ${
+        campaignStatusLabels[questionnaire.data.campaignStatus] ?? questionnaire.data.campaignStatus
+      }`}
+    >
+      {saved ? (
+        <InlineBanner
+          description="Черновик сохранён."
+          tone="success"
+          testId="questionnaire-flash-saved"
+        />
+      ) : null}
+      {submitted ? (
+        <InlineBanner
+          description="Анкета отправлена."
+          tone="success"
+          testId="questionnaire-flash-submitted"
+        />
+      ) : null}
+      {errorCode ? (
+        <InlineBanner
+          description="Не удалось выполнить действие. Обновите страницу и попробуйте снова."
+          tone="error"
+          testId="questionnaire-flash-error"
+        />
+      ) : null}
+      {readonly ? (
+        <InlineBanner
+          description="Анкета доступна только для чтения."
+          tone="warning"
+          testId="readonly-banner"
+        />
+      ) : null}
 
-        {saved ? (
-          <Card
-            className="border-emerald-300 bg-emerald-50"
-            data-testid="questionnaire-flash-saved"
-          >
-            <CardContent className="py-3 text-sm text-emerald-900">Черновик сохранён.</CardContent>
-          </Card>
-        ) : null}
-        {submitted ? (
-          <Card
-            className="border-emerald-300 bg-emerald-50"
-            data-testid="questionnaire-flash-submitted"
-          >
-            <CardContent className="py-3 text-sm text-emerald-900">Анкета отправлена.</CardContent>
-          </Card>
-        ) : null}
-        {errorCode ? (
-          <Card
-            className="border-destructive/40 bg-destructive/5"
-            data-testid="questionnaire-flash-error"
-          >
-            <CardContent className="py-3 text-sm text-destructive">Ошибка: {errorCode}</CardContent>
-          </Card>
-        ) : null}
-        {readonly ? (
-          <Card className="border-amber-300 bg-amber-50" data-testid="readonly-banner">
-            <CardContent className="py-3 text-sm text-amber-950">
-              Анкета доступна только для чтения.
-            </CardContent>
-          </Card>
-        ) : null}
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Комментарий по компетенции (MVP)</CardTitle>
-            <CardDescription>
-              На этапе MVP форма анкеты упрощена до текстового поля для проверки draft/save/submit.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <form action="/api/questionnaires/draft" method="post" className="space-y-3">
-              <input
-                type="hidden"
-                name="questionnaireId"
-                value={questionnaire.data.questionnaireId}
-              />
-              <input
-                type="hidden"
-                name="returnTo"
-                value={`/questionnaires/${questionnaire.data.questionnaireId}`}
-              />
-              <textarea
-                name="note"
-                defaultValue={note}
-                rows={8}
-                className="w-full rounded-md border p-3 text-sm"
-                placeholder="Опишите наблюдения и примеры поведения."
-                disabled={readonly}
-                data-testid="questionnaire-note"
-              />
-              <div className="flex flex-wrap gap-2">
-                <Button type="submit" disabled={readonly} data-testid="save-draft-button">
-                  Сохранить черновик
-                </Button>
-                <Button asChild variant="outline">
-                  <a href="/questionnaires">К списку анкет</a>
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Отправка анкеты</CardTitle>
-            <CardDescription>После отправки анкета становится неизменяемой.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form action="/api/questionnaires/submit" method="post" className="space-y-3">
-              <input
-                type="hidden"
-                name="questionnaireId"
-                value={questionnaire.data.questionnaireId}
-              />
-              <input type="hidden" name="returnTo" value="/questionnaires" />
-              <Button type="submit" disabled={readonly} data-testid="submit-questionnaire-button">
-                Отправить анкету
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Комментарий по компетенции (MVP)</CardTitle>
+          <CardDescription>
+            На этапе MVP форма анкеты упрощена до текстового поля для проверки draft/save/submit.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <form action="/api/questionnaires/draft" method="post" className="space-y-3">
+            <input
+              type="hidden"
+              name="questionnaireId"
+              value={questionnaire.data.questionnaireId}
+            />
+            <input
+              type="hidden"
+              name="returnTo"
+              value={`/questionnaires/${questionnaire.data.questionnaireId}`}
+            />
+            <textarea
+              name="note"
+              defaultValue={note}
+              rows={8}
+              className="w-full rounded-md border p-3 text-sm"
+              placeholder="Опишите наблюдения и примеры поведения."
+              disabled={readonly}
+              data-testid="questionnaire-note"
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" disabled={readonly} data-testid="save-draft-button">
+                Сохранить черновик
               </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </main>
+              <Button asChild variant="outline">
+                <a href="/questionnaires">К списку анкет</a>
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Отправка анкеты</CardTitle>
+          <CardDescription>После отправки анкета становится неизменяемой.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action="/api/questionnaires/submit" method="post" className="space-y-3">
+            <input
+              type="hidden"
+              name="questionnaireId"
+              value={questionnaire.data.questionnaireId}
+            />
+            <input type="hidden" name="returnTo" value="/questionnaires" />
+            <Button type="submit" disabled={readonly} data-testid="submit-questionnaire-button">
+              Отправить анкету
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </InternalAppShell>
   );
 }
