@@ -60,6 +60,8 @@ HR видит полный разбор результатов и коммент
 ## Acceptance evidence (2026-03-06)
 - Local acceptance:
   - `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3101 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0101-results-privacy.spec.ts tests/ft-0153-hr-results-workbench.spec.ts --workers=1 --reporter=line` → passed.
+- Beta acceptance:
+  - `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0101-results-privacy.spec.ts tests/ft-0153-hr-results-workbench.spec.ts --workers=1 --reporter=line` → passed after merge commit `82eb507975ceda162f29e53c42cfd0ba8fb2bcaf`.
 - Covered acceptance:
   - `hr_admin` видит raw + processed в combined mode;
   - `hr_admin` может переключиться в `Processed only`, и raw исчезает из DOM;
@@ -86,3 +88,5 @@ HR видит полный разбор результатов и коммент
   - `hr_admin` видит raw/processed/summary и text-mode controls;
   - `hr_reader` не видит raw и не получает toggle controls;
   - filters и subject switching не ломают access model.
+- Result:
+  - passed on `https://beta.go360go.ru`.
