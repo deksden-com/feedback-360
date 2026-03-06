@@ -1,24 +1,19 @@
+import { runSeedScenario } from "@feedback-360/db";
 import { type APIRequestContext, type Page, expect } from "@playwright/test";
 
 type SeedResponse = {
-  ok?: boolean;
+  scenario?: string;
   handles?: Record<string, string>;
 };
 
 export const seedScenario = async (
-  request: APIRequestContext,
+  _request: APIRequestContext,
   scenario: string,
 ): Promise<Record<string, string>> => {
-  const response = await request.post("/api/dev/seed", {
-    data: {
-      scenario,
-    },
-  });
-
-  expect(response.ok()).toBeTruthy();
-
-  const payload = (await response.json()) as SeedResponse;
-  expect(payload.ok).toBeTruthy();
+  const payload = (await runSeedScenario({
+    scenario: scenario as Parameters<typeof runSeedScenario>[0]["scenario"],
+  })) as SeedResponse;
+  expect(payload.scenario).toBe(scenario);
   expect(payload.handles).toBeDefined();
 
   return payload.handles ?? {};
