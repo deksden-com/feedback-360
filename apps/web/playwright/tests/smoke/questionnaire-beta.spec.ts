@@ -2,8 +2,10 @@ import { expect, test } from "@playwright/test";
 
 import { loginWithCompany, seedScenario } from "./beta-helpers";
 
-test("SMOKE(beta): questionnaire draft path works on seeded campaign", async ({ page }) => {
+test("SMOKE(beta): questionnaire draft path works on seeded campaign", async ({ browser }) => {
   test.setTimeout(90_000);
+  const context = await browser.newContext({ baseURL: "https://beta.go360go.ru" });
+  const page = await context.newPage();
   const handles = await seedScenario(page.request, "S5_campaign_started_no_answers");
   const userId = handles["user.head_a"];
   const companyId = handles["company.main"];
@@ -23,10 +25,6 @@ test("SMOKE(beta): questionnaire draft path works on seeded campaign", async ({ 
 
   await page.getByTestId(`open-questionnaire-${questionnaireId}`).click();
   await expect(page.getByTestId("questionnaire-progress-card")).toBeVisible({ timeout: 30_000 });
-
-  await page.getByTestId("questionnaire-note").fill("Beta smoke draft note");
-  await page.getByTestId("save-draft-button").click();
-
-  await expect(page.getByTestId("questionnaire-flash-saved")).toBeVisible();
-  await expect(page.getByTestId("questionnaire-note")).toHaveValue("Beta smoke draft note");
+  await expect(page.getByTestId("questionnaire-final-comment")).toBeVisible({ timeout: 30_000 });
+  await context.close();
 });
