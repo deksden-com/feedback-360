@@ -1,5 +1,7 @@
 import { InternalAppShell } from "@/components/internal-app-shell";
 import { PageEmptyState, PageErrorState, PageStateScreen } from "@/components/page-state";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { applyDebugPageDelay } from "@/lib/debug-page-delay";
@@ -84,6 +86,41 @@ export default async function ResultsHrViewPage({
 
   const campaignId = getQueryValue(params?.campaignId);
   const subjectEmployeeId = getQueryValue(params?.subjectEmployeeId);
+  const textView = getQueryValue(params?.textView);
+  const normalizedTextView =
+    textView === "raw" || textView === "processed" || textView === "combined"
+      ? textView
+      : "combined";
+  const client = createInprocClient();
+  const [campaigns, employees, snapshot] = await Promise.all([
+    client.campaignList({}, resolved.context),
+    client.employeeListActive({}, resolved.context),
+    campaignId
+      ? client.campaignSnapshotList({ campaignId }, resolved.context)
+      : Promise.resolve(undefined),
+  ]);
+  const campaignOptions = campaigns.ok
+    ? campaigns.data.items.map((item) => ({
+        campaignId: item.campaignId,
+        label: item.name,
+        status: item.status,
+      }))
+    : [];
+  const subjectOptions = snapshot?.ok
+    ? snapshot.data.items
+        .map((item) => ({
+          subjectEmployeeId: item.employeeId,
+          label: [item.firstName, item.lastName].filter(Boolean).join(" ").trim() || item.email,
+        }))
+        .sort((left, right) => left.label.localeCompare(right.label))
+    : employees.ok
+      ? employees.data.items
+          .map((item) => ({
+            subjectEmployeeId: item.employeeId,
+            label: [item.firstName, item.lastName].filter(Boolean).join(" ").trim() || item.email,
+          }))
+          .sort((left, right) => left.label.localeCompare(right.label))
+      : [];
 
   if (!campaignId || !subjectEmployeeId) {
     return (
@@ -128,12 +165,54 @@ export default async function ResultsHrViewPage({
               </button>
             </div>
           </form>
+          {campaignOptions.length > 0 ? (
+            <Card data-testid="results-hr-campaign-switcher">
+              <CardHeader>
+                <CardTitle className="text-lg">Кампании</CardTitle>
+                <CardDescription>
+                  Откройте completed или `ai_failed` кампанию из HR-каталога.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                {campaignOptions.map((campaign) => (
+                  <Button key={campaign.campaignId} asChild variant="outline">
+                    <a href={`/results/hr?campaignId=${encodeURIComponent(campaign.campaignId)}`}>
+                      {campaign.label}
+                    </a>
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+          ) : null}
+          {subjectOptions.length > 0 ? (
+            <Card data-testid="results-hr-subject-switcher">
+              <CardHeader>
+                <CardTitle className="text-lg">Сотрудники</CardTitle>
+                <CardDescription>
+                  После выбора кампании список берётся из snapshot, чтобы HR работал с исторически
+                  зафиксированным составом.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                {subjectOptions.map((subject) => (
+                  <Button key={subject.subjectEmployeeId} asChild variant="outline">
+                    <a
+                      href={`/results/hr?subjectEmployeeId=${encodeURIComponent(
+                        subject.subjectEmployeeId,
+                      )}${campaignId ? `&campaignId=${encodeURIComponent(campaignId)}` : ""}`}
+                    >
+                      {subject.label}
+                    </a>
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+          ) : null}
         </ResultsPageLayout>
       </InternalAppShell>
     );
   }
 
-  const client = createInprocClient();
   const view = await client.resultsGetHrView(
     {
       campaignId,
@@ -182,15 +261,120 @@ export default async function ResultsHrViewPage({
       subtitle={subtitle}
     >
       <ResultsPageLayout title="HR результаты" subtitle={subtitle}>
+        <Card data-testid="results-hr-toolbar">
+          <CardHeader>
+            <CardTitle className="text-lg">Рабочий режим HR</CardTitle>
+            <CardDescription>
+              Фильтры и представление текста привязаны к текущей роли и не обходят privacy rules.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {campaignOptions.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {campaignOptions.map((campaign) => (
+                  <Button
+                    key={campaign.campaignId}
+                    asChild
+                    variant={campaign.campaignId === campaignId ? "secondary" : "outline"}
+                    data-testid={`results-hr-campaign-${campaign.campaignId}`}
+                  >
+                    <a
+                      href={`/results/hr?campaignId=${encodeURIComponent(campaign.campaignId)}${
+                        subjectEmployeeId
+                          ? `&subjectEmployeeId=${encodeURIComponent(subjectEmployeeId)}`
+                          : ""
+                      }`}
+                    >
+                      {campaign.label}
+                    </a>
+                  </Button>
+                ))}
+              </div>
+            ) : null}
+            {subjectOptions.length > 0 ? (
+              <div className="flex flex-wrap gap-2" data-testid="results-hr-subject-switcher">
+                {subjectOptions.map((subject) => (
+                  <Button
+                    key={subject.subjectEmployeeId}
+                    asChild
+                    variant={
+                      subject.subjectEmployeeId === subjectEmployeeId ? "secondary" : "outline"
+                    }
+                    data-testid={`results-hr-subject-${subject.subjectEmployeeId}`}
+                  >
+                    <a
+                      href={`/results/hr?campaignId=${encodeURIComponent(
+                        campaignId,
+                      )}&subjectEmployeeId=${encodeURIComponent(subject.subjectEmployeeId)}`}
+                    >
+                      {subject.label}
+                    </a>
+                  </Button>
+                ))}
+              </div>
+            ) : null}
+            {showRawText ? (
+              <div className="flex flex-wrap gap-2" data-testid="results-hr-text-toggle">
+                <Button
+                  asChild
+                  variant={normalizedTextView === "combined" ? "secondary" : "outline"}
+                >
+                  <a
+                    href={`/results/hr?campaignId=${encodeURIComponent(
+                      campaignId,
+                    )}&subjectEmployeeId=${encodeURIComponent(subjectEmployeeId)}&textView=combined`}
+                  >
+                    Combined
+                  </a>
+                </Button>
+                <Button
+                  asChild
+                  variant={normalizedTextView === "processed" ? "secondary" : "outline"}
+                >
+                  <a
+                    href={`/results/hr?campaignId=${encodeURIComponent(
+                      campaignId,
+                    )}&subjectEmployeeId=${encodeURIComponent(subjectEmployeeId)}&textView=processed`}
+                  >
+                    Processed only
+                  </a>
+                </Button>
+                <Button asChild variant={normalizedTextView === "raw" ? "secondary" : "outline"}>
+                  <a
+                    href={`/results/hr?campaignId=${encodeURIComponent(
+                      campaignId,
+                    )}&subjectEmployeeId=${encodeURIComponent(subjectEmployeeId)}&textView=raw`}
+                  >
+                    Raw only
+                  </a>
+                </Button>
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
         <ResultsSummaryCard
           campaignId={view.data.campaignId}
           subjectEmployeeId={view.data.subjectEmployeeId}
+          campaignLabel={
+            campaignOptions.find((item) => item.campaignId === view.data.campaignId)?.label
+          }
+          subjectLabel={
+            subjectOptions.find((item) => item.subjectEmployeeId === view.data.subjectEmployeeId)
+              ?.label
+          }
           overallScore={view.data.overallScore}
           modelKind={view.data.modelKind}
+          anonymityThreshold={view.data.anonymityThreshold}
+          openTextCount={view.data.openText?.length ?? 0}
+          viewerLabel={showRawText ? "HR Admin workbench" : "HR Reader workbench"}
         />
         <ResultsGroupCard data={view.data} />
         <ResultsCompetenciesCard data={view.data} />
-        <ResultsOpenTextCard items={view.data.openText} showRawText={showRawText} />
+        <ResultsOpenTextCard
+          items={view.data.openText}
+          showRawText={showRawText}
+          textView={showRawText ? normalizedTextView : "processed"}
+        />
       </ResultsPageLayout>
     </InternalAppShell>
   );

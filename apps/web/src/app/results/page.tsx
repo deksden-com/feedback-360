@@ -1,5 +1,7 @@
 import { InternalAppShell } from "@/components/internal-app-shell";
 import { PageEmptyState, PageErrorState, PageStateScreen } from "@/components/page-state";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { applyDebugPageDelay } from "@/lib/debug-page-delay";
@@ -65,8 +67,18 @@ export default async function ResultsMyDashboardPage({
   const client = createInprocClient();
 
   const assignedQuestionnaires = await client.questionnaireListAssigned({}, resolved.context);
-  const suggestedCampaignIds = assignedQuestionnaires.ok
-    ? [...new Set(assignedQuestionnaires.data.items.map((item) => item.campaignId))]
+  const campaignOptions = assignedQuestionnaires.ok
+    ? Array.from(
+        new Map(
+          assignedQuestionnaires.data.items.map((item) => [
+            item.campaignId,
+            {
+              campaignId: item.campaignId,
+              label: item.campaignName ?? item.campaignId,
+            },
+          ]),
+        ).values(),
+      ).sort((left, right) => left.label.localeCompare(right.label))
     : [];
 
   if (!campaignId) {
@@ -104,21 +116,24 @@ export default async function ResultsMyDashboardPage({
               </button>
             </div>
           </form>
-          {suggestedCampaignIds.length > 0 ? (
-            <div className="rounded-md border p-4 text-sm" data-testid="my-results-suggestions">
-              <p className="font-medium">Доступные кампании из назначенных анкет:</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {suggestedCampaignIds.map((id) => (
-                  <a
-                    key={id}
-                    className="rounded border px-2 py-1 font-mono text-xs hover:bg-muted"
-                    href={`/results?campaignId=${encodeURIComponent(id)}`}
-                  >
-                    {id}
-                  </a>
+          {campaignOptions.length > 0 ? (
+            <Card data-testid="my-results-suggestions">
+              <CardHeader>
+                <CardTitle className="text-lg">Быстрый выбор кампании</CardTitle>
+                <CardDescription>
+                  Используем кампании из ваших анкет, чтобы быстрее открыть готовый отчёт.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                {campaignOptions.map((campaign) => (
+                  <Button key={campaign.campaignId} asChild variant="outline">
+                    <a href={`/results?campaignId=${encodeURIComponent(campaign.campaignId)}`}>
+                      {campaign.label}
+                    </a>
+                  </Button>
                 ))}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ) : null}
         </ResultsPageLayout>
       </InternalAppShell>
@@ -167,11 +182,42 @@ export default async function ResultsMyDashboardPage({
       subtitle="Агрегаты по завершённой кампании 360."
     >
       <ResultsPageLayout title="Мои результаты" subtitle="Агрегаты по завершённой кампании 360.">
+        {campaignOptions.length > 0 ? (
+          <Card data-testid="results-my-campaign-switcher">
+            <CardHeader>
+              <CardTitle className="text-lg">Переключение между кампаниями</CardTitle>
+              <CardDescription>
+                Откройте другой завершённый отчёт, не теряя контекст текущей компании.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+              {campaignOptions.map((campaign) => (
+                <Button
+                  key={campaign.campaignId}
+                  asChild
+                  variant={campaign.campaignId === campaignId ? "secondary" : "outline"}
+                  data-testid={`results-my-campaign-${campaign.campaignId}`}
+                >
+                  <a href={`/results?campaignId=${encodeURIComponent(campaign.campaignId)}`}>
+                    {campaign.label}
+                  </a>
+                </Button>
+              ))}
+            </CardContent>
+          </Card>
+        ) : null}
         <ResultsSummaryCard
           campaignId={dashboard.data.campaignId}
           subjectEmployeeId={dashboard.data.subjectEmployeeId}
+          campaignLabel={
+            campaignOptions.find((item) => item.campaignId === dashboard.data.campaignId)?.label
+          }
+          subjectLabel="Мой профиль"
           overallScore={dashboard.data.overallScore}
           modelKind={dashboard.data.modelKind}
+          anonymityThreshold={dashboard.data.anonymityThreshold}
+          openTextCount={dashboard.data.openText.length}
+          viewerLabel="Личная витрина результатов"
         />
         <ResultsGroupCard data={dashboard.data} />
         <ResultsCompetenciesCard data={dashboard.data} />

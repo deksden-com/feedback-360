@@ -5,7 +5,7 @@ import { type Page, expect, test } from "@playwright/test";
 const artifactsDir = resolve(
   process.cwd(),
   "../..",
-  ".memory-bank/evidence/EP-010/FT-0101/2026-03-06",
+  ".memory-bank/evidence/EP-015/FT-0153/2026-03-06",
 );
 
 const loginWithCompany = async (page: Page, userId: string, companyId: string) => {
@@ -28,7 +28,9 @@ test.beforeAll(async () => {
   await mkdir(artifactsDir, { recursive: true });
 });
 
-test("FT-0101: hr_reader is redacted, hr_admin keeps raw comments", async ({ page }) => {
+test("FT-0153: HR admin gets text-mode controls while HR reader stays redacted", async ({
+  page,
+}) => {
   test.setTimeout(120_000);
 
   const seededResponse = await page.request.post("/api/dev/seed", {
@@ -46,38 +48,43 @@ test("FT-0101: hr_reader is redacted, hr_admin keeps raw comments", async ({ pag
   const campaignId = seeded.handles?.["campaign.main"];
   const companyId = seeded.handles?.["company.main"];
   const subjectEmployeeId = seeded.handles?.["employee.subject_main"];
-  const hrReaderUserId = seeded.handles?.["user.hr_reader"];
   const hrAdminUserId = seeded.handles?.["user.hr_admin"];
+  const hrReaderUserId = seeded.handles?.["user.hr_reader"];
 
   expect(campaignId).toBeTruthy();
   expect(companyId).toBeTruthy();
   expect(subjectEmployeeId).toBeTruthy();
-  expect(hrReaderUserId).toBeTruthy();
   expect(hrAdminUserId).toBeTruthy();
-
-  await loginWithCompany(page, String(hrReaderUserId), String(companyId));
-  await page.goto(`/results/hr?campaignId=${campaignId}&subjectEmployeeId=${subjectEmployeeId}`);
-  await expect(page.getByRole("heading", { name: "HR результаты" })).toBeVisible();
-  await expect(page.getByTestId("results-layout-context")).toContainText(
-    "processed + summary комментарии без raw текста.",
-  );
-  await expect(page.getByTestId(/^open-text-raw-/)).toHaveCount(0);
-  await expect(page.getByTestId(/^open-text-processed-/).first()).toBeVisible();
-  await page.screenshot({
-    fullPage: true,
-    path: `${artifactsDir}/step-01-hr-reader-results-redacted.png`,
-  });
+  expect(hrReaderUserId).toBeTruthy();
 
   await loginWithCompany(page, String(hrAdminUserId), String(companyId));
   await page.goto(`/results/hr?campaignId=${campaignId}&subjectEmployeeId=${subjectEmployeeId}`);
   await expect(page.getByRole("heading", { name: "HR результаты" })).toBeVisible();
-  await expect(page.getByTestId("results-layout-context")).toContainText(
-    "raw + processed + summary комментарии.",
-  );
+  await expect(page.getByTestId("results-hr-toolbar")).toBeVisible();
+  await expect(page.getByTestId("results-hr-text-toggle")).toBeVisible();
   await expect(page.getByTestId(/^open-text-raw-/).first()).toBeVisible();
+  await page.screenshot({
+    fullPage: true,
+    path: `${artifactsDir}/step-01-hr-admin-combined.png`,
+  });
+
+  await page.getByRole("link", { name: "Processed only" }).click();
+  await expect(page).toHaveURL(/textView=processed/);
+  await expect(page.getByTestId(/^open-text-raw-/)).toHaveCount(0);
+  await page.screenshot({
+    fullPage: true,
+    path: `${artifactsDir}/step-02-hr-admin-processed-only.png`,
+  });
+
+  await loginWithCompany(page, String(hrReaderUserId), String(companyId));
+  await page.goto(`/results/hr?campaignId=${campaignId}&subjectEmployeeId=${subjectEmployeeId}`);
+  await expect(page.getByRole("heading", { name: "HR результаты" })).toBeVisible();
+  await expect(page.getByTestId("results-hr-toolbar")).toBeVisible();
+  await expect(page.getByTestId("results-hr-text-toggle")).toHaveCount(0);
+  await expect(page.getByTestId(/^open-text-raw-/)).toHaveCount(0);
   await expect(page.getByTestId(/^open-text-processed-/).first()).toBeVisible();
   await page.screenshot({
     fullPage: true,
-    path: `${artifactsDir}/step-02-hr-admin-results-with-raw.png`,
+    path: `${artifactsDir}/step-03-hr-reader-redacted.png`,
   });
 });
