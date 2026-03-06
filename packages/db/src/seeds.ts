@@ -34,6 +34,7 @@ const ids = {
   companyA: "10000000-0000-4000-8000-000000000010",
   companyB: "10000000-0000-4000-8000-000000000011",
   membershipHrAdmin: "11000000-0000-4000-8000-000000000001",
+  membershipHrReader: "11000000-0000-4000-8000-000000000008",
   membershipSharedCompanyA: "11000000-0000-4000-8000-000000000010",
   membershipSharedCompanyB: "11000000-0000-4000-8000-000000000011",
   membershipCompanyAOnly: "11000000-0000-4000-8000-000000000012",
@@ -44,6 +45,7 @@ const ids = {
   membershipStaffA2: "11000000-0000-4000-8000-000000000006",
   membershipStaffB1: "11000000-0000-4000-8000-000000000007",
   employeeHrAdmin: "12000000-0000-4000-8000-000000000001",
+  employeeHrReader: "12000000-0000-4000-8000-000000000008",
   employeeSharedCompanyA: "12000000-0000-4000-8000-000000000010",
   employeeSharedCompanyB: "12000000-0000-4000-8000-000000000011",
   employeeCompanyAOnly: "12000000-0000-4000-8000-000000000012",
@@ -54,6 +56,7 @@ const ids = {
   employeeStaffA2: "12000000-0000-4000-8000-000000000006",
   employeeStaffB1: "12000000-0000-4000-8000-000000000007",
   employeeLinkHrAdmin: "13000000-0000-4000-8000-000000000001",
+  employeeLinkHrReader: "13000000-0000-4000-8000-000000000008",
   employeeLinkSharedCompanyA: "13000000-0000-4000-8000-000000000010",
   employeeLinkSharedCompanyB: "13000000-0000-4000-8000-000000000011",
   employeeLinkCompanyAOnly: "13000000-0000-4000-8000-000000000012",
@@ -79,6 +82,7 @@ const ids = {
   managerHistoryStaffA2: "16000000-0000-4000-8000-000000000004",
   managerHistoryStaffB1: "16000000-0000-4000-8000-000000000005",
   positionHrAdmin: "17000000-0000-4000-8000-000000000001",
+  positionHrReader: "17000000-0000-4000-8000-000000000008",
   positionCeo: "17000000-0000-4000-8000-000000000002",
   positionHeadA: "17000000-0000-4000-8000-000000000003",
   positionHeadB: "17000000-0000-4000-8000-000000000004",
@@ -86,6 +90,7 @@ const ids = {
   positionStaffA2: "17000000-0000-4000-8000-000000000006",
   positionStaffB1: "17000000-0000-4000-8000-000000000007",
   userHrAdmin: "18000000-0000-4000-8000-000000000001",
+  userHrReader: "18000000-0000-4000-8000-000000000008",
   userShared: "18000000-0000-4000-8000-000000000010",
   userCompanyAOnly: "18000000-0000-4000-8000-000000000012",
   userCeo: "18000000-0000-4000-8000-000000000002",
@@ -159,8 +164,11 @@ const buildS1Handles = (): Record<string, string> => {
   return {
     "company.main": ids.companyMain,
     "employee.hr_admin": ids.employeeHrAdmin,
+    "employee.hr_reader": ids.employeeHrReader,
     "membership.hr_admin@company.main": ids.membershipHrAdmin,
+    "membership.hr_reader@company.main": ids.membershipHrReader,
     "user.hr_admin": ids.userHrAdmin,
+    "user.hr_reader": ids.userHrReader,
   };
 };
 
@@ -192,42 +200,83 @@ const insertS1 = async (db: ReturnType<typeof createDb>): Promise<Record<string,
     updatedAt: seededAt,
   });
 
-  await db.insert(employees).values({
-    id: ids.employeeHrAdmin,
-    companyId: ids.companyMain,
-    email: "hr.admin@acme.example",
-    firstName: "HR",
-    lastName: "Admin",
-    phone: "+10000000001",
-    isActive: true,
-    createdAt: seededAt,
-    updatedAt: seededAt,
-  });
+  await db.insert(employees).values([
+    {
+      id: ids.employeeHrAdmin,
+      companyId: ids.companyMain,
+      email: "hr.admin@acme.example",
+      firstName: "HR",
+      lastName: "Admin",
+      phone: "+10000000001",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+    {
+      id: ids.employeeHrReader,
+      companyId: ids.companyMain,
+      email: "hr.reader@acme.example",
+      firstName: "HR",
+      lastName: "Reader",
+      phone: "+10000000008",
+      isActive: true,
+      createdAt: seededAt,
+      updatedAt: seededAt,
+    },
+  ]);
 
-  await db.insert(companyMemberships).values({
-    id: ids.membershipHrAdmin,
-    companyId: ids.companyMain,
-    userId: ids.userHrAdmin,
-    role: "hr_admin",
-    createdAt: seededAt,
-  });
+  await db.insert(companyMemberships).values([
+    {
+      id: ids.membershipHrAdmin,
+      companyId: ids.companyMain,
+      userId: ids.userHrAdmin,
+      role: "hr_admin",
+      createdAt: seededAt,
+    },
+    {
+      id: ids.membershipHrReader,
+      companyId: ids.companyMain,
+      userId: ids.userHrReader,
+      role: "hr_reader",
+      createdAt: seededAt,
+    },
+  ]);
 
-  await db.insert(employeeUserLinks).values({
-    id: ids.employeeLinkHrAdmin,
-    companyId: ids.companyMain,
-    employeeId: ids.employeeHrAdmin,
-    userId: ids.userHrAdmin,
-    createdAt: seededAt,
-  });
+  await db.insert(employeeUserLinks).values([
+    {
+      id: ids.employeeLinkHrAdmin,
+      companyId: ids.companyMain,
+      employeeId: ids.employeeHrAdmin,
+      userId: ids.userHrAdmin,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.employeeLinkHrReader,
+      companyId: ids.companyMain,
+      employeeId: ids.employeeHrReader,
+      userId: ids.userHrReader,
+      createdAt: seededAt,
+    },
+  ]);
 
-  await db.insert(employeePositions).values({
-    id: ids.positionHrAdmin,
-    employeeId: ids.employeeHrAdmin,
-    title: "HR Admin",
-    level: 8,
-    startAt: seededAt,
-    createdAt: seededAt,
-  });
+  await db.insert(employeePositions).values([
+    {
+      id: ids.positionHrAdmin,
+      employeeId: ids.employeeHrAdmin,
+      title: "HR Admin",
+      level: 8,
+      startAt: seededAt,
+      createdAt: seededAt,
+    },
+    {
+      id: ids.positionHrReader,
+      employeeId: ids.employeeHrReader,
+      title: "HR Reader",
+      level: 7,
+      startAt: seededAt,
+      createdAt: seededAt,
+    },
+  ]);
 
   return buildS1Handles();
 };
