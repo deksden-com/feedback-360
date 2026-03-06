@@ -61,6 +61,8 @@ Status: Completed (2026-03-06)
 ## Acceptance evidence (2026-03-06)
 - Local acceptance:
   - `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3107 pnpm --filter @feedback-360/web exec playwright test --config playwright/playwright.config.mjs tests/ft-0193-audit-console.spec.ts --workers=1` → passed.
+- Beta acceptance:
+  - `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web exec playwright test --config playwright/playwright.config.mjs tests/ft-0193-audit-console.spec.ts --workers=1` → passed after merge commit `0f4bf1c`.
 - Covered acceptance:
   - `hr_admin` creates an AI audit signal through real `ai.runForCampaign`.
   - `hr_reader` filters audit console by event type and sees redacted actor/metadata.
@@ -83,4 +85,4 @@ Status: Completed (2026-03-06)
   - `hr_reader` видит событие, но actor и metadata redacted для non-release source;
   - audit order детерминированный и campaign filter работает.
 - Result:
-  - pending beta deploy for EP-019.
+  - passed on `https://beta.go360go.ru`.
