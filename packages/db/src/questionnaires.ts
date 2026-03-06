@@ -1,13 +1,24 @@
 import {
   type CampaignProgressGetOutput,
   type CampaignProgressPendingItem,
+  type QuestionnaireDefinition,
   type QuestionnaireStatus,
   createOperationError,
 } from "@feedback-360/api-contract";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
-import { campaigns, questionnaires } from "./schema";
+import {
+  campaignAssignments,
+  campaignEmployeeSnapshots,
+  campaigns,
+  competencies,
+  competencyGroups,
+  competencyIndicators,
+  competencyLevels,
+  competencyModelVersions,
+  questionnaires,
+} from "./schema";
 
 type QuestionnaireDbRow = {
   questionnaireId: string;
@@ -21,10 +32,60 @@ type QuestionnaireDbRow = {
   draftPayload: Record<string, unknown>;
   campaignStatus: string;
   campaignLockedAt: Date | null;
+  campaignName: string;
+  campaignEndAt: Date;
+  modelVersionId: string | null;
+  modelName: string | null;
+  modelKind: string | null;
+  subjectFirstName: string | null;
+  subjectLastName: string | null;
+  subjectEmail: string | null;
+  subjectPositionTitle: string | null;
+  raterRole: string | null;
+};
+
+type QuestionnaireListRow = {
+  questionnaireId: string;
+  campaignId: string;
+  companyId: string;
+  subjectEmployeeId: string;
+  raterEmployeeId: string;
+  status: string;
+  campaignName: string;
+  campaignStatus: string;
+  campaignEndAt: Date;
+  subjectFirstName: string | null;
+  subjectLastName: string | null;
+  subjectEmail: string | null;
+  subjectPositionTitle: string | null;
+  raterRole: string | null;
+  firstDraftAt: Date | null;
+  submittedAt: Date | null;
 };
 
 type DbReader = {
   select: ReturnType<typeof createDb>["select"];
+};
+
+const formatDisplayName = (value: {
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  fallbackId: string;
+}): string => {
+  const parts = [value.firstName?.trim(), value.lastName?.trim()].filter((item): item is string =>
+    Boolean(item),
+  );
+
+  if (parts.length > 0) {
+    return parts.join(" ");
+  }
+
+  if (value.email) {
+    return value.email;
+  }
+
+  return value.fallbackId;
 };
 
 const ensureQuestionnaireStatus = (value: string): QuestionnaireStatus => {
@@ -35,6 +96,52 @@ const ensureQuestionnaireStatus = (value: string): QuestionnaireStatus => {
   throw createOperationError("invalid_input", `Unsupported questionnaire status: ${value}`);
 };
 
+const ensureQuestionnaireRaterRole = (
+  value: string | null,
+): "manager" | "peer" | "subordinate" | "self" | undefined => {
+  if (!value) {
+    return undefined;
+  }
+
+  if (value === "manager" || value === "peer" || value === "subordinate" || value === "self") {
+    return value;
+  }
+
+  return undefined;
+};
+
+const mapQuestionnaireListRow = (row: QuestionnaireListRow) => {
+  return {
+    questionnaireId: row.questionnaireId,
+    campaignId: row.campaignId,
+    companyId: row.companyId,
+    subjectEmployeeId: row.subjectEmployeeId,
+    raterEmployeeId: row.raterEmployeeId,
+    status: ensureQuestionnaireStatus(row.status),
+    campaignName: row.campaignName,
+    campaignStatus: row.campaignStatus as
+      | "draft"
+      | "started"
+      | "ended"
+      | "processing_ai"
+      | "ai_failed"
+      | "completed",
+    campaignEndAt: row.campaignEndAt.toISOString(),
+    subjectDisplayName: formatDisplayName({
+      firstName: row.subjectFirstName,
+      lastName: row.subjectLastName,
+      email: row.subjectEmail,
+      fallbackId: row.subjectEmployeeId,
+    }),
+    ...(row.subjectPositionTitle ? { subjectPositionTitle: row.subjectPositionTitle } : {}),
+    ...(ensureQuestionnaireRaterRole(row.raterRole)
+      ? { raterRole: ensureQuestionnaireRaterRole(row.raterRole) }
+      : {}),
+    ...(row.firstDraftAt ? { firstDraftAt: row.firstDraftAt.toISOString() } : {}),
+    ...(row.submittedAt ? { submittedAt: row.submittedAt.toISOString() } : {}),
+  };
+};
+
 const mapQuestionnaireRow = (row: QuestionnaireDbRow) => {
   return {
     questionnaireId: row.questionnaireId,
@@ -43,6 +150,34 @@ const mapQuestionnaireRow = (row: QuestionnaireDbRow) => {
     subjectEmployeeId: row.subjectEmployeeId,
     raterEmployeeId: row.raterEmployeeId,
     status: ensureQuestionnaireStatus(row.status),
+    campaignStatus: ensureCampaignStatus(row.campaignStatus),
+    campaignName: row.campaignName,
+    campaignEndAt: row.campaignEndAt.toISOString(),
+    subjectDisplayName: formatDisplayName({
+      firstName: row.subjectFirstName,
+      lastName: row.subjectLastName,
+      email: row.subjectEmail,
+      fallbackId: row.subjectEmployeeId,
+    }),
+    ...(row.subjectPositionTitle ? { subjectPositionTitle: row.subjectPositionTitle } : {}),
+    ...(ensureQuestionnaireRaterRole(row.raterRole)
+      ? { raterRole: ensureQuestionnaireRaterRole(row.raterRole) }
+      : {}),
+    ...(row.firstDraftAt ? { firstDraftAt: row.firstDraftAt.toISOString() } : {}),
+    ...(row.submittedAt ? { submittedAt: row.submittedAt.toISOString() } : {}),
+  };
+};
+
+const mapQuestionnaireDebugRow = (row: QuestionnaireDbRow) => {
+  return {
+    questionnaireId: row.questionnaireId,
+    campaignId: row.campaignId,
+    companyId: row.companyId,
+    subjectEmployeeId: row.subjectEmployeeId,
+    raterEmployeeId: row.raterEmployeeId,
+    status: ensureQuestionnaireStatus(row.status),
+    campaignStatus: ensureCampaignStatus(row.campaignStatus),
+    draft: row.draftPayload,
     ...(row.firstDraftAt ? { firstDraftAt: row.firstDraftAt.toISOString() } : {}),
     ...(row.submittedAt ? { submittedAt: row.submittedAt.toISOString() } : {}),
   };
@@ -73,11 +208,37 @@ const getQuestionnaireRow = async (
       firstDraftAt: questionnaires.firstDraftAt,
       submittedAt: questionnaires.submittedAt,
       draftPayload: questionnaires.draftPayload,
+      campaignName: campaigns.name,
+      campaignEndAt: campaigns.endAt,
       campaignStatus: campaigns.status,
       campaignLockedAt: campaigns.lockedAt,
+      modelVersionId: campaigns.modelVersionId,
+      modelName: competencyModelVersions.name,
+      modelKind: competencyModelVersions.kind,
+      subjectFirstName: campaignEmployeeSnapshots.firstName,
+      subjectLastName: campaignEmployeeSnapshots.lastName,
+      subjectEmail: campaignEmployeeSnapshots.email,
+      subjectPositionTitle: campaignEmployeeSnapshots.positionTitle,
+      raterRole: campaignAssignments.raterRole,
     })
     .from(questionnaires)
     .innerJoin(campaigns, eq(campaigns.id, questionnaires.campaignId))
+    .leftJoin(competencyModelVersions, eq(competencyModelVersions.id, campaigns.modelVersionId))
+    .leftJoin(
+      campaignEmployeeSnapshots,
+      and(
+        eq(campaignEmployeeSnapshots.campaignId, questionnaires.campaignId),
+        eq(campaignEmployeeSnapshots.employeeId, questionnaires.subjectEmployeeId),
+      ),
+    )
+    .leftJoin(
+      campaignAssignments,
+      and(
+        eq(campaignAssignments.campaignId, questionnaires.campaignId),
+        eq(campaignAssignments.subjectEmployeeId, questionnaires.subjectEmployeeId),
+        eq(campaignAssignments.raterEmployeeId, questionnaires.raterEmployeeId),
+      ),
+    )
     .where(and(...whereClauses))
     .limit(1);
 
@@ -98,6 +259,188 @@ const getQuestionnaireRow = async (
   return {
     ...row,
     draftPayload,
+  };
+};
+
+const getQuestionnaireDefinition = async (
+  tx: DbReader,
+  input: {
+    companyId: string;
+    modelVersionId: string | null;
+  },
+): Promise<QuestionnaireDefinition | undefined> => {
+  if (!input.modelVersionId) {
+    return undefined;
+  }
+
+  const modelRows = await tx
+    .select({
+      modelVersionId: competencyModelVersions.id,
+      modelName: competencyModelVersions.name,
+      modelKind: competencyModelVersions.kind,
+    })
+    .from(competencyModelVersions)
+    .where(
+      and(
+        eq(competencyModelVersions.id, input.modelVersionId),
+        eq(competencyModelVersions.companyId, input.companyId),
+      ),
+    )
+    .limit(1);
+
+  const model = modelRows[0];
+  if (!model) {
+    return undefined;
+  }
+
+  if (model.modelKind !== "indicators" && model.modelKind !== "levels") {
+    throw createOperationError("invalid_input", "Unsupported questionnaire model kind.", {
+      modelVersionId: model.modelVersionId,
+      modelKind: model.modelKind,
+    });
+  }
+
+  const competencyRows = await tx
+    .select({
+      groupId: competencyGroups.id,
+      groupName: competencyGroups.name,
+      groupWeight: competencyGroups.weight,
+      groupOrder: competencyGroups.order,
+      competencyId: competencies.id,
+      competencyName: competencies.name,
+      competencyOrder: competencies.order,
+    })
+    .from(competencies)
+    .innerJoin(competencyGroups, eq(competencyGroups.id, competencies.groupId))
+    .where(eq(competencies.modelVersionId, model.modelVersionId))
+    .orderBy(asc(competencyGroups.order), asc(competencies.order));
+
+  const groups = new Map<
+    string,
+    {
+      groupId: string;
+      name: string;
+      weight: number;
+      order: number;
+      competencies: Array<{
+        competencyId: string;
+        name: string;
+        order: number;
+        indicators?: Array<{ indicatorId: string; text: string; order: number }>;
+        levels?: Array<{ levelId: string; level: number; text: string }>;
+      }>;
+    }
+  >();
+
+  for (const row of competencyRows) {
+    const existingGroup = groups.get(row.groupId) ?? {
+      groupId: row.groupId,
+      name: row.groupName,
+      weight: row.groupWeight,
+      order: row.groupOrder,
+      competencies: [],
+    };
+
+    if (!groups.has(row.groupId)) {
+      groups.set(row.groupId, existingGroup);
+    }
+
+    existingGroup.competencies.push({
+      competencyId: row.competencyId,
+      name: row.competencyName,
+      order: row.competencyOrder,
+    });
+  }
+
+  const competencyById = new Map(
+    Array.from(groups.values())
+      .flatMap((group) => group.competencies)
+      .map((competency) => [competency.competencyId, competency]),
+  );
+
+  if (model.modelKind === "indicators") {
+    const indicatorRows = await tx
+      .select({
+        competencyId: competencyIndicators.competencyId,
+        indicatorId: competencyIndicators.id,
+        text: competencyIndicators.text,
+        order: competencyIndicators.order,
+      })
+      .from(competencyIndicators)
+      .innerJoin(competencies, eq(competencies.id, competencyIndicators.competencyId))
+      .where(eq(competencies.modelVersionId, model.modelVersionId))
+      .orderBy(asc(competencyIndicators.competencyId), asc(competencyIndicators.order));
+
+    for (const row of indicatorRows) {
+      const competency = competencyById.get(row.competencyId);
+      if (!competency) {
+        continue;
+      }
+
+      const indicators = competency.indicators ?? [];
+      indicators.push({
+        indicatorId: row.indicatorId,
+        text: row.text,
+        order: row.order,
+      });
+      competency.indicators = indicators;
+    }
+  } else {
+    const levelRows = await tx
+      .select({
+        competencyId: competencyLevels.competencyId,
+        levelId: competencyLevels.id,
+        level: competencyLevels.level,
+        text: competencyLevels.text,
+      })
+      .from(competencyLevels)
+      .innerJoin(competencies, eq(competencies.id, competencyLevels.competencyId))
+      .where(eq(competencies.modelVersionId, model.modelVersionId))
+      .orderBy(asc(competencyLevels.competencyId), asc(competencyLevels.level));
+
+    for (const row of levelRows) {
+      const competency = competencyById.get(row.competencyId);
+      if (!competency) {
+        continue;
+      }
+
+      const levels = competency.levels ?? [];
+      levels.push({
+        levelId: row.levelId,
+        level: row.level,
+        text: row.text,
+      });
+      competency.levels = levels;
+    }
+  }
+
+  const sortedGroups = Array.from(groups.values()).sort((left, right) => {
+    if (left.order !== right.order) {
+      return left.order - right.order;
+    }
+
+    return left.groupId.localeCompare(right.groupId);
+  });
+
+  const totalPrompts = sortedGroups.reduce((sum, group) => {
+    return (
+      sum +
+      group.competencies.reduce((groupSum, competency) => {
+        if (model.modelKind === "indicators") {
+          return groupSum + (competency.indicators?.length ?? 0);
+        }
+
+        return groupSum + 1;
+      }, 0)
+    );
+  }, 0);
+
+  return {
+    modelVersionId: model.modelVersionId,
+    modelKind: model.modelKind,
+    ...(model.modelName ? { modelName: model.modelName } : {}),
+    groups: sortedGroups,
+    totalPrompts,
   };
 };
 
@@ -153,6 +496,13 @@ export type ListAssignedQuestionnairesOutput = {
     subjectEmployeeId: string;
     raterEmployeeId: string;
     status: QuestionnaireStatus;
+    campaignName: string;
+    campaignStatus: "draft" | "started" | "ended" | "processing_ai" | "ai_failed" | "completed";
+    campaignEndAt: string;
+    subjectDisplayName: string;
+    subjectPositionTitle?: string;
+    raterRole?: "manager" | "peer" | "subordinate" | "self";
+    firstDraftAt?: string;
     submittedAt?: string;
   }>;
 };
@@ -195,22 +545,39 @@ export const listAssignedQuestionnaires = async (
         subjectEmployeeId: questionnaires.subjectEmployeeId,
         raterEmployeeId: questionnaires.raterEmployeeId,
         status: questionnaires.status,
+        campaignName: campaigns.name,
+        campaignStatus: campaigns.status,
+        campaignEndAt: campaigns.endAt,
+        subjectFirstName: campaignEmployeeSnapshots.firstName,
+        subjectLastName: campaignEmployeeSnapshots.lastName,
+        subjectEmail: campaignEmployeeSnapshots.email,
+        subjectPositionTitle: campaignEmployeeSnapshots.positionTitle,
+        raterRole: campaignAssignments.raterRole,
+        firstDraftAt: questionnaires.firstDraftAt,
         submittedAt: questionnaires.submittedAt,
       })
       .from(questionnaires)
+      .innerJoin(campaigns, eq(campaigns.id, questionnaires.campaignId))
+      .leftJoin(
+        campaignEmployeeSnapshots,
+        and(
+          eq(campaignEmployeeSnapshots.campaignId, questionnaires.campaignId),
+          eq(campaignEmployeeSnapshots.employeeId, questionnaires.subjectEmployeeId),
+        ),
+      )
+      .leftJoin(
+        campaignAssignments,
+        and(
+          eq(campaignAssignments.campaignId, questionnaires.campaignId),
+          eq(campaignAssignments.subjectEmployeeId, questionnaires.subjectEmployeeId),
+          eq(campaignAssignments.raterEmployeeId, questionnaires.raterEmployeeId),
+        ),
+      )
       .where(whereClauses.length > 0 ? and(...whereClauses) : undefined)
-      .orderBy(questionnaires.createdAt);
+      .orderBy(asc(campaigns.endAt), asc(questionnaires.createdAt));
 
     return {
-      items: rows.map((row) => ({
-        questionnaireId: row.questionnaireId,
-        campaignId: row.campaignId,
-        companyId: row.companyId,
-        subjectEmployeeId: row.subjectEmployeeId,
-        raterEmployeeId: row.raterEmployeeId,
-        status: ensureQuestionnaireStatus(row.status),
-        ...(row.submittedAt ? { submittedAt: row.submittedAt.toISOString() } : {}),
-      })),
+      items: rows.map(mapQuestionnaireListRow),
     };
   } finally {
     await pool.end();
@@ -481,13 +848,13 @@ export const getCampaignProgress = async (
 
 export const getQuestionnaireForDebug = async (
   questionnaireId: string,
-): Promise<ReturnType<typeof mapQuestionnaireRow>> => {
+): Promise<ReturnType<typeof mapQuestionnaireDebugRow>> => {
   const pool = createPool();
 
   try {
     const db = createDb(pool);
     const row = await getQuestionnaireRow(db, questionnaireId);
-    return mapQuestionnaireRow(row);
+    return mapQuestionnaireDebugRow(row);
   } finally {
     await pool.end();
   }
@@ -508,6 +875,12 @@ export type GetQuestionnaireDraftOutput = {
   status: QuestionnaireStatus;
   campaignStatus: "draft" | "started" | "ended" | "processing_ai" | "ai_failed" | "completed";
   draft: Record<string, unknown>;
+  campaignName: string;
+  campaignEndAt: string;
+  subjectDisplayName: string;
+  subjectPositionTitle?: string;
+  raterRole?: "manager" | "peer" | "subordinate" | "self";
+  definition?: QuestionnaireDefinition;
   firstDraftAt?: string;
   submittedAt?: string;
 };
@@ -542,18 +915,15 @@ export const getQuestionnaireDraft = async (
       input.companyId,
       input.raterEmployeeId,
     );
+    const definition = await getQuestionnaireDefinition(db, {
+      companyId: row.companyId,
+      modelVersionId: row.modelVersionId,
+    });
 
     return {
-      questionnaireId: row.questionnaireId,
-      campaignId: row.campaignId,
-      companyId: row.companyId,
-      subjectEmployeeId: row.subjectEmployeeId,
-      raterEmployeeId: row.raterEmployeeId,
-      status: ensureQuestionnaireStatus(row.status),
-      campaignStatus: ensureCampaignStatus(row.campaignStatus),
+      ...mapQuestionnaireRow(row),
       draft: row.draftPayload,
-      ...(row.firstDraftAt ? { firstDraftAt: row.firstDraftAt.toISOString() } : {}),
-      ...(row.submittedAt ? { submittedAt: row.submittedAt.toISOString() } : {}),
+      ...(definition ? { definition } : {}),
     };
   } finally {
     await pool.end();

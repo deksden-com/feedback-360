@@ -7,6 +7,7 @@ import {
   logInfo,
 } from "@/lib/observability";
 import { resolveAppOperationContext } from "@/lib/operation-context";
+import { parseQuestionnaireDraftFromFormData } from "@/lib/questionnaire-form";
 import { type OperationError, createOperationError } from "@feedback-360/api-contract";
 import { createInprocClient } from "@feedback-360/client";
 import { NextResponse } from "next/server";
@@ -53,20 +54,63 @@ const parsePayload = async (
 ): Promise<
   | {
       questionnaireId: string;
+      draft?: Record<string, unknown>;
       returnTo?: string;
     }
   | OperationError
 > => {
+  const queryReturnTo = getFormString(new URL(request.url).searchParams.get("returnTo"));
+  const parseDraftCandidate = (value: unknown): Record<string, unknown> | undefined => {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed.length === 0) {
+        return undefined;
+      }
+
+      try {
+        const parsed = JSON.parse(trimmed) as unknown;
+        if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+          return parsed as Record<string, unknown>;
+        }
+      } catch {
+        return undefined;
+      }
+    }
+
+    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+      return value as Record<string, unknown>;
+    }
+
+    return undefined;
+  };
+
   if (isJsonRequest(request)) {
-    const body = (await request.json()) as { questionnaireId?: unknown; returnTo?: unknown };
+    const body = (await request.json()) as {
+      questionnaireId?: unknown;
+      draft?: unknown;
+      draftJson?: unknown;
+      returnTo?: unknown;
+    };
     if (typeof body.questionnaireId !== "string" || body.questionnaireId.trim().length === 0) {
       return createOperationError("invalid_input", "questionnaireId is required.");
     }
 
     return {
       questionnaireId: body.questionnaireId.trim(),
-      ...(typeof body.returnTo === "string" && body.returnTo.trim().length > 0
-        ? { returnTo: body.returnTo.trim() }
+      ...((parseDraftCandidate(body.draft) ?? parseDraftCandidate(body.draftJson))
+        ? { draft: parseDraftCandidate(body.draft) ?? parseDraftCandidate(body.draftJson) }
+        : {}),
+      ...((
+        typeof body.returnTo === "string" && body.returnTo.trim().length > 0
+          ? body.returnTo.trim()
+          : queryReturnTo
+      )
+        ? {
+            returnTo:
+              (typeof body.returnTo === "string" && body.returnTo.trim().length > 0
+                ? body.returnTo.trim()
+                : queryReturnTo) ?? undefined,
+          }
         : {}),
     };
   }
@@ -78,9 +122,12 @@ const parsePayload = async (
   }
 
   const returnTo = getFormString(form.get("returnTo"));
+  const draft = parseDraftCandidate(getFormString(form.get("draftJson")));
+  const parsedFormDraft = draft ?? parseQuestionnaireDraftFromFormData(form);
   return {
     questionnaireId,
-    ...(returnTo ? { returnTo } : {}),
+    ...(Object.keys(parsedFormDraft).length > 0 ? { draft: parsedFormDraft } : {}),
+    ...((returnTo ?? queryReturnTo) ? { returnTo: returnTo ?? queryReturnTo } : {}),
   };
 };
 
@@ -144,6 +191,40 @@ export async function POST(request: Request) {
   });
 
   const client = createInprocClient();
+  if (payload.draft) {
+    const draftResult = await client.questionnaireSaveDraft(
+      {
+        questionnaireId: payload.questionnaireId,
+        draft: payload.draft,
+      },
+      resolved.context,
+    );
+
+    if (!draftResult.ok) {
+      if (isJsonRequest(request)) {
+        logError(trace, "questionnaire_submit_draft_failed", draftResult.error, {
+          errorCode: draftResult.error.code,
+        });
+        return jsonWithRequestTrace(
+          trace,
+          {
+            ok: false,
+            error: draftResult.error,
+          },
+          { status: mapHttpStatus(draftResult.error) },
+        );
+      }
+
+      const redirectTo = payload.returnTo ?? "/questionnaires";
+      return NextResponse.redirect(
+        new URL(withQuery(redirectTo, { error: draftResult.error.code }), request.url),
+        {
+          status: 303,
+        },
+      );
+    }
+  }
+
   const result = await client.questionnaireSubmit(
     {
       questionnaireId: payload.questionnaireId,

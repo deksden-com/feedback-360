@@ -7,6 +7,7 @@ import {
   logInfo,
 } from "@/lib/observability";
 import { resolveAppOperationContext } from "@/lib/operation-context";
+import { parseQuestionnaireDraftFromFormData } from "@/lib/questionnaire-form";
 import { type OperationError, createOperationError } from "@feedback-360/api-contract";
 import { createInprocClient } from "@feedback-360/client";
 import { NextResponse } from "next/server";
@@ -58,10 +59,36 @@ const parsePayload = async (
     }
   | OperationError
 > => {
+  const queryReturnTo = getFormString(new URL(request.url).searchParams.get("returnTo"));
+  const parseDraftCandidate = (value: unknown): Record<string, unknown> | undefined => {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed.length === 0) {
+        return undefined;
+      }
+
+      try {
+        const parsed = JSON.parse(trimmed) as unknown;
+        if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+          return parsed as Record<string, unknown>;
+        }
+      } catch {
+        return undefined;
+      }
+    }
+
+    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+      return value as Record<string, unknown>;
+    }
+
+    return undefined;
+  };
+
   if (isJsonRequest(request)) {
     const body = (await request.json()) as {
       questionnaireId?: unknown;
       draft?: unknown;
+      draftJson?: unknown;
       note?: unknown;
       returnTo?: unknown;
     };
@@ -76,15 +103,22 @@ const parsePayload = async (
           }
         : {};
     const draft =
-      typeof body.draft === "object" && body.draft !== null && !Array.isArray(body.draft)
-        ? (body.draft as Record<string, unknown>)
-        : fallbackDraft;
+      parseDraftCandidate(body.draft) ?? parseDraftCandidate(body.draftJson) ?? fallbackDraft;
 
     return {
       questionnaireId: body.questionnaireId.trim(),
       draft,
-      ...(typeof body.returnTo === "string" && body.returnTo.trim().length > 0
-        ? { returnTo: body.returnTo.trim() }
+      ...((
+        typeof body.returnTo === "string" && body.returnTo.trim().length > 0
+          ? body.returnTo.trim()
+          : queryReturnTo
+      )
+        ? {
+            returnTo:
+              (typeof body.returnTo === "string" && body.returnTo.trim().length > 0
+                ? body.returnTo.trim()
+                : queryReturnTo) ?? undefined,
+          }
         : {}),
     };
   }
@@ -95,15 +129,13 @@ const parsePayload = async (
     return createOperationError("invalid_input", "questionnaireId is required.");
   }
 
-  const note = getFormString(form.get("note")) ?? "";
+  const parsedDraft = parseDraftCandidate(getFormString(form.get("draftJson")));
   const returnTo = getFormString(form.get("returnTo"));
 
   return {
     questionnaireId,
-    draft: {
-      note,
-    },
-    ...(returnTo ? { returnTo } : {}),
+    draft: parsedDraft ?? parseQuestionnaireDraftFromFormData(form),
+    ...((returnTo ?? queryReturnTo) ? { returnTo: returnTo ?? queryReturnTo } : {}),
   };
 };
 
