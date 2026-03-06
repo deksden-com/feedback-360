@@ -62,6 +62,8 @@ HR Admin/ops быстро понимают, что происходит с AI jo
 ## Acceptance evidence (2026-03-06)
 - Local acceptance:
   - `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3107 pnpm --filter @feedback-360/web exec playwright test --config playwright/playwright.config.mjs tests/ft-0192-ai-diagnostics.spec.ts --workers=1` → passed.
+- Beta acceptance:
+  - `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web exec playwright test --config playwright/playwright.config.mjs tests/ft-0192-ai-diagnostics.spec.ts --workers=1` → passed after merge commit `0f4bf1c`.
 - Covered acceptance:
   - HR admin инициирует/читает AI diagnostics для seeded campaign.
   - Dev webhook fixture создаёт duplicate delivery и UI показывает `deliveries 2`.
@@ -85,4 +87,4 @@ HR Admin/ops быстро понимают, что происходит с AI jo
   - duplicate deliveries помечены счётчиком;
   - receipt payload summary читаем.
 - Result:
-  - pending beta deploy for EP-019.
+  - passed on `https://beta.go360go.ru`.
