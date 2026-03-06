@@ -3,6 +3,10 @@ import {
   type AiRunForCampaignOutput,
   type CampaignCreateInput,
   type CampaignCreateOutput,
+  type CampaignGetInput,
+  type CampaignGetOutput,
+  type CampaignListInput,
+  type CampaignListOutput,
   type CampaignParticipantsAddFromDepartmentsInput,
   type CampaignParticipantsAddFromDepartmentsOutput,
   type CampaignParticipantsMutationInput,
@@ -15,6 +19,8 @@ import {
   type CampaignSnapshotListOutput,
   type CampaignTransitionInput,
   type CampaignTransitionOutput,
+  type CampaignUpdateDraftInput,
+  type CampaignUpdateDraftOutput,
   type CampaignWeightsSetInput,
   type CampaignWeightsSetOutput,
   type ClientSetActiveCompanyOutput,
@@ -31,6 +37,8 @@ import {
   type MembershipListOutput,
   type ModelVersionCreateInput,
   type ModelVersionCreateOutput,
+  type ModelVersionListInput,
+  type ModelVersionListOutput,
   type NotificationsDispatchOutboxInput,
   type NotificationsDispatchOutboxOutput,
   type NotificationsGenerateRemindersInput,
@@ -66,6 +74,10 @@ import {
   parseAiRunForCampaignOutput,
   parseCampaignCreateInput,
   parseCampaignCreateOutput,
+  parseCampaignGetInput,
+  parseCampaignGetOutput,
+  parseCampaignListInput,
+  parseCampaignListOutput,
   parseCampaignParticipantsAddFromDepartmentsInput,
   parseCampaignParticipantsAddFromDepartmentsOutput,
   parseCampaignParticipantsMutationInput,
@@ -78,6 +90,8 @@ import {
   parseCampaignSnapshotListOutput,
   parseCampaignTransitionInput,
   parseCampaignTransitionOutput,
+  parseCampaignUpdateDraftInput,
+  parseCampaignUpdateDraftOutput,
   parseCampaignWeightsSetInput,
   parseCampaignWeightsSetOutput,
   parseClientSetActiveCompanyInput,
@@ -95,6 +109,8 @@ import {
   parseMembershipListOutput,
   parseModelVersionCreateInput,
   parseModelVersionCreateOutput,
+  parseModelVersionListInput,
+  parseModelVersionListOutput,
   parseNotificationsDispatchOutboxInput,
   parseNotificationsDispatchOutboxOutput,
   parseNotificationsGenerateRemindersInput,
@@ -159,10 +175,26 @@ export type Feedback360Client = {
     input: ModelVersionCreateInput,
     context?: OperationContext,
   ): Promise<OperationResult<ModelVersionCreateOutput>>;
+  modelVersionList(
+    input?: ModelVersionListInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<ModelVersionListOutput>>;
+  campaignList(
+    input?: CampaignListInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignListOutput>>;
+  campaignGet(
+    input: CampaignGetInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignGetOutput>>;
   campaignCreate(
     input: CampaignCreateInput,
     context?: OperationContext,
   ): Promise<OperationResult<CampaignCreateOutput>>;
+  campaignUpdateDraft(
+    input: CampaignUpdateDraftInput,
+    context?: OperationContext,
+  ): Promise<OperationResult<CampaignUpdateDraftOutput>>;
   campaignSetModelVersion(
     input: CampaignSetModelVersionInput,
     context?: OperationContext,
@@ -390,6 +422,56 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
       });
     },
 
+    modelVersionList: async (input, context) => {
+      let parsedInput: ModelVersionListInput;
+      try {
+        parsedInput = parseModelVersionListInput(input ?? {});
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid modelVersionList input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "model.version.list",
+        input: parsedInput,
+        context,
+        parseOutput: parseModelVersionListOutput,
+      });
+    },
+
+    campaignList: async (input, context) => {
+      let parsedInput: CampaignListInput;
+      try {
+        parsedInput = parseCampaignListInput(input ?? {});
+      } catch (error) {
+        return errorResult(errorFromUnknown(error, "invalid_input", "Invalid campaignList input."));
+      }
+
+      return invokeOperation({
+        operation: "campaign.list",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignListOutput,
+      });
+    },
+
+    campaignGet: async (input, context) => {
+      let parsedInput: CampaignGetInput;
+      try {
+        parsedInput = parseCampaignGetInput(input);
+      } catch (error) {
+        return errorResult(errorFromUnknown(error, "invalid_input", "Invalid campaignGet input."));
+      }
+
+      return invokeOperation({
+        operation: "campaign.get",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignGetOutput,
+      });
+    },
+
     campaignCreate: async (input, context) => {
       let parsedInput: CampaignCreateInput;
       try {
@@ -405,6 +487,24 @@ export const createClient = (transport: OperationTransport): Feedback360Client =
         input: parsedInput,
         context,
         parseOutput: parseCampaignCreateOutput,
+      });
+    },
+
+    campaignUpdateDraft: async (input, context) => {
+      let parsedInput: CampaignUpdateDraftInput;
+      try {
+        parsedInput = parseCampaignUpdateDraftInput(input);
+      } catch (error) {
+        return errorResult(
+          errorFromUnknown(error, "invalid_input", "Invalid campaignUpdateDraft input."),
+        );
+      }
+
+      return invokeOperation({
+        operation: "campaign.updateDraft",
+        input: parsedInput,
+        context,
+        parseOutput: parseCampaignUpdateDraftOutput,
       });
     },
 

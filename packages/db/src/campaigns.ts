@@ -1,5 +1,5 @@
 import { createOperationError } from "@feedback-360/api-contract";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
 import { enqueueCampaignInvitesOnStartInDb } from "./notifications";
@@ -24,6 +24,45 @@ export type CreateCampaignOutput = {
   endAt: string;
   timezone: string;
   createdAt: string;
+};
+
+export type CampaignListOutput = {
+  items: Array<{
+    campaignId: string;
+    companyId: string;
+    name: string;
+    status: CampaignLifecycleStatus;
+    modelVersionId: string | null;
+    modelName: string | null;
+    modelKind: "indicators" | "levels" | null;
+    modelVersion: number | null;
+    startAt: string;
+    endAt: string;
+    timezone: string;
+    lockedAt?: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+};
+
+export type CampaignGetOutput = CampaignListOutput["items"][number] & {
+  managerWeight: number;
+  peersWeight: number;
+  subordinatesWeight: number;
+  selfWeight: number;
+};
+
+export type UpdateCampaignDraftOutput = {
+  campaignId: string;
+  companyId: string;
+  modelVersionId: string;
+  name: string;
+  status: "draft";
+  startAt: string;
+  endAt: string;
+  timezone: string;
+  changed: boolean;
+  updatedAt: string;
 };
 
 type CampaignLifecycleStatus =
@@ -91,6 +130,48 @@ const ensureCampaignLifecycleStatus = (value: string): CampaignLifecycleStatus =
   throw createOperationError("invalid_input", "Unsupported campaign status.", {
     status: value,
   });
+};
+
+const normalizeModelKind = (value: string | null): "indicators" | "levels" | null => {
+  if (value === "indicators" || value === "levels") {
+    return value;
+  }
+
+  return null;
+};
+
+const mapCampaignRow = (row: {
+  campaignId: string;
+  companyId: string;
+  name: string;
+  status: string;
+  modelVersionId: string | null;
+  modelName: string | null;
+  modelKind: string | null;
+  modelVersion: number | null;
+  startAt: Date;
+  endAt: Date;
+  timezone: string;
+  lockedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}): CampaignListOutput["items"][number] => {
+  return {
+    campaignId: row.campaignId,
+    companyId: row.companyId,
+    name: row.name,
+    status: ensureCampaignLifecycleStatus(row.status),
+    modelVersionId: row.modelVersionId,
+    modelName: row.modelName,
+    modelKind: normalizeModelKind(row.modelKind),
+    modelVersion: row.modelVersion,
+    startAt: row.startAt.toISOString(),
+    endAt: row.endAt.toISOString(),
+    timezone: row.timezone,
+    ...(row.lockedAt ? { lockedAt: row.lockedAt.toISOString() } : {}),
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  };
 };
 
 const transitionCampaignStatus = async (
@@ -301,6 +382,250 @@ export const createCampaign = async (input: CreateCampaignInput): Promise<Create
         endAt: endAt.toISOString(),
         timezone,
         createdAt: campaign.createdAt.toISOString(),
+      };
+    });
+  } finally {
+    await pool.end();
+  }
+};
+
+export const listCampaigns = async (input: {
+  companyId: string;
+  status?: CampaignLifecycleStatus;
+}): Promise<CampaignListOutput> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const rows = await db
+      .select({
+        campaignId: campaigns.id,
+        companyId: campaigns.companyId,
+        name: campaigns.name,
+        status: campaigns.status,
+        modelVersionId: campaigns.modelVersionId,
+        modelName: competencyModelVersions.name,
+        modelKind: competencyModelVersions.kind,
+        modelVersion: competencyModelVersions.version,
+        startAt: campaigns.startAt,
+        endAt: campaigns.endAt,
+        timezone: campaigns.timezone,
+        lockedAt: campaigns.lockedAt,
+        createdAt: campaigns.createdAt,
+        updatedAt: campaigns.updatedAt,
+      })
+      .from(campaigns)
+      .leftJoin(competencyModelVersions, eq(competencyModelVersions.id, campaigns.modelVersionId))
+      .where(
+        and(
+          eq(campaigns.companyId, input.companyId),
+          input.status ? eq(campaigns.status, input.status) : undefined,
+        ),
+      )
+      .orderBy(desc(campaigns.updatedAt), desc(campaigns.createdAt));
+
+    return {
+      items: rows.map(mapCampaignRow),
+    };
+  } finally {
+    await pool.end();
+  }
+};
+
+export const getCampaign = async (input: {
+  companyId: string;
+  campaignId: string;
+}): Promise<CampaignGetOutput> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const rows = await db
+      .select({
+        campaignId: campaigns.id,
+        companyId: campaigns.companyId,
+        name: campaigns.name,
+        status: campaigns.status,
+        modelVersionId: campaigns.modelVersionId,
+        modelName: competencyModelVersions.name,
+        modelKind: competencyModelVersions.kind,
+        modelVersion: competencyModelVersions.version,
+        startAt: campaigns.startAt,
+        endAt: campaigns.endAt,
+        timezone: campaigns.timezone,
+        lockedAt: campaigns.lockedAt,
+        createdAt: campaigns.createdAt,
+        updatedAt: campaigns.updatedAt,
+        managerWeight: campaigns.managerWeight,
+        peersWeight: campaigns.peersWeight,
+        subordinatesWeight: campaigns.subordinatesWeight,
+        selfWeight: campaigns.selfWeight,
+      })
+      .from(campaigns)
+      .leftJoin(competencyModelVersions, eq(competencyModelVersions.id, campaigns.modelVersionId))
+      .where(and(eq(campaigns.companyId, input.companyId), eq(campaigns.id, input.campaignId)))
+      .limit(1);
+
+    const row = rows[0];
+    if (!row) {
+      throw createOperationError("not_found", "Campaign not found in active company.", {
+        companyId: input.companyId,
+        campaignId: input.campaignId,
+      });
+    }
+
+    return {
+      ...mapCampaignRow(row),
+      managerWeight: row.managerWeight,
+      peersWeight: row.peersWeight,
+      subordinatesWeight: row.subordinatesWeight,
+      selfWeight: row.selfWeight,
+    };
+  } finally {
+    await pool.end();
+  }
+};
+
+export const updateCampaignDraft = async (input: {
+  companyId: string;
+  campaignId: string;
+  name: string;
+  modelVersionId: string;
+  startAt: string;
+  endAt: string;
+  timezone?: string;
+}): Promise<UpdateCampaignDraftOutput> => {
+  const name = input.name.trim();
+  if (name.length === 0) {
+    throw createOperationError("invalid_input", "Campaign name must be non-empty.");
+  }
+
+  const startAt = parseTimestamp(input.startAt, "startAt");
+  const endAt = parseTimestamp(input.endAt, "endAt");
+  if (endAt <= startAt) {
+    throw createOperationError("invalid_input", "endAt must be greater than startAt.");
+  }
+
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+
+    return await db.transaction(async (tx) => {
+      const campaignRows = await tx
+        .select({
+          campaignId: campaigns.id,
+          companyId: campaigns.companyId,
+          status: campaigns.status,
+          name: campaigns.name,
+          modelVersionId: campaigns.modelVersionId,
+          startAt: campaigns.startAt,
+          endAt: campaigns.endAt,
+          timezone: campaigns.timezone,
+        })
+        .from(campaigns)
+        .where(and(eq(campaigns.id, input.campaignId), eq(campaigns.companyId, input.companyId)))
+        .limit(1);
+
+      const campaign = campaignRows[0];
+      if (!campaign) {
+        throw createOperationError("not_found", "Campaign not found in active company.", {
+          campaignId: input.campaignId,
+          companyId: input.companyId,
+        });
+      }
+
+      if (campaign.status !== "draft") {
+        throw createOperationError(
+          "campaign_started_immutable",
+          "Campaign draft settings can be changed only in draft status.",
+          {
+            campaignId: input.campaignId,
+            status: campaign.status,
+          },
+        );
+      }
+
+      const modelRows = await tx
+        .select({
+          modelVersionId: competencyModelVersions.id,
+        })
+        .from(competencyModelVersions)
+        .where(
+          and(
+            eq(competencyModelVersions.id, input.modelVersionId),
+            eq(competencyModelVersions.companyId, input.companyId),
+          ),
+        )
+        .limit(1);
+
+      if (!modelRows[0]) {
+        throw createOperationError("not_found", "Model version not found in active company.", {
+          modelVersionId: input.modelVersionId,
+          companyId: input.companyId,
+        });
+      }
+
+      const resolvedTimezone = input.timezone?.trim() || campaign.timezone;
+      const changed =
+        campaign.name !== name ||
+        campaign.modelVersionId !== input.modelVersionId ||
+        campaign.startAt.getTime() !== startAt.getTime() ||
+        campaign.endAt.getTime() !== endAt.getTime() ||
+        campaign.timezone !== resolvedTimezone;
+
+      const now = new Date();
+      if (!changed) {
+        return {
+          campaignId: campaign.campaignId,
+          companyId: campaign.companyId,
+          modelVersionId: input.modelVersionId,
+          name,
+          status: "draft",
+          startAt: startAt.toISOString(),
+          endAt: endAt.toISOString(),
+          timezone: resolvedTimezone,
+          changed: false,
+          updatedAt: now.toISOString(),
+        };
+      }
+
+      const updatedRows = await tx
+        .update(campaigns)
+        .set({
+          name,
+          modelVersionId: input.modelVersionId,
+          startAt,
+          endAt,
+          timezone: resolvedTimezone,
+          updatedAt: now,
+        })
+        .where(eq(campaigns.id, input.campaignId))
+        .returning({
+          campaignId: campaigns.id,
+          companyId: campaigns.companyId,
+          modelVersionId: campaigns.modelVersionId,
+          name: campaigns.name,
+          status: campaigns.status,
+          startAt: campaigns.startAt,
+          endAt: campaigns.endAt,
+          timezone: campaigns.timezone,
+          updatedAt: campaigns.updatedAt,
+        });
+
+      const updated = updatedRows[0];
+      if (!updated?.modelVersionId) {
+        throw createOperationError("invalid_transition", "Failed to update campaign draft.");
+      }
+
+      return {
+        campaignId: updated.campaignId,
+        companyId: updated.companyId,
+        modelVersionId: updated.modelVersionId,
+        name: updated.name,
+        status: "draft",
+        startAt: updated.startAt.toISOString(),
+        endAt: updated.endAt.toISOString(),
+        timezone: updated.timezone,
+        changed: true,
+        updatedAt: updated.updatedAt.toISOString(),
       };
     });
   } finally {

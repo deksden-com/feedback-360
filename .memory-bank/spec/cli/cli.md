@@ -21,7 +21,11 @@ Status: Draft (2026-03-03)
 - `org department create|move ...`
 - `org set-manager ...`
 - `model version create --kind indicators|levels ...`
+- `model version list`
 - `campaign create ...`
+- `campaign list [--status <status>]`
+- `campaign get <campaign_id>`
+- `campaign update-draft <campaign_id> ...`
 - `campaign set-model <campaign_id> <model_version_id>`
 - `campaign participants add|remove ...`
 - `campaign participants add-departments <campaign_id> --from-departments ...`

@@ -11,8 +11,12 @@ describe("client package", () => {
     const client = createInprocClient();
     expect(typeof client.seedRun).toBe("function");
     expect(typeof client.systemPing).toBe("function");
+    expect(typeof client.modelVersionList).toBe("function");
+    expect(typeof client.campaignList).toBe("function");
+    expect(typeof client.campaignGet).toBe("function");
     expect(typeof client.employeeUpsert).toBe("function");
     expect(typeof client.employeeListActive).toBe("function");
+    expect(typeof client.campaignUpdateDraft).toBe("function");
     expect(typeof client.orgDepartmentMove).toBe("function");
     expect(typeof client.orgManagerSet).toBe("function");
     expect(typeof client.campaignSnapshotList).toBe("function");

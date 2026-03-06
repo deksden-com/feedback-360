@@ -65,7 +65,11 @@ export const knownOperations = [
   "company.updateProfile",
   "membership.list",
   "model.version.create",
+  "model.version.list",
+  "campaign.list",
+  "campaign.get",
   "campaign.create",
+  "campaign.updateDraft",
   "campaign.start",
   "campaign.stop",
   "campaign.end",
@@ -154,6 +158,21 @@ export type ModelVersionCreateOutput = {
   levelCount: number;
 };
 
+export type ModelVersionListInput = Record<string, never>;
+
+export type ModelVersionListItem = {
+  modelVersionId: string;
+  name: string;
+  kind: "indicators" | "levels";
+  version: number;
+  status: string;
+  createdAt: string;
+};
+
+export type ModelVersionListOutput = {
+  items: ModelVersionListItem[];
+};
+
 export type CampaignCreateInput = {
   name: string;
   modelVersionId: string;
@@ -184,6 +203,64 @@ export const campaignLifecycleStatuses = [
 ] as const;
 
 export type CampaignLifecycleStatus = (typeof campaignLifecycleStatuses)[number];
+
+export type CampaignListInput = {
+  status?: CampaignLifecycleStatus;
+};
+
+export type CampaignListItem = {
+  campaignId: string;
+  companyId: string;
+  name: string;
+  status: CampaignLifecycleStatus;
+  modelVersionId: string | null;
+  modelName: string | null;
+  modelKind: "indicators" | "levels" | null;
+  modelVersion: number | null;
+  startAt: string;
+  endAt: string;
+  timezone: string;
+  lockedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CampaignListOutput = {
+  items: CampaignListItem[];
+};
+
+export type CampaignGetInput = {
+  campaignId: string;
+};
+
+export type CampaignGetOutput = CampaignListItem & {
+  managerWeight: number;
+  peersWeight: number;
+  subordinatesWeight: number;
+  selfWeight: number;
+};
+
+export type CampaignUpdateDraftInput = {
+  campaignId: string;
+  name: string;
+  modelVersionId: string;
+  startAt: string;
+  endAt: string;
+  timezone?: string;
+};
+
+export type CampaignUpdateDraftOutput = {
+  campaignId: string;
+  companyId: string;
+  modelVersionId: string;
+  name: string;
+  status: "draft";
+  startAt: string;
+  endAt: string;
+  timezone: string;
+  changed: boolean;
+  updatedAt: string;
+};
 
 export type CampaignTransitionInput = {
   campaignId: string;
@@ -1206,6 +1283,45 @@ export const parseModelVersionCreateOutput = (value: unknown): ModelVersionCreat
   };
 };
 
+const parseModelVersionListItem = (value: unknown): ModelVersionListItem => {
+  const record = ensureObject(value, "model.version.list output.items[]");
+  ensureAllowedKeys(
+    record,
+    ["modelVersionId", "name", "kind", "version", "status", "createdAt"],
+    "model.version.list output.items[]",
+  );
+
+  return {
+    modelVersionId: ensureStringField(
+      record,
+      "modelVersionId",
+      "model.version.list output.items[]",
+    ),
+    name: ensureStringField(record, "name", "model.version.list output.items[]"),
+    kind: parseModelKind(record.kind, "model.version.list output.items[].kind"),
+    version: ensureNumberField(record, "version", "model.version.list output.items[]"),
+    status: ensureStringField(record, "status", "model.version.list output.items[]"),
+    createdAt: ensureStringField(record, "createdAt", "model.version.list output.items[]"),
+  };
+};
+
+export const parseModelVersionListInput = (value: unknown): ModelVersionListInput => {
+  const record = ensureObject(value, "model.version.list input");
+  ensureAllowedKeys(record, [], "model.version.list input");
+  return {};
+};
+
+export const parseModelVersionListOutput = (value: unknown): ModelVersionListOutput => {
+  const record = ensureObject(value, "model.version.list output");
+  ensureAllowedKeys(record, ["items"], "model.version.list output");
+
+  return {
+    items: ensureArray(record.items, "model.version.list output.items").map(
+      parseModelVersionListItem,
+    ),
+  };
+};
+
 export const parseCampaignCreateInput = (value: unknown): CampaignCreateInput => {
   const record = ensureObject(value, "campaign.create input");
   ensureAllowedKeys(
@@ -1263,6 +1379,247 @@ export const parseCampaignCreateOutput = (value: unknown): CampaignCreateOutput 
     endAt: ensureStringField(record, "endAt", "campaign.create output"),
     timezone: ensureStringField(record, "timezone", "campaign.create output"),
     createdAt: ensureStringField(record, "createdAt", "campaign.create output"),
+  };
+};
+
+const parseNullableCampaignModelKind = (
+  value: unknown,
+  path: string,
+): "indicators" | "levels" | null => {
+  if (value == null) {
+    return null;
+  }
+  return parseModelKind(value, path);
+};
+
+const parseNullableCampaignString = (
+  record: Record<string, unknown>,
+  fieldName: string,
+  path: string,
+) => {
+  const value = record[fieldName];
+  if (value == null) {
+    return null;
+  }
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error(`${path}.${fieldName} must be a non-empty string when provided.`);
+  }
+  return value.trim();
+};
+
+const parseNullableCampaignNumber = (
+  record: Record<string, unknown>,
+  fieldName: string,
+  path: string,
+) => {
+  const value = record[fieldName];
+  if (value == null) {
+    return null;
+  }
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    throw new Error(`${path}.${fieldName} must be a number when provided.`);
+  }
+  return value;
+};
+
+const parseCampaignListItem = (value: unknown): CampaignListItem => {
+  const record = ensureObject(value, "campaign.list output.items[]");
+  ensureAllowedKeys(
+    record,
+    [
+      "campaignId",
+      "companyId",
+      "name",
+      "status",
+      "modelVersionId",
+      "modelName",
+      "modelKind",
+      "modelVersion",
+      "startAt",
+      "endAt",
+      "timezone",
+      "lockedAt",
+      "createdAt",
+      "updatedAt",
+    ],
+    "campaign.list output.items[]",
+  );
+
+  const lockedAt = record.lockedAt;
+  if (lockedAt !== undefined && lockedAt !== null && typeof lockedAt !== "string") {
+    throw new Error("campaign.list output.items[].lockedAt must be a string when provided.");
+  }
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.list output.items[]"),
+    companyId: ensureStringField(record, "companyId", "campaign.list output.items[]"),
+    name: ensureStringField(record, "name", "campaign.list output.items[]"),
+    status: parseCampaignLifecycleStatus(record.status, "campaign.list output.items[].status"),
+    modelVersionId: parseNullableCampaignString(
+      record,
+      "modelVersionId",
+      "campaign.list output.items[]",
+    ),
+    modelName: parseNullableCampaignString(record, "modelName", "campaign.list output.items[]"),
+    modelKind: parseNullableCampaignModelKind(
+      record.modelKind,
+      "campaign.list output.items[].modelKind",
+    ),
+    modelVersion: parseNullableCampaignNumber(
+      record,
+      "modelVersion",
+      "campaign.list output.items[]",
+    ),
+    startAt: ensureStringField(record, "startAt", "campaign.list output.items[]"),
+    endAt: ensureStringField(record, "endAt", "campaign.list output.items[]"),
+    timezone: ensureStringField(record, "timezone", "campaign.list output.items[]"),
+    ...(typeof lockedAt === "string" ? { lockedAt } : {}),
+    createdAt: ensureStringField(record, "createdAt", "campaign.list output.items[]"),
+    updatedAt: ensureStringField(record, "updatedAt", "campaign.list output.items[]"),
+  };
+};
+
+export const parseCampaignListInput = (value: unknown): CampaignListInput => {
+  const record = ensureObject(value, "campaign.list input");
+  ensureAllowedKeys(record, ["status"], "campaign.list input");
+
+  const status = record.status;
+  if (status === undefined) {
+    return {};
+  }
+
+  return {
+    status: parseCampaignLifecycleStatus(status, "campaign.list input.status"),
+  };
+};
+
+export const parseCampaignListOutput = (value: unknown): CampaignListOutput => {
+  const record = ensureObject(value, "campaign.list output");
+  ensureAllowedKeys(record, ["items"], "campaign.list output");
+
+  return {
+    items: ensureArray(record.items, "campaign.list output.items").map(parseCampaignListItem),
+  };
+};
+
+export const parseCampaignGetInput = (value: unknown): CampaignGetInput => {
+  const record = ensureObject(value, "campaign.get input");
+  ensureAllowedKeys(record, ["campaignId"], "campaign.get input");
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.get input"),
+  };
+};
+
+export const parseCampaignGetOutput = (value: unknown): CampaignGetOutput => {
+  const record = ensureObject(value, "campaign.get output");
+  ensureAllowedKeys(
+    record,
+    [
+      "campaignId",
+      "companyId",
+      "name",
+      "status",
+      "modelVersionId",
+      "modelName",
+      "modelKind",
+      "modelVersion",
+      "startAt",
+      "endAt",
+      "timezone",
+      "lockedAt",
+      "createdAt",
+      "updatedAt",
+      "managerWeight",
+      "peersWeight",
+      "subordinatesWeight",
+      "selfWeight",
+    ],
+    "campaign.get output",
+  );
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.get output"),
+    companyId: ensureStringField(record, "companyId", "campaign.get output"),
+    name: ensureStringField(record, "name", "campaign.get output"),
+    status: parseCampaignLifecycleStatus(record.status, "campaign.get output.status"),
+    modelVersionId: parseNullableCampaignString(record, "modelVersionId", "campaign.get output"),
+    modelName: parseNullableCampaignString(record, "modelName", "campaign.get output"),
+    modelKind: parseNullableCampaignModelKind(record.modelKind, "campaign.get output.modelKind"),
+    modelVersion: parseNullableCampaignNumber(record, "modelVersion", "campaign.get output"),
+    startAt: ensureStringField(record, "startAt", "campaign.get output"),
+    endAt: ensureStringField(record, "endAt", "campaign.get output"),
+    timezone: ensureStringField(record, "timezone", "campaign.get output"),
+    ...(typeof record.lockedAt === "string" ? { lockedAt: record.lockedAt } : {}),
+    createdAt: ensureStringField(record, "createdAt", "campaign.get output"),
+    updatedAt: ensureStringField(record, "updatedAt", "campaign.get output"),
+    managerWeight: ensureNumberField(record, "managerWeight", "campaign.get output"),
+    peersWeight: ensureNumberField(record, "peersWeight", "campaign.get output"),
+    subordinatesWeight: ensureNumberField(record, "subordinatesWeight", "campaign.get output"),
+    selfWeight: ensureNumberField(record, "selfWeight", "campaign.get output"),
+  };
+};
+
+export const parseCampaignUpdateDraftInput = (value: unknown): CampaignUpdateDraftInput => {
+  const record = ensureObject(value, "campaign.updateDraft input");
+  ensureAllowedKeys(
+    record,
+    ["campaignId", "name", "modelVersionId", "startAt", "endAt", "timezone"],
+    "campaign.updateDraft input",
+  );
+
+  const timezone = record.timezone;
+  if (timezone !== undefined && typeof timezone !== "string") {
+    throw new Error("campaign.updateDraft input.timezone must be a string when provided.");
+  }
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.updateDraft input"),
+    name: ensureStringField(record, "name", "campaign.updateDraft input"),
+    modelVersionId: ensureStringField(record, "modelVersionId", "campaign.updateDraft input"),
+    startAt: ensureStringField(record, "startAt", "campaign.updateDraft input"),
+    endAt: ensureStringField(record, "endAt", "campaign.updateDraft input"),
+    ...(typeof timezone === "string" && timezone.trim().length > 0
+      ? { timezone: timezone.trim() }
+      : {}),
+  };
+};
+
+export const parseCampaignUpdateDraftOutput = (value: unknown): CampaignUpdateDraftOutput => {
+  const record = ensureObject(value, "campaign.updateDraft output");
+  ensureAllowedKeys(
+    record,
+    [
+      "campaignId",
+      "companyId",
+      "modelVersionId",
+      "name",
+      "status",
+      "startAt",
+      "endAt",
+      "timezone",
+      "changed",
+      "updatedAt",
+    ],
+    "campaign.updateDraft output",
+  );
+
+  const status = ensureStringField(record, "status", "campaign.updateDraft output");
+  if (status !== "draft") {
+    throw new Error('campaign.updateDraft output.status must be "draft".');
+  }
+
+  return {
+    campaignId: ensureStringField(record, "campaignId", "campaign.updateDraft output"),
+    companyId: ensureStringField(record, "companyId", "campaign.updateDraft output"),
+    modelVersionId: ensureStringField(record, "modelVersionId", "campaign.updateDraft output"),
+    name: ensureStringField(record, "name", "campaign.updateDraft output"),
+    status: "draft",
+    startAt: ensureStringField(record, "startAt", "campaign.updateDraft output"),
+    endAt: ensureStringField(record, "endAt", "campaign.updateDraft output"),
+    timezone: ensureStringField(record, "timezone", "campaign.updateDraft output"),
+    changed: ensureBooleanField(record, "changed", "campaign.updateDraft output"),
+    updatedAt: ensureStringField(record, "updatedAt", "campaign.updateDraft output"),
   };
 };
 

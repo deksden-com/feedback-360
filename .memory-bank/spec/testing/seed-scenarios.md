@@ -38,7 +38,7 @@ Status: Draft (2026-03-03)
 - `S2_org_basic`: подразделения + сотрудники + руководитель + связи.
 - `S3_model_indicators`: модель компетенций (indicators).
 - `S3_model_levels` (planned): модель компетенций (levels 1..4 + UNSURE) для GS9.
-- `S4_campaign_draft`: кампания в draft с участниками.
+- `S4_campaign_draft`: кампания в draft с published model и без participants по умолчанию.
 - `S5_campaign_started_no_answers`: started, матрица назначений, но без ответов.
 - `S6_campaign_started_some_drafts`: есть draft save (кампания locked).
 - `S7_campaign_started_some_submitted`: есть submit (для агрегаций/анонимности).

@@ -571,6 +571,7 @@ const buildS9Handles = (): Record<string, string> => {
 const buildS4Handles = (): Record<string, string> => {
   return {
     ...buildS2Handles(),
+    "model.version.main": ids.modelVersionMainIndicators,
     "campaign.main": ids.campaignMain,
   };
 };
@@ -2024,11 +2025,67 @@ const insertS4 = async (
 
   const campaignStartAt = new Date("2026-01-15T09:00:00.000Z");
   const campaignEndAt = new Date("2026-01-30T18:00:00.000Z");
+  const modelCreatedAt = new Date("2026-01-10T08:00:00.000Z");
+
+  await db.insert(competencyModelVersions).values({
+    id: ids.modelVersionMainIndicators,
+    companyId: ids.companyMain,
+    name: "S4 Draft Model",
+    kind: "indicators",
+    version: 1,
+    status: "published",
+    createdAt: modelCreatedAt,
+    updatedAt: modelCreatedAt,
+  });
+
+  await db.insert(competencyGroups).values({
+    id: ids.competencyGroupMain,
+    companyId: ids.companyMain,
+    modelVersionId: ids.modelVersionMainIndicators,
+    name: "Core",
+    weight: 100,
+    order: 1,
+    createdAt: modelCreatedAt,
+    updatedAt: modelCreatedAt,
+  });
+
+  await db.insert(competencies).values({
+    id: ids.competencyMain,
+    companyId: ids.companyMain,
+    modelVersionId: ids.modelVersionMainIndicators,
+    groupId: ids.competencyGroupMain,
+    name: "Leadership",
+    order: 1,
+    createdAt: modelCreatedAt,
+    updatedAt: modelCreatedAt,
+  });
+
+  await db.insert(competencyIndicators).values([
+    {
+      id: ids.competencyIndicatorMain1,
+      companyId: ids.companyMain,
+      competencyId: ids.competencyMain,
+      text: "Sets clear direction",
+      order: 1,
+      createdAt: modelCreatedAt,
+      updatedAt: modelCreatedAt,
+    },
+    {
+      id: ids.competencyIndicatorMain2,
+      companyId: ids.companyMain,
+      competencyId: ids.competencyMain,
+      text: "Supports team members",
+      order: 2,
+      createdAt: modelCreatedAt,
+      updatedAt: modelCreatedAt,
+    },
+  ]);
 
   await db.insert(campaigns).values({
     id: ids.campaignMain,
     companyId: ids.companyMain,
     name: "Q1 Draft Campaign",
+    modelVersionId: ids.modelVersionMainIndicators,
     status: "draft",
     timezone: "Europe/Kaliningrad",
     startAt: campaignStartAt,

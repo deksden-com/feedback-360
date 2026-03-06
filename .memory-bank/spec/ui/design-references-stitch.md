@@ -53,6 +53,7 @@ Status: Updated (2026-03-06)
 - [`hr_admin_campaign_dashboard/screen.png`](../../assets/ui/stitch_go360go/hr_admin_campaign_dashboard/screen.png): primary reference for campaigns list/detail/dashboard.
 - Take: stat cards, list/detail relationship, section order.
 - Do not take: export/actions not covered by our typed contract.
+- Implementation note: current EP-012 uses this reference only for information hierarchy and card language; create/edit draft flow stays aligned with our draft-first lifecycle and does not inherit any unsupported export/report actions from the mock.
 
 ### EP-013 — Questionnaire experience
 - [`_1/screen.png`](../../assets/ui/stitch_go360go/_1/screen.png): inbox/list pattern.
