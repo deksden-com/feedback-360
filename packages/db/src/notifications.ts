@@ -10,6 +10,7 @@ import {
   employees,
   notificationAttempts,
   notificationOutbox,
+  notificationSettings,
   questionnaires,
 } from "./schema";
 
@@ -46,6 +47,122 @@ export type NotificationsDispatchOutboxOutput = {
   remainingPending: number;
 };
 
+export type NotificationReminderSettings = {
+  companyId: string;
+  reminderScheduledHour: number;
+  quietHoursStart: number;
+  quietHoursEnd: number;
+  reminderWeekdays: number[];
+  locale: "ru";
+  updatedAt: Date;
+};
+
+export type NotificationReminderSettingsUpsertInput = {
+  companyId: string;
+  reminderScheduledHour: number;
+  quietHoursStart: number;
+  quietHoursEnd: number;
+  reminderWeekdays: number[];
+};
+
+export type NotificationReminderPreviewInput = {
+  companyId: string;
+  campaignId?: string;
+  now?: Date;
+  draftSettings?: {
+    reminderScheduledHour?: number;
+    quietHoursStart?: number;
+    quietHoursEnd?: number;
+    reminderWeekdays?: number[];
+  };
+};
+
+export type NotificationReminderPreviewOutput = {
+  companyId: string;
+  campaignId?: string;
+  effectiveTimezone: string;
+  companyTimezone: string;
+  campaignTimezone?: string;
+  reminderScheduledHour: number;
+  quietHoursStart: number;
+  quietHoursEnd: number;
+  reminderWeekdays: number[];
+  nextRunAt: Date | null;
+  localDateBucket: string;
+  localWeekday: number;
+  localHour: number;
+};
+
+export type NotificationTemplateCatalogItem = {
+  templateKey: "campaign_invite@v1" | "campaign_reminder@v1";
+  locale: "ru";
+  version: "v1";
+  channel: "email";
+  title: string;
+  description: string;
+  variables: string[];
+};
+
+export type NotificationTemplatePreviewOutput = NotificationTemplateCatalogItem & {
+  subject: string;
+  text: string;
+  html: string;
+};
+
+export type NotificationDeliveryDiagnosticsInput = {
+  companyId: string;
+  campaignId?: string;
+  status?: "pending" | "sent" | "failed" | "dead_letter" | "retry_scheduled";
+  channel?: "email";
+};
+
+export type NotificationDeliveryDiagnosticsOutput = {
+  items: Array<{
+    outboxId: string;
+    campaignId: string;
+    campaignName: string;
+    recipientEmployeeId: string;
+    recipientLabel: string;
+    toEmail: string;
+    eventType: string;
+    templateKey: string;
+    channel: "email";
+    status: string;
+    attempts: number;
+    nextRetryAt: Date | null;
+    lastError: string | null;
+    idempotencyKey: string;
+    attemptsHistory: Array<{
+      attemptNo: number;
+      provider: string;
+      status: string;
+      errorMessage: string | null;
+      requestedAt: Date;
+    }>;
+  }>;
+};
+
+const resolveDeliveryStatus = (row: {
+  status: string;
+  nextRetryAt: Date | null;
+  attempts: number;
+}): "pending" | "sent" | "failed" | "dead_letter" | "retry_scheduled" => {
+  if (row.status === "pending" && row.nextRetryAt && row.attempts > 0) {
+    return "retry_scheduled";
+  }
+
+  if (
+    row.status === "pending" ||
+    row.status === "sent" ||
+    row.status === "failed" ||
+    row.status === "dead_letter"
+  ) {
+    return row.status;
+  }
+
+  return "failed";
+};
+
 type TxLike = Pick<ReturnType<typeof createDb>, "select" | "insert">;
 
 type OutboxStatus = "pending" | "sent" | "failed" | "dead_letter";
@@ -74,6 +191,7 @@ const QUIET_HOURS_START = 8;
 const QUIET_HOURS_END = 20;
 const DEFAULT_REMINDER_HOUR = 10;
 const REMINDER_WEEKDAYS = [1, 3, 5] as const;
+const DEFAULT_NOTIFICATION_LOCALE = "ru" as const;
 
 type ReminderScheduleEvaluationReason =
   | "ok"
@@ -135,9 +253,49 @@ const resolveReminderTimezone = (campaignTimezone: string, companyTimezone: stri
   return "UTC";
 };
 
+const normalizeReminderWeekdays = (value: unknown): number[] => {
+  if (!Array.isArray(value)) {
+    return [...REMINDER_WEEKDAYS];
+  }
+
+  const normalized = value
+    .map((item) => (typeof item === "number" ? item : Number(item)))
+    .filter((item) => Number.isInteger(item) && item >= 1 && item <= 7);
+
+  return normalized.length > 0
+    ? [...new Set(normalized)].sort((left, right) => left - right)
+    : [...REMINDER_WEEKDAYS];
+};
+
+const normalizeHour = (value: number | undefined, fallback: number): number => {
+  if (typeof value !== "number" || !Number.isInteger(value)) {
+    return fallback;
+  }
+  return Math.min(Math.max(value, 0), 23);
+};
+
+const normalizeQuietEnd = (value: number | undefined, start: number): number => {
+  const normalized = normalizeHour(value, QUIET_HOURS_END);
+  return normalized > start ? normalized : Math.min(start + 1, 23);
+};
+
+const buildDefaultReminderSettings = (companyId: string): NotificationReminderSettings => ({
+  companyId,
+  reminderScheduledHour: DEFAULT_REMINDER_HOUR,
+  quietHoursStart: QUIET_HOURS_START,
+  quietHoursEnd: QUIET_HOURS_END,
+  reminderWeekdays: [...REMINDER_WEEKDAYS],
+  locale: DEFAULT_NOTIFICATION_LOCALE,
+  updatedAt: new Date(0),
+});
+
 export const evaluateReminderSchedule = (input: {
   now: Date;
   timezone: string;
+  reminderScheduledHour?: number;
+  quietHoursStart?: number;
+  quietHoursEnd?: number;
+  reminderWeekdays?: number[];
 }): ReminderScheduleEvaluationOutput => {
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone: input.timezone,
@@ -155,8 +313,12 @@ export const evaluateReminderSchedule = (input: {
   const localWeekday = weekdayFromIntl(partRecord.weekday ?? "");
   const localHour = Number(partRecord.hour ?? "0");
   const localDateBucket = `${partRecord.year ?? "1970"}-${partRecord.month ?? "01"}-${partRecord.day ?? "01"}`;
+  const quietHoursStart = normalizeHour(input.quietHoursStart, QUIET_HOURS_START);
+  const quietHoursEnd = normalizeQuietEnd(input.quietHoursEnd, quietHoursStart);
+  const reminderScheduledHour = normalizeHour(input.reminderScheduledHour, DEFAULT_REMINDER_HOUR);
+  const reminderWeekdays = normalizeReminderWeekdays(input.reminderWeekdays);
 
-  if (localHour < QUIET_HOURS_START || localHour >= QUIET_HOURS_END) {
+  if (localHour < quietHoursStart || localHour >= quietHoursEnd) {
     return {
       shouldGenerate: false,
       reason: "outside_quiet_hours",
@@ -167,7 +329,7 @@ export const evaluateReminderSchedule = (input: {
     };
   }
 
-  if (!REMINDER_WEEKDAYS.includes(localWeekday as (typeof REMINDER_WEEKDAYS)[number])) {
+  if (!reminderWeekdays.includes(localWeekday)) {
     return {
       shouldGenerate: false,
       reason: "outside_weekly_schedule",
@@ -178,7 +340,7 @@ export const evaluateReminderSchedule = (input: {
     };
   }
 
-  if (localHour !== DEFAULT_REMINDER_HOUR) {
+  if (localHour !== reminderScheduledHour) {
     return {
       shouldGenerate: false,
       reason: "outside_scheduled_hour",
@@ -197,6 +359,371 @@ export const evaluateReminderSchedule = (input: {
     localWeekday,
     localHour,
   };
+};
+
+export const getNotificationReminderSettings = async (
+  companyId: string,
+): Promise<NotificationReminderSettings> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const row = await db.query.notificationSettings.findFirst({
+      where: eq(notificationSettings.companyId, companyId),
+    });
+
+    if (!row) {
+      return buildDefaultReminderSettings(companyId);
+    }
+
+    return {
+      companyId,
+      reminderScheduledHour: normalizeHour(row.reminderScheduledHour, DEFAULT_REMINDER_HOUR),
+      quietHoursStart: normalizeHour(row.quietHoursStart, QUIET_HOURS_START),
+      quietHoursEnd: normalizeQuietEnd(row.quietHoursEnd, row.quietHoursStart),
+      reminderWeekdays: normalizeReminderWeekdays(row.reminderWeekdays),
+      locale: DEFAULT_NOTIFICATION_LOCALE,
+      updatedAt: row.updatedAt,
+    };
+  } finally {
+    await pool.end();
+  }
+};
+
+export const upsertNotificationReminderSettings = async (
+  input: NotificationReminderSettingsUpsertInput,
+): Promise<NotificationReminderSettings> => {
+  const now = new Date();
+  const reminderScheduledHour = normalizeHour(input.reminderScheduledHour, DEFAULT_REMINDER_HOUR);
+  const quietHoursStart = normalizeHour(input.quietHoursStart, QUIET_HOURS_START);
+  const quietHoursEnd = normalizeQuietEnd(input.quietHoursEnd, quietHoursStart);
+  const reminderWeekdays = normalizeReminderWeekdays(input.reminderWeekdays);
+
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    await db
+      .insert(notificationSettings)
+      .values({
+        companyId: input.companyId,
+        reminderScheduledHour,
+        quietHoursStart,
+        quietHoursEnd,
+        reminderWeekdays,
+        locale: DEFAULT_NOTIFICATION_LOCALE,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: notificationSettings.companyId,
+        set: {
+          reminderScheduledHour,
+          quietHoursStart,
+          quietHoursEnd,
+          reminderWeekdays,
+          locale: DEFAULT_NOTIFICATION_LOCALE,
+          updatedAt: now,
+        },
+      });
+
+    return {
+      companyId: input.companyId,
+      reminderScheduledHour,
+      quietHoursStart,
+      quietHoursEnd,
+      reminderWeekdays,
+      locale: DEFAULT_NOTIFICATION_LOCALE,
+      updatedAt: now,
+    };
+  } finally {
+    await pool.end();
+  }
+};
+
+const findNextReminderRun = (input: {
+  now: Date;
+  timezone: string;
+  reminderScheduledHour: number;
+  quietHoursStart: number;
+  quietHoursEnd: number;
+  reminderWeekdays: number[];
+  campaignStartAt?: Date;
+  campaignEndAt?: Date;
+}): NotificationReminderPreviewOutput["nextRunAt"] => {
+  const start =
+    input.campaignStartAt && input.campaignStartAt > input.now ? input.campaignStartAt : input.now;
+  const startMs = start.getTime();
+  const endMs = input.campaignEndAt?.getTime() ?? startMs + 1000 * 60 * 60 * 24 * 30;
+
+  for (let offset = 0; offset <= 24 * 30; offset += 1) {
+    const candidate = new Date(startMs + offset * 60 * 60 * 1000);
+    if (candidate.getTime() > endMs) {
+      break;
+    }
+
+    const evaluation = evaluateReminderSchedule({
+      now: candidate,
+      timezone: input.timezone,
+      reminderScheduledHour: input.reminderScheduledHour,
+      quietHoursStart: input.quietHoursStart,
+      quietHoursEnd: input.quietHoursEnd,
+      reminderWeekdays: input.reminderWeekdays,
+    });
+
+    if (evaluation.shouldGenerate) {
+      return candidate;
+    }
+  }
+
+  return null;
+};
+
+export const previewNotificationReminderSchedule = async (
+  input: NotificationReminderPreviewInput,
+): Promise<NotificationReminderPreviewOutput> => {
+  const settings = input.draftSettings
+    ? {
+        ...(await getNotificationReminderSettings(input.companyId)),
+        ...(input.draftSettings.reminderScheduledHour !== undefined
+          ? { reminderScheduledHour: input.draftSettings.reminderScheduledHour }
+          : {}),
+        ...(input.draftSettings.quietHoursStart !== undefined
+          ? { quietHoursStart: input.draftSettings.quietHoursStart }
+          : {}),
+        ...(input.draftSettings.quietHoursEnd !== undefined
+          ? { quietHoursEnd: input.draftSettings.quietHoursEnd }
+          : {}),
+        ...(input.draftSettings.reminderWeekdays !== undefined
+          ? { reminderWeekdays: input.draftSettings.reminderWeekdays }
+          : {}),
+      }
+    : await getNotificationReminderSettings(input.companyId);
+
+  const now = input.now ?? new Date();
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const company = await db.query.companies.findFirst({
+      where: eq(companies.id, input.companyId),
+    });
+    if (!company) {
+      throw createOperationError("not_found", "Company not found.");
+    }
+
+    const campaign = input.campaignId
+      ? await db.query.campaigns.findFirst({
+          where: and(eq(campaigns.companyId, input.companyId), eq(campaigns.id, input.campaignId)),
+        })
+      : null;
+    if (input.campaignId && !campaign) {
+      throw createOperationError("not_found", "Campaign not found.");
+    }
+
+    const effectiveTimezone = resolveReminderTimezone(
+      campaign?.timezone ?? company.timezone,
+      company.timezone,
+    );
+    const currentEvaluation = evaluateReminderSchedule({
+      now,
+      timezone: effectiveTimezone,
+      reminderScheduledHour: settings.reminderScheduledHour,
+      quietHoursStart: settings.quietHoursStart,
+      quietHoursEnd: settings.quietHoursEnd,
+      reminderWeekdays: settings.reminderWeekdays,
+    });
+    const nextRunAt = findNextReminderRun({
+      now,
+      timezone: effectiveTimezone,
+      reminderScheduledHour: settings.reminderScheduledHour,
+      quietHoursStart: settings.quietHoursStart,
+      quietHoursEnd: settings.quietHoursEnd,
+      reminderWeekdays: settings.reminderWeekdays,
+      ...(campaign ? { campaignStartAt: campaign.startAt, campaignEndAt: campaign.endAt } : {}),
+    });
+
+    return {
+      companyId: input.companyId,
+      ...(campaign ? { campaignId: campaign.id, campaignTimezone: campaign.timezone } : {}),
+      companyTimezone: company.timezone,
+      effectiveTimezone,
+      reminderScheduledHour: settings.reminderScheduledHour,
+      quietHoursStart: settings.quietHoursStart,
+      quietHoursEnd: settings.quietHoursEnd,
+      reminderWeekdays: settings.reminderWeekdays,
+      nextRunAt,
+      localDateBucket: currentEvaluation.localDateBucket,
+      localWeekday: currentEvaluation.localWeekday,
+      localHour: currentEvaluation.localHour,
+    };
+  } finally {
+    await pool.end();
+  }
+};
+
+const notificationTemplateCatalog: NotificationTemplateCatalogItem[] = [
+  {
+    templateKey: "campaign_invite@v1",
+    locale: "ru",
+    version: "v1",
+    channel: "email",
+    title: "Приглашение в кампанию",
+    description: "Первое письмо при старте кампании и включении сотрудника в процесс оценки.",
+    variables: ["campaignName", "recipientEmployeeId", "invitedAt"],
+  },
+  {
+    templateKey: "campaign_reminder@v1",
+    locale: "ru",
+    version: "v1",
+    channel: "email",
+    title: "Напоминание о незавершённых анкетах",
+    description:
+      "Повторное уведомление по расписанию, если у сотрудника остались не-submitted анкеты.",
+    variables: ["campaignName", "recipientEmployeeId", "pendingCount", "dateBucket", "timezone"],
+  },
+];
+
+export const listNotificationTemplateCatalog = async (): Promise<
+  NotificationTemplateCatalogItem[]
+> => {
+  return notificationTemplateCatalog;
+};
+
+export const previewNotificationTemplate = async (input: {
+  templateKey: NotificationTemplateCatalogItem["templateKey"];
+  campaignId?: string;
+  companyId: string;
+}): Promise<NotificationTemplatePreviewOutput> => {
+  const templateMeta = notificationTemplateCatalog.find(
+    (item) => item.templateKey === input.templateKey,
+  );
+  if (!templateMeta) {
+    throw createOperationError("not_found", "Template not found.");
+  }
+
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const campaign = input.campaignId
+      ? await db.query.campaigns.findFirst({
+          where: and(eq(campaigns.companyId, input.companyId), eq(campaigns.id, input.campaignId)),
+        })
+      : null;
+
+    const payload =
+      input.templateKey === "campaign_invite@v1"
+        ? {
+            campaignName: campaign?.name ?? "Q1 Campaign",
+            recipientEmployeeId: "employee-preview",
+            invitedAt: new Date("2026-03-06T10:00:00.000Z").toISOString(),
+          }
+        : {
+            campaignName: campaign?.name ?? "Q1 Campaign",
+            recipientEmployeeId: "employee-preview",
+            pendingCount: 3,
+            dateBucket: "2026-03-06",
+            timezone: campaign?.timezone ?? "Europe/Kaliningrad",
+          };
+    const rendered = renderTemplate({
+      templateKey: input.templateKey,
+      payload,
+    });
+
+    return {
+      ...templateMeta,
+      ...rendered,
+    };
+  } finally {
+    await pool.end();
+  }
+};
+
+export const listNotificationDeliveryDiagnostics = async (
+  input: NotificationDeliveryDiagnosticsInput,
+): Promise<NotificationDeliveryDiagnosticsOutput> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const rows = await db
+      .select({
+        outboxId: notificationOutbox.id,
+        campaignId: notificationOutbox.campaignId,
+        campaignName: campaigns.name,
+        recipientEmployeeId: notificationOutbox.recipientEmployeeId,
+        recipientFirstName: employees.firstName,
+        recipientLastName: employees.lastName,
+        toEmail: notificationOutbox.toEmail,
+        eventType: notificationOutbox.eventType,
+        templateKey: notificationOutbox.templateKey,
+        channel: notificationOutbox.channel,
+        status: notificationOutbox.status,
+        attempts: notificationOutbox.attempts,
+        nextRetryAt: notificationOutbox.nextRetryAt,
+        lastError: notificationOutbox.lastError,
+        idempotencyKey: notificationOutbox.idempotencyKey,
+      })
+      .from(notificationOutbox)
+      .innerJoin(campaigns, eq(campaigns.id, notificationOutbox.campaignId))
+      .innerJoin(employees, eq(employees.id, notificationOutbox.recipientEmployeeId))
+      .where(
+        and(
+          eq(notificationOutbox.companyId, input.companyId),
+          input.campaignId ? eq(notificationOutbox.campaignId, input.campaignId) : undefined,
+          input.channel ? eq(notificationOutbox.channel, input.channel) : undefined,
+        ),
+      )
+      .orderBy(asc(notificationOutbox.createdAt));
+
+    const filteredRows = input.status
+      ? rows.filter((row) => resolveDeliveryStatus(row) === input.status)
+      : rows;
+
+    const outboxIds = filteredRows.map((row) => row.outboxId);
+    const attempts =
+      outboxIds.length === 0
+        ? []
+        : await db
+            .select({
+              outboxId: notificationAttempts.outboxId,
+              attemptNo: notificationAttempts.attemptNo,
+              provider: notificationAttempts.provider,
+              status: notificationAttempts.status,
+              errorMessage: notificationAttempts.errorMessage,
+              requestedAt: notificationAttempts.requestedAt,
+            })
+            .from(notificationAttempts)
+            .where(inArray(notificationAttempts.outboxId, outboxIds))
+            .orderBy(asc(notificationAttempts.outboxId), asc(notificationAttempts.attemptNo));
+
+    return {
+      items: filteredRows.map((row) => ({
+        outboxId: row.outboxId,
+        campaignId: row.campaignId,
+        campaignName: row.campaignName,
+        recipientEmployeeId: row.recipientEmployeeId,
+        recipientLabel:
+          [row.recipientFirstName, row.recipientLastName].filter(Boolean).join(" ") || row.toEmail,
+        toEmail: row.toEmail,
+        eventType: row.eventType,
+        templateKey: row.templateKey,
+        channel: "email",
+        status: resolveDeliveryStatus(row),
+        attempts: row.attempts,
+        nextRetryAt: row.nextRetryAt,
+        lastError: row.lastError,
+        idempotencyKey: row.idempotencyKey,
+        attemptsHistory: attempts
+          .filter((attempt) => attempt.outboxId === row.outboxId)
+          .map((attempt) => ({
+            attemptNo: attempt.attemptNo,
+            provider: attempt.provider,
+            status: attempt.status,
+            errorMessage: attempt.errorMessage,
+            requestedAt: attempt.requestedAt,
+          })),
+      })),
+    };
+  } finally {
+    await pool.end();
+  }
 };
 
 export const enqueueCampaignInvitesOnStartInDb = async (
@@ -536,6 +1063,24 @@ export const generateReminderOutbox = async (
         );
       }
 
+      const storedSettings = await tx.query.notificationSettings.findFirst({
+        where: eq(notificationSettings.companyId, input.companyId),
+      });
+      const effectiveSettings = storedSettings
+        ? {
+            reminderScheduledHour: normalizeHour(
+              storedSettings.reminderScheduledHour,
+              DEFAULT_REMINDER_HOUR,
+            ),
+            quietHoursStart: normalizeHour(storedSettings.quietHoursStart, QUIET_HOURS_START),
+            quietHoursEnd: normalizeQuietEnd(
+              storedSettings.quietHoursEnd,
+              storedSettings.quietHoursStart,
+            ),
+            reminderWeekdays: normalizeReminderWeekdays(storedSettings.reminderWeekdays),
+          }
+        : buildDefaultReminderSettings(input.companyId);
+
       const resolvedTimezone = resolveReminderTimezone(
         campaign.campaignTimezone,
         campaign.companyTimezone,
@@ -543,6 +1088,10 @@ export const generateReminderOutbox = async (
       const scheduleEvaluation = evaluateReminderSchedule({
         now,
         timezone: resolvedTimezone,
+        reminderScheduledHour: effectiveSettings.reminderScheduledHour,
+        quietHoursStart: effectiveSettings.quietHoursStart,
+        quietHoursEnd: effectiveSettings.quietHoursEnd,
+        reminderWeekdays: effectiveSettings.reminderWeekdays,
       });
       const dateBucket = scheduleEvaluation.localDateBucket;
 

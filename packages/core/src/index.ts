@@ -31,6 +31,11 @@ import {
   type ModelVersionListOutput,
   type ModelVersionPublishOutput,
   type ModelVersionUpsertDraftOutput,
+  type NotificationDeliveryDiagnosticsOutput,
+  type NotificationReminderPreviewOutput,
+  type NotificationReminderSettingsOutput,
+  type NotificationTemplateCatalogOutput,
+  type NotificationTemplatePreviewOutput,
   type NotificationsDispatchOutboxOutput,
   type NotificationsGenerateRemindersOutput,
   type OperationResult,
@@ -88,6 +93,12 @@ import {
   runModelVersionUpsertDraft,
 } from "./features/models";
 import {
+  runNotificationDeliveryDiagnostics,
+  runNotificationReminderPreview,
+  runNotificationReminderSettingsGet,
+  runNotificationReminderSettingsUpsert,
+  runNotificationTemplateCatalog,
+  runNotificationTemplatePreview,
   runNotificationsDispatchOutbox,
   runNotificationsGenerateReminders,
 } from "./features/notifications";
@@ -133,6 +144,11 @@ type DispatchOutput =
   | CampaignProgressGetOutput
   | NotificationsGenerateRemindersOutput
   | NotificationsDispatchOutboxOutput
+  | NotificationReminderSettingsOutput
+  | NotificationReminderPreviewOutput
+  | NotificationTemplateCatalogOutput
+  | NotificationTemplatePreviewOutput
+  | NotificationDeliveryDiagnosticsOutput
   | ResultsGetMyDashboardOutput
   | ResultsGetTeamDashboardOutput
   | ResultsGetHrViewOutput
@@ -203,6 +219,12 @@ const operationHandlers: Partial<Record<KnownOperation, OperationHandler>> = {
   "results.getTeamDashboard": runResultsGetTeamDashboard,
   "notifications.generateReminders": runNotificationsGenerateReminders,
   "notifications.dispatchOutbox": runNotificationsDispatchOutbox,
+  "notifications.settings.get": runNotificationReminderSettingsGet,
+  "notifications.settings.upsert": runNotificationReminderSettingsUpsert,
+  "notifications.settings.preview": runNotificationReminderPreview,
+  "notifications.templates.list": runNotificationTemplateCatalog,
+  "notifications.templates.preview": runNotificationTemplatePreview,
+  "notifications.deliveries.list": runNotificationDeliveryDiagnostics,
   "matrix.generateSuggested": runMatrixGenerateSuggested,
   "matrix.list": runMatrixList,
   "matrix.set": runMatrixSet,
