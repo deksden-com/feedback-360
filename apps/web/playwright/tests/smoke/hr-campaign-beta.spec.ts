@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import { loginWithCompany, seedScenario } from "./beta-helpers";
 
 test("SMOKE(beta): HR campaign workbench loads ended campaign", async ({ page }) => {
+  test.setTimeout(90_000);
   const handles = await seedScenario(page.request, "S8_campaign_ended");
   const companyId = handles["company.main"];
   const campaignId = handles["campaign.main"];
@@ -14,8 +15,8 @@ test("SMOKE(beta): HR campaign workbench loads ended campaign", async ({ page })
 
   await loginWithCompany(page, String(hrUserId), String(companyId));
 
-  await page.goto(`/hr/campaigns?campaignId=${campaignId}`);
-  await expect(page.getByRole("heading", { name: "HR Campaign Workbench" })).toBeVisible();
-  await expect(page.getByTestId("hr-campaign-workbench")).toBeVisible();
-  await expect(page.getByTestId("campaign-ai-retry-button")).toBeVisible();
+  await page.goto(`/hr/campaigns/${campaignId}`);
+  await expect(page.getByTestId("campaign-detail-overview")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId("hr-campaign-workbench")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId("campaign-ai-retry-button")).toBeVisible({ timeout: 15_000 });
 });

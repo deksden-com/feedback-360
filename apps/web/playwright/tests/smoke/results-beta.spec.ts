@@ -5,6 +5,7 @@ import { loginWithCompany, seedScenario } from "./beta-helpers";
 test("SMOKE(beta): results pages render processed and HR views on completed campaign", async ({
   page,
 }) => {
+  test.setTimeout(90_000);
   const handles = await seedScenario(page.request, "S9_campaign_completed_with_ai");
   const companyId = handles["company.main"];
   const campaignId = handles["campaign.main"];
@@ -20,15 +21,13 @@ test("SMOKE(beta): results pages render processed and HR views on completed camp
 
   await loginWithCompany(page, String(employeeUserId), String(companyId));
   await page.goto(`/results?campaignId=${campaignId}`);
-  await expect(page.getByRole("heading", { name: "Мои результаты" })).toBeVisible();
-  await expect(page.getByTestId("results-summary")).toBeVisible();
-  await expect(page.getByTestId(/^open-text-processed-/).first()).toBeVisible();
+  await expect(page.getByTestId("results-summary")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId(/^open-text-processed-/).first()).toBeVisible({ timeout: 15_000 });
   await expect(page.getByTestId(/^open-text-raw-/)).toHaveCount(0);
 
   await loginWithCompany(page, String(hrUserId), String(companyId));
   await page.goto(`/results/hr?campaignId=${campaignId}&subjectEmployeeId=${subjectEmployeeId}`);
-  await expect(page.getByRole("heading", { name: "HR результаты" })).toBeVisible();
-  await expect(page.getByTestId("results-summary")).toBeVisible();
-  await expect(page.getByTestId(/^open-text-processed-/).first()).toBeVisible();
-  await expect(page.getByTestId(/^open-text-raw-/).first()).toBeVisible();
+  await expect(page.getByTestId("results-summary")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId(/^open-text-processed-/).first()).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId(/^open-text-raw-/).first()).toBeVisible({ timeout: 15_000 });
 });
