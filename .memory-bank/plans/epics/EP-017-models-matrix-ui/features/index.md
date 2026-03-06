@@ -1,5 +1,5 @@
 # EP-017 — Feature catalog
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 - [FT-0171 Model catalog and version hub](FT-0171-model-catalog/index.md): список моделей, версий и create/clone draft flow. Читать, чтобы HR понимал, чем он управляет до входа в editor.
 - [FT-0172 Model editor](FT-0172-model-editor/index.md): draft editor для indicators/levels с validation и publish flow. Читать, чтобы структура competency model стала управляемой через GUI.

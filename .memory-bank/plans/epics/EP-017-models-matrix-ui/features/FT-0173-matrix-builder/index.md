@@ -1,5 +1,5 @@
 # FT-0173 — Matrix builder with freeze preview
-Status: Planned (2026-03-06)
+Status: Completed (2026-03-06)
 
 ## User value
 HR настраивает “кто кого оценивает” в понятном UI и заранее понимает, что произойдёт после lock.
@@ -45,3 +45,46 @@ HR настраивает “кто кого оценивает” в понят
 
 ## Docs updates (SSoT)
 - [UI sitemap & flows](../../../../../spec/ui/sitemap-and-flows.md)
+- [Client API operation catalog](../../../../../spec/client-api/operation-catalog.md)
+- [CLI command catalog](../../../../../spec/cli/command-catalog.md)
+
+## Progress note (2026-03-06)
+- Выполнен вертикальный слайс FT-0173:
+  - `/hr/campaigns/[campaignId]/matrix` даёт HR matrix builder с department-based autogen и manual save;
+  - builder показывает lock banner до и после первого draft save и переводит locked campaigns в read-only state;
+  - typed contract дополнился `matrix.list`, чтобы UI и CLI одинаково читали текущие assignments.
+
+## Quality checks evidence (2026-03-06)
+- `pnpm checks` → passed.
+- `pnpm --filter @feedback-360/cli test -- --runInBand src/ft-0171-models-matrix-cli.test.ts` → passed.
+
+## Acceptance evidence (2026-03-06)
+- Local acceptance:
+  - `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3101 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0173-matrix-builder.spec.ts --workers=1 --reporter=line` → passed.
+- Beta acceptance:
+  - `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0173-matrix-builder.spec.ts --workers=1 --reporter=line` → passed after merge commit `5b7cdc5`.
+- Covered acceptance:
+  - HR генерирует assignments из выбранных подразделений;
+  - сохранение матрицы работает до lock;
+  - locked campaign показывает read-only controls и объяснение freeze semantics.
+- Artifacts:
+  - editable matrix builder.
+    ![ft-0173-matrix-builder-editable](../../../../../evidence/EP-017/FT-0173/2026-03-06/step-01-matrix-builder-editable.png)
+  - locked matrix builder.
+    ![ft-0173-matrix-builder-locked](../../../../../evidence/EP-017/FT-0173/2026-03-06/step-02-matrix-builder-locked.png)
+
+## Manual verification (deployed environment)
+### Beta scenario — matrix builder
+- Environment:
+  - URL: `https://beta.go360go.ru`
+  - account: `hr_admin` with seeded company access
+- Steps:
+  1. Открыть draft campaign detail и перейти на `/hr/campaigns/[campaignId]/matrix`.
+  2. Выбрать подразделение, сгенерировать assignments и сохранить matrix.
+  3. Открыть started campaign со сделанным questionnaire draft и проверить lock banner.
+- Expected:
+  - builder показывает generated assignments по оргструктуре;
+  - save подтверждает количество назначений;
+  - после первого questionnaire draft matrix controls становятся disabled.
+- Result:
+  - passed on `https://beta.go360go.ru`.
