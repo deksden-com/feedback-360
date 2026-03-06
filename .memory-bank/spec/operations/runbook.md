@@ -36,6 +36,8 @@ Status: Draft (2026-03-04)
 - Runtime setup: smoke suite seeds its own scenarios through `/api/dev/seed` and authenticates via `/api/dev/test-login`; отдельный `BETA_SMOKE_USER_ID` не нужен.
 - Command: `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web test:smoke:beta`.
 - Timeout policy: remote beta smoke runs with `90s` Playwright timeout to absorb real DB/network latency without ложных падений.
+- Shared DB rule: все seed-based проверки (`/api/dev/seed`, remote smoke, FT acceptance against `beta`) выполняются строго последовательно; пока идёт `Beta Smoke` workflow, не запускаем параллельные ручные seed-based прогоны по `beta`.
+- GitHub guardrail: `beta-smoke.yml` сериализован через `concurrency.group=beta-smoke-develop`, чтобы два workflow-run не били одну и ту же beta DB одновременно.
 - Reason: catches runtime drift between local tests and real beta environment (DB/env/deploy mismatches).
 
 ## CI/CD verification commands (operator quick-check)
@@ -81,7 +83,10 @@ Status: Draft (2026-03-04)
 - Quick check:
   - `curl -i "https://beta.go360go.ru/api/sentry-example-api?message=EP-010-check"`
   - verify response headers/body,
-  - verify matching event in Sentry by `request_id`.
+  - verify matching route issue/event in Sentry project feed or issue list using `transaction=GET /api/sentry-example-api` and, where available, `request_id`.
+- Investigation note:
+  - hosted Sentry project feeds can be eventually consistent for exact per-event lookup immediately after the response;
+  - the runbook treats returned `eventId` + `requestId` headers as first-line evidence, and project feed/issue visibility as the stable confirmation path.
 
 ### AI webhook investigation path
 - For any AI webhook receipt:

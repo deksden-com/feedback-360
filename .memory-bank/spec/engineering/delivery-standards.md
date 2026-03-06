@@ -26,6 +26,7 @@ Status: Draft (2026-03-04)
    - ссылка на GitHub Actions run (или check-runs commit),
    - ссылка на Vercel deployment (preview/beta/prod),
    - итоговый статус (`success/ready`) и root-cause заметка, если был fail.
+   - если проверка использует shared beta DB через `/api/dev/seed`, evidence должен подтверждать, что прогон выполнялся без параллельного seed-based workflow/run.
 9) Если менялись планы/статусы/evidence в меморибанке — прогнан `pnpm docs:audit` (или эквивалентный audit для целевого эпика) и результат зафиксирован в feature/epic doc.
 
 Если хотя бы один пункт не выполнен — фича не переводится в `Completed`.

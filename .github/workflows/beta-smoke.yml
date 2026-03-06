@@ -6,6 +6,10 @@ on:
       - develop
   workflow_dispatch:
 
+concurrency:
+  group: beta-smoke-develop
+  cancel-in-progress: false
+
 jobs:
   beta-smoke:
     runs-on: ubuntu-latest
