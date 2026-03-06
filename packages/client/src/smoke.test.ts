@@ -16,6 +16,11 @@ describe("client package", () => {
     expect(typeof client.campaignGet).toBe("function");
     expect(typeof client.employeeUpsert).toBe("function");
     expect(typeof client.employeeListActive).toBe("function");
+    expect(typeof client.employeeDirectoryList).toBe("function");
+    expect(typeof client.employeeProfileGet).toBe("function");
+    expect(typeof client.departmentList).toBe("function");
+    expect(typeof client.departmentUpsert).toBe("function");
+    expect(typeof client.identityProvisionAccess).toBe("function");
     expect(typeof client.campaignUpdateDraft).toBe("function");
     expect(typeof client.orgDepartmentMove).toBe("function");
     expect(typeof client.orgManagerSet).toBe("function");

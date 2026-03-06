@@ -1,4 +1,6 @@
 export {
+  parseIdentityProvisionAccessInput,
+  parseIdentityProvisionAccessOutput,
   parseClientSetActiveCompanyInput,
   parseClientSetActiveCompanyOutput,
   parseCompanyUpdateProfileInput,
@@ -10,6 +12,8 @@ export {
 } from "./v1/legacy";
 
 export type {
+  IdentityProvisionAccessInput,
+  IdentityProvisionAccessOutput,
   ClientSetActiveCompanyInput,
   ClientSetActiveCompanyOutput,
   CompanyUpdateProfileInput,

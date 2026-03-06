@@ -48,6 +48,16 @@ export const getInternalNavItems = (role: MembershipRole): InternalNavItem[] => 
   if (role === "hr_admin" || role === "hr_reader") {
     items.push(
       {
+        href: "/hr/employees",
+        label: "Сотрудники",
+        testId: "nav-hr-employees",
+      },
+      {
+        href: "/hr/org",
+        label: "Оргструктура",
+        testId: "nav-hr-org",
+      },
+      {
         href: "/results/hr",
         label: "HR результаты",
         testId: "nav-results-hr",

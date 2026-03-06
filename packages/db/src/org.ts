@@ -1,5 +1,5 @@
 import { createOperationError } from "@feedback-360/api-contract";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
 import {
@@ -35,6 +35,41 @@ type OrgManagerSetOutput = {
   managerEmployeeId: string;
   changed: boolean;
   effectiveAt: string;
+};
+
+export type DepartmentListInput = {
+  companyId: string;
+  includeInactive?: boolean;
+};
+
+export type DepartmentListOutput = {
+  items: Array<{
+    departmentId: string;
+    name: string;
+    parentDepartmentId?: string;
+    isActive: boolean;
+    deletedAt?: string;
+    memberCount: number;
+  }>;
+};
+
+export type DepartmentUpsertInput = {
+  companyId: string;
+  departmentId: string;
+  name: string;
+  parentDepartmentId?: string;
+  isActive?: boolean;
+};
+
+export type DepartmentUpsertOutput = {
+  departmentId: string;
+  companyId: string;
+  name: string;
+  parentDepartmentId?: string;
+  isActive: boolean;
+  deletedAt?: string;
+  updatedAt: string;
+  created: boolean;
 };
 
 type DbReader = {
@@ -103,6 +138,38 @@ const ensureDepartmentIsActive = async (tx: DbReader, departmentId: string): Pro
       "invalid_transition",
       "Cannot move employee to inactive department.",
     );
+  }
+};
+
+const assertNoDepartmentCycle = (
+  allDepartments: Array<{ departmentId: string; parentDepartmentId?: string | null }>,
+  departmentId: string,
+  parentDepartmentId?: string,
+): void => {
+  if (!parentDepartmentId) {
+    return;
+  }
+
+  if (parentDepartmentId === departmentId) {
+    throw createOperationError("invalid_input", "Department cannot be its own parent department.");
+  }
+
+  const parentById = new Map(
+    allDepartments.map((row) => [row.departmentId, row.parentDepartmentId ?? undefined]),
+  );
+
+  let cursor: string | undefined = parentDepartmentId;
+  const seen = new Set<string>();
+  while (cursor) {
+    if (cursor === departmentId) {
+      throw createOperationError("invalid_input", "Department hierarchy would create a cycle.");
+    }
+
+    if (seen.has(cursor)) {
+      break;
+    }
+    seen.add(cursor);
+    cursor = parentById.get(cursor);
   }
 };
 
@@ -242,6 +309,173 @@ export const setEmployeeManager = async (
         managerEmployeeId: input.managerEmployeeId,
         changed: true,
         effectiveAt: now.toISOString(),
+      };
+    });
+  } finally {
+    await pool.end();
+  }
+};
+
+export const listDepartments = async (
+  input: DepartmentListInput,
+): Promise<DepartmentListOutput> => {
+  const pool = createPool();
+
+  try {
+    const db = createDb(pool);
+    const departmentRows = await db
+      .select({
+        departmentId: departments.id,
+        name: departments.name,
+        parentDepartmentId: departments.parentId,
+        isActive: departments.isActive,
+        deletedAt: departments.deletedAt,
+      })
+      .from(departments)
+      .where(eq(departments.companyId, input.companyId))
+      .orderBy(departments.createdAt);
+
+    const visibleRows = input.includeInactive
+      ? departmentRows
+      : departmentRows.filter((row) => row.isActive && row.deletedAt === null);
+
+    const departmentIds = visibleRows.map((row) => row.departmentId);
+    const memberRows = departmentIds.length
+      ? await db
+          .select({
+            departmentId: employeeDepartmentHistory.departmentId,
+          })
+          .from(employeeDepartmentHistory)
+          .where(
+            and(
+              inArray(employeeDepartmentHistory.departmentId, departmentIds),
+              isNull(employeeDepartmentHistory.endAt),
+            ),
+          )
+      : [];
+
+    const memberCounts = new Map<string, number>();
+    for (const row of memberRows) {
+      memberCounts.set(row.departmentId, (memberCounts.get(row.departmentId) ?? 0) + 1);
+    }
+
+    return {
+      items: visibleRows
+        .map((row) => ({
+          departmentId: row.departmentId,
+          name: row.name,
+          ...(row.parentDepartmentId ? { parentDepartmentId: row.parentDepartmentId } : {}),
+          isActive: row.isActive,
+          ...(row.deletedAt ? { deletedAt: row.deletedAt.toISOString() } : {}),
+          memberCount: memberCounts.get(row.departmentId) ?? 0,
+        }))
+        .sort((left, right) => left.name.localeCompare(right.name)),
+    };
+  } finally {
+    await pool.end();
+  }
+};
+
+export const upsertDepartment = async (
+  input: DepartmentUpsertInput,
+): Promise<DepartmentUpsertOutput> => {
+  const pool = createPool();
+
+  try {
+    const db = createDb(pool);
+
+    return await db.transaction(async (tx) => {
+      const existingRows = await tx
+        .select({
+          departmentId: departments.id,
+          parentDepartmentId: departments.parentId,
+          name: departments.name,
+          isActive: departments.isActive,
+          deletedAt: departments.deletedAt,
+        })
+        .from(departments)
+        .where(eq(departments.companyId, input.companyId));
+
+      if (input.parentDepartmentId) {
+        const parentExists = existingRows.some(
+          (row) => row.departmentId === input.parentDepartmentId,
+        );
+        if (!parentExists) {
+          throw createOperationError("not_found", "Parent department not found in company.", {
+            parentDepartmentId: input.parentDepartmentId,
+            companyId: input.companyId,
+          });
+        }
+      }
+
+      assertNoDepartmentCycle(
+        existingRows.map((row) => ({
+          departmentId: row.departmentId,
+          parentDepartmentId:
+            row.departmentId === input.departmentId
+              ? (input.parentDepartmentId ?? undefined)
+              : (row.parentDepartmentId ?? undefined),
+        })),
+        input.departmentId,
+        input.parentDepartmentId,
+      );
+
+      const found = existingRows.find((row) => row.departmentId === input.departmentId);
+      const now = new Date();
+
+      if (!found) {
+        const createdIsActive = input.isActive ?? true;
+        const createdDeletedAt = createdIsActive ? null : now;
+
+        await tx.insert(departments).values({
+          id: input.departmentId,
+          companyId: input.companyId,
+          parentId: input.parentDepartmentId ?? null,
+          name: input.name,
+          isActive: createdIsActive,
+          deletedAt: createdDeletedAt,
+          createdAt: now,
+          updatedAt: now,
+        });
+
+        return {
+          departmentId: input.departmentId,
+          companyId: input.companyId,
+          name: input.name,
+          ...(input.parentDepartmentId ? { parentDepartmentId: input.parentDepartmentId } : {}),
+          isActive: createdIsActive,
+          ...(createdDeletedAt ? { deletedAt: createdDeletedAt.toISOString() } : {}),
+          updatedAt: now.toISOString(),
+          created: true,
+        };
+      }
+
+      const nextIsActive = input.isActive ?? found.isActive;
+      const nextDeletedAt =
+        input.isActive === undefined ? found.deletedAt : nextIsActive ? null : now;
+
+      await tx
+        .update(departments)
+        .set({
+          name: input.name,
+          parentId: input.parentDepartmentId ?? null,
+          isActive: nextIsActive,
+          deletedAt: nextDeletedAt,
+          updatedAt: now,
+        })
+        .where(
+          and(eq(departments.id, input.departmentId), eq(departments.companyId, input.companyId)),
+        );
+
+      return {
+        departmentId: input.departmentId,
+        companyId: input.companyId,
+        name: input.name,
+        ...(input.parentDepartmentId ? { parentDepartmentId: input.parentDepartmentId } : {}),
+        isActive: nextIsActive,
+        ...(nextDeletedAt ? { deletedAt: nextDeletedAt.toISOString() } : {}),
+        updatedAt: now.toISOString(),
+        created: false,
       };
     });
   } finally {

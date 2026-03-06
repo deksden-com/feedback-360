@@ -58,7 +58,11 @@ describe("FT-0031 org history + soft delete", () => {
         context,
       });
       expect(moveDepartment.ok).toBe(true);
-      if (moveDepartment.ok && "departmentId" in moveDepartment.data) {
+      if (
+        moveDepartment.ok &&
+        "departmentId" in moveDepartment.data &&
+        "effectiveAt" in moveDepartment.data
+      ) {
         expect(moveDepartment.data.departmentId).toBe(departmentB);
         expect(moveDepartment.data.changed).toBe(true);
       }
