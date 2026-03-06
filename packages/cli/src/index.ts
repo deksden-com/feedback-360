@@ -7,6 +7,7 @@ import { Command } from "commander";
 import { parseProvisionLinksJson, provisionAuthEmailAccess } from "./auth-provisioning";
 
 import {
+  type CampaignLifecycleStatus,
   type MembershipRole,
   type OperationError,
   type OperationResult,
@@ -92,6 +93,24 @@ type ModelVersionCreateOptions = {
 };
 
 type CampaignCreateOptions = {
+  json?: boolean;
+  name: string;
+  modelVersion: string;
+  startAt: string;
+  endAt: string;
+  timezone?: string;
+};
+
+type CampaignListOptions = {
+  json?: boolean;
+  status?: CampaignLifecycleStatus;
+};
+
+type CampaignGetOptions = {
+  json?: boolean;
+};
+
+type CampaignUpdateDraftOptions = {
   json?: boolean;
   name: string;
   modelVersion: string;
@@ -502,6 +521,28 @@ const formatModelVersionCreateHuman = (data: {
   return `Model version created: id=${data.modelVersionId}, company=${data.companyId}, name=${data.name}, kind=${data.kind}, version=${data.version}, groups=${data.groupCount}, competencies=${data.competencyCount}, indicators=${data.indicatorCount}, levels=${data.levelCount}`;
 };
 
+const formatModelVersionListHuman = (data: {
+  items: Array<{
+    modelVersionId: string;
+    name: string;
+    kind: "indicators" | "levels";
+    version: number;
+    status: string;
+  }>;
+}): string => {
+  if (data.items.length === 0) {
+    return "No model versions found.";
+  }
+
+  return [
+    "Model versions:",
+    ...data.items.map(
+      (item) =>
+        `- ${item.modelVersionId}: ${item.name} v${item.version} (${item.kind}, ${item.status})`,
+    ),
+  ].join("\n");
+};
+
 const formatCampaignCreateHuman = (data: {
   campaignId: string;
   companyId: string;
@@ -513,6 +554,67 @@ const formatCampaignCreateHuman = (data: {
   timezone: string;
 }): string => {
   return `Campaign created: id=${data.campaignId}, company=${data.companyId}, modelVersion=${data.modelVersionId}, name=${data.name}, status=${data.status}, startAt=${data.startAt}, endAt=${data.endAt}, timezone=${data.timezone}`;
+};
+
+const formatCampaignListHuman = (data: {
+  items: Array<{
+    campaignId: string;
+    name: string;
+    status: string;
+    modelName: string | null;
+    modelVersion: number | null;
+    timezone: string;
+    startAt: string;
+    endAt: string;
+  }>;
+}): string => {
+  if (data.items.length === 0) {
+    return "No campaigns found.";
+  }
+
+  return [
+    "Campaigns:",
+    ...data.items.map((item) => {
+      const model = item.modelName ? `${item.modelName} v${item.modelVersion ?? "?"}` : "no-model";
+      return `- ${item.campaignId}: ${item.name} [${item.status}] ${item.startAt} -> ${item.endAt}, timezone=${item.timezone}, model=${model}`;
+    }),
+  ].join("\n");
+};
+
+const formatCampaignGetHuman = (data: {
+  campaignId: string;
+  name: string;
+  status: string;
+  modelVersionId: string | null;
+  modelName: string | null;
+  modelVersion: number | null;
+  timezone: string;
+  startAt: string;
+  endAt: string;
+  managerWeight: number;
+  peersWeight: number;
+  subordinatesWeight: number;
+  selfWeight: number;
+  lockedAt?: string;
+}): string => {
+  return [
+    `Campaign detail: id=${data.campaignId}, name=${data.name}, status=${data.status}`,
+    `- model=${data.modelName ?? "n/a"}${data.modelVersion ? ` v${data.modelVersion}` : ""}, modelVersionId=${data.modelVersionId ?? "n/a"}`,
+    `- dates=${data.startAt} -> ${data.endAt}, timezone=${data.timezone}`,
+    `- weights=manager:${data.managerWeight}, peers:${data.peersWeight}, subordinates:${data.subordinatesWeight}, self:${data.selfWeight}`,
+    `- lockedAt=${data.lockedAt ?? "not_locked"}`,
+  ].join("\n");
+};
+
+const formatCampaignUpdateDraftHuman = (data: {
+  campaignId: string;
+  modelVersionId: string;
+  name: string;
+  changed: boolean;
+  timezone: string;
+  updatedAt: string;
+}): string => {
+  return `Campaign draft saved: id=${data.campaignId}, name=${data.name}, modelVersion=${data.modelVersionId}, changed=${data.changed}, timezone=${data.timezone}, updatedAt=${data.updatedAt}`;
 };
 
 const formatCampaignTransitionHuman = (data: {
@@ -820,7 +922,11 @@ Examples:
   pnpm seed --scenario S1_company_min
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- company use <company_id> --role hr_admin --user-id <user_id>
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- model version create --name "Q1 Model" --kind indicators --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- model version list --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign create --name "Q1 Campaign" --model-version <model_version_id> --start-at 2026-02-01T09:00:00.000Z --end-at 2026-02-28T18:00:00.000Z --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign list --status started --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign get <campaign_id> --json
+  pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign update-draft <campaign_id> --name "Q1 Campaign" --model-version <model_version_id> --start-at 2026-02-01T09:00:00.000Z --end-at 2026-02-28T18:00:00.000Z --timezone Europe/Kaliningrad --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign set-model <campaign_id> <model_version_id> --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign weights set <campaign_id> --manager 40 --peers 30 --subordinates 30 --json
   pnpm --filter @feedback-360/cli exec tsx src/index.ts -- campaign participants add <campaign_id> <employee_id>... --json
@@ -1128,6 +1234,26 @@ Examples:
     .description("Competency model version operations.");
 
   modelVersionCommand
+    .command("list")
+    .description("List competency model versions in active company.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: JsonFlagOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.modelVersionList({});
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatModelVersionListHuman(result.data));
+      }
+    });
+
+  modelVersionCommand
     .command("create")
     .description("Create competency model version (indicators/levels).")
     .requiredOption("--name <name>", "Model version name.")
@@ -1236,6 +1362,51 @@ Examples:
   const campaignCommand = program.command("campaign").description("Campaign operations.");
 
   campaignCommand
+    .command("list")
+    .description("List campaigns in active company.")
+    .option(
+      "--status <status>",
+      "Filter by lifecycle status (draft | started | ended | processing_ai | ai_failed | completed).",
+    )
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: CampaignListOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.campaignList(options.status ? { status: options.status } : {});
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatCampaignListHuman(result.data));
+      }
+    });
+
+  campaignCommand
+    .command("get")
+    .description("Show campaign detail snapshot for HR.")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (campaignId: string, options: CampaignGetOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.campaignGet({ campaignId });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatCampaignGetHuman(result.data));
+      }
+    });
+
+  campaignCommand
     .command("create")
     .description("Create draft campaign linked to competency model version.")
     .requiredOption("--name <name>", "Campaign name.")
@@ -1263,6 +1434,39 @@ Examples:
 
       if (!options.json && result.ok) {
         console.log(formatCampaignCreateHuman(result.data));
+      }
+    });
+
+  campaignCommand
+    .command("update-draft")
+    .description("Update draft campaign base configuration.")
+    .argument("<campaign_id>", "Campaign identifier.")
+    .requiredOption("--name <name>", "Campaign name.")
+    .requiredOption("--model-version <modelVersionId>", "Competency model version identifier.")
+    .requiredOption("--start-at <startAt>", "Campaign start datetime (ISO).")
+    .requiredOption("--end-at <endAt>", "Campaign end datetime (ISO).")
+    .option("--timezone <timezone>", "Campaign timezone override.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (campaignId: string, options: CampaignUpdateDraftOptions) => {
+      const client = await getClientWithActiveCompany(options.json);
+      if (!client) {
+        return;
+      }
+
+      const result = await client.campaignUpdateDraft({
+        campaignId,
+        name: options.name,
+        modelVersionId: options.modelVersion,
+        startAt: options.startAt,
+        endAt: options.endAt,
+        ...(options.timezone ? { timezone: options.timezone } : {}),
+      });
+      if (!emitResult(result, options.json)) {
+        return;
+      }
+
+      if (!options.json && result.ok) {
+        console.log(formatCampaignUpdateDraftHuman(result.data));
       }
     });
 

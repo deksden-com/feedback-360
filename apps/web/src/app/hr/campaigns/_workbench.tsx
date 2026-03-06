@@ -62,9 +62,11 @@ const defaultIsoStartAt = "2026-01-15T09:00:00.000Z";
 export const HrCampaignWorkbench = ({
   role,
   initialCampaignId,
+  showCreateSection = true,
 }: {
   role: MembershipRole;
   initialCampaignId?: string;
+  showCreateSection?: boolean;
 }) => {
   const canMutate = role === "hr_admin";
   const [campaignId, setCampaignId] = useState(initialCampaignId ?? "");
@@ -448,67 +450,69 @@ export const HrCampaignWorkbench = ({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Создать кампанию</CardTitle>
-          <CardDescription>
-            Для create нужны `name`, `modelVersionId`, `startAt`, `endAt`.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3">
-          <div className="grid gap-2">
-            <Label htmlFor="createCampaignName">Название</Label>
-            <Input
-              id="createCampaignName"
-              value={campaignName}
-              onChange={(event) => setCampaignName(event.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="createCampaignModelVersionId">Model version ID</Label>
-            <Input
-              id="createCampaignModelVersionId"
-              value={modelVersionId}
-              onChange={(event) => setModelVersionId(event.target.value)}
-              placeholder="21000000-..."
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="createCampaignStartAt">Start at (ISO)</Label>
-            <Input
-              id="createCampaignStartAt"
-              value={startAt}
-              onChange={(event) => setStartAt(event.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="createCampaignEndAt">End at (ISO)</Label>
-            <Input
-              id="createCampaignEndAt"
-              value={endAt}
-              onChange={(event) => setEndAt(event.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="createCampaignTimezone">Timezone</Label>
-            <Input
-              id="createCampaignTimezone"
-              value={timezone}
-              onChange={(event) => setTimezone(event.target.value)}
-            />
-          </div>
-          <div>
-            <Button
-              type="button"
-              onClick={onCreateCampaign}
-              disabled={!canMutate}
-              data-testid="create-campaign-button"
-            >
-              Создать кампанию
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {showCreateSection ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Создать кампанию</CardTitle>
+            <CardDescription>
+              Для create нужны `name`, `modelVersionId`, `startAt`, `endAt`.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="createCampaignName">Название</Label>
+              <Input
+                id="createCampaignName"
+                value={campaignName}
+                onChange={(event) => setCampaignName(event.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="createCampaignModelVersionId">Model version ID</Label>
+              <Input
+                id="createCampaignModelVersionId"
+                value={modelVersionId}
+                onChange={(event) => setModelVersionId(event.target.value)}
+                placeholder="21000000-..."
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="createCampaignStartAt">Start at (ISO)</Label>
+              <Input
+                id="createCampaignStartAt"
+                value={startAt}
+                onChange={(event) => setStartAt(event.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="createCampaignEndAt">End at (ISO)</Label>
+              <Input
+                id="createCampaignEndAt"
+                value={endAt}
+                onChange={(event) => setEndAt(event.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="createCampaignTimezone">Timezone</Label>
+              <Input
+                id="createCampaignTimezone"
+                value={timezone}
+                onChange={(event) => setTimezone(event.target.value)}
+              />
+            </div>
+            <div>
+              <Button
+                type="button"
+                onClick={onCreateCampaign}
+                disabled={!canMutate}
+                data-testid="create-campaign-button"
+              >
+                Создать кампанию
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

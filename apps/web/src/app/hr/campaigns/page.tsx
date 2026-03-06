@@ -1,12 +1,18 @@
 import { InternalAppShell } from "@/components/internal-app-shell";
-import { PageErrorState, PageStateScreen } from "@/components/page-state";
+import { PageEmptyState, PageErrorState, PageStateScreen } from "@/components/page-state";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { applyDebugPageDelay } from "@/lib/debug-page-delay";
+import {
+  campaignStatusLabels,
+  campaignStatusOrder,
+  formatCampaignDateTimeLabel,
+  getCampaignStatusCount,
+} from "@/lib/hr-campaigns";
 import { resolveAppOperationContext } from "@/lib/operation-context";
 import { getFriendlyErrorCopy } from "@/lib/page-state";
+import { createInprocClient } from "@feedback-360/client";
 import { redirect } from "next/navigation";
-
-import { HrCampaignWorkbench } from "./_workbench";
 
 const getQueryValue = (value: string | string[] | undefined): string | undefined => {
   if (typeof value === "string") {
@@ -24,8 +30,8 @@ export default async function HrCampaignsPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const params = searchParams ? await searchParams : undefined;
-  await applyDebugPageDelay(params?.debugDelayMs);
+  const params = searchParams ? await searchParams : {};
+  await applyDebugPageDelay(params.debugDelayMs);
   const resolved = await resolveAppOperationContext();
   if (!resolved.ok) {
     if (resolved.error.code === "unauthenticated") {
@@ -59,7 +65,7 @@ export default async function HrCampaignsPage({
       <InternalAppShell
         context={resolved.context}
         currentPath="/hr/campaigns"
-        title="HR Campaign Workbench"
+        title="HR кампании"
         subtitle="Доступно только для ролей HR Admin и HR Reader."
       >
         <PageErrorState
@@ -72,21 +78,182 @@ export default async function HrCampaignsPage({
     );
   }
 
-  const initialCampaignId = getQueryValue(params?.campaignId);
+  const initialCampaignId = getQueryValue(params.campaignId);
+  if (initialCampaignId) {
+    redirect(`/hr/campaigns/${initialCampaignId}`);
+  }
+
+  const activeStatus = getQueryValue(params.status);
+  const client = createInprocClient();
+  const campaigns = await client.campaignList({}, resolved.context);
+  if (!campaigns.ok) {
+    const state = getFriendlyErrorCopy(campaigns.error, {
+      title: "Не удалось загрузить кампании",
+      description: "Список кампаний временно недоступен. Попробуйте обновить страницу позже.",
+    });
+
+    return (
+      <PageStateScreen maxWidthClassName="max-w-5xl">
+        <PageErrorState
+          title={state.title}
+          description={state.description}
+          actions={[{ href: "/", label: "Вернуться на главную", variant: "outline" }]}
+        />
+      </PageStateScreen>
+    );
+  }
+
+  const filteredItems = activeStatus
+    ? campaigns.data.items.filter((item) => item.status === activeStatus)
+    : campaigns.data.items;
 
   return (
     <InternalAppShell
       context={resolved.context}
       currentPath="/hr/campaigns"
-      title="HR Campaign Workbench"
-      subtitle="Draft/start/matrix/progress/retry AI через typed client API."
+      title="HR кампании"
+      subtitle="Campaign portfolio: список, статусы, быстрый переход в detail dashboard и создание новых draft."
     >
       <div className="flex flex-wrap gap-2">
         <Button asChild variant="outline">
           <a href="/results/hr">HR результаты</a>
         </Button>
+        {resolved.context.role === "hr_admin" ? (
+          <Button asChild data-testid="campaign-list-create">
+            <a href="/hr/campaigns/new">Создать draft</a>
+          </Button>
+        ) : null}
       </div>
-      <HrCampaignWorkbench role={resolved.context.role} initialCampaignId={initialCampaignId} />
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <Card data-testid="campaign-count-all">
+          <CardHeader>
+            <CardTitle className="text-base">Все кампании</CardTitle>
+          </CardHeader>
+          <CardContent className="text-3xl font-semibold">
+            {campaigns.data.items.length}
+          </CardContent>
+        </Card>
+        {campaignStatusOrder.map((status) => (
+          <Card key={status} data-testid={`campaign-count-${status}`}>
+            <CardHeader>
+              <CardTitle className="text-base">{campaignStatusLabels[status]}</CardTitle>
+            </CardHeader>
+            <CardContent className="text-3xl font-semibold">
+              {getCampaignStatusCount(campaigns.data.items, status)}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Фильтры</CardTitle>
+          <CardDescription>
+            Сфокусируйтесь на нужном lifecycle status и откройте detail page кампании в один клик.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          <Button
+            asChild
+            variant={!activeStatus ? "secondary" : "outline"}
+            data-testid="campaign-filter-all"
+          >
+            <a href="/hr/campaigns">Все</a>
+          </Button>
+          {campaignStatusOrder.map((status) => (
+            <Button
+              asChild
+              key={status}
+              variant={activeStatus === status ? "secondary" : "outline"}
+              data-testid={`campaign-filter-${status}`}
+            >
+              <a href={`/hr/campaigns?status=${status}`}>
+                {campaignStatusLabels[status]} (
+                {getCampaignStatusCount(campaigns.data.items, status)})
+              </a>
+            </Button>
+          ))}
+        </CardContent>
+      </Card>
+
+      {filteredItems.length === 0 ? (
+        <PageEmptyState
+          title={activeStatus ? "Нет кампаний с таким статусом" : "Пока нет кампаний"}
+          description={
+            activeStatus
+              ? "Снимите фильтр или создайте новую draft campaign."
+              : "Создайте первую campaign draft, затем откройте её detail dashboard."
+          }
+          actions={
+            resolved.context.role === "hr_admin"
+              ? [{ href: "/hr/campaigns/new", label: "Создать draft", variant: "outline" }]
+              : [{ href: "/results/hr", label: "Открыть HR результаты", variant: "outline" }]
+          }
+          testId="campaign-list-empty"
+        />
+      ) : (
+        <div className="grid gap-4">
+          {filteredItems.map((campaign) => (
+            <Card
+              key={campaign.campaignId}
+              data-testid={`campaign-list-row-${campaign.campaignId}`}
+            >
+              <CardHeader className="space-y-2">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg">{campaign.name}</CardTitle>
+                    <CardDescription>
+                      {campaignStatusLabels[campaign.status] ?? campaign.status} ·{" "}
+                      {campaign.timezone}
+                    </CardDescription>
+                  </div>
+                  <div
+                    className="rounded-full border px-3 py-1 text-sm"
+                    data-testid={`campaign-row-status-${campaign.campaignId}`}
+                  >
+                    {campaignStatusLabels[campaign.status] ?? campaign.status}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+                <div className="grid gap-2 text-sm text-muted-foreground md:grid-cols-3">
+                  <p>
+                    Модель:{" "}
+                    <span className="font-medium text-foreground">
+                      {campaign.modelName
+                        ? `${campaign.modelName} · v${campaign.modelVersion ?? "?"}`
+                        : "Не выбрана"}
+                    </span>
+                  </p>
+                  <p>
+                    Start:{" "}
+                    <span className="font-medium text-foreground">
+                      {formatCampaignDateTimeLabel(campaign.startAt)}
+                    </span>
+                  </p>
+                  <p>
+                    End:{" "}
+                    <span className="font-medium text-foreground">
+                      {formatCampaignDateTimeLabel(campaign.endAt)}
+                    </span>
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button asChild variant="outline">
+                    <a href={`/hr/campaigns/${campaign.campaignId}`}>Открыть detail</a>
+                  </Button>
+                  {resolved.context.role === "hr_admin" && campaign.status === "draft" ? (
+                    <Button asChild data-testid={`campaign-edit-${campaign.campaignId}`}>
+                      <a href={`/hr/campaigns/${campaign.campaignId}/edit`}>Редактировать draft</a>
+                    </Button>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </InternalAppShell>
   );
 }

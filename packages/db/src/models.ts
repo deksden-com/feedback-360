@@ -46,6 +46,17 @@ export type CreateModelVersionOutput = {
   levelCount: number;
 };
 
+export type ModelVersionListOutput = {
+  items: Array<{
+    modelVersionId: string;
+    name: string;
+    kind: ModelKind;
+    version: number;
+    status: string;
+    createdAt: string;
+  }>;
+};
+
 const ensurePositiveInteger = (value: number, fieldName: string): number => {
   if (!Number.isInteger(value) || value <= 0) {
     throw createOperationError("invalid_input", `${fieldName} must be a positive integer.`);
@@ -286,6 +297,44 @@ export const createModelVersion = async (
         levelCount,
       };
     });
+  } finally {
+    await pool.end();
+  }
+};
+
+export const listModelVersions = async (input: {
+  companyId: string;
+}): Promise<ModelVersionListOutput> => {
+  const pool = createPool();
+  try {
+    const db = createDb(pool);
+    const rows = await db
+      .select({
+        modelVersionId: competencyModelVersions.id,
+        name: competencyModelVersions.name,
+        kind: competencyModelVersions.kind,
+        version: competencyModelVersions.version,
+        status: competencyModelVersions.status,
+        createdAt: competencyModelVersions.createdAt,
+      })
+      .from(competencyModelVersions)
+      .where(eq(competencyModelVersions.companyId, input.companyId))
+      .orderBy(
+        desc(competencyModelVersions.createdAt),
+        desc(competencyModelVersions.version),
+        desc(competencyModelVersions.id),
+      );
+
+    return {
+      items: rows.map((row) => ({
+        modelVersionId: row.modelVersionId,
+        name: row.name,
+        kind: row.kind as ModelKind,
+        version: row.version,
+        status: row.status,
+        createdAt: row.createdAt.toISOString(),
+      })),
+    };
   } finally {
     await pool.end();
   }

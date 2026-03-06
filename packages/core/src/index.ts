@@ -3,6 +3,10 @@ import {
   type AiRunForCampaignOutput,
   type CampaignCreateInput,
   type CampaignCreateOutput,
+  type CampaignGetInput,
+  type CampaignGetOutput,
+  type CampaignListInput,
+  type CampaignListOutput,
   type CampaignParticipantsAddFromDepartmentsInput,
   type CampaignParticipantsAddFromDepartmentsOutput,
   type CampaignParticipantsMutationInput,
@@ -15,6 +19,8 @@ import {
   type CampaignSnapshotListOutput,
   type CampaignTransitionInput,
   type CampaignTransitionOutput,
+  type CampaignUpdateDraftInput,
+  type CampaignUpdateDraftOutput,
   type CampaignWeightsSetInput,
   type CampaignWeightsSetOutput,
   type CompanyUpdateProfileInput,
@@ -32,6 +38,8 @@ import {
   type MembershipListOutput,
   type ModelVersionCreateInput,
   type ModelVersionCreateOutput,
+  type ModelVersionListInput,
+  type ModelVersionListOutput,
   type NotificationsDispatchOutboxInput,
   type NotificationsDispatchOutboxOutput,
   type NotificationsGenerateRemindersInput,
@@ -66,6 +74,10 @@ import {
   parseAiRunForCampaignOutput,
   parseCampaignCreateInput,
   parseCampaignCreateOutput,
+  parseCampaignGetInput,
+  parseCampaignGetOutput,
+  parseCampaignListInput,
+  parseCampaignListOutput,
   parseCampaignParticipantsAddFromDepartmentsInput,
   parseCampaignParticipantsAddFromDepartmentsOutput,
   parseCampaignParticipantsMutationInput,
@@ -78,6 +90,8 @@ import {
   parseCampaignSnapshotListOutput,
   parseCampaignTransitionInput,
   parseCampaignTransitionOutput,
+  parseCampaignUpdateDraftInput,
+  parseCampaignUpdateDraftOutput,
   parseCampaignWeightsSetInput,
   parseCampaignWeightsSetOutput,
   parseCompanyUpdateProfileInput,
@@ -95,6 +109,8 @@ import {
   parseMembershipListOutput,
   parseModelVersionCreateInput,
   parseModelVersionCreateOutput,
+  parseModelVersionListInput,
+  parseModelVersionListOutput,
   parseNotificationsDispatchOutboxInput,
   parseNotificationsDispatchOutboxOutput,
   parseNotificationsGenerateRemindersInput,
@@ -129,6 +145,7 @@ import {
   endCampaign,
   generateReminderOutbox,
   generateSuggestedMatrix,
+  getCampaign,
   getCampaignProgress,
   getEmployeeIdByUserInCompany,
   getQuestionnaireDraft,
@@ -137,7 +154,9 @@ import {
   listActiveEmployees,
   listAssignedQuestionnaires,
   listCampaignEmployeeSnapshots,
+  listCampaigns,
   listMemberships,
+  listModelVersions,
   moveEmployeeDepartment,
   removeCampaignParticipants,
   runAiForCampaign,
@@ -149,6 +168,7 @@ import {
   startCampaign,
   stopCampaign,
   submitQuestionnaire,
+  updateCampaignDraft,
   upsertEmployee,
 } from "@feedback-360/db";
 
@@ -301,6 +321,110 @@ const runModelVersionCreate = async (
   }
 };
 
+const runModelVersionList = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<ModelVersionListOutput>> => {
+  if (!hasRole(request, ["hr_admin", "hr_reader"])) {
+    return errorResult(
+      createOperationError("forbidden", "Current role cannot list model versions.", {
+        operation: "model.version.list",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: ModelVersionListInput;
+  try {
+    parsedInput = parseModelVersionListInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid model.version.list input."),
+    );
+  }
+
+  try {
+    const output = await listModelVersions({
+      companyId: companyIdOrError,
+      ...parsedInput,
+    });
+    return okResult(parseModelVersionListOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to list model versions."));
+  }
+};
+
+const runCampaignList = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignListOutput>> => {
+  if (!hasRole(request, ["hr_admin", "hr_reader"])) {
+    return errorResult(
+      createOperationError("forbidden", "Current role cannot list campaigns.", {
+        operation: "campaign.list",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignListInput;
+  try {
+    parsedInput = parseCampaignListInput(request.input);
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Invalid campaign.list input."));
+  }
+
+  try {
+    const output = await listCampaigns({
+      companyId: companyIdOrError,
+      status: parsedInput.status,
+    });
+    return okResult(parseCampaignListOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to list campaigns."));
+  }
+};
+
+const runCampaignGet = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignGetOutput>> => {
+  if (!hasRole(request, ["hr_admin", "hr_reader"])) {
+    return errorResult(
+      createOperationError("forbidden", "Current role cannot read campaign details.", {
+        operation: "campaign.get",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignGetInput;
+  try {
+    parsedInput = parseCampaignGetInput(request.input);
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Invalid campaign.get input."));
+  }
+
+  try {
+    const output = await getCampaign({
+      companyId: companyIdOrError,
+      campaignId: parsedInput.campaignId,
+    });
+    return okResult(parseCampaignGetOutput(output));
+  } catch (error) {
+    return errorResult(errorFromUnknown(error, "invalid_input", "Failed to load campaign."));
+  }
+};
+
 const runCampaignCreate = async (
   request: DispatchOperationInput,
 ): Promise<OperationResult<CampaignCreateOutput>> => {
@@ -332,6 +456,44 @@ const runCampaignCreate = async (
     return okResult(parseCampaignCreateOutput(output));
   } catch (error) {
     return errorResult(errorFromUnknown(error, "invalid_input", "Failed to create campaign."));
+  }
+};
+
+const runCampaignUpdateDraft = async (
+  request: DispatchOperationInput,
+): Promise<OperationResult<CampaignUpdateDraftOutput>> => {
+  if (!hasRole(request, ["hr_admin"])) {
+    return errorResult(
+      createOperationError("forbidden", "Only HR Admin can update campaign drafts.", {
+        operation: "campaign.updateDraft",
+      }),
+    );
+  }
+
+  const companyIdOrError = ensureContextCompany(request);
+  if (typeof companyIdOrError !== "string") {
+    return companyIdOrError;
+  }
+
+  let parsedInput: CampaignUpdateDraftInput;
+  try {
+    parsedInput = parseCampaignUpdateDraftInput(request.input);
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Invalid campaign.updateDraft input."),
+    );
+  }
+
+  try {
+    const output = await updateCampaignDraft({
+      companyId: companyIdOrError,
+      ...parsedInput,
+    });
+    return okResult(parseCampaignUpdateDraftOutput(output));
+  } catch (error) {
+    return errorResult(
+      errorFromUnknown(error, "invalid_input", "Failed to update campaign draft."),
+    );
   }
 };
 
@@ -1525,6 +1687,9 @@ export const dispatchOperation = (
     | EmployeeUpsertOutput
     | EmployeeListActiveOutput
     | MembershipListOutput
+    | ModelVersionListOutput
+    | CampaignListOutput
+    | CampaignGetOutput
     | CampaignSetModelVersionOutput
     | CampaignWeightsSetOutput
     | CampaignParticipantsMutationOutput
@@ -1544,6 +1709,7 @@ export const dispatchOperation = (
     | AiRunForCampaignOutput
     | ModelVersionCreateOutput
     | CampaignCreateOutput
+    | CampaignUpdateDraftOutput
     | QuestionnaireListAssignedOutput
     | QuestionnaireGetDraftOutput
     | QuestionnaireSaveDraftOutput
@@ -1576,8 +1742,16 @@ export const dispatchOperation = (
       return Promise.resolve(runCompanyUpdateProfile(parsedRequest));
     case "model.version.create":
       return runModelVersionCreate(parsedRequest);
+    case "model.version.list":
+      return runModelVersionList(parsedRequest);
+    case "campaign.list":
+      return runCampaignList(parsedRequest);
+    case "campaign.get":
+      return runCampaignGet(parsedRequest);
     case "campaign.create":
       return runCampaignCreate(parsedRequest);
+    case "campaign.updateDraft":
+      return runCampaignUpdateDraft(parsedRequest);
     case "campaign.start":
       return runCampaignStart(parsedRequest);
     case "campaign.stop":
