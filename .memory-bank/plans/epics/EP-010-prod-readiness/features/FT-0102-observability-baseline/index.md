@@ -7,7 +7,7 @@ Status: Draft (2026-03-05)
 ## Deliverables
 - Sentry baseline для web/runtime ошибок подтверждён end-to-end.
 - Structured logs и correlation ids для ключевых flows.
-- Видимость webhook and cron событий.
+- Видимость webhook и critical write событий.
 - Runbook section “how to investigate”.
 
 ## Context (SSoT links)
@@ -31,12 +31,18 @@ Status: Draft (2026-03-05)
 
 ## Implementation plan (target repo)
 - Проверить текущую Sentry integration.
-- Добавить/нормализовать correlation ids в ключевых route handlers/jobs.
+- Добавить/нормализовать correlation ids в ключевых route handlers/jobs:
+  - `/api/webhooks/ai`
+  - `/api/hr/campaigns/execute`
+  - `/api/questionnaires/draft`
+  - `/api/questionnaires/submit`
+  - `/api/sentry-example-api`
 - Согласовать формат structured logs.
 - Обновить operational docs и troubleshooting.
 
 ## Tests
 - Runtime smoke for sentry/logging.
+- Route tests for webhook/correlation headers and controlled Sentry error payload.
 - Manual/integration verification for webhook traceability.
 
 ## Memory bank updates
@@ -44,7 +50,7 @@ Status: Draft (2026-03-05)
 
 ## Verification (must)
 - Runtime smoke on `beta`.
-- Must run: controlled error + webhook/cron trace.
+- Must run: controlled error + webhook trace + critical write routes return correlation headers.
 
 ## Manual verification (deployed environment)
 - Environment:
@@ -57,3 +63,17 @@ Status: Draft (2026-03-05)
 - Expected:
   - событие приходит в нужный проект;
   - correlation id позволяет связать logs и событие.
+
+## Quality checks evidence (2026-03-06)
+- `pnpm --filter @feedback-360/web lint` → passed.
+- `pnpm --filter @feedback-360/web typecheck` → passed.
+- `pnpm --filter @feedback-360/web test -- src/lib/observability.test.ts src/app/api/webhooks/ai/route.test.ts src/app/api/sentry-example-api/route.test.ts` → passed.
+- `pnpm --filter @feedback-360/web build` → passed.
+
+## Acceptance evidence (2026-03-06, local baseline)
+- `pnpm --filter @feedback-360/web test -- src/lib/observability.test.ts src/app/api/webhooks/ai/route.test.ts src/app/api/sentry-example-api/route.test.ts` → passed.
+- Covered acceptance:
+  - controlled backend error returns `eventId`, `requestId`, `x-request-id`, `x-correlation-id`;
+  - AI webhook route propagates/generated request ids and keeps trace-friendly payload on success/error;
+  - helper tests confirm request-id propagation into response headers.
+- Deployed-environment evidence for `beta` is recorded after merge to `develop`.
