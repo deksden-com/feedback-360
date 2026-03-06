@@ -97,32 +97,38 @@ Status: Draft (2026-03-03)
 - read-only and re-entry states
   - Детали: [EP-013 Feature catalog](epics/EP-013-questionnaire-experience/features/index.md) — user-level сценарии оценивания от inbox до submit/read-only. Читать, чтобы UX опирался на уже работающие questionnaire ops.
 
-## Epic 16 — Results experience
+## Epic 16 — Feature-area slice refactor
+- explicit feature areas across core/contract/client/cli/web
+- shared-module policy and migration inventory
+- docs/link renumbering + regression/deploy proof
+  - Детали: [EP-014 Feature catalog](epics/EP-014-feature-area-slices-refactor/features/index.md) — refactor slices с target structure, shared boundaries и доказуемой стабилизацией. Читать, чтобы следующая GUI wave строилась на обслуживаемой кодовой базе.
+
+## Epic 17 — Results experience
 - employee results dashboard
 - manager team results dashboard
 - HR results workbench
-  - Детали: [EP-014 Feature catalog](epics/EP-014-results-experience/features/index.md) — role-aware reporting surfaces с privacy/anonymity constraints. Читать, чтобы визуализация не нарушила доменные правила.
+  - Детали: [EP-015 Feature catalog](epics/EP-015-results-experience/features/index.md) — role-aware reporting surfaces с privacy/anonymity constraints. Читать, чтобы визуализация не нарушила доменные правила.
 
-## Epic 17 — People and org admin
+## Epic 18 — People and org admin
 - employee directory
 - employee profile and account provisioning
 - department tree and org editor
-  - Детали: [EP-015 Feature catalog](epics/EP-015-people-org-admin/features/index.md) — HR-admin GUI для employees и org structure. Читать, чтобы справочник и оргданные поддерживались без CLI.
+  - Детали: [EP-016 Feature catalog](epics/EP-016-people-org-admin/features/index.md) — HR-admin GUI для employees и org structure. Читать, чтобы справочник и оргданные поддерживались без CLI.
 
-## Epic 18 — Competency models and matrix UI
+## Epic 19 — Competency models and matrix UI
 - model catalog and version hub
 - model editor
 - matrix builder with freeze preview
-  - Детали: [EP-016 Feature catalog](epics/EP-016-models-matrix-ui/features/index.md) — GUI для содержательной настройки 360 и assignments. Читать, чтобы models/matrix не оставались только “backend capability”.
+  - Детали: [EP-017 Feature catalog](epics/EP-017-models-matrix-ui/features/index.md) — GUI для содержательной настройки 360 и assignments. Читать, чтобы models/matrix не оставались только “backend capability”.
 
-## Epic 19 — Notification center UI
+## Epic 20 — Notification center UI
 - reminder schedule editor
 - template catalog and preview
 - delivery diagnostics and outbox view
-  - Детали: [EP-017 Feature catalog](epics/EP-017-notification-center-ui/features/index.md) — визуальный контроль уведомлений и доставок. Читать, чтобы HR/Admin мог управлять reminders через GUI.
+  - Детали: [EP-018 Feature catalog](epics/EP-018-notification-center-ui/features/index.md) — визуальный контроль уведомлений и доставок. Читать, чтобы HR/Admin мог управлять reminders через GUI.
 
-## Epic 20 — Admin and ops UI
+## Epic 21 — Admin and ops UI
 - health and release dashboard
 - AI jobs and webhook diagnostics
 - audit trail and release console
-  - Детали: [EP-018 Feature catalog](epics/EP-018-admin-ops-ui/features/index.md) — эксплуатационный GUI для beta/prod. Читать, чтобы команда видела состояние системы без ручного похода в разные панели.
+  - Детали: [EP-019 Feature catalog](epics/EP-019-admin-ops-ui/features/index.md) — эксплуатационный GUI для beta/prod. Читать, чтобы команда видела состояние системы без ручного похода в разные панели.

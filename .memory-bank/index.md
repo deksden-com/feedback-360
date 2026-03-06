@@ -8,6 +8,7 @@
 - [Frontend UI stack](spec/engineering/frontend-ui-stack.md): зафиксированный baseline `Tailwind v4 + shadcn/ui` для `apps/web` и политика обновления. Читать перед UI-фичами, чтобы не смешивать разные подходы к стилям/компонентам.
 - [Visual references policy](mbb/visual-references.md): как хранить и использовать mockups/screenshots без подмены требований и архитектуры. Читать перед планированием GUI-фич, чтобы visual refs помогали, а не вносили шум.
 - [Architecture guardrails](spec/engineering/architecture-guardrails.md): границы core/client/web и правила слоёв+vertical slices. Читать перед кодом, чтобы не утащить бизнес-логику в UI/CLI.
+- [Feature-area boundaries](spec/project/feature-area-boundaries.md): ownership boundaries между `campaigns/results/questionnaires/...`, правила для `shared` и root composition points. Читать перед structural refactor и новыми slices, чтобы понимать не только layout, но и почему границы проведены именно так.
 - [Implementation playbook](plans/implementation-playbook.md): пошаговый чеклист реализации фичи (contract→core→db→cli→tests→docs). Читать как рабочую инструкцию полного цикла разработки.
 - [Testing standards](spec/engineering/testing-standards.md): уровни тестов и правило двух гейтов (quality checks + acceptance/GS). Читать перед проверкой фичи, чтобы запускать проверки в правильной последовательности.
 - [Verification matrix](plans/verification-matrix.md): обязательные проверки по FT/GS и формат evidence. Читать перед закрытием фичи, чтобы фиксировать подтверждение готовности по каждому сценарию.
@@ -26,6 +27,7 @@
 ## Specifications — important docs
 - [C4 package (`spec/c4/`)](spec/c4/index.md): L1/L2/L3 описание системы и её контейнеров/компонентов. Читать, чтобы сохранять архитектурную целостность при росте проекта.
 - [Project boundaries (`spec/project/`)](spec/project/index.md): стек, MVP scope, non-goals, слои и target-структура репо. Читать, чтобы не выходить за границы MVP и не ломать структуру.
+- [Feature-area boundaries (`spec/project/feature-area-boundaries.md`)](spec/project/feature-area-boundaries.md): canonical feature areas, ownership rules и ограничение `shared`. Читать перед code organization changes, чтобы структура проекта была осмысленной и воспроизводимой.
 - [Domain rules (`spec/domain/`)](spec/domain/index.md): state machines, матрица оценщиков, анкеты, расчёты, анонимность, видимость результатов. Читать как основу для core use-cases и инвариантов.
 - [Security rules (`spec/security/`)](spec/security/index.md): identity/auth, RBAC, RLS, webhook security. Читать перед реализацией доступа и интеграций.
 - [Client API (`spec/client-api/`)](spec/client-api/index.md): операции, ошибки и transport contract для thin clients. Читать, чтобы CLI/UI работали через один typed-контракт.
@@ -41,7 +43,7 @@
 - [Roadmap](plans/roadmap.md): порядок эпиков и логика последовательности поставки. Читать, чтобы не терять фокус в реализации.
 - [Epic catalog](plans/epics.md): полный список EP/FT и их целевая структура. Читать для навигации по текущему объёму работ.
 - [Epic plans (`plans/epics/`)](plans/epics/index.md): детальные страницы эпиков и фич с deliverables/acceptance. Читать перед стартом конкретной фичи.
-- [GUI wave — EP-011..EP-018](plans/epics/EP-011-app-shell-navigation/index.md): следующая серия GUI-эпиков после MVP/prod readiness. Читать, чтобы видеть план эволюции интерфейса от shell до ops UI.
+- [GUI wave — EP-011..EP-019](plans/epics/EP-011-app-shell-navigation/index.md): следующая серия GUI-эпиков после MVP/prod readiness, включая post-EP-013 structural refactor EP-014. Читать, чтобы видеть план эволюции интерфейса и supporting codebase от shell до ops UI.
 - [Implementation playbook](plans/implementation-playbook.md): практический чеклист “FT → код → тесты → docs”. Читать как рабочую инструкцию для реализации vertical slice.
 - [Verification matrix](plans/verification-matrix.md): обязательные тесты/сценарии и execution evidence по эпикам. Читать как финальный критерий готовности фич.
 
@@ -49,6 +51,7 @@
 - [ADR 0001](adr/0001-core-client-cli-first.md): почему выбрана модель core + typed client + CLI-first перед UI. Читать для сохранения архитектурной дисциплины.
 - [ADR 0002](adr/0002-anonymity-threshold.md): как применяется порог анонимности и почему именно так. Читать перед изменениями в расчётах/видимости результатов.
 - [ADR 0003](adr/0003-freeze-on-draft-save.md): почему lock наступает на первом draft-save и каковы последствия. Читать при изменениях freeze-логики кампании.
+- [ADR 0004](adr/0004-feature-area-slicing-boundaries.md): почему выбраны feature areas и почему `shared` не должен становиться “свалкой”. Читать перед architectural refactor и перед следующими GUI-эпиками.
 
 ## MBB — writing rules
 - [Principles](mbb/principles.md): базовые правила SSoT, traceability и evidence-first completion. Читать перед правками документации, чтобы не расползались стандарты.
