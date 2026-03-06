@@ -39,3 +39,4 @@ Status: Completed (2026-03-06)
   - questionnaire list enriched campaign/subject/rater metadata и работает как inbox для resume flow;
   - questionnaire detail page рендерит structured definition из model version и показывает progress/read-only states без переноса логики в UI;
   - API contract, DB reads, CLI и seeds синхронизированы, чтобы local/beta acceptance были воспроизводимыми.
+  - beta release gate подтверждён: smoke suite на `https://beta.go360go.ru` проходит после переноса seeding в runner и изоляции browser sessions для role-specific маршрутов.
