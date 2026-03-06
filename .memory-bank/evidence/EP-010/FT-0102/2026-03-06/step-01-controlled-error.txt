@@ -1,0 +1,15 @@
+HTTP/2 500 
+age: 0
+cache-control: public, max-age=0, must-revalidate
+content-type: application/json
+date: Fri, 06 Mar 2026 06:54:00 GMT
+server: Vercel
+strict-transport-security: max-age=63072000
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-correlation-id: c70ffb68-b121-4515-9aa2-8ab6ef0ee88f
+x-matched-path: /api/sentry-example-api
+x-request-id: c70ffb68-b121-4515-9aa2-8ab6ef0ee88f
+x-vercel-cache: MISS
+x-vercel-id: iad1::iad1::j6lvh-1772780040892-315f28d325af
+
+{"ok":false,"error":{"code":"controlled_backend_error","message":"EP-010-observability-1772780039"},"eventId":"81f83474a74d475b8f72684e319e8a1c","requestId":"c70ffb68-b121-4515-9aa2-8ab6ef0ee88f"}

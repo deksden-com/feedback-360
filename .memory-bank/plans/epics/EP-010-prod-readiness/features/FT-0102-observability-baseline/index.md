@@ -1,5 +1,5 @@
 # FT-0102 — Observability baseline
-Status: Draft (2026-03-05)
+Status: Completed (2026-03-06)
 
 ## User value
 Когда что-то ломается в `beta` или `prod`, команда быстро понимает что, где и почему: ошибки видны в Sentry, запросы и webhook/cron операции имеют correlation ids, а логи пригодны для расследования.
@@ -55,7 +55,7 @@ Status: Draft (2026-03-05)
 ## Manual verification (deployed environment)
 - Environment:
   - target: `beta` first
-  - Date: `2026-03-05`
+  - Date: `2026-03-06`
 - Steps:
   1. Вызвать контролируемую ошибку.
   2. Проверить появление события в Sentry.
@@ -76,4 +76,13 @@ Status: Draft (2026-03-05)
   - controlled backend error returns `eventId`, `requestId`, `x-request-id`, `x-correlation-id`;
   - AI webhook route propagates/generated request ids and keeps trace-friendly payload on success/error;
   - helper tests confirm request-id propagation into response headers.
-- Deployed-environment evidence for `beta` is recorded after merge to `develop`.
+
+## Acceptance evidence (2026-03-06, beta)
+- Controlled error on `beta`:
+  - `curl -isS "https://beta.go360go.ru/api/sentry-example-api?message=EP-010-observability-1772780039"` → `500`, `eventId=81f83474a74d475b8f72684e319e8a1c`, `requestId=c70ffb68-b121-4515-9aa2-8ab6ef0ee88f`, headers `x-request-id` + `x-correlation-id` returned.
+- Sentry project visibility:
+  - `GET https://sentry.io/api/0/projects/deksdencom/go360go-beta/events/` (with `SENTRY_AUTH_TOKEN`) returns beta-project event feed including runtime events for `/api/dev/seed` and `GET /api/sentry-example-api`.
+  - Runbook updated to use returned `eventId`/`requestId` as immediate evidence and the beta project feed/issue list as the stable confirmation path when exact per-event lookup lags.
+- Artifacts:
+  - `step-01-controlled-error.txt` — `../../../../../evidence/EP-010/FT-0102/2026-03-06/step-01-controlled-error.txt`
+  - `step-02-sentry-project-events.json` — `../../../../../evidence/EP-010/FT-0102/2026-03-06/step-02-sentry-project-events.json`

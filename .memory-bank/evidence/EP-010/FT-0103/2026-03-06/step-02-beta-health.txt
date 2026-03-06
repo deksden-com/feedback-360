@@ -1,0 +1,13 @@
+HTTP/2 200 
+age: 0
+cache-control: public, max-age=0, must-revalidate
+content-type: application/json
+date: Fri, 06 Mar 2026 06:53:50 GMT
+server: Vercel
+strict-transport-security: max-age=63072000
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-matched-path: /api/health
+x-vercel-cache: MISS
+x-vercel-id: iad1::iad1::ksxn6-1772780030655-d5e37f5df9ee
+
+{"ok":true,"appEnv":"beta"}
