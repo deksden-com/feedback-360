@@ -1,5 +1,5 @@
 # FT-0214 — HR CRUD and hierarchy polish
-Status: Draft (2026-03-07)
+Status: Completed (2026-03-07)
 
 ## User value
 HR работает со справочником сотрудников и оргструктурой через привычные CRUD/hierarchy patterns: искать, открывать, редактировать и понимать структуру компании становится проще и быстрее.
@@ -65,3 +65,18 @@ HR работает со справочником сотрудников и ор
 - `spec/ui/screen-by-screen-redesign.md`
 - guides/tutorial screenshots for employees/org
 - relevant future screen specs when added
+
+## Quality checks evidence (2026-03-07)
+- `pnpm checks` → passed
+- `pnpm docs:audit` → passed
+- `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3108 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0214-hr-crud-hierarchy-polish.spec.ts --workers=1 --reporter=line` → passed
+- `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0214-hr-crud-hierarchy-polish.spec.ts --workers=1 --reporter=line` → passed
+
+## Acceptance evidence (2026-03-07)
+- Employee directory uses content-first SaaS CRUD hierarchy with clear toolbar, status badges and deep-link actions
+- Employee detail promotes summary/history split instead of equal-weight operational blocks
+- Org editor shows stronger tree + selected-node detail relationship
+- Artifacts:
+  - `.memory-bank/evidence/EP-021/FT-0214/2026-03-07/step-01-directory__(SCR-HR-EMPLOYEES).png`
+  - `.memory-bank/evidence/EP-021/FT-0214/2026-03-07/step-02-profile__(SCR-HR-EMPLOYEE-DETAIL).png`
+  - `.memory-bank/evidence/EP-021/FT-0214/2026-03-07/step-03-org__(SCR-HR-ORG).png`

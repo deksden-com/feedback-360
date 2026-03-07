@@ -72,8 +72,8 @@ HR, manager и employee работают внутри единого интер�
 - Artifacts:
   - step-01: employee home shell.
     ![step-01-employee-home-shell](../../../../../evidence/EP-011/FT-0111/2026-03-06/step-01-employee-home-shell.png)
-  - step-02: questionnaires shell.
-    ![step-02-questionnaires-shell](../../../../../evidence/EP-011/FT-0111/2026-03-06/step-02-questionnaires-shell.png)
+  - step-02: results shell.
+    ![step-02-results-shell](../../../../../evidence/EP-011/FT-0111/2026-03-06/step-02-results-shell.png)
   - step-03: manager team results shell.
     ![step-03-manager-team-results-shell](../../../../../evidence/EP-011/FT-0111/2026-03-06/step-03-manager-team-results-shell.png)
   - step-04: HR campaigns shell.
