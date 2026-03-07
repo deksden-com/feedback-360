@@ -17,3 +17,7 @@
 - `XE_ENV=beta|local`
 - `XE_BASE_URL=https://beta.go360go.ru`
 - `XE_OUTPUT=token|human`
+
+## Manual walkthrough
+
+- `./scenarios/XE-001/manual-check.md` — пошаговая инструкция, как вручную зайти в результаты `XE-001` на `beta`, какие команды запускать и что именно должно открыться в UI. Внутри есть встроенные screenshots employee / manager / HR view.
