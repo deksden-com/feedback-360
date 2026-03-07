@@ -1,3 +1,14 @@
+---
+screen_id: SCR-APP-HOME
+route: /
+actors:
+  - employee
+  - manager
+  - hr_admin
+  - hr_reader
+test_id_scope: scr-app-home
+---
+
 # Screen spec — Internal home
 Status: Draft (2026-03-07)
 

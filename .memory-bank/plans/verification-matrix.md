@@ -259,6 +259,14 @@ Status: Draft (2026-03-03)
 - FT-0091: what=DB integration isolation + deterministic seed replay; where=local + Supabase beta pooler; how=`pnpm test:db`, rerun `pnpm test:db`, `pnpm checks`, targeted `pnpm --filter @feedback-360/db exec vitest run --testTimeout=45000 --maxWorkers=1 --no-file-parallelism src/migrations/ft-0091-db-integration-isolation.test.ts`; quality_gate=passed; acceptance_gate=passed (DB lane green twice подряд, no duplicate/FK drift, seed replay deterministic, curated DB timeouts raised to 45s for cloud latency); ci_run=`https://github.com/deksden-com/feedback-360/actions/runs/22738344260`; result=passed.
 - FT-0092: what=required GitHub `checks` topology + Vercel-ready PR surface; where=GitHub PR `#26` + local repro; how=`pnpm checks`, `gh pr checks 26`, `gh run list --workflow ci.yml --limit 3`; quality_gate=passed; acceptance_gate=passed (`checks` context exists, branch protection sees green status, PR no longer blocked by missing context); ci_run=`https://github.com/deksden-com/feedback-360/actions/runs/22738344260`; deploy=`https://go360go-beta-qjzyzd712-deksdens-projects.vercel.app`; result=passed.
 
+## EP-021 UI traceability and SaaS polish
+- FT-0211
+  - Must add test: docs/traceability verification via registry + screen spec + guide linkage.
+  - Must run: `pnpm docs:audit`, `rg "SCR-" .memory-bank apps/web/src/app apps/web/src/features`, screenshot naming check in active guides.
+
+### EP-021 execution evidence (2026-03-07)
+- FT-0211: what=screen-registry rollout for key HR/results surfaces + guide/screenshot traceability; where=local docs/codebase; how=`pnpm docs:audit`, `rg "SCR-" .memory-bank apps/web/src/app apps/web/src/features`, `find .memory-bank/guides/assets/manual-first-campaign -maxdepth 1 -type f | sort`; quality_gate=passed (`pnpm docs:audit`); acceptance_gate=passed (new screen specs for employees, employee detail, org, HR campaigns, manager results and HR results; guides use `screen_ids`; active tutorial screenshots renamed with `__(SCR-...)` suffix); result=passed.
+
 ## EP-010 Production readiness
 - FT-0101
   - Must add test: `apps/web/playwright/tests/ft-0101-results-privacy.spec.ts`

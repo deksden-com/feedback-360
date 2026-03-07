@@ -20,6 +20,11 @@ const getQueryValue = (value: string | string[] | undefined): string | undefined
   return undefined;
 };
 
+/**
+ * HR campaign draft edit screen.
+ * @screenId SCR-HR-CAMPAIGN-EDIT
+ * @testIdScope scr-hr-campaign-edit
+ */
 export default async function EditHrCampaignPage({
   params,
   searchParams,
@@ -150,13 +155,15 @@ export default async function EditHrCampaignPage({
       title="Редактировать draft кампании"
       subtitle={getCampaignActionHint(campaign.data)}
     >
-      <HrCampaignDraftForm
-        mode="edit"
-        values={getDraftFormValues(campaign.data)}
-        models={models.data.items}
-        returnTo={`/hr/campaigns/${campaignId}/edit`}
-        errorCode={getQueryValue(query.error)}
-      />
+      <div data-testid="scr-hr-campaign-edit-root">
+        <HrCampaignDraftForm
+          mode="edit"
+          values={getDraftFormValues(campaign.data)}
+          models={models.data.items}
+          returnTo={`/hr/campaigns/${campaignId}/edit`}
+          errorCode={getQueryValue(query.error)}
+        />
+      </div>
     </InternalAppShell>
   );
 }

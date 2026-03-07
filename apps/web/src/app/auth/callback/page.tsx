@@ -18,6 +18,11 @@ const syncSessionToApp = async (userId: string) => {
   return response.ok && Boolean(payload.ok);
 };
 
+/**
+ * Auth callback bridge screen.
+ * @screenId SCR-AUTH-CALLBACK
+ * @testIdScope scr-auth-callback
+ */
 export default function AuthCallbackPage() {
   const router = useRouter();
   const [status, setStatus] = useState<"processing" | "ready" | "error">("processing");
@@ -81,7 +86,10 @@ export default function AuthCallbackPage() {
   }, [router]);
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-lg items-center p-6">
+    <main
+      className="mx-auto flex min-h-dvh w-full max-w-lg items-center p-6"
+      data-testid="scr-auth-callback-root"
+    >
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Проверяем вход</CardTitle>

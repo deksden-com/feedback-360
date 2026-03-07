@@ -4,10 +4,13 @@ Status: Draft (2026-03-07)
 ## Naming
 - один экран = один основной page object;
 - имя page object должно совпадать со screen spec по смыслу (`QuestionnaireFillPage`, `EmployeeResultsPage`).
+- каждый POM обязан ссылаться на канонический `screen_id` из `screen-registry.md`.
 
 ## `data-testid`
 - используем для ключевых интерактивных элементов и assertion targets;
-- формат: `<area>.<screen>.<element>`;
+- `data-testid` строим от `testIdScope`, привязанного к `screen_id`;
+- базовый формат: `<test-id-scope>-<element>`;
+- пример: `scr-hr-employees-search`, `scr-questionnaires-fill-submit`;
 - test ids должны быть стабильнее визуального layout.
 
 ## POM ↔ screen spec

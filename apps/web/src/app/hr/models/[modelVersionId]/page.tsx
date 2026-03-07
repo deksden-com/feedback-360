@@ -11,6 +11,11 @@ import { HrModelCloneButton } from "@/features/models-matrix/components/hr-model
 import { HrModelEditor } from "@/features/models-matrix/components/hr-model-editor";
 import { getQueryValue, modelToDraft } from "@/features/models-matrix/lib/models-matrix";
 
+/**
+ * HR model detail screen.
+ * @screenId SCR-HR-MODEL-DETAIL
+ * @testIdScope scr-hr-model-detail
+ */
 export default async function HrModelDetailPage({
   params,
   searchParams,
@@ -114,31 +119,33 @@ export default async function HrModelDetailPage({
       title={`${model.data.name} · v${model.data.version}`}
       subtitle="Редактор и detail view competency model version."
     >
-      {flash ? (
-        <InlineBanner
-          description={flash.description}
-          tone={flash.tone}
-          testId="model-detail-flash"
-        />
-      ) : null}
-
-      {resolved.context.role === "hr_admin" && model.data.status === "published" ? (
-        <div className="flex">
-          <HrModelCloneButton
-            sourceModelVersionId={model.data.modelVersionId}
-            returnTo={`/hr/models/${model.data.modelVersionId}`}
-            testId="model-detail-clone"
-            label="Создать clone draft"
+      <div className="space-y-4" data-testid="scr-hr-model-detail-root">
+        {flash ? (
+          <InlineBanner
+            description={flash.description}
+            tone={flash.tone}
+            testId="model-detail-flash"
           />
-        </div>
-      ) : null}
+        ) : null}
 
-      <HrModelEditor
-        initialDraft={modelToDraft(model.data)}
-        model={model.data}
-        mode={mode}
-        canMutate={resolved.context.role === "hr_admin"}
-      />
+        {resolved.context.role === "hr_admin" && model.data.status === "published" ? (
+          <div className="flex">
+            <HrModelCloneButton
+              sourceModelVersionId={model.data.modelVersionId}
+              returnTo={`/hr/models/${model.data.modelVersionId}`}
+              testId="model-detail-clone"
+              label="Создать clone draft"
+            />
+          </div>
+        ) : null}
+
+        <HrModelEditor
+          initialDraft={modelToDraft(model.data)}
+          model={model.data}
+          mode={mode}
+          canMutate={resolved.context.role === "hr_admin"}
+        />
+      </div>
     </InternalAppShell>
   );
 }

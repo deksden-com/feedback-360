@@ -29,6 +29,11 @@ const getQueryValue = (value: string | string[] | undefined): string | undefined
   return undefined;
 };
 
+/**
+ * Manager results dashboard screen.
+ * @screenId SCR-RESULTS-MANAGER
+ * @testIdScope scr-results-manager
+ */
 export default async function ResultsTeamDashboardPage({
   searchParams,
 }: {
@@ -71,7 +76,11 @@ export default async function ResultsTeamDashboardPage({
         title="Результаты команды"
         subtitle="Доступно только для роли Manager."
       >
-        <ResultsPageLayout title="Результаты команды" subtitle="Доступно только для роли Manager.">
+        <ResultsPageLayout
+          title="Результаты команды"
+          subtitle="Доступно только для роли Manager."
+          testId="scr-results-manager-root"
+        >
           <PageErrorState
             title="Эта витрина доступна только руководителю"
             description="Откройте личные результаты или переключите активную компанию, где у вас есть роль manager."
@@ -133,6 +142,7 @@ export default async function ResultsTeamDashboardPage({
         <ResultsPageLayout
           title="Результаты команды"
           subtitle="Выберите кампанию и сотрудника, чтобы открыть витрину руководителя."
+          testId="scr-results-manager-root"
         >
           <PageEmptyState
             title="Нужно выбрать сотрудника и кампанию"
@@ -235,7 +245,11 @@ export default async function ResultsTeamDashboardPage({
         title="Результаты команды"
         subtitle={state.description}
       >
-        <ResultsPageLayout title="Результаты команды" subtitle={state.description}>
+        <ResultsPageLayout
+          title="Результаты команды"
+          subtitle={state.description}
+          testId="scr-results-manager-root"
+        >
           <PageErrorState
             title={state.title}
             description={state.description}
@@ -257,6 +271,7 @@ export default async function ResultsTeamDashboardPage({
       <ResultsPageLayout
         title="Результаты команды"
         subtitle="Витрина руководителя: только агрегаты и обработанные комментарии."
+        testId="scr-results-manager-root"
       >
         <Card data-testid="results-team-toolbar">
           <CardHeader>

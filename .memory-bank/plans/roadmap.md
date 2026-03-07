@@ -29,6 +29,7 @@ Status: Draft (2026-03-03)
 21) Notification center UI.
 22) Admin + ops UI.
 23) Cross-epic scenarios (XE) foundation.
+24) UI traceability + SaaS polish foundation.
 
 Отложено после GUI wave:
 - Реальная внешняя AI integration beyond current MVP stub.

@@ -19,9 +19,13 @@ Status: Updated (2026-03-06)
 
 ## Memory bank structure
 - `.memory-bank/spec/`: WHAT — нормативные требования и ограничения.
+  - `spec/ui/screen-registry.md`: канонический registry всех `screen_id` и `testIdScope`.
+  - `spec/ui/test-id-registry.md`: naming contract для `data-testid`, построенный от `screen_id`.
+  - `spec/ui/design-system/`: visual tokens, status semantics, component patterns и sync policy.
   - `spec/ui/screens/`: screen specs по отдельным экранам.
   - `spec/ui/pom/`: mapping screen specs → automation/POM/test ids.
   - `spec/testing/xe-*.md`: нормативные правила XE run/scenario model.
+- `.memory-bank/guides/`: пользовательские документы в стиле Diátaxis (`tutorials/`, `how-to/`, `explanation/`, `reference/`). Храним здесь operational/product docs “как пользоваться”, не дублируя нормативные правила из `spec/`.
 - `.memory-bank/plans/`: roadmap, эпики/фичи, acceptance сценарии и verification matrix.
   - `plans/xe/`: каталог cross-epic сценариев и их фаз.
 - `.memory-bank/adr/`: WHY — архитектурные решения.

@@ -9,6 +9,11 @@ import { redirect } from "next/navigation";
 import { HrMatrixBuilder } from "@/features/models-matrix/components/hr-matrix-builder";
 import { buildMatrixPeople } from "@/features/models-matrix/lib/models-matrix";
 
+/**
+ * HR campaign matrix builder screen.
+ * @screenId SCR-HR-CAMPAIGN-MATRIX
+ * @testIdScope scr-hr-campaign-matrix
+ */
 export default async function HrCampaignMatrixPage({
   params,
   searchParams,
@@ -126,13 +131,15 @@ export default async function HrCampaignMatrixPage({
       title={`Матрица оценивания · ${campaign.data.name}`}
       subtitle="Autogen по оргструктуре, ручные правки и freeze behavior для campaign matrix."
     >
-      <HrMatrixBuilder
-        role={resolved.context.role}
-        campaign={campaign.data}
-        employees={buildMatrixPeople(employees.data.items, snapshots.data.items)}
-        departments={departments.data.items}
-        initialAssignments={matrix.data.assignments}
-      />
+      <div data-testid="scr-hr-campaign-matrix-root">
+        <HrMatrixBuilder
+          role={resolved.context.role}
+          campaign={campaign.data}
+          employees={buildMatrixPeople(employees.data.items, snapshots.data.items)}
+          departments={departments.data.items}
+          initialAssignments={matrix.data.assignments}
+        />
+      </div>
     </InternalAppShell>
   );
 }

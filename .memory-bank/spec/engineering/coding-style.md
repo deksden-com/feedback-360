@@ -21,6 +21,9 @@ Status: Draft (2026-03-03)
 - В `apps/web` используем Tailwind v4 + shadcn/ui как единый UI foundation.
 - Базовые UI building blocks добавляем через `shadcn` registry и дорабатываем локально (без копирования внешних UI kit поверх этого стека).
 - UI-компоненты остаются презентационными: доменные расчёты/политики не дублируем в компонентах.
+- Route-level screens и screen-level containers получают канонический `@screenId` в JSDoc, а при наличии stable selector scope — `@testIdScope`.
+- Ключевые интерактивные элементы и assertion targets используют `data-testid`, построенный от `testIdScope`, а не локально придуманные ad-hoc имена.
+- Имена screenshot assets, привязанных к конкретному экрану, включают suffix `__(SCR-...)`, чтобы было легко обновлять evidence и guides при UI refactor.
 
 ## CLI conventions
 - Human-readable по умолчанию, `--json` — стабильная машиночитаемая схема.
@@ -36,3 +39,5 @@ Status: Draft (2026-03-03)
 - [Testing standards](testing-standards.md) — уровни тестов, правила размещения FT/GS тестов и completion gate. Читать, чтобы писать тесты в согласованном формате и закрывать фичи только после проверок.
 - [Delivery standards](delivery-standards.md) — дисциплина закрытия фич (traceability, code checks, acceptance evidence). Читать, чтобы статус `Completed` всегда был подтверждён артефактами.
 - [Frontend UI stack](frontend-ui-stack.md) — фиксируем версии и bootstrap правила Tailwind/shadcn. Читать перед изменениями в `apps/web`, чтобы стек оставался консистентным.
+- [Screen registry](../ui/screen-registry.md) — канонический список `screen_id` и `testIdScope`. Читать перед созданием нового экрана или переименованием существующего UI surface.
+- [Test ID registry](../ui/test-id-registry.md) — naming contract для `data-testid`. Читать перед добавлением новых stable selectors, чтобы UI automation не расползалась по разным стилям именования.

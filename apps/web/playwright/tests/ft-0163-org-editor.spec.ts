@@ -57,6 +57,10 @@ test("FT-0163: HR edits department tree, moves employee and updates manager with
   await expect(page.getByRole("heading", { name: "Оргструктура" })).toBeVisible({
     timeout: 60_000,
   });
+  await expect(page.getByTestId("scr-hr-org-root")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId("scr-hr-org-selected-department")).toBeVisible({
+    timeout: 60_000,
+  });
   await page.getByTestId("department-name-input").fill("Команда A");
   await Promise.all([
     page.waitForURL(/flash=department-saved/),

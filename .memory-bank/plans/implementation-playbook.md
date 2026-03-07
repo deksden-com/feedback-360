@@ -19,6 +19,10 @@ Status: Updated (2026-03-06)
 `Project grounding` обязателен и фиксируется в FT-документе (см. шаблон фичи).
 1) Открыть FT-документ фичи: acceptance (Setup/Action/Assert), ops, seeds.
 2) Открыть связанные SSoT документы из `## Context` в FT (domain/security/notifications/...).
+   - Для UI polish/refactor фич дополнительно обязательно открыть:
+     - [UI design system](../spec/ui/design-system/index.md): tokens, patterns и sync policy. Читать, чтобы визуальные изменения шли через систему, а не через локальные patch-и.
+     - [Screen registry](../spec/ui/screen-registry.md): канонические `screen_id` и `testIdScope`. Читать, чтобы новые screens/screenshots/selectors были traceable.
+     - [Screen-by-screen redesign](../spec/ui/screen-by-screen-redesign.md): agreed audit по текущим surfaces. Читать, чтобы UI changes опирались на уже собранный экранный контекст.
 3) Проверить каталоги:
    - [Operation catalog](../spec/client-api/operation-catalog.md): SSoT списка операций. Читать, чтобы не добавлять “скрытые” вызовы.
    - [CLI command catalog](../spec/cli/command-catalog.md): 1:1 команда → операция. Читать, чтобы CLI не содержал доменной логики.
@@ -136,3 +140,7 @@ Checklist:
 - `spec/testing/*`: traceability (инвариант → тест → seed), seed docs и сценарии.
 - `plans/verification-matrix.md`: evidence по затронутому EP/FT.
 - `adr/*`: если принято новое существенное решение (WHY), зафиксировать в ADR.
+- Для material UI changes:
+  - `spec/ui/design-system/*`: если менялись tokens, semantic statuses или repeated UI patterns;
+  - `spec/ui/screens/*`: если изменился contract конкретного экрана;
+  - guides/tutorial screenshots/evidence: если существующие изображения перестали отражать актуальный UI.

@@ -1,3 +1,11 @@
+---
+screen_id: SCR-RESULTS-EMPLOYEE
+route: /results
+actors:
+  - employee
+test_id_scope: scr-results-employee
+---
+
 # Screen spec — Employee results dashboard
 Status: Draft (2026-03-07)
 

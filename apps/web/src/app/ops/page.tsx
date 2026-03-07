@@ -9,6 +9,11 @@ import { redirect } from "next/navigation";
 
 import { OpsConsole } from "@/features/ops/components/ops-console";
 
+/**
+ * Ops console screen.
+ * @screenId SCR-OPS
+ * @testIdScope scr-ops
+ */
 export default async function OpsPage({
   searchParams,
 }: {
@@ -105,13 +110,15 @@ export default async function OpsPage({
       title="Ops console"
       subtitle="Health, release, AI diagnostics и audit trail для beta/prod support."
     >
-      <OpsConsole
-        role={resolved.context.role}
-        campaigns={campaigns.data.items}
-        initialHealth={health.data}
-        initialAiDiagnostics={aiDiagnostics.data}
-        initialAudit={auditTrail.data}
-      />
+      <div data-testid="scr-ops-root">
+        <OpsConsole
+          role={resolved.context.role}
+          campaigns={campaigns.data.items}
+          initialHealth={health.data}
+          initialAiDiagnostics={aiDiagnostics.data}
+          initialAudit={auditTrail.data}
+        />
+      </div>
     </InternalAppShell>
   );
 }

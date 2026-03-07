@@ -28,6 +28,11 @@ const getQueryValue = (value: string | string[] | undefined): string | undefined
   return undefined;
 };
 
+/**
+ * HR campaign detail screen.
+ * @screenId SCR-HR-CAMPAIGN-DETAIL
+ * @testIdScope scr-hr-campaign-detail
+ */
 export default async function HrCampaignDetailPage({
   params,
   searchParams,
@@ -142,146 +147,148 @@ export default async function HrCampaignDetailPage({
       title={campaign.data.name}
       subtitle="Detail dashboard: overview, progress, lock state и operational controls в одном месте."
     >
-      {flash ? (
-        <InlineBanner
-          description={flash.description}
-          tone={flash.tone}
-          testId="campaign-detail-flash"
-        />
-      ) : null}
+      <div className="space-y-4" data-testid="scr-hr-campaign-detail-root">
+        {flash ? (
+          <InlineBanner
+            description={flash.description}
+            tone={flash.tone}
+            testId="campaign-detail-flash"
+          />
+        ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
-        <Card data-testid="campaign-detail-overview">
-          <CardHeader>
-            <CardTitle className="text-xl">Overview</CardTitle>
-            <CardDescription>{getCampaignActionHint(campaign.data)}</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-sm text-muted-foreground">Кампания</p>
-              <p className="text-lg font-semibold" data-testid="campaign-detail-name">
-                {campaign.data.name}
-              </p>
-            </div>
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-sm text-muted-foreground">Status</p>
-              <p className="text-lg font-semibold" data-testid="campaign-detail-status">
-                {campaignStatusLabels[campaign.data.status] ?? campaign.data.status}
-              </p>
-            </div>
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-sm text-muted-foreground">Model</p>
-              <p className="text-lg font-semibold" data-testid="campaign-detail-model">
-                {campaign.data.modelName
-                  ? `${campaign.data.modelName} · v${campaign.data.modelVersion ?? "?"}`
-                  : "Не выбрана"}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {campaign.data.modelKind ?? "kind unknown"}
-              </p>
-            </div>
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-sm text-muted-foreground">Сроки</p>
-              <p className="font-medium">
-                {formatCampaignDateTimeLabel(campaign.data.startAt)} →{" "}
-                {formatCampaignDateTimeLabel(campaign.data.endAt)}
-              </p>
-              <p className="text-sm text-muted-foreground">{campaign.data.timezone}</p>
-            </div>
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-sm text-muted-foreground">Веса</p>
-              <p className="font-medium">
-                M {campaign.data.managerWeight}% · P {campaign.data.peersWeight}% · S{" "}
-                {campaign.data.subordinatesWeight}%
-              </p>
-              <p className="text-sm text-muted-foreground">Self {campaign.data.selfWeight}%</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+          <Card data-testid="campaign-detail-overview">
+            <CardHeader>
+              <CardTitle className="text-xl">Overview</CardTitle>
+              <CardDescription>{getCampaignActionHint(campaign.data)}</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-lg border bg-muted/20 p-4">
+                <p className="text-sm text-muted-foreground">Кампания</p>
+                <p className="text-lg font-semibold" data-testid="campaign-detail-name">
+                  {campaign.data.name}
+                </p>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-4">
+                <p className="text-sm text-muted-foreground">Status</p>
+                <p className="text-lg font-semibold" data-testid="campaign-detail-status">
+                  {campaignStatusLabels[campaign.data.status] ?? campaign.data.status}
+                </p>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-4">
+                <p className="text-sm text-muted-foreground">Model</p>
+                <p className="text-lg font-semibold" data-testid="campaign-detail-model">
+                  {campaign.data.modelName
+                    ? `${campaign.data.modelName} · v${campaign.data.modelVersion ?? "?"}`
+                    : "Не выбрана"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {campaign.data.modelKind ?? "kind unknown"}
+                </p>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-4">
+                <p className="text-sm text-muted-foreground">Сроки</p>
+                <p className="font-medium">
+                  {formatCampaignDateTimeLabel(campaign.data.startAt)} →{" "}
+                  {formatCampaignDateTimeLabel(campaign.data.endAt)}
+                </p>
+                <p className="text-sm text-muted-foreground">{campaign.data.timezone}</p>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-4">
+                <p className="text-sm text-muted-foreground">Веса</p>
+                <p className="font-medium">
+                  M {campaign.data.managerWeight}% · P {campaign.data.peersWeight}% · S{" "}
+                  {campaign.data.subordinatesWeight}%
+                </p>
+                <p className="text-sm text-muted-foreground">Self {campaign.data.selfWeight}%</p>
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card data-testid="campaign-detail-actions">
-          <CardHeader>
-            <CardTitle className="text-xl">Quick actions</CardTitle>
-            <CardDescription>
-              HR detail page остаётся источником daily operations без дублирования domain rules.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              {canEditCampaignDraft(campaign.data) && resolved.context.role === "hr_admin" ? (
-                <Button asChild data-testid="campaign-detail-edit-draft">
-                  <a href={`/hr/campaigns/${campaignId}/edit`}>Редактировать draft</a>
+          <Card data-testid="campaign-detail-actions">
+            <CardHeader>
+              <CardTitle className="text-xl">Quick actions</CardTitle>
+              <CardDescription>
+                HR detail page остаётся источником daily operations без дублирования domain rules.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {canEditCampaignDraft(campaign.data) && resolved.context.role === "hr_admin" ? (
+                  <Button asChild data-testid="campaign-detail-edit-draft">
+                    <a href={`/hr/campaigns/${campaignId}/edit`}>Редактировать draft</a>
+                  </Button>
+                ) : null}
+                <Button asChild variant="outline" data-testid="campaign-detail-open-matrix">
+                  <a href={`/hr/campaigns/${campaignId}/matrix`}>Открыть матрицу</a>
                 </Button>
-              ) : null}
-              <Button asChild variant="outline" data-testid="campaign-detail-open-matrix">
-                <a href={`/hr/campaigns/${campaignId}/matrix`}>Открыть матрицу</a>
-              </Button>
-              <Button asChild variant="outline">
-                <a href="/hr/campaigns">К списку кампаний</a>
-              </Button>
-            </div>
+                <Button asChild variant="outline">
+                  <a href="/hr/campaigns">К списку кампаний</a>
+                </Button>
+              </div>
 
-            {campaign.data.lockedAt ? (
-              <InlineBanner
-                description={`Кампания зафиксирована: ${formatCampaignDateTimeLabel(campaign.data.lockedAt)}. Матрица и веса больше не меняются.`}
-                tone="warning"
-                testId="campaign-detail-lock-banner"
-              />
-            ) : (
-              <InlineBanner
-                description="Матрица и веса можно менять, пока в любой анкете не появился первый draft save."
-                tone="default"
-                testId="campaign-detail-unlocked-banner"
-              />
-            )}
+              {campaign.data.lockedAt ? (
+                <InlineBanner
+                  description={`Кампания зафиксирована: ${formatCampaignDateTimeLabel(campaign.data.lockedAt)}. Матрица и веса больше не меняются.`}
+                  tone="warning"
+                  testId="campaign-detail-lock-banner"
+                />
+              ) : (
+                <InlineBanner
+                  description="Матрица и веса можно менять, пока в любой анкете не появился первый draft save."
+                  tone="default"
+                  testId="campaign-detail-unlocked-banner"
+                />
+              )}
 
-            <div className="rounded-lg border bg-muted/20 p-4 text-sm">
-              <p className="font-medium">AI post-processing</p>
-              <p className="text-muted-foreground">
-                {canRetryAiForCampaign(campaign.data)
-                  ? "После ended или ai_failed можно повторно запустить AI job."
-                  : "AI retry появится, когда кампания перейдёт в ended/ai_failed."}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="rounded-lg border bg-muted/20 p-4 text-sm">
+                <p className="font-medium">AI post-processing</p>
+                <p className="text-muted-foreground">
+                  {canRetryAiForCampaign(campaign.data)
+                    ? "После ended или ai_failed можно повторно запустить AI job."
+                    : "AI retry появится, когда кампания перейдёт в ended/ai_failed."}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card data-testid="campaign-detail-progress-total">
+            <CardHeader>
+              <CardTitle className="text-base">Questionnaires</CardTitle>
+              <CardDescription>Общее количество назначенных анкет.</CardDescription>
+            </CardHeader>
+            <CardContent className="text-3xl font-semibold">
+              {progressData?.totalQuestionnaires ?? "—"}
+            </CardContent>
+          </Card>
+          <Card data-testid="campaign-detail-progress-pending">
+            <CardHeader>
+              <CardTitle className="text-base">Pending</CardTitle>
+              <CardDescription>Не начатые и незавершённые анкеты.</CardDescription>
+            </CardHeader>
+            <CardContent className="text-3xl font-semibold">{pendingCount ?? "—"}</CardContent>
+          </Card>
+          <Card data-testid="campaign-detail-progress-lock">
+            <CardHeader>
+              <CardTitle className="text-base">Lock state</CardTitle>
+              <CardDescription>Freeze-правило после первого draft save.</CardDescription>
+            </CardHeader>
+            <CardContent className="text-sm font-medium">
+              {progressData?.campaignLockedAt
+                ? formatCampaignDateTimeLabel(progressData.campaignLockedAt)
+                : "not_locked"}
+            </CardContent>
+          </Card>
+        </div>
+
+        <HrCampaignWorkbench
+          role={resolved.context.role}
+          initialCampaignId={campaignId}
+          showCreateSection={false}
+        />
       </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card data-testid="campaign-detail-progress-total">
-          <CardHeader>
-            <CardTitle className="text-base">Questionnaires</CardTitle>
-            <CardDescription>Общее количество назначенных анкет.</CardDescription>
-          </CardHeader>
-          <CardContent className="text-3xl font-semibold">
-            {progressData?.totalQuestionnaires ?? "—"}
-          </CardContent>
-        </Card>
-        <Card data-testid="campaign-detail-progress-pending">
-          <CardHeader>
-            <CardTitle className="text-base">Pending</CardTitle>
-            <CardDescription>Не начатые и незавершённые анкеты.</CardDescription>
-          </CardHeader>
-          <CardContent className="text-3xl font-semibold">{pendingCount ?? "—"}</CardContent>
-        </Card>
-        <Card data-testid="campaign-detail-progress-lock">
-          <CardHeader>
-            <CardTitle className="text-base">Lock state</CardTitle>
-            <CardDescription>Freeze-правило после первого draft save.</CardDescription>
-          </CardHeader>
-          <CardContent className="text-sm font-medium">
-            {progressData?.campaignLockedAt
-              ? formatCampaignDateTimeLabel(progressData.campaignLockedAt)
-              : "not_locked"}
-          </CardContent>
-        </Card>
-      </div>
-
-      <HrCampaignWorkbench
-        role={resolved.context.role}
-        initialCampaignId={campaignId}
-        showCreateSection={false}
-      />
     </InternalAppShell>
   );
 }

@@ -58,6 +58,7 @@ test("FT-0152: manager sees structured team results with merge explanations and 
   await loginWithCompany(page, String(managerUserId), String(companyId));
   await page.goto(`/results/team?campaignId=${campaignId}&subjectEmployeeId=${subjectEmployeeId}`);
 
+  await expect(page.getByTestId("scr-results-manager-root")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole("heading", { name: "Результаты команды" })).toBeVisible();
   await expect(page.getByTestId("results-team-toolbar")).toBeVisible();
   await expect(page.getByTestId("results-team-subject-switcher")).toBeVisible();

@@ -90,6 +90,11 @@ const isReadonlyState = (status: string, campaignStatus: string): boolean => {
   );
 };
 
+/**
+ * Questionnaire fill/read-only screen.
+ * @screenId SCR-QUESTIONNAIRES-FILL
+ * @testIdScope scr-questionnaires-fill
+ */
 export default async function QuestionnaireDetailsPage({
   params,
   searchParams,
@@ -170,321 +175,332 @@ export default async function QuestionnaireDetailsPage({
         questionnaireStatusLabels[data.status] ?? data.status
       } · ${campaignStatusLabels[data.campaignStatus] ?? data.campaignStatus}`}
     >
-      {saved ? (
-        <InlineBanner
-          description="Черновик сохранён. Можно вернуться к нему в любой момент до завершения кампании."
-          tone="success"
-          testId="questionnaire-flash-saved"
-        />
-      ) : null}
-      {submitted ? (
-        <InlineBanner
-          description="Анкета отправлена. Теперь она доступна только для просмотра."
-          tone="success"
-          testId="questionnaire-flash-submitted"
-        />
-      ) : null}
-      {errorCode ? (
-        <InlineBanner
-          description={
-            errorLabels[errorCode] ??
-            "Не удалось выполнить действие. Обновите страницу и попробуйте снова."
-          }
-          tone="error"
-          testId="questionnaire-flash-error"
-        />
-      ) : null}
-      {readonly ? (
-        <InlineBanner
-          description={getReadonlyReason(data.status, data.campaignStatus)}
-          tone="warning"
-          testId="readonly-banner"
-        />
-      ) : null}
+      <div className="space-y-6" data-testid="scr-questionnaires-fill-root">
+        {saved ? (
+          <InlineBanner
+            description="Черновик сохранён. Можно вернуться к нему в любой момент до завершения кампании."
+            tone="success"
+            testId="questionnaire-flash-saved"
+          />
+        ) : null}
+        {submitted ? (
+          <InlineBanner
+            description="Анкета отправлена. Теперь она доступна только для просмотра."
+            tone="success"
+            testId="questionnaire-flash-submitted"
+          />
+        ) : null}
+        {errorCode ? (
+          <InlineBanner
+            description={
+              errorLabels[errorCode] ??
+              "Не удалось выполнить действие. Обновите страницу и попробуйте снова."
+            }
+            tone="error"
+            testId="questionnaire-flash-error"
+          />
+        ) : null}
+        {readonly ? (
+          <InlineBanner
+            description={getReadonlyReason(data.status, data.campaignStatus)}
+            tone="warning"
+            testId="readonly-banner"
+          />
+        ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
-        <Card>
-          <CardHeader className="space-y-4">
-            <div className="space-y-1">
-              <CardTitle className="text-2xl">
-                {data.subjectDisplayName ?? `Сотрудник ${data.subjectEmployeeId}`}
-              </CardTitle>
-              <CardDescription>
-                {data.subjectPositionTitle ? `${data.subjectPositionTitle} · ` : ""}
-                {data.raterRole ? questionnaireRaterRoleLabels[data.raterRole] : "Оценивающий"}
-              </CardDescription>
-            </div>
-            <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
-              <p>
-                Кампания: <span className="font-medium text-foreground">{data.campaignName}</span>
-              </p>
-              <p>
-                Дедлайн:{" "}
-                <span className="font-medium text-foreground">
-                  {formatDate(data.campaignEndAt)}
-                </span>
-              </p>
-              <p>
-                Статус анкеты:{" "}
-                <span className="font-medium text-foreground">
-                  {questionnaireStatusLabels[data.status]}
-                </span>
-              </p>
-              <p>
-                Состояние кампании:{" "}
-                <span className="font-medium text-foreground">
-                  {campaignStatusLabels[data.campaignStatus]}
-                </span>
-              </p>
-            </div>
-          </CardHeader>
-        </Card>
-
-        <Card data-testid="questionnaire-progress-card">
-          <CardHeader className="space-y-1">
-            <CardDescription>Прогресс заполнения</CardDescription>
-            <CardTitle className="text-3xl" data-testid="questionnaire-progress">
-              {progress.answeredPrompts}/{progress.totalPrompts}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>
-              Компетенции готовы:{" "}
-              <span className="font-medium text-foreground">
-                {progress.completedCompetencies}/{progress.totalCompetencies}
-              </span>
-            </p>
-            <p>
-              {data.firstDraftAt
-                ? `Первый черновик сохранён ${formatDate(data.firstDraftAt)}`
-                : "Черновик ещё не сохранялся."}
-            </p>
-            {data.submittedAt ? <p>Отправлена {formatDate(data.submittedAt)}</p> : null}
-          </CardContent>
-        </Card>
-      </div>
-
-      <form method="post" className="space-y-6">
-        <input type="hidden" name="questionnaireId" value={data.questionnaireId} />
-
-        {data.definition ? (
-          data.definition.groups.map((group) => (
-            <Card key={group.groupId}>
-              <CardHeader className="space-y-2">
-                <CardTitle className="text-xl">{group.name}</CardTitle>
+        <div
+          className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]"
+          data-testid="scr-questionnaires-fill-summary"
+        >
+          <Card className="overflow-hidden border-border/80 shadow-sm">
+            <CardHeader className="space-y-4 border-b bg-muted/25">
+              <div className="space-y-1">
+                <CardTitle className="text-2xl">
+                  {data.subjectDisplayName ?? `Сотрудник ${data.subjectEmployeeId}`}
+                </CardTitle>
                 <CardDescription>
-                  Вес группы: {group.weight}% · Компетенций: {group.competencies.length}
+                  {data.subjectPositionTitle ? `${data.subjectPositionTitle} · ` : ""}
+                  {data.raterRole ? questionnaireRaterRoleLabels[data.raterRole] : "Оценивающий"}
                 </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {group.competencies.map((competency) => (
-                  <section
-                    key={competency.competencyId}
-                    className="space-y-4 border-t pt-6 first:border-t-0 first:pt-0"
-                    data-testid={`competency-${competency.competencyId}`}
-                  >
-                    <div className="space-y-1">
-                      <h2 className="text-lg font-semibold">{competency.name}</h2>
-                      <p className="text-sm text-muted-foreground">
-                        {data.definition?.modelKind === "indicators"
-                          ? "Оцените каждый индикатор по шкале 1–5 или выберите «Не могу оценить»."
-                          : "Выберите уровень, который лучше всего описывает текущее проявление компетенции."}
-                      </p>
-                    </div>
+              </div>
+              <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
+                <p>
+                  Кампания: <span className="font-medium text-foreground">{data.campaignName}</span>
+                </p>
+                <p>
+                  Дедлайн:{" "}
+                  <span className="font-medium text-foreground">
+                    {formatDate(data.campaignEndAt)}
+                  </span>
+                </p>
+                <p>
+                  Статус анкеты:{" "}
+                  <span className="font-medium text-foreground">
+                    {questionnaireStatusLabels[data.status]}
+                  </span>
+                </p>
+                <p>
+                  Состояние кампании:{" "}
+                  <span className="font-medium text-foreground">
+                    {campaignStatusLabels[data.campaignStatus]}
+                  </span>
+                </p>
+              </div>
+            </CardHeader>
+          </Card>
 
-                    {data.definition?.modelKind === "indicators" ? (
-                      <div className="space-y-4">
-                        {competency.indicators?.map((indicator) => {
-                          const selectedValue =
-                            normalizedDraft.indicatorResponses[competency.competencyId]?.[
-                              indicator.indicatorId
-                            ] ?? "";
+          <Card
+            className="border-border/80 shadow-sm lg:sticky lg:top-6"
+            data-testid="questionnaire-progress-card"
+          >
+            <CardHeader className="space-y-1">
+              <CardDescription>Прогресс заполнения</CardDescription>
+              <CardTitle className="text-3xl" data-testid="questionnaire-progress">
+                {progress.answeredPrompts}/{progress.totalPrompts}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                Компетенции готовы:{" "}
+                <span className="font-medium text-foreground">
+                  {progress.completedCompetencies}/{progress.totalCompetencies}
+                </span>
+              </p>
+              <p>
+                {data.firstDraftAt
+                  ? `Первый черновик сохранён ${formatDate(data.firstDraftAt)}`
+                  : "Черновик ещё не сохранялся."}
+              </p>
+              {data.submittedAt ? <p>Отправлена {formatDate(data.submittedAt)}</p> : null}
+            </CardContent>
+          </Card>
+        </div>
 
-                          return (
-                            <div
-                              key={indicator.indicatorId}
-                              className="rounded-xl border p-4"
-                              data-testid={`indicator-${indicator.indicatorId}`}
-                            >
-                              <p className="mb-3 font-medium">{indicator.text}</p>
-                              <div className="flex flex-wrap gap-2">
-                                {indicatorScale.map((option) => (
-                                  <label
-                                    key={option.value}
-                                    className={cn(
-                                      "inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm",
-                                      selectedValue === option.value &&
-                                        "border-primary bg-primary/10 text-primary",
-                                      readonly && "cursor-not-allowed opacity-70",
-                                    )}
-                                  >
-                                    <input
-                                      type="radio"
-                                      name={`indicator:${competency.competencyId}:${indicator.indicatorId}`}
-                                      value={option.value}
-                                      defaultChecked={selectedValue === option.value}
-                                      disabled={readonly}
-                                      className="sr-only"
-                                      data-testid={`indicator-input-${indicator.indicatorId}-${option.value}`}
-                                    />
-                                    <span>{option.label}</span>
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })}
+        <form method="post" className="space-y-6" data-testid="scr-questionnaires-fill-form">
+          <input type="hidden" name="questionnaireId" value={data.questionnaireId} />
+
+          {data.definition ? (
+            data.definition.groups.map((group) => (
+              <Card key={group.groupId} className="border-border/80 shadow-sm">
+                <CardHeader className="space-y-2">
+                  <CardTitle className="text-xl">{group.name}</CardTitle>
+                  <CardDescription>
+                    Вес группы: {group.weight}% · Компетенций: {group.competencies.length}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {group.competencies.map((competency) => (
+                    <section
+                      key={competency.competencyId}
+                      className="space-y-4 border-t pt-6 first:border-t-0 first:pt-0"
+                      data-testid={`competency-${competency.competencyId}`}
+                    >
+                      <div className="space-y-1">
+                        <h2 className="text-lg font-semibold">{competency.name}</h2>
+                        <p className="text-sm text-muted-foreground">
+                          {data.definition?.modelKind === "indicators"
+                            ? "Оцените каждый индикатор по шкале 1–5 или выберите «Не могу оценить»."
+                            : "Выберите уровень, который лучше всего описывает текущее проявление компетенции."}
+                        </p>
                       </div>
-                    ) : (
-                      <div className="rounded-xl border p-4">
-                        <div className="flex flex-wrap gap-2">
-                          {levelScale.map((option) => {
+
+                      {data.definition?.modelKind === "indicators" ? (
+                        <div className="space-y-4">
+                          {competency.indicators?.map((indicator) => {
                             const selectedValue =
-                              normalizedDraft.levelResponses[competency.competencyId] ?? "";
+                              normalizedDraft.indicatorResponses[competency.competencyId]?.[
+                                indicator.indicatorId
+                              ] ?? "";
 
                             return (
-                              <label
-                                key={option.value}
-                                className={cn(
-                                  "inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm",
-                                  selectedValue === option.value &&
-                                    "border-primary bg-primary/10 text-primary",
-                                  readonly && "cursor-not-allowed opacity-70",
-                                )}
+                              <div
+                                key={indicator.indicatorId}
+                                className="rounded-xl border p-4"
+                                data-testid={`indicator-${indicator.indicatorId}`}
                               >
-                                <input
-                                  type="radio"
-                                  name={`level:${competency.competencyId}`}
-                                  value={option.value}
-                                  defaultChecked={selectedValue === option.value}
-                                  disabled={readonly}
-                                  className="sr-only"
-                                  data-testid={`level-input-${competency.competencyId}-${option.value}`}
-                                />
-                                <span>{option.label}</span>
-                              </label>
+                                <p className="mb-3 font-medium">{indicator.text}</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {indicatorScale.map((option) => (
+                                    <label
+                                      key={option.value}
+                                      className={cn(
+                                        "inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm",
+                                        selectedValue === option.value &&
+                                          "border-primary bg-primary/10 text-primary",
+                                        readonly && "cursor-not-allowed opacity-70",
+                                      )}
+                                    >
+                                      <input
+                                        type="radio"
+                                        name={`indicator:${competency.competencyId}:${indicator.indicatorId}`}
+                                        value={option.value}
+                                        defaultChecked={selectedValue === option.value}
+                                        disabled={readonly}
+                                        className="sr-only"
+                                        data-testid={`indicator-input-${indicator.indicatorId}-${option.value}`}
+                                      />
+                                      <span>{option.label}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
                             );
                           })}
                         </div>
-                        <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                          {competency.levels?.map((level) => (
-                            <li key={level.levelId}>
-                              <span className="font-medium text-foreground">
-                                Уровень {level.level}:
-                              </span>{" "}
-                              {level.text}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="rounded-xl border p-4">
+                          <div className="flex flex-wrap gap-2">
+                            {levelScale.map((option) => {
+                              const selectedValue =
+                                normalizedDraft.levelResponses[competency.competencyId] ?? "";
 
-                    <div className="space-y-2">
-                      <label
-                        htmlFor={`comment-${competency.competencyId}`}
-                        className="text-sm font-medium"
-                      >
-                        Комментарий по компетенции
-                      </label>
-                      <textarea
-                        id={`comment-${competency.competencyId}`}
-                        name={`comment:${competency.competencyId}`}
-                        defaultValue={
-                          normalizedDraft.competencyComments[competency.competencyId] ?? ""
-                        }
-                        rows={4}
-                        disabled={readonly}
-                        className="w-full rounded-md border p-3 text-sm"
-                        placeholder="Добавьте примеры поведения или наблюдения — комментарий опционален."
-                        data-testid={`competency-comment-${competency.competencyId}`}
-                      />
-                    </div>
-                  </section>
-                ))}
+                              return (
+                                <label
+                                  key={option.value}
+                                  className={cn(
+                                    "inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm",
+                                    selectedValue === option.value &&
+                                      "border-primary bg-primary/10 text-primary",
+                                    readonly && "cursor-not-allowed opacity-70",
+                                  )}
+                                >
+                                  <input
+                                    type="radio"
+                                    name={`level:${competency.competencyId}`}
+                                    value={option.value}
+                                    defaultChecked={selectedValue === option.value}
+                                    disabled={readonly}
+                                    className="sr-only"
+                                    data-testid={`level-input-${competency.competencyId}-${option.value}`}
+                                  />
+                                  <span>{option.label}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                          <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                            {competency.levels?.map((level) => (
+                              <li key={level.levelId}>
+                                <span className="font-medium text-foreground">
+                                  Уровень {level.level}:
+                                </span>{" "}
+                                {level.text}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      <div className="space-y-2">
+                        <label
+                          htmlFor={`comment-${competency.competencyId}`}
+                          className="text-sm font-medium"
+                        >
+                          Комментарий по компетенции
+                        </label>
+                        <textarea
+                          id={`comment-${competency.competencyId}`}
+                          name={`comment:${competency.competencyId}`}
+                          defaultValue={
+                            normalizedDraft.competencyComments[competency.competencyId] ?? ""
+                          }
+                          rows={4}
+                          disabled={readonly}
+                          className="w-full rounded-md border p-3 text-sm"
+                          placeholder="Добавьте примеры поведения или наблюдения — комментарий опционален."
+                          data-testid={`competency-comment-${competency.competencyId}`}
+                        />
+                      </div>
+                    </section>
+                  ))}
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Card className="border-border/80 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-xl">Комментарий по анкете</CardTitle>
+                <CardDescription>
+                  Для этой кампании ещё недоступна структурированная модель компетенций, поэтому
+                  сохраняем MVP fallback.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <textarea
+                  name="note"
+                  defaultValue={normalizedDraft.note}
+                  rows={8}
+                  className="w-full rounded-md border p-3 text-sm"
+                  placeholder="Опишите наблюдения и примеры поведения."
+                  disabled={readonly}
+                  data-testid="questionnaire-note"
+                />
               </CardContent>
             </Card>
-          ))
-        ) : (
-          <Card>
+          )}
+
+          <Card className="border-border/80 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-xl">Комментарий по анкете</CardTitle>
+              <CardTitle className="text-xl">Итоговый комментарий</CardTitle>
               <CardDescription>
-                Для этой кампании ещё недоступна структурированная модель компетенций, поэтому
-                сохраняем MVP fallback.
+                Необязательное summary для всей анкеты — полезно, если хотите связать наблюдения по
+                нескольким компетенциям.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent>
               <textarea
-                name="note"
-                defaultValue={normalizedDraft.note}
-                rows={8}
-                className="w-full rounded-md border p-3 text-sm"
-                placeholder="Опишите наблюдения и примеры поведения."
+                name="finalComment"
+                defaultValue={normalizedDraft.finalComment}
+                rows={5}
                 disabled={readonly}
-                data-testid="questionnaire-note"
+                className="w-full rounded-md border p-3 text-sm"
+                placeholder="Сформулируйте итоговые наблюдения по сотруднику."
+                data-testid="questionnaire-final-comment"
               />
             </CardContent>
           </Card>
-        )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Итоговый комментарий</CardTitle>
-            <CardDescription>
-              Необязательное summary для всей анкеты — полезно, если хотите связать наблюдения по
-              нескольким компетенциям.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <textarea
-              name="finalComment"
-              defaultValue={normalizedDraft.finalComment}
-              rows={5}
-              disabled={readonly}
-              className="w-full rounded-md border p-3 text-sm"
-              placeholder="Сформулируйте итоговые наблюдения по сотруднику."
-              data-testid="questionnaire-final-comment"
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Действия</CardTitle>
-            <CardDescription>
-              Сначала можно сохранить черновик, а когда всё готово — отправить анкету.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            <Button
-              type="submit"
-              formAction={`/api/questionnaires/draft?returnTo=%2Fquestionnaires%2F${data.questionnaireId}`}
-              disabled={readonly}
-              data-testid="save-draft-button"
-            >
-              Сохранить черновик
-            </Button>
-            <Button
-              type="submit"
-              formAction="/api/questionnaires/submit?returnTo=%2Fquestionnaires"
-              disabled={readonly}
-              data-testid="submit-questionnaire-button"
-            >
-              Отправить анкету
-            </Button>
-            <Button asChild variant="outline">
-              <a href="/questionnaires">К списку анкет</a>
-            </Button>
-            {readonly ? (
-              <Button asChild variant="outline">
-                <a href="/results" data-testid="go-to-results">
-                  К результатам
-                </a>
+          <Card
+            className="border-border/80 shadow-sm"
+            data-testid="scr-questionnaires-fill-actions"
+          >
+            <CardHeader>
+              <CardTitle className="text-xl">Действия</CardTitle>
+              <CardDescription>
+                Сначала можно сохранить черновик, а когда всё готово — отправить анкету.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+              <Button
+                type="submit"
+                formAction={`/api/questionnaires/draft?returnTo=%2Fquestionnaires%2F${data.questionnaireId}`}
+                disabled={readonly}
+                data-testid="save-draft-button"
+              >
+                Сохранить черновик
               </Button>
-            ) : null}
-          </CardContent>
-        </Card>
-      </form>
+              <Button
+                type="submit"
+                formAction="/api/questionnaires/submit?returnTo=%2Fquestionnaires"
+                disabled={readonly}
+                data-testid="submit-questionnaire-button"
+              >
+                Отправить анкету
+              </Button>
+              <Button asChild variant="outline">
+                <a href="/questionnaires">К списку анкет</a>
+              </Button>
+              {readonly ? (
+                <Button asChild variant="outline">
+                  <a href="/results" data-testid="go-to-results">
+                    К результатам
+                  </a>
+                </Button>
+              ) : null}
+            </CardContent>
+          </Card>
+        </form>
+      </div>
     </InternalAppShell>
   );
 }

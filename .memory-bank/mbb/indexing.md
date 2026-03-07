@@ -45,10 +45,13 @@ Status: Draft (2026-03-03)
 Для контуров, которые быстро растут и связаны с automation, используем обязательные подиндексы:
 - `spec/ui/screens/index.md`
 - `spec/ui/pom/index.md`
+- `spec/ui/screen-registry.md`
+- `spec/ui/test-id-registry.md`
 - `plans/xe/index.md`
 
 Это нужно, чтобы агент мог быстро найти:
 - нормативный screen contract,
+- канонический `screen_id` и `testIdScope`,
 - automation/POM contract,
 - конкретный XE scenario.
 

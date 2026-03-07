@@ -8,6 +8,11 @@ import { resolveAppOperationContext } from "@/lib/operation-context";
 import { getFriendlyErrorCopy } from "@/lib/page-state";
 import { redirect } from "next/navigation";
 
+/**
+ * HR employee create screen.
+ * @screenId SCR-HR-EMPLOYEE-CREATE
+ * @testIdScope scr-hr-employee-create
+ */
 export default async function NewEmployeePage() {
   const resolved = await resolveAppOperationContext();
   if (!resolved.ok) {
@@ -58,7 +63,7 @@ export default async function NewEmployeePage() {
       title="Новый сотрудник"
       subtitle="Создайте запись Employee, затем при необходимости привяжите User account и company role."
     >
-      <Card>
+      <Card data-testid="scr-hr-employee-create-root">
         <CardHeader>
           <CardTitle className="text-xl">Профиль сотрудника</CardTitle>
           <CardDescription>

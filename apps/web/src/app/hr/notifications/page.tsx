@@ -9,6 +9,11 @@ import { redirect } from "next/navigation";
 
 import { HrNotificationCenter } from "@/features/notifications-center/components/hr-notification-center";
 
+/**
+ * HR notification center screen.
+ * @screenId SCR-HR-NOTIFICATIONS
+ * @testIdScope scr-hr-notifications
+ */
 export default async function HrNotificationsPage({
   searchParams,
 }: {
@@ -155,15 +160,17 @@ export default async function HrNotificationsPage({
       title="Notification center"
       subtitle="Reminder cadence, template preview и outbox diagnostics для HR/Admin."
     >
-      <HrNotificationCenter
-        role={resolved.context.role}
-        campaigns={campaigns.data.items}
-        initialSettings={settings.data}
-        initialPreview={preview.data}
-        initialTemplates={templates.data.items}
-        initialTemplatePreview={templatePreview.data}
-        initialDeliveries={deliveries.data}
-      />
+      <div data-testid="scr-hr-notifications-root">
+        <HrNotificationCenter
+          role={resolved.context.role}
+          campaigns={campaigns.data.items}
+          initialSettings={settings.data}
+          initialPreview={preview.data}
+          initialTemplates={templates.data.items}
+          initialTemplatePreview={templatePreview.data}
+          initialDeliveries={deliveries.data}
+        />
+      </div>
     </InternalAppShell>
   );
 }

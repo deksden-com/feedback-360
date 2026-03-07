@@ -19,6 +19,11 @@ const getQueryValue = (value: string | string[] | undefined): string | undefined
   return undefined;
 };
 
+/**
+ * HR campaign create screen.
+ * @screenId SCR-HR-CAMPAIGN-CREATE
+ * @testIdScope scr-hr-campaign-create
+ */
 export default async function NewHrCampaignPage({
   searchParams,
 }: {
@@ -126,13 +131,15 @@ export default async function NewHrCampaignPage({
       title="Создать draft кампании"
       subtitle="Draft-first flow: создаём кампанию, затем открываем detail dashboard для запуска и daily operations."
     >
-      <HrCampaignDraftForm
-        mode="create"
-        values={values}
-        models={models.data.items}
-        returnTo="/hr/campaigns/new"
-        errorCode={getQueryValue(params.error)}
-      />
+      <div data-testid="scr-hr-campaign-create-root">
+        <HrCampaignDraftForm
+          mode="create"
+          values={values}
+          models={models.data.items}
+          returnTo="/hr/campaigns/new"
+          errorCode={getQueryValue(params.error)}
+        />
+      </div>
     </InternalAppShell>
   );
 }

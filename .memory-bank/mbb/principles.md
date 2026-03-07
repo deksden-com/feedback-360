@@ -12,6 +12,7 @@ Status: Draft (2026-03-03)
 
 ## 4) WHY vs WHAT vs HOW
 - `spec/` — WHAT (норматив: как система должна работать).
+- `guides/` — user-facing docs: tutorials/how-to/explanation/reference (как системой пользоваться и как объяснять её поведение людям).
 - `adr/` — WHY (почему приняли такое решение).
 - `plans/` — как делаем по шагам (что в каком порядке и как проверяем).
 Код — HOW (детали реализации), и не должен копироваться в меморибанк (кроме ссылок).
@@ -31,6 +32,7 @@ Status: Draft (2026-03-03)
 Для новых UI/XE документов это правило применяется явно:
 - новые `spec/ui/screens/*` и `spec/ui/pom/*` документы обязаны быть добавлены в `spec/ui/index.md` и соответствующий подиндекс;
 - новые `plans/xe/*` и `spec/testing/xe-*` документы обязаны быть добавлены в `plans/index.md`, `plans/xe/index.md` или `spec/testing/index.md`.
+- новые `guides/*` документы обязаны быть добавлены в `guides/index.md` и индекс соответствующего Diátaxis-раздела (`tutorials/`, `how-to/`, `explanation/`, `reference/`).
 
 ## 7) Annotated links (обязательное правило)
 Каждая ссылка в markdown должна быть аннотирована:
@@ -93,6 +95,26 @@ SSoT поведения системы остаётся в `spec/` и `plans/`. 
 - сценарии и фазы ссылаются на screen specs/POM, а не дублируют их.
 
 Это нужно, чтобы GUI мог эволюционировать без потери тестируемости и без расхождения между UX-доками и automation.
+
+## 16) Screen IDs are mandatory for UI traceability
+Каждый route-level screen получает канонический `screen_id`, зафиксированный в `spec/ui/screen-registry.md`.
+
+Этот `screen_id` используется:
+- в `screen spec` frontmatter (`screen_id`);
+- в guide/tutorial/how-to/explanation frontmatter (`screen_ids`);
+- в code annotations через JSDoc (`@screenId`);
+- в `data-testid` через связанный `testIdScope`;
+- в screenshot filenames как suffix `__(SCR-...)`.
+
+Никакие локальные aliases/эвристики не заменяют канонический `screen_id`: если экран изменился, impact analysis начинается именно от registry.
+
+## 17) Design system is SSoT for repeated visual language
+Если visual rule повторяется более чем на одном экране (tokens, status colors, page header pattern, toolbar pattern, summary strip, report block), он должен жить в `spec/ui/design-system/*`, а не только в коде конкретного экрана.
+
+Это нужно, чтобы:
+- UI polish был воспроизводимым;
+- screen-level refactor не расходился по стилю;
+- guides/screenshots можно было синхронизировать с единым visual contract.
 
 ## 14) Boundary rationale must be documented
 Если проект вводит новые архитектурные границы (feature areas, shared modules, root composition points, subsystem ownership), меморибанк обязан отвечать на два вопроса:

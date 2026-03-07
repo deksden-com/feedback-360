@@ -160,23 +160,38 @@ const VisibilityBadge = ({ visibility }: { visibility: string | undefined }) => 
 };
 
 export const ResultsPageLayout = ({
+  title,
   subtitle,
+  testId,
   children,
 }: {
   title: string;
   subtitle: string;
+  testId?: string;
   children: ReactNode;
 }) => {
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground" data-testid="results-layout-context">
-        {subtitle}
-      </p>
-      <div className="flex flex-wrap gap-2">
-        <Button asChild variant="outline">
-          <a href="/results">Сбросить фильтры</a>
-        </Button>
-      </div>
+    <div className="space-y-5" data-testid={testId}>
+      <Card
+        className="overflow-hidden border-border/80 shadow-sm"
+        data-testid="results-layout-hero"
+      >
+        <CardHeader className="gap-4 border-b bg-muted/25">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="space-y-2">
+              <CardTitle className="text-2xl">{title}</CardTitle>
+              <CardDescription className="max-w-3xl" data-testid="results-layout-context">
+                {subtitle}
+              </CardDescription>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline">
+                <a href="/results">Сбросить фильтры</a>
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
       {children}
     </div>
   );
@@ -204,8 +219,8 @@ export const ResultsSummaryCard = ({
   viewerLabel?: string;
 }) => {
   return (
-    <Card className="overflow-hidden" data-testid="results-summary">
-      <CardHeader className="gap-4 border-b bg-muted/40">
+    <Card className="overflow-hidden border-border/80 shadow-sm" data-testid="results-summary">
+      <CardHeader className="gap-4 border-b bg-muted/35">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
             <CardTitle className="text-xl">Сводка результатов</CardTitle>
@@ -311,7 +326,7 @@ export const ResultsGroupCard = ({
   ].filter((group) => group.visibility !== undefined || group.score !== undefined || group.weight);
 
   return (
-    <Card data-testid="results-groups">
+    <Card className="border-border/80 shadow-sm" data-testid="results-groups">
       <CardHeader>
         <CardTitle className="text-xl">Группы оценивания</CardTitle>
         <CardDescription>
@@ -357,7 +372,7 @@ export const ResultsCompetenciesCard = ({
   data: ResultsGetMyDashboardOutput | ResultsGetTeamDashboardOutput | ResultsGetHrViewOutput;
 }) => {
   return (
-    <Card data-testid="results-competencies">
+    <Card className="border-border/80 shadow-sm" data-testid="results-competencies">
       <CardHeader>
         <CardTitle className="text-xl">Компетенции</CardTitle>
       </CardHeader>
@@ -481,7 +496,7 @@ export const ResultsOpenTextCard = ({
   });
 
   return (
-    <Card data-testid="results-open-text">
+    <Card className="border-border/80 shadow-sm" data-testid="results-open-text">
       <CardHeader>
         <CardTitle className="text-xl">Текстовые инсайты</CardTitle>
         <CardDescription>

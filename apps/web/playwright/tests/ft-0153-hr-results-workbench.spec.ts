@@ -59,6 +59,7 @@ test("FT-0153: HR admin gets text-mode controls while HR reader stays redacted",
 
   await loginWithCompany(page, String(hrAdminUserId), String(companyId));
   await page.goto(`/results/hr?campaignId=${campaignId}&subjectEmployeeId=${subjectEmployeeId}`);
+  await expect(page.getByTestId("scr-results-hr-root")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole("heading", { name: "HR результаты" })).toBeVisible();
   await expect(page.getByTestId("results-hr-toolbar")).toBeVisible();
   await expect(page.getByTestId("results-hr-text-toggle")).toBeVisible();
@@ -78,6 +79,7 @@ test("FT-0153: HR admin gets text-mode controls while HR reader stays redacted",
 
   await loginWithCompany(page, String(hrReaderUserId), String(companyId));
   await page.goto(`/results/hr?campaignId=${campaignId}&subjectEmployeeId=${subjectEmployeeId}`);
+  await expect(page.getByTestId("scr-results-hr-root")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole("heading", { name: "HR результаты" })).toBeVisible();
   await expect(page.getByTestId("results-hr-toolbar")).toBeVisible();
   await expect(page.getByTestId("results-hr-text-toggle")).toHaveCount(0);
