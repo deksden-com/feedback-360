@@ -28,6 +28,7 @@ Status: Draft (2026-03-03)
 20) Competency models + matrix UI.
 21) Notification center UI.
 22) Admin + ops UI.
+23) Cross-epic scenarios (XE) foundation.
 
 Отложено после GUI wave:
 - Реальная внешняя AI integration beyond current MVP stub.

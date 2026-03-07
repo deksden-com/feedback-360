@@ -132,3 +132,11 @@ Status: Draft (2026-03-03)
 - AI jobs and webhook diagnostics
 - audit trail and release console
   - Детали: [EP-019 Feature catalog](epics/EP-019-admin-ops-ui/features/index.md) — эксплуатационный GUI для beta/prod. Читать, чтобы команда видела состояние системы без ручного похода в разные панели.
+
+## Epic 22 — Cross-epic scenarios (XE) foundation
+- XE run registry + cleanup
+- system seed + named seeds
+- test adapters + auth bootstrap
+- XE CLI + scenario runner
+- XE-001 first campaign happy path
+  - Детали: [EP-020 Feature catalog](epics/EP-020-cross-epic-scenarios/features/index.md) — first-class сквозные сценарии, которые запускаются через CLI и дают artifacts/evidence. Читать, чтобы продукт проверялся end-to-end, а не только по slice acceptance.

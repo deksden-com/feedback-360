@@ -33,3 +33,4 @@ Status: Draft (2026-03-03)
 - [EP-017 Competency models and matrix UI](EP-017-models-matrix-ui/index.md): модели компетенций и matrix builder. Читать, чтобы содержание оценки и assignments были управляемы в web UI.
 - [EP-018 Notification center UI](EP-018-notification-center-ui/index.md): reminders/templates/delivery diagnostics. Читать, чтобы notifications subsystem стал видимым и управляемым.
 - [EP-019 Admin and ops UI](EP-019-admin-ops-ui/index.md): environment health, AI/webhook diagnostics и audit console. Читать, чтобы эксплуатация системы меньше зависела от внешних панелей и CLI.
+- [EP-020 Cross-epic scenarios (XE) foundation](EP-020-cross-epic-scenarios/index.md): run registry, named seeds, XE CLI, phase runner и первый golden XE scenario. Читать, чтобы система умела выполнять полноценные сквозные прогоны как first-class capability.

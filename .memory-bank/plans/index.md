@@ -16,6 +16,7 @@ Status: Draft (2026-03-03)
 - [How we plan](how-we-plan.md) — правила планирования и DoD фичи + связь с seed и тестами. Читать, чтобы план был исполнимым и проверяемым.
 - [Scenario registry](scenarios.md) — список ключевых сценариев MVP и их связь с seeds/tests. Читать, чтобы план и тесты оставались синхронизированными.
 - [Verification matrix](verification-matrix.md) — какой automated test добавляем и какие GS/Acceptance должны быть зелёными для каждой FT. Читать, чтобы “готово” означало проверяемо и воспроизводимо.
+- [XE scenarios](xe/index.md) — каталог cross-epic сценариев и их фаз. Читать, чтобы сквозные продуктовые проверки были отдельным first-class контуром, а не набором ad-hoc e2e.
 - [Engineering standards](../spec/engineering/index.md) — стандарты кодирования/тестирования/документации. Читать, чтобы фичи делались одинаково и без утечки доменной логики в UI/CLI.
 - [Client API](../spec/client-api/index.md) — typed contract/client и каталог операций v1. Читать, чтобы планируемые фичи были “вертикальными” и имели явные операции для UI/CLI/тестов.
 - [UI design references](../spec/ui/design-references-stitch.md) — как stitch bundle маппится на будущие GUI-эпики и что из него можно брать. Читать перед UI-планированием, чтобы сценарии и design refs были синхронизированы.
