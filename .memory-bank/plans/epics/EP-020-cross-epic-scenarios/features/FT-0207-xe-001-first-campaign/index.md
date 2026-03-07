@@ -31,6 +31,9 @@ Acceptance scenario:
   - `pnpm --filter @feedback-360/cli cli -- xe runs run XE-001 --env local --owner codex --base-url http://127.0.0.1:3105 --json` → passed (`RUN-20260307121405-25bdb060`).
 - Beta acceptance:
   - `pnpm --filter @feedback-360/cli cli -- xe runs run XE-001 --env beta --owner codex --base-url https://beta.go360go.ru --json` → passed (`RUN-20260307121525-c767edf3`).
+- Manual beta inspection:
+  - `pnpm --filter @feedback-360/cli cli -- xe auth issue RUN-20260307121525-c767edf3 --actor subject --base-url https://beta.go360go.ru --format token`
+  - открыть `https://beta.go360go.ru/auth/login`, раскрыть XE token helper (`Ctrl/Cmd+Shift+X`) и вставить token.
 - Covered acceptance:
   - HR инициализирует полную 360-компанию и система создаёт invite intents;
   - все 8 questionnaires проходят deterministic draft+submit flow;

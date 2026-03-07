@@ -58,6 +58,11 @@ MVP default:
 - раннер и automation используют `storage-state`;
 - `token` остаётся для ручной диагностики и специальных flows.
 
+Token flow:
+- CLI выпускает short-lived signed token для конкретного actor/run;
+- login page на `local|beta` поддерживает manual XE token login;
+- после обмена token → session пользователь работает как обычный logged-in actor, включая обычный logout.
+
 ## Assertions and artifacts
 - `xe assertions run <run-id>`
 - `xe artifacts dir <run-id>`

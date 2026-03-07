@@ -22,6 +22,7 @@ Acceptance scenario:
 ## Progress note (2026-03-07)
 - CLI получил команды для scenario catalog, runs, phases, seeds, auth bootstrap, artifacts, notifications и lock management.
 - XE CLI стал основным surface для агента: сценарий можно создать, запустить, исследовать и почистить без ad-hoc команд.
+- CLI `xe auth issue` теперь поддерживает и `storage-state`, и `token`, чтобы один и тот же XE run было удобно проверять как automation-ом, так и вручную на beta.
 
 ## Quality checks evidence (2026-03-07)
 - `pnpm --filter @feedback-360/cli lint` → passed.
@@ -35,7 +36,8 @@ Acceptance scenario:
 - Covered acceptance:
   - `xe scenarios list/show` возвращают catalog и spec metadata;
   - `xe runs run/status/list` отражают актуальный phase progression;
-  - `xe lock status/release --force`, `xe auth issue`, `xe notifications list`, `xe artifacts dir` доступны в одном CLI surface.
+  - `xe lock status/release --force`, `xe auth issue`, `xe notifications list`, `xe artifacts dir` доступны в одном CLI surface;
+  - `xe auth issue ... --format token` печатает usable XE login token для login page.
 - Artifacts:
   - scenario snapshot from executed run.
     `[.memory-bank/evidence/EP-020/FT-0204/2026-03-07/scenario.json](../../../../../evidence/EP-020/FT-0204/2026-03-07/scenario.json)`

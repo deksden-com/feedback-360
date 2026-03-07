@@ -5,6 +5,7 @@ import { type XeAuthIssueOutput, createOperationError } from "@feedback-360/api-
 import { request as playwrightRequest } from "@playwright/test";
 
 import { getXeRunRegistry } from "./run-registry";
+import { issueXeLoginToken } from "./token";
 
 const ensureActorBinding = (bindings: Record<string, unknown>, actor: string) => {
   const actors = bindings.actors;
@@ -86,4 +87,31 @@ export const issueXeActorStorageState = async (input: {
   } finally {
     await api.dispose();
   }
+};
+
+export const issueXeActorLoginToken = async (input: {
+  runId: string;
+  actor: string;
+  baseUrl: string;
+}): Promise<XeAuthIssueOutput> => {
+  const run = await getXeRunRegistry(input.runId);
+  const actorBinding = ensureActorBinding(run.bindings as Record<string, unknown>, input.actor);
+  const companyId = (run.bindings as Record<string, unknown>).company as
+    | { id?: string }
+    | undefined;
+  if (!companyId?.id) {
+    throw createOperationError("invalid_input", "XE run is missing company binding.");
+  }
+
+  return {
+    actor: input.actor,
+    format: "token",
+    token: issueXeLoginToken({
+      runId: input.runId,
+      actor: input.actor,
+      userId: actorBinding.userId,
+      companyId: companyId.id,
+    }),
+    baseUrl: input.baseUrl,
+  };
 };
