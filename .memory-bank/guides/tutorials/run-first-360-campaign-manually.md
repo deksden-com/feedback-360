@@ -71,6 +71,14 @@ HR открывает справочник сотрудников и:
 
 ![Employee directory](../assets/manual-first-campaign/step-02-employees.png)
 
+Экран создания сотрудника:
+
+![Employee create](../assets/manual-first-campaign/step-02b-employee-create.png)
+
+И карточка отдельного сотрудника:
+
+![Employee profile](../assets/manual-first-campaign/step-02c-employee-profile.png)
+
 ### Шаг 3. HR собирает оргструктуру
 
 HR открывает редактор оргструктуры и:
@@ -105,6 +113,10 @@ HR открывает каталог моделей и:
 
 ![Model catalog](../assets/manual-first-campaign/step-04-models.png)
 
+Экран создания draft-модели:
+
+![Model create](../assets/manual-first-campaign/step-04b-model-create.png)
+
 ### Шаг 5. HR создаёт кампанию
 
 HR открывает раздел кампаний и:
@@ -123,6 +135,10 @@ HR открывает раздел кампаний и:
 
 ![Campaign list](../assets/manual-first-campaign/step-05-campaigns.png)
 
+Экран создания draft-кампании:
+
+![Campaign create](../assets/manual-first-campaign/step-05b-campaign-create.png)
+
 ### Шаг 6. HR настраивает участников и матрицу
 
 HR добавляет в кампанию сотрудников и проверяет, кто кого оценивает:
@@ -138,6 +154,16 @@ HR добавляет в кампанию сотрудников и провер
 Результат шага:
 
 - матрица готова к запуску кампании.
+
+Когда кампания уже открыта, HR работает с detail page и matrix builder.
+
+Карточка кампании / operational detail:
+
+![Campaign detail](../assets/manual-first-campaign/step-06-campaign-detail.png)
+
+Матрица оценивания:
+
+![Matrix builder](../assets/manual-first-campaign/step-07-matrix-builder.png)
 
 ### Шаг 7. HR стартует кампанию
 
@@ -164,6 +190,8 @@ HR добавляет в кампанию сотрудников и провер
 
 - кампания получает реальные ответы по всем группам оценивания.
 
+Для этого шага мы позже добавим отдельный набор manual screenshots глазами участника. Сейчас продуктовый UI для анкеты уже есть, и он покрыт в acceptance/evidence, но в этом tutorial мы пока не встроили отдельный живой walkthrough по employee login path.
+
 ### Шаг 9. Кампания завершается и считаются результаты
 
 После дедлайна или ручного завершения:
@@ -177,6 +205,8 @@ HR добавляет в кампанию сотрудников и провер
 - сотрудник видит свой dashboard;
 - руководитель видит team results;
 - HR видит полную HR-витрину.
+
+Этот блок тоже логично расширить отдельной серией screenshots глазами каждой роли — это следующий естественный шаг для этого tutorial.
 
 ## Что есть уже сейчас
 
@@ -207,8 +237,7 @@ HR добавляет в кампанию сотрудников и провер
 
 Следующий логичный слой наполнения:
 
-- шаг `6`: participants + matrix;
-- шаг `7`: start campaign;
+- шаг `7`: start campaign и lifecycle action buttons;
 - шаг `8`: questionnaire flow глазами участника;
 - шаг `9–10`: завершение кампании и просмотр результатов ролями.
 
