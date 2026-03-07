@@ -12,6 +12,7 @@ export * from "./notifications";
 export * from "./org";
 export * from "./questionnaires";
 export * from "./results";
+export * from "./xe";
 export * from "./seeds";
 export * from "./snapshots";
 export * as schema from "./schema";

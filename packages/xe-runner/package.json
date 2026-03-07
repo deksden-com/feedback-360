@@ -1,5 +1,5 @@
 {
-  "name": "@feedback-360/cli",
+  "name": "@feedback-360/xe-runner",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,18 +8,12 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run --testTimeout=15000",
-    "cli": "tsx src/index.ts"
+    "test": "vitest run --testTimeout=30000"
   },
   "dependencies": {
     "@feedback-360/api-contract": "workspace:*",
     "@feedback-360/client": "workspace:*",
-    "@feedback-360/core": "workspace:*",
     "@feedback-360/db": "workspace:*",
-    "@feedback-360/xe-runner": "workspace:*",
-    "commander": "14.0.1"
-  },
-  "devDependencies": {
-    "tsx": "4.20.6"
+    "@playwright/test": "1.54.2"
   }
 }

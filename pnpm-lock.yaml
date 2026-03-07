@@ -107,6 +107,9 @@ importers:
       '@feedback-360/db':
         specifier: workspace:*
         version: link:../db
+      '@feedback-360/xe-runner':
+        specifier: workspace:*
+        version: link:../xe-runner
       commander:
         specifier: 14.0.1
         version: 14.0.1
@@ -164,6 +167,21 @@ importers:
         version: 4.20.6
 
   packages/testkit: {}
+
+  packages/xe-runner:
+    dependencies:
+      '@feedback-360/api-contract':
+        specifier: workspace:*
+        version: link:../api-contract
+      '@feedback-360/client':
+        specifier: workspace:*
+        version: link:../client
+      '@feedback-360/db':
+        specifier: workspace:*
+        version: link:../db
+      '@playwright/test':
+        specifier: 1.54.2
+        version: 1.54.2
 
 packages:
 

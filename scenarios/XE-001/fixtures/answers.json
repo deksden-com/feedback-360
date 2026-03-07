@@ -1,0 +1,76 @@
+{
+  "actors": {
+    "subject": {
+      "competencies": {
+        "clarity": { "indicatorValues": [5, 5], "comment": "Самооценка: коммуникация стала увереннее и структурнее." },
+        "feedback": { "indicatorValues": [5, 5], "comment": "Самооценка: чаще даю полезную обратную связь команде." },
+        "ownership": { "indicatorValues": [5, 5], "comment": "Самооценка: беру ответственность за результат без эскалаций." },
+        "planning": { "indicatorValues": [5, 5], "comment": "Самооценка: планирую работу прозрачно и заранее." }
+      },
+      "finalComment": "Сильная самооценка с упором на рост и зрелость."
+    },
+    "manager": {
+      "competencies": {
+        "clarity": { "indicatorValues": [4, 4], "comment": "Руководитель: ясно объясняет решения и ожидания." },
+        "feedback": { "indicatorValues": [4, 4], "comment": "Руководитель: обратная связь полезная и спокойная." },
+        "ownership": { "indicatorValues": [4, 4], "comment": "Руководитель: доводит задачи до конца без лишнего шума." },
+        "planning": { "indicatorValues": [4, 4], "comment": "Руководитель: планирование стало заметно стабильнее." }
+      },
+      "finalComment": "Сотрудник стабильно растёт и берёт всё больше ответственности."
+    },
+    "peer_1": {
+      "competencies": {
+        "clarity": { "indicatorValues": [3, 3], "comment": "Коллега: коммуникация стала лучше, но иногда не хватает контекста." },
+        "feedback": { "indicatorValues": [3, 3], "comment": "Коллега: обратная связь полезна, хотя не всегда достаточно конкретна." },
+        "ownership": { "indicatorValues": [3, 3], "comment": "Коллега: надёжный участник команды, но не всегда заранее поднимает риски." },
+        "planning": { "indicatorValues": [3, 3], "comment": "Коллега: планирование рабочее, но можно точнее синхронизироваться." }
+      },
+      "finalComment": "Есть хорошие сдвиги, но ещё видим потенциал для роста."
+    },
+    "peer_2": {
+      "competencies": {
+        "clarity": { "indicatorValues": [4, 4], "comment": "Коллега: хорошо формулирует решения и помогает команде." },
+        "feedback": { "indicatorValues": [4, 4], "comment": "Коллега: качественно и уважительно даёт обратную связь." },
+        "ownership": { "indicatorValues": [4, 4], "comment": "Коллега: держит ответственность за результат и качество." },
+        "planning": { "indicatorValues": [4, 4], "comment": "Коллега: понятен в планах и сроках." }
+      },
+      "finalComment": "Сильный командный игрок с хорошей динамикой."
+    },
+    "peer_3": {
+      "competencies": {
+        "clarity": { "indicatorValues": [4, 4], "comment": "Коллега: общение понятное, конструктивное и спокойное." },
+        "feedback": { "indicatorValues": [4, 4], "comment": "Коллега: умеет замечать важное и доносить это без давления." },
+        "ownership": { "indicatorValues": [4, 4], "comment": "Коллега: держит слово и завершает задачи." },
+        "planning": { "indicatorValues": [4, 4], "comment": "Коллега: умеет раскладывать работу на понятные шаги." }
+      },
+      "finalComment": "Уверенный вклад в совместную работу."
+    },
+    "subordinate_1": {
+      "competencies": {
+        "clarity": { "indicatorValues": [4, 4], "comment": "Подчинённый: задачи объясняет понятно и последовательно." },
+        "feedback": { "indicatorValues": [4, 4], "comment": "Подчинённый: обратная связь полезная и спокойная." },
+        "ownership": { "indicatorValues": [4, 4], "comment": "Подчинённый: помогает доводить работу до результата." },
+        "planning": { "indicatorValues": [4, 4], "comment": "Подчинённый: заранее объясняет приоритеты и ожидания." }
+      },
+      "finalComment": "Работать комфортно, курс и ожидания понятны."
+    },
+    "subordinate_2": {
+      "competencies": {
+        "clarity": { "indicatorValues": [4, 4], "comment": "Подчинённый: хорошо структурирует обсуждения и задачи." },
+        "feedback": { "indicatorValues": [4, 4], "comment": "Подчинённый: даёт понятную обратную связь по работе." },
+        "ownership": { "indicatorValues": [4, 4], "comment": "Подчинённый: помогает держать общий темп исполнения." },
+        "planning": { "indicatorValues": [4, 4], "comment": "Подчинённый: планирование стало предсказуемым." }
+      },
+      "finalComment": "Хороший лидерский тон и понятная постановка задач."
+    },
+    "subordinate_3": {
+      "competencies": {
+        "clarity": { "indicatorValues": [5, 5], "comment": "Подчинённый: особенно силён в разъяснении контекста и ожиданий." },
+        "feedback": { "indicatorValues": [5, 5], "comment": "Подчинённый: регулярно даёт поддерживающую и точную обратную связь." },
+        "ownership": { "indicatorValues": [5, 5], "comment": "Подчинённый: помогает чувствовать уверенность в результате." },
+        "planning": { "indicatorValues": [5, 5], "comment": "Подчинённый: отлично задаёт ритм и рамки работы." }
+      },
+      "finalComment": "Сильная поддержка команды и хороший лидерский пример."
+    }
+  }
+}

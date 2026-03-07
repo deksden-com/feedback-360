@@ -1,0 +1,56 @@
+{
+  "id": "XE-001",
+  "scenarioId": "XE-001",
+  "version": "1",
+  "name": "First 360 campaign happy path",
+  "description": "HR starts the first 360 campaign, actors complete questionnaires, and results are verified end-to-end.",
+  "allowedEnvironments": ["local", "beta"],
+  "seed": {
+    "handle": "XE-001-first-campaign",
+    "extends": "system"
+  },
+  "artifacts": {
+    "rootDir": ".xe-runs",
+    "retainDays": 30
+  },
+  "phasePolicy": {
+    "defaultFailurePolicy": "fail_run"
+  },
+  "phases": [
+    {
+      "phaseId": "phase-01-seed",
+      "title": "Apply seed and capture bindings",
+      "handler": "xe-001:seed",
+      "failurePolicy": "fail_run",
+      "requiredArtifacts": ["seed-summary.json", "assertions.json"]
+    },
+    {
+      "phaseId": "phase-02-start-campaign",
+      "title": "Start campaign and generate notifications",
+      "handler": "xe-001:start-campaign",
+      "failurePolicy": "fail_run",
+      "requiredArtifacts": ["campaign.json", "notifications.json", "assertions.json"]
+    },
+    {
+      "phaseId": "phase-03-bootstrap-sessions",
+      "title": "Issue actor storage states",
+      "handler": "xe-001:bootstrap-sessions",
+      "failurePolicy": "fail_run",
+      "requiredArtifacts": ["sessions.json", "assertions.json"]
+    },
+    {
+      "phaseId": "phase-04-fill-questionnaires",
+      "title": "Actors fill and submit questionnaires",
+      "handler": "xe-001:fill-questionnaires",
+      "failurePolicy": "fail_run",
+      "requiredArtifacts": ["questionnaires.json", "progress.json", "assertions.json"]
+    },
+    {
+      "phaseId": "phase-05-verify-results",
+      "title": "End campaign and verify results",
+      "handler": "xe-001:verify-results",
+      "failurePolicy": "fail_run",
+      "requiredArtifacts": ["results.json", "assertions.json", "employee-results.png", "manager-results.png", "hr-results.png"]
+    }
+  ]
+}

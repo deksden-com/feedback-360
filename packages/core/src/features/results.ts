@@ -145,8 +145,9 @@ export const runResultsGetMyDashboard = async (
     return companyIdOrError;
   }
 
+  const contextEmployeeId = request.context?.employeeId;
   const userId = request.context?.userId;
-  if (!userId) {
+  if (!contextEmployeeId && !userId) {
     return errorResult(
       createOperationError("unauthenticated", "User context is required for own dashboard.", {
         operation: "results.getMyDashboard",
@@ -164,10 +165,12 @@ export const runResultsGetMyDashboard = async (
   }
 
   try {
-    const employeeId = await getEmployeeIdByUserInCompany({
-      companyId: companyIdOrError,
-      userId,
-    });
+    const employeeId =
+      contextEmployeeId ??
+      (await getEmployeeIdByUserInCompany({
+        companyId: companyIdOrError,
+        userId: userId as string,
+      }));
     if (!employeeId) {
       return errorResult(
         createOperationError("forbidden", "No employee profile linked to current user.", {
@@ -207,8 +210,9 @@ export const runResultsGetTeamDashboard = async (
     return companyIdOrError;
   }
 
+  const contextEmployeeId = request.context?.employeeId;
   const userId = request.context?.userId;
-  if (!userId) {
+  if (!contextEmployeeId && !userId) {
     return errorResult(
       createOperationError("unauthenticated", "User context is required for team dashboard.", {
         operation: "results.getTeamDashboard",
@@ -226,10 +230,12 @@ export const runResultsGetTeamDashboard = async (
   }
 
   try {
-    const managerEmployeeId = await getEmployeeIdByUserInCompany({
-      companyId: companyIdOrError,
-      userId,
-    });
+    const managerEmployeeId =
+      contextEmployeeId ??
+      (await getEmployeeIdByUserInCompany({
+        companyId: companyIdOrError,
+        userId: userId as string,
+      }));
     if (!managerEmployeeId) {
       return errorResult(
         createOperationError("forbidden", "No employee profile linked to current user.", {

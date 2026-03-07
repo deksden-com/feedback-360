@@ -26,6 +26,7 @@ import {
   questionnaires,
 } from "./schema";
 import { createCampaignEmployeeSnapshotsForCampaignStartInDb } from "./snapshots";
+import { getXeLock } from "./xe";
 
 const seededAt = new Date("2026-01-01T09:00:00.000Z");
 
@@ -2293,6 +2294,7 @@ const insertS4 = async (
 
 export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutput> => {
   const parsed = parseSeedRunInput(input);
+  const appEnv = process.env.APP_ENV === "beta" ? "beta" : "local";
 
   if (
     parsed.variant &&
@@ -2311,6 +2313,15 @@ export const runSeedScenario = async (input: SeedRunInput): Promise<SeedRunOutpu
   const pool = createPool();
 
   try {
+    if (appEnv === "beta") {
+      const activeXeLock = await getXeLock("beta");
+      if (activeXeLock && new Date(activeXeLock.expiresAt) > new Date()) {
+        throw new Error(
+          `seed.run is blocked while XE run ${activeXeLock.runId} holds the beta lock.`,
+        );
+      }
+    }
+
     const db = createDb(pool);
 
     const handles = await db.transaction(async (tx) => {
