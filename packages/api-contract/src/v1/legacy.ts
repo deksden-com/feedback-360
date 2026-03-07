@@ -50,6 +50,7 @@ export type MembershipRole = (typeof membershipRoles)[number];
 
 export type OperationContext = {
   userId?: string;
+  employeeId?: string;
   companyId?: string;
   role?: MembershipRole;
 };
@@ -1359,7 +1360,7 @@ export const parseOperationContext = (value: unknown): OperationContext => {
   }
 
   const record = ensureObject(value, "context");
-  ensureAllowedKeys(record, ["userId", "companyId", "role"], "context");
+  ensureAllowedKeys(record, ["userId", "employeeId", "companyId", "role"], "context");
 
   const userId = record.userId;
   if (userId !== undefined && typeof userId !== "string") {
@@ -1371,6 +1372,11 @@ export const parseOperationContext = (value: unknown): OperationContext => {
     throw new Error("context.companyId must be a string when provided.");
   }
 
+  const employeeId = record.employeeId;
+  if (employeeId !== undefined && typeof employeeId !== "string") {
+    throw new Error("context.employeeId must be a string when provided.");
+  }
+
   const roleValue = record.role;
   if (roleValue !== undefined) {
     if (typeof roleValue !== "string" || !isMembershipRole(roleValue)) {
@@ -1380,6 +1386,7 @@ export const parseOperationContext = (value: unknown): OperationContext => {
 
   return {
     ...(userId ? { userId } : {}),
+    ...(employeeId ? { employeeId } : {}),
     ...(companyId ? { companyId } : {}),
     ...(roleValue ? { role: roleValue } : {}),
   };

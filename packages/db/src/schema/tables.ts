@@ -262,6 +262,34 @@ export const aiWebhookReceipts = pgTable(
   (table) => [unique("uq_ai_webhook_receipt_idempotency").on(table.idempotencyKey)],
 );
 
+export const xeRuns = pgTable("xe_runs", {
+  runId: text("run_id").primaryKey(),
+  scenarioId: text("scenario_id").notNull(),
+  scenarioVersion: text("scenario_version").notNull(),
+  environment: text("environment").notNull(),
+  status: text("status").notNull().default("created"),
+  workspacePath: text("workspace_path").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  finishedAt: timestamp("finished_at", { withTimezone: true }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  cleanupStatus: text("cleanup_status").notNull().default("active"),
+  summaryJson: jsonb("summary_json").notNull().default({}),
+  bindingsJson: jsonb("bindings_json").notNull().default({}),
+  lastError: text("last_error"),
+});
+
+export const xeRunLocks = pgTable("xe_run_locks", {
+  environment: text("environment").primaryKey(),
+  runId: text("run_id")
+    .notNull()
+    .references(() => xeRuns.runId, { onDelete: "cascade" }),
+  owner: text("owner").notNull(),
+  acquiredAt: timestamp("acquired_at", { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const auditEvents = pgTable("audit_events", {
   id: uuid("id").defaultRandom().primaryKey(),
   companyId: uuid("company_id")

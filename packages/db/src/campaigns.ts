@@ -3,7 +3,9 @@ import { and, desc, eq } from "drizzle-orm";
 
 import { createDb, createPool } from "./db";
 import { enqueueCampaignInvitesOnStartInDb } from "./notifications";
+import { ensureQuestionnairesForCampaignAssignmentsInDb } from "./questionnaires";
 import { campaigns, companies, competencyModelVersions } from "./schema";
+import { createCampaignEmployeeSnapshotsForCampaignStartInDb } from "./snapshots";
 
 type CreateCampaignInput = {
   companyId: string;
@@ -274,6 +276,14 @@ const transitionCampaignStatus = async (
       }
 
       if (input.targetStatus === "started") {
+        await ensureQuestionnairesForCampaignAssignmentsInDb(tx, {
+          companyId: input.companyId,
+          campaignId: input.campaignId,
+        });
+        await createCampaignEmployeeSnapshotsForCampaignStartInDb(tx, {
+          companyId: input.companyId,
+          campaignId: input.campaignId,
+        });
         await enqueueCampaignInvitesOnStartInDb(tx, {
           companyId: input.companyId,
           campaignId: input.campaignId,

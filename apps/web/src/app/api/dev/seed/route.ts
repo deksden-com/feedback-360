@@ -49,12 +49,14 @@ export async function POST(request: Request) {
       handles: seeded.handles,
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Unexpected seed error.";
+    const status = message.includes("holds the beta lock") ? 409 : 500;
     return NextResponse.json(
       {
         ok: false,
-        error: error instanceof Error ? error.message : "Unexpected seed error.",
+        error: message,
       },
-      { status: 500 },
+      { status },
     );
   }
 }

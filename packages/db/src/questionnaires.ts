@@ -20,6 +20,56 @@ import {
   questionnaires,
 } from "./schema";
 
+type DbTransaction = Parameters<Parameters<ReturnType<typeof createDb>["transaction"]>[0]>[0];
+
+export const ensureQuestionnairesForCampaignAssignmentsInDb = async (
+  tx: DbReader & Pick<DbTransaction, "insert">,
+  input: {
+    companyId: string;
+    campaignId: string;
+  },
+): Promise<number> => {
+  const assignmentRows = await tx
+    .select({
+      subjectEmployeeId: campaignAssignments.subjectEmployeeId,
+      raterEmployeeId: campaignAssignments.raterEmployeeId,
+    })
+    .from(campaignAssignments)
+    .where(
+      and(
+        eq(campaignAssignments.companyId, input.companyId),
+        eq(campaignAssignments.campaignId, input.campaignId),
+      ),
+    );
+
+  if (assignmentRows.length === 0) {
+    return 0;
+  }
+
+  const insertedRows = await tx
+    .insert(questionnaires)
+    .values(
+      assignmentRows.map((assignment) => ({
+        companyId: input.companyId,
+        campaignId: input.campaignId,
+        subjectEmployeeId: assignment.subjectEmployeeId,
+        raterEmployeeId: assignment.raterEmployeeId,
+        status: "not_started",
+        draftPayload: {},
+      })),
+    )
+    .onConflictDoNothing({
+      target: [
+        questionnaires.campaignId,
+        questionnaires.subjectEmployeeId,
+        questionnaires.raterEmployeeId,
+      ],
+    })
+    .returning({ questionnaireId: questionnaires.id });
+
+  return insertedRows.length;
+};
+
 type QuestionnaireDbRow = {
   questionnaireId: string;
   campaignId: string;

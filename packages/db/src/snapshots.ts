@@ -36,8 +36,10 @@ export type CampaignSnapshotListOutput = {
   items: CampaignSnapshotItem[];
 };
 
+type DbTransaction = Parameters<Parameters<ReturnType<typeof createDb>["transaction"]>[0]>[0];
+
 const createCampaignEmployeeSnapshotsUsingDb = async (
-  db: ReturnType<typeof createDb>,
+  db: ReturnType<typeof createDb> | DbTransaction,
   input: CreateCampaignEmployeeSnapshotsInput,
 ): Promise<void> => {
   const campaignRows = await db

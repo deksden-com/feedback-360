@@ -17,7 +17,11 @@ Status: Updated (2026-03-06)
 
 ## Memory bank structure
 - `.memory-bank/spec/`: WHAT — нормативные требования и ограничения.
+  - `spec/ui/screens/`: screen specs по отдельным экранам.
+  - `spec/ui/pom/`: mapping screen specs → automation/POM/test ids.
+  - `spec/testing/xe-*.md`: нормативные правила XE run/scenario model.
 - `.memory-bank/plans/`: roadmap, эпики/фичи, acceptance сценарии и verification matrix.
+  - `plans/xe/`: каталог cross-epic сценариев и их фаз.
 - `.memory-bank/adr/`: WHY — архитектурные решения.
 - `.memory-bank/mbb/`: правила ведения меморибанка и шаблоны.
 - `.memory-bank/assets/`: non-SSoT visual references и вспомогательные материалы.

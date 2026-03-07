@@ -37,6 +37,11 @@ export const resolveRaterEmployeeId = async (
     return undefined;
   }
 
+  const contextEmployeeId = request.context?.employeeId;
+  if (contextEmployeeId) {
+    return contextEmployeeId;
+  }
+
   const userId = request.context?.userId;
   if (!userId) {
     return errorResult(

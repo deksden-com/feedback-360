@@ -28,6 +28,10 @@ Status: Draft (2026-03-03)
 ## 6) Index-first navigation
 Новые документы должны появляться в индексе соответствующей папки. Orphan файлы без входной ссылки считаем дефектом.
 
+Для новых UI/XE документов это правило применяется явно:
+- новые `spec/ui/screens/*` и `spec/ui/pom/*` документы обязаны быть добавлены в `spec/ui/index.md` и соответствующий подиндекс;
+- новые `plans/xe/*` и `spec/testing/xe-*` документы обязаны быть добавлены в `plans/index.md`, `plans/xe/index.md` или `spec/testing/index.md`.
+
 ## 7) Annotated links (обязательное правило)
 Каждая ссылка в markdown должна быть аннотирована:
 1) 1–2 предложения “что по ссылке”.
@@ -79,6 +83,16 @@ SSoT поведения системы остаётся в `spec/` и `plans/`. 
 Связанные правила:
 - [Visual references](visual-references.md): где хранить макеты, как их аннотировать и что из них можно/нельзя брать. Читать перед добавлением новых UI источников.
 - [Stitch design mapping](../spec/ui/design-references-stitch.md): текущий каталог `stitch_go360go` и его привязка к GUI-эпикам. Читать перед планированием или реализацией GUI, чтобы все агенты опирались на один и тот же набор референсов.
+
+## 15) UI specs and POM mapping are first-class documentation
+Для экранов, которыми управляют acceptance/XE/browser automation:
+- screen spec хранится в `.memory-bank/spec/ui/screens/`;
+- POM mapping и automation conventions хранятся в `.memory-bank/spec/ui/pom/`;
+- screen spec описывает смысл и contract экрана;
+- POM mapping описывает stable ids, page object surface и связь с automation layer;
+- сценарии и фазы ссылаются на screen specs/POM, а не дублируют их.
+
+Это нужно, чтобы GUI мог эволюционировать без потери тестируемости и без расхождения между UX-доками и automation.
 
 ## 14) Boundary rationale must be documented
 Если проект вводит новые архитектурные границы (feature areas, shared modules, root composition points, subsystem ownership), меморибанк обязан отвечать на два вопроса:

@@ -12,6 +12,7 @@
 - [Implementation playbook](plans/implementation-playbook.md): пошаговый чеклист реализации фичи (contract→core→db→cli→tests→docs). Читать как рабочую инструкцию полного цикла разработки.
 - [Testing standards](spec/engineering/testing-standards.md): уровни тестов и правило двух гейтов (quality checks + acceptance/GS). Читать перед проверкой фичи, чтобы запускать проверки в правильной последовательности.
 - [Verification matrix](plans/verification-matrix.md): обязательные проверки по FT/GS и формат evidence. Читать перед закрытием фичи, чтобы фиксировать подтверждение готовности по каждому сценарию.
+- [XE scenarios](plans/xe/index.md): cross-epic сценарии, их фазы и expected artifacts. Читать перед проектированием или запуском сквозных продуктовых прогонов.
 - [Delivery standards](spec/engineering/delivery-standards.md): единый процесс закрытия фич (traceability, quality gate, acceptance gate, evidence). Читать перед merge, чтобы `Completed` был подтверждён всеми обязательными проверками.
 - [Git flow](spec/operations/git-flow.md): ветки, naming, commit/PR traceability (`[FT-*]/[EP-*]`) и обязательные проверки/evidence. Читать до создания ветки и PR, чтобы вести работу по стандарту.
 - [Deployment architecture](spec/operations/deployment-architecture.md): карта beta/prod окружений и обязательные env vars/интеграции. Читать перед deploy, чтобы не смешивать конфигурации окружений.
@@ -32,9 +33,12 @@
 - [Security rules (`spec/security/`)](spec/security/index.md): identity/auth, RBAC, RLS, webhook security. Читать перед реализацией доступа и интеграций.
 - [Client API (`spec/client-api/`)](spec/client-api/index.md): операции, ошибки и transport contract для thin clients. Читать, чтобы CLI/UI работали через один typed-контракт.
 - [Testing package (`spec/testing/`)](spec/testing/index.md): seed-сценарии, golden scenarios, traceability и test strategy. Читать, чтобы строить проверяемые и воспроизводимые тесты.
+- [XE contracts (`spec/testing/xe-*.md`)](spec/testing/index.md): XE run model, CLI contract, JSON schemas и runner structure. Читать, чтобы строить cross-epic сценарии на одном согласованном основании.
 - [Operations package (`spec/operations/`)](spec/operations/index.md): git flow, deployment architecture, runbook, DNS, privacy/retention. Читать перед релизом и настройкой окружений.
 - [CLI spec (`spec/cli/`)](spec/cli/index.md): каталог команд, human/`--json` форматы, контракт CLI-first процесса. Читать для расширения и стабилизации автоматизируемых сценариев.
 - [UI spec (`spec/ui/`)](spec/ui/index.md): sitemap/flows и минимальные wireframes без логики в клиенте. Читать для согласованной эволюции интерфейса.
+- [UI screen specs (`spec/ui/screens/`)](spec/ui/screens/index.md): отдельные экранные контракты для UI и XE automation. Читать, чтобы не смешивать sitemap с подробным поведением конкретных экранов.
+- [UI POM mapping (`spec/ui/pom/`)](spec/ui/pom/index.md): правила page objects, `data-testid` и browser automation. Читать, чтобы GUI-тесты и XE-фазы опирались на стабильные контракты.
 - [UI assets (`assets/ui/`)](assets/ui/index.md): реальные stitch screenshot/html assets и их provenance. Читать, чтобы быстро открыть visual reference из плана или UI spec.
 - [Notifications (`spec/notifications/`)](spec/notifications/index.md): события, outbox/idempotency, RU-шаблоны и расписания. Читать, чтобы уведомления были устойчивыми и не дублировались.
 - [AI processing (`spec/ai/`)](spec/ai/index.md): запуск AI job, статусы и связь с webhook. Читать, чтобы безопасно реализовывать пост-обработку комментариев.
@@ -46,6 +50,7 @@
 - [GUI wave — EP-011..EP-019](plans/epics/EP-011-app-shell-navigation/index.md): следующая серия GUI-эпиков после MVP/prod readiness, включая post-EP-013 structural refactor EP-014. Читать, чтобы видеть план эволюции интерфейса и supporting codebase от shell до ops UI.
 - [Implementation playbook](plans/implementation-playbook.md): практический чеклист “FT → код → тесты → docs”. Читать как рабочую инструкцию для реализации vertical slice.
 - [Verification matrix](plans/verification-matrix.md): обязательные тесты/сценарии и execution evidence по эпикам. Читать как финальный критерий готовности фич.
+- [XE scenario catalog](plans/xe/index.md): first-class cross-epic runs, начиная с `XE-001`. Читать, чтобы строить сквозные проверки поверх уже существующих feature/golden tests.
 
 ## ADR — important docs
 - [ADR 0001](adr/0001-core-client-cli-first.md): почему выбрана модель core + typed client + CLI-first перед UI. Читать для сохранения архитектурной дисциплины.

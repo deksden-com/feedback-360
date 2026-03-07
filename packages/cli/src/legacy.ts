@@ -265,6 +265,46 @@ type AuthProvisionEmailOptions = {
   projectRef?: string;
 };
 
+type XeBaseOptions = {
+  json?: boolean;
+};
+
+type XeRunCreateOptions = XeBaseOptions & {
+  env?: "local" | "beta";
+  owner?: string;
+  rootDir?: string;
+};
+
+type XeRunStartOptions = XeBaseOptions & {
+  baseUrl: string;
+  headful?: boolean;
+};
+
+type XeRunRunOptions = XeRunCreateOptions & {
+  baseUrl: string;
+  headful?: boolean;
+};
+
+type XeRunDeleteOptions = XeBaseOptions & {
+  expired?: boolean;
+  before?: string;
+  since?: string;
+};
+
+type XeAuthIssueOptions = XeBaseOptions & {
+  actor: string;
+  baseUrl: string;
+};
+
+type XeLockStatusOptions = XeBaseOptions & {
+  env?: "local" | "beta";
+};
+
+type XeLockReleaseOptions = XeBaseOptions & {
+  env?: "local" | "beta";
+  force?: boolean;
+};
+
 type CliState = {
   activeCompanyId?: string;
   activeRole?: MembershipRole;
@@ -316,6 +356,8 @@ const parseCsvList = (value: string): string[] => {
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
 };
+
+const loadXeRunner = () => import("@feedback-360/xe-runner");
 
 const emitError = (error: OperationError, asJson?: boolean): void => {
   if (asJson) {
@@ -608,6 +650,113 @@ const formatAiRunHuman = (data: {
   wasAlreadyCompleted: boolean;
 }): string => {
   return `AI processing ${data.wasAlreadyCompleted ? "already completed" : "completed"}: campaign=${data.campaignId}, job=${data.aiJobId}, provider=${data.provider}, status=${data.status}, completedAt=${data.completedAt}`;
+};
+
+const formatXeScenariosHuman = (
+  items: Array<{
+    scenarioId: string;
+    version: string;
+    name: string;
+    allowedEnvironments: string[];
+    phases: Array<{ phaseId: string; title: string }>;
+  }>,
+) => {
+  if (items.length === 0) {
+    return "No XE scenarios found.";
+  }
+
+  const lines = [`XE scenarios: ${items.length}`];
+  for (const item of items) {
+    lines.push(
+      `- ${item.scenarioId}@v${item.version}: ${item.name} · env=${item.allowedEnvironments.join(", ")} · phases=${item.phases.length}`,
+    );
+  }
+  return lines.join("\n");
+};
+
+const formatXeRunHuman = (run: {
+  runId: string;
+  scenarioId: string;
+  scenarioVersion: string;
+  environment: string;
+  status: string;
+  workspacePath: string;
+  createdAt: string;
+  finishedAt?: string;
+  lastError?: string;
+}) => {
+  const lines = [
+    `XE run: ${run.runId}`,
+    `Scenario: ${run.scenarioId}@v${run.scenarioVersion}`,
+    `Environment: ${run.environment}`,
+    `Status: ${run.status}`,
+    `Workspace: ${run.workspacePath}`,
+    `Created at: ${run.createdAt}`,
+  ];
+
+  if (run.finishedAt) {
+    lines.push(`Finished at: ${run.finishedAt}`);
+  }
+  if (run.lastError) {
+    lines.push(`Last error: ${run.lastError}`);
+  }
+  return lines.join("\n");
+};
+
+const formatXeRunListHuman = (
+  items: Array<{
+    runId: string;
+    scenarioId: string;
+    environment: string;
+    status: string;
+    createdAt: string;
+  }>,
+) => {
+  if (items.length === 0) {
+    return "No XE runs found.";
+  }
+
+  const lines = [`XE runs: ${items.length}`];
+  for (const item of items) {
+    lines.push(
+      `- ${item.runId}: scenario=${item.scenarioId}, env=${item.environment}, status=${item.status}, createdAt=${item.createdAt}`,
+    );
+  }
+  return lines.join("\n");
+};
+
+const formatXeNotificationsHuman = (
+  items: Array<{
+    outboxId: string;
+    eventType: string;
+    recipientEmployeeId: string;
+    status: string;
+    toEmail: string;
+  }>,
+) => {
+  if (items.length === 0) {
+    return "No XE notifications captured for the run.";
+  }
+
+  const lines = [`XE notifications: ${items.length}`];
+  for (const item of items) {
+    lines.push(
+      `- ${item.outboxId}: event=${item.eventType}, recipient=${item.recipientEmployeeId}, status=${item.status}, email=${item.toEmail}`,
+    );
+  }
+  return lines.join("\n");
+};
+
+const formatXeLockHuman = (lock?: {
+  environment: string;
+  runId: string;
+  owner: string;
+  expiresAt: string;
+}) => {
+  if (!lock) {
+    return "XE lock is свободен.";
+  }
+  return `XE lock: env=${lock.environment}, run=${lock.runId}, owner=${lock.owner}, expiresAt=${lock.expiresAt}`;
 };
 
 const formatRemindersGenerateHuman = (data: {
@@ -2941,6 +3090,436 @@ Examples:
         console.log(formatResultsHrHuman(result.data));
       }
     });
+
+  const xeCommand = program
+    .command("xe")
+    .description("Cross-epic scenario orchestration commands.");
+  const xeScenariosCommand = xeCommand.command("scenarios").description("XE scenario catalog.");
+
+  xeScenariosCommand
+    .command("list")
+    .description("List registered XE scenarios.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: XeBaseOptions) => {
+      const { listAvailableXeScenarios } = await loadXeRunner();
+      const scenarios = await listAvailableXeScenarios();
+      if (options.json) {
+        console.log(JSON.stringify({ ok: true, data: { items: scenarios } }, null, 2));
+        return;
+      }
+      console.log(formatXeScenariosHuman(scenarios));
+    });
+
+  xeScenariosCommand
+    .command("show <scenarioId>")
+    .description("Show XE scenario summary.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (scenarioId: string, options: XeBaseOptions) => {
+      const { listAvailableXeScenarios } = await loadXeRunner();
+      const scenarios = await listAvailableXeScenarios();
+      const scenario = scenarios.find((item) => item.scenarioId === scenarioId);
+      if (!scenario) {
+        emitError(
+          createOperationError("not_found", "XE scenario is not found.", { scenarioId }),
+          options.json,
+        );
+        return;
+      }
+
+      if (options.json) {
+        console.log(JSON.stringify({ ok: true, data: scenario }, null, 2));
+        return;
+      }
+      console.log(formatXeScenariosHuman([scenario]));
+    });
+
+  const xeRunsCommand = xeCommand.command("runs").description("XE run lifecycle.");
+
+  xeRunsCommand
+    .command("create <scenarioId>")
+    .description("Create XE run workspace and registry record.")
+    .option("--env <environment>", "Target environment: local | beta.", "local")
+    .option("--owner <owner>", "Owner label stored in run summary.", "cli")
+    .option("--root-dir <path>", "Override workspace root directory.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (scenarioId: string, options: XeRunCreateOptions) => {
+      try {
+        const { createXeRunWorkspace } = await loadXeRunner();
+        const run = await createXeRunWorkspace({
+          scenarioId,
+          environment: (options.env ?? "local") as "local" | "beta",
+          owner: options.owner ?? "cli",
+          rootDir: options.rootDir,
+        });
+        if (options.json) {
+          console.log(JSON.stringify({ ok: true, data: run }, null, 2));
+          return;
+        }
+        console.log(formatXeRunHuman(run));
+      } catch (error) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Failed to create XE run."),
+          options.json,
+        );
+      }
+    });
+
+  xeRunsCommand
+    .command("run <scenarioId>")
+    .description("Create and execute XE scenario in one command.")
+    .requiredOption("--base-url <url>", "Base URL for dev/beta app.")
+    .option("--env <environment>", "Target environment: local | beta.", "local")
+    .option("--owner <owner>", "Owner label stored in run summary.", "cli")
+    .option("--root-dir <path>", "Override workspace root directory.")
+    .option("--headful", "Run browser with visible UI.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (scenarioId: string, options: XeRunRunOptions) => {
+      try {
+        const { runXeScenarioById } = await loadXeRunner();
+        const run = await runXeScenarioById({
+          scenarioId,
+          environment: (options.env ?? "local") as "local" | "beta",
+          owner: options.owner ?? "cli",
+          rootDir: options.rootDir,
+          baseUrl: options.baseUrl,
+          headless: !options.headful,
+        });
+        if (options.json) {
+          console.log(JSON.stringify({ ok: true, data: run }, null, 2));
+          return;
+        }
+        console.log(formatXeRunHuman(run));
+      } catch (error) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Failed to execute XE scenario."),
+          options.json,
+        );
+      }
+    });
+
+  xeRunsCommand
+    .command("start <runId>")
+    .description("Execute an existing XE run.")
+    .requiredOption("--base-url <url>", "Base URL for dev/beta app.")
+    .option("--headful", "Run browser with visible UI.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (runId: string, options: XeRunStartOptions) => {
+      try {
+        const { runXeScenario } = await loadXeRunner();
+        const run = await runXeScenario({
+          runId,
+          baseUrl: options.baseUrl,
+          headless: !options.headful,
+        });
+        if (options.json) {
+          console.log(JSON.stringify({ ok: true, data: run }, null, 2));
+          return;
+        }
+        console.log(formatXeRunHuman(run));
+      } catch (error) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Failed to start XE run."),
+          options.json,
+        );
+      }
+    });
+
+  xeRunsCommand
+    .command("status <runId>")
+    .description("Show XE run status.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (runId: string, options: XeBaseOptions) => {
+      try {
+        const { getXeRunRegistry } = await loadXeRunner();
+        const run = await getXeRunRegistry(runId);
+        if (options.json) {
+          console.log(JSON.stringify({ ok: true, data: run }, null, 2));
+          return;
+        }
+        console.log(formatXeRunHuman(run));
+      } catch (error) {
+        emitError(errorFromUnknown(error, "invalid_input", "Failed to load XE run."), options.json);
+      }
+    });
+
+  xeRunsCommand
+    .command("list")
+    .description("List XE runs from registry.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: XeBaseOptions) => {
+      try {
+        const { listXeRunRegistry } = await loadXeRunner();
+        const runs = await listXeRunRegistry();
+        if (options.json) {
+          console.log(JSON.stringify({ ok: true, data: runs }, null, 2));
+          return;
+        }
+        console.log(formatXeRunListHuman(runs.items));
+      } catch (error) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Failed to list XE runs."),
+          options.json,
+        );
+      }
+    });
+
+  xeRunsCommand
+    .command("delete [runId]")
+    .description("Delete XE runs and clean DB/workspace traces.")
+    .option("--expired", "Delete expired runs.")
+    .option("--before <date>", "Delete runs expired before ISO date.")
+    .option("--since <date>", "Delete runs created on/after ISO date.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (runId: string | undefined, options: XeRunDeleteOptions) => {
+      try {
+        if (options.expired) {
+          const { cleanupExpiredManagedXeRuns } = await loadXeRunner();
+          const result = await cleanupExpiredManagedXeRuns({
+            ...(options.before ? { before: new Date(options.before) } : {}),
+            ...(options.since ? { since: new Date(options.since) } : {}),
+          });
+          if (options.json) {
+            console.log(JSON.stringify({ ok: true, data: result }, null, 2));
+            return;
+          }
+          console.log(`Deleted expired XE runs: ${result.deletedRunIds.length}`);
+          return;
+        }
+
+        if (!runId) {
+          emitError(
+            createOperationError(
+              "invalid_input",
+              "Provide runId or use --expired for bulk XE cleanup.",
+            ),
+            options.json,
+          );
+          return;
+        }
+
+        const { deleteManagedXeRun } = await loadXeRunner();
+        const result = await deleteManagedXeRun(runId);
+        if (options.json) {
+          console.log(JSON.stringify({ ok: true, data: result }, null, 2));
+          return;
+        }
+        console.log(result.deleted ? `Deleted XE run ${runId}.` : `XE run ${runId} not found.`);
+      } catch (error) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Failed to delete XE runs."),
+          options.json,
+        );
+      }
+    });
+
+  const xePhasesCommand = xeCommand.command("phases").description("XE run phases.");
+
+  xePhasesCommand
+    .command("list <runId>")
+    .description("List phase statuses from state.json.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (runId: string, options: XeBaseOptions) => {
+      try {
+        const { getXeRunRegistry, readXeState } = await loadXeRunner();
+        const run = await getXeRunRegistry(runId);
+        const state = await readXeState(run.workspacePath);
+        const phases = (state?.phases ?? {}) as Record<
+          string,
+          {
+            status: string;
+          }
+        >;
+        if (options.json) {
+          console.log(JSON.stringify({ ok: true, data: { phases } }, null, 2));
+          return;
+        }
+        const lines = [`XE phases for ${runId}:`];
+        for (const [phaseId, phase] of Object.entries(phases)) {
+          lines.push(`- ${phaseId}: ${phase.status}`);
+        }
+        console.log(lines.join("\n"));
+      } catch (error) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Failed to inspect XE phases."),
+          options.json,
+        );
+      }
+    });
+
+  const xeAuthCommand = xeCommand.command("auth").description("XE auth bootstrap helpers.");
+
+  xeAuthCommand
+    .command("issue <runId>")
+    .description("Issue actor storage state for XE browser automation.")
+    .requiredOption("--actor <actor>", "Actor key from bindings.")
+    .requiredOption("--base-url <url>", "Base URL for dev/beta app.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (runId: string, options: XeAuthIssueOptions) => {
+      try {
+        const { issueXeActorStorageState } = await loadXeRunner();
+        const issued = await issueXeActorStorageState({
+          runId,
+          actor: options.actor,
+          baseUrl: options.baseUrl,
+        });
+        if (options.json) {
+          console.log(JSON.stringify({ ok: true, data: issued }, null, 2));
+          return;
+        }
+        console.log(
+          `Issued ${issued.format} for ${issued.actor}: ${issued.path ?? issued.baseUrl}`,
+        );
+      } catch (error) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Failed to issue XE auth bootstrap."),
+          options.json,
+        );
+      }
+    });
+
+  const xeArtifactsCommand = xeCommand.command("artifacts").description("Inspect XE artifacts.");
+
+  xeArtifactsCommand
+    .command("dir <runId>")
+    .description("Print XE workspace directory.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (runId: string, options: XeBaseOptions) => {
+      try {
+        const { getXeRunRegistry } = await loadXeRunner();
+        const run = await getXeRunRegistry(runId);
+        if (options.json) {
+          console.log(
+            JSON.stringify({ ok: true, data: { workspacePath: run.workspacePath } }, null, 2),
+          );
+          return;
+        }
+        console.log(run.workspacePath);
+      } catch (error) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Failed to inspect XE artifacts directory."),
+          options.json,
+        );
+      }
+    });
+
+  const xeNotificationsCommand = xeCommand
+    .command("notifications")
+    .description("Inspect XE notification captures.");
+
+  xeNotificationsCommand
+    .command("list <runId>")
+    .description("List notifications associated with XE run.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (runId: string, options: XeBaseOptions) => {
+      try {
+        const { listXeRunNotifications } = await loadXeRunner();
+        const notifications = await listXeRunNotifications(runId);
+        if (options.json) {
+          console.log(JSON.stringify({ ok: true, data: notifications }, null, 2));
+          return;
+        }
+        console.log(formatXeNotificationsHuman(notifications.items));
+      } catch (error) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Failed to load XE notifications."),
+          options.json,
+        );
+      }
+    });
+
+  const xeLockCommand = xeCommand.command("lock").description("XE environment lock.");
+
+  xeLockCommand
+    .command("status")
+    .description("Show XE lock for environment.")
+    .option("--env <environment>", "Target environment: local | beta.", "local")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (options: XeLockStatusOptions) => {
+      try {
+        const { getXeEnvironmentLock } = await loadXeRunner();
+        const lock = await getXeEnvironmentLock((options.env ?? "local") as "local" | "beta");
+        if (options.json) {
+          console.log(JSON.stringify({ ok: true, data: lock ?? null }, null, 2));
+          return;
+        }
+        console.log(formatXeLockHuman(lock));
+      } catch (error) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Failed to inspect XE lock."),
+          options.json,
+        );
+      }
+    });
+
+  xeLockCommand
+    .command("acquire <runId>")
+    .description("Acquire XE environment lock manually.")
+    .requiredOption("--env <environment>", "Target environment: local | beta.")
+    .option("--owner <owner>", "Owner label stored in lock.", "cli")
+    .option("--json", "Output machine-readable JSON.")
+    .action(async (runId: string, options: XeRunCreateOptions) => {
+      try {
+        const { acquireXeEnvironmentLock } = await loadXeRunner();
+        const lock = await acquireXeEnvironmentLock({
+          environment: (options.env ?? "local") as "local" | "beta",
+          runId,
+          owner: options.owner ?? "cli",
+        });
+        if (options.json) {
+          console.log(JSON.stringify({ ok: true, data: lock }, null, 2));
+          return;
+        }
+        console.log(formatXeLockHuman(lock));
+      } catch (error) {
+        emitError(
+          errorFromUnknown(error, "invalid_input", "Failed to acquire XE lock."),
+          options.json,
+        );
+      }
+    });
+
+  xeLockCommand
+    .command("release")
+    .description("Release XE lock for environment.")
+    .requiredOption("--env <environment>", "Target environment: local | beta.")
+    .option("--force", "Release current XE lock without specifying runId.")
+    .option("--run-id <runId>", "Release only if lock belongs to this run.")
+    .option("--json", "Output machine-readable JSON.")
+    .action(
+      async (
+        options: XeLockReleaseOptions & {
+          runId?: string;
+        },
+      ) => {
+        try {
+          const { releaseXeEnvironmentLock } = await loadXeRunner();
+          if (!options.force && !options.runId) {
+            emitError(
+              createOperationError(
+                "invalid_input",
+                "Use --force or provide --run-id when releasing XE lock.",
+              ),
+              options.json,
+            );
+            return;
+          }
+          const released = await releaseXeEnvironmentLock({
+            environment: (options.env ?? "local") as "local" | "beta",
+            ...(options.force ? {} : options.runId ? { runId: options.runId } : {}),
+          });
+          if (options.json) {
+            console.log(JSON.stringify({ ok: true, data: { released } }, null, 2));
+            return;
+          }
+          console.log(released ? "XE lock released." : "XE lock was already free.");
+        } catch (error) {
+          emitError(
+            errorFromUnknown(error, "invalid_input", "Failed to release XE lock."),
+            options.json,
+          );
+        }
+      },
+    );
 
   await program.parseAsync(normalizedArgv);
 };

@@ -16,6 +16,7 @@
     "@feedback-360/client": "workspace:*",
     "@feedback-360/core": "workspace:*",
     "@feedback-360/db": "workspace:*",
+    "@feedback-360/xe-runner": "workspace:*",
     "commander": "14.0.1"
   },
   "devDependencies": {
