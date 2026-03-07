@@ -1,5 +1,5 @@
 # EP-010 — Feature catalog
-Status: Draft (2026-03-05)
+Status: Completed (2026-03-06)
 
 - [FT-0101 Retention and privacy policy finalization](FT-0101-retention-privacy-finalization/index.md): финализировать сроки хранения, доступ к raw/processed и operational policy. Читать, чтобы privacy не оставалась “открытым вопросом”.
 - [FT-0102 Observability baseline](FT-0102-observability-baseline/index.md): Sentry, structured logs, correlation ids, webhook/cron traceability. Читать, чтобы проблемы в prod было видно и можно было расследовать.
