@@ -1,0 +1,173 @@
+{
+  "runId": "RUN-20260307121405-25bdb060",
+  "scenarioId": "XE-001",
+  "scenarioVersion": "1",
+  "environment": "local",
+  "status": "passed",
+  "updatedAt": "2026-03-07T12:17:33.155Z",
+  "bindings": {
+    "company": {
+      "id": "c999d500-021b-4b4a-a841-ecef689e5e91",
+      "name": "XE 001 140525bdb060"
+    },
+    "campaign": {
+      "id": "298c8a8b-83ca-4d84-b65b-480b6c4415b7"
+    },
+    "modelVersion": {
+      "id": "bbdd6dce-5c3f-4f27-bdba-9be67e707b97"
+    },
+    "actors": {
+      "hr_admin": {
+        "userId": "cdf0ddce-c40b-41c2-a08b-a18c286e72a8",
+        "employeeId": "956d3b48-ae68-400e-af5d-61dab5b5a2ab",
+        "email": "140525bdb060-hr_admin@xe.test",
+        "role": "hr_admin"
+      },
+      "manager": {
+        "userId": "8b22e848-5b7e-49bf-92bc-d85d68971670",
+        "employeeId": "a0ab9993-eac8-4635-b0cf-407f2449c3e2",
+        "email": "140525bdb060-manager@xe.test",
+        "role": "manager"
+      },
+      "subject": {
+        "userId": "fa7d3c17-5d3a-4686-b5b9-7421ffe42ca0",
+        "employeeId": "18549731-4678-4417-8a31-a5fba35c192c",
+        "email": "140525bdb060-subject@xe.test",
+        "role": "employee"
+      },
+      "peer_1": {
+        "userId": "cca4db3d-e79d-4b6e-8fa9-c57684c47e72",
+        "employeeId": "3918a09d-a561-417a-b2e4-85e58efa0dd6",
+        "email": "140525bdb060-peer_1@xe.test",
+        "role": "employee"
+      },
+      "peer_2": {
+        "userId": "774a61ce-7247-4b8e-adaf-4911bc9001eb",
+        "employeeId": "60a58680-bc63-42d4-9fa9-8769fd73e900",
+        "email": "140525bdb060-peer_2@xe.test",
+        "role": "employee"
+      },
+      "peer_3": {
+        "userId": "e422d014-351b-48a7-bd0c-63f7335cfbbf",
+        "employeeId": "2e523cc5-dcd0-4091-8167-a174d4238204",
+        "email": "140525bdb060-peer_3@xe.test",
+        "role": "employee"
+      },
+      "subordinate_1": {
+        "userId": "2f37d3a8-4d42-4687-bbb2-6ccaf7435f05",
+        "employeeId": "50c7d541-a51a-4bba-af97-c91c240c4bae",
+        "email": "140525bdb060-subordinate_1@xe.test",
+        "role": "employee"
+      },
+      "subordinate_2": {
+        "userId": "2932de6c-ed3d-44ad-970e-298d902d6fa5",
+        "employeeId": "528ab74e-11a3-4413-9c67-b8c15610144f",
+        "email": "140525bdb060-subordinate_2@xe.test",
+        "role": "employee"
+      },
+      "subordinate_3": {
+        "userId": "af0e9d55-aecc-4297-bba9-95bdc680a112",
+        "employeeId": "2b9efb73-bf55-49d7-8cec-7be12faa3762",
+        "email": "140525bdb060-subordinate_3@xe.test",
+        "role": "employee"
+      }
+    },
+    "departments": {
+      "root": "54998450-ba10-4d0f-a3e1-7829f9e4b842",
+      "engineering": "331d0477-1b14-46ec-9296-31201d5cbb12"
+    },
+    "competencies": {
+      "clarity": {
+        "competencyId": "f54a77e1-b507-44a3-a30b-5f1a9bd67c57",
+        "indicatorIds": [
+          "0c583968-8bd9-4113-873e-79e2233159ef",
+          "9e48d5c6-f097-4e1c-b6dd-b9b7fec9eec4"
+        ]
+      },
+      "feedback": {
+        "competencyId": "7b311b96-ff80-4be0-a8b0-40335fe01658",
+        "indicatorIds": [
+          "7fa3de75-2cc2-42f4-a426-4bc5a99fa356",
+          "b2420ec5-ca1d-4604-ac1b-008ee2ef978d"
+        ]
+      },
+      "ownership": {
+        "competencyId": "ba043358-aaee-4e28-a14e-42c43b39000e",
+        "indicatorIds": [
+          "041a458c-531b-4294-9682-fa2d9d46cd4b",
+          "c339bc9b-878c-4a2e-9962-7a3d6ca4dd81"
+        ]
+      },
+      "planning": {
+        "competencyId": "712aaea5-0f15-4bf1-af68-0bbe07496a24",
+        "indicatorIds": [
+          "63876ce1-0a44-49da-9774-8e0790574def",
+          "6501a8d3-02b3-45c2-a753-c911258cd3f0"
+        ]
+      }
+    },
+    "createdEntities": [
+      {
+        "type": "company",
+        "id": "c999d500-021b-4b4a-a841-ecef689e5e91"
+      },
+      {
+        "type": "campaign",
+        "id": "298c8a8b-83ca-4d84-b65b-480b6c4415b7"
+      },
+      {
+        "type": "model_version",
+        "id": "bbdd6dce-5c3f-4f27-bdba-9be67e707b97"
+      }
+    ]
+  },
+  "phases": {
+    "phase-01-seed": {
+      "status": "passed",
+      "startedAt": "2026-03-07T12:14:16.743Z",
+      "finishedAt": "2026-03-07T12:14:34.783Z",
+      "artifacts": [
+        "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121405-25bdb060__XE-001/phase-01-seed/seed-summary.json"
+      ]
+    },
+    "phase-02-start-campaign": {
+      "status": "passed",
+      "startedAt": "2026-03-07T12:14:36.261Z",
+      "finishedAt": "2026-03-07T12:14:58.379Z",
+      "artifacts": [
+        "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121405-25bdb060__XE-001/phase-02-start-campaign/campaign.json",
+        "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121405-25bdb060__XE-001/phase-02-start-campaign/notifications.json"
+      ]
+    },
+    "phase-03-bootstrap-sessions": {
+      "status": "passed",
+      "startedAt": "2026-03-07T12:14:59.936Z",
+      "finishedAt": "2026-03-07T12:15:31.455Z",
+      "artifacts": [
+        "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121405-25bdb060__XE-001/phase-03-bootstrap-sessions/sessions.json"
+      ]
+    },
+    "phase-04-fill-questionnaires": {
+      "status": "passed",
+      "startedAt": "2026-03-07T12:15:33.194Z",
+      "finishedAt": "2026-03-07T12:16:26.964Z",
+      "artifacts": [
+        "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121405-25bdb060__XE-001/phase-04-fill-questionnaires/questionnaires.json",
+        "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121405-25bdb060__XE-001/phase-04-fill-questionnaires/progress.json"
+      ]
+    },
+    "phase-05-verify-results": {
+      "status": "passed",
+      "startedAt": "2026-03-07T12:16:28.456Z",
+      "finishedAt": "2026-03-07T12:17:31.691Z",
+      "artifacts": [
+        "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121405-25bdb060__XE-001/phase-05-verify-results/results.json",
+        "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121405-25bdb060__XE-001/phase-05-verify-results/employee-results.png",
+        "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121405-25bdb060__XE-001/phase-05-verify-results/manager-results.png",
+        "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121405-25bdb060__XE-001/phase-05-verify-results/hr-results.png"
+      ]
+    }
+  },
+  "notes": [],
+  "baseUrl": "http://127.0.0.1:3105"
+}

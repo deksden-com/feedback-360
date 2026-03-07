@@ -14,8 +14,11 @@ Status: Updated (2026-03-06)
 - `packages/client/` — typed client поверх contract (HTTP и/или in-proc).
 - `packages/cli/` — Commander CLI поверх client (human + `--json`).
 - `packages/db/` — Drizzle schema/migrations + seed scenarios.
+- `packages/xe-runner/` — XE runtime (registry helpers, phase runner, state/artifacts, POM helpers).
 - `packages/testkit/` — builders/fixtures/helpers (не бизнес-логика).
 - `packages/config/` — общие конфиги (tsconfig/biome/vitest).
+- `scenarios/` — исполнимые scenario materials (`scenario.json`, fixtures, scenario docs).
+- `.xe-runs/` — runtime workspaces completed/failed XE runs (state + artifacts, не SSoT).
 
 ## Feature slicing (текущее target-состояние после EP-014)
 Чтобы вертикальные слайсы не растворялись в “слоях”, production-код группируется по feature areas:

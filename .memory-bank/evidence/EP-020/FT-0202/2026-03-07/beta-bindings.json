@@ -1,0 +1,116 @@
+{
+  "company": {
+    "id": "dd609327-b300-4689-a2a0-6c1e5a7d6cad",
+    "name": "XE 001 1525c767edf3"
+  },
+  "campaign": {
+    "id": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc"
+  },
+  "modelVersion": {
+    "id": "bf699be9-28b0-44b6-a4df-6c9cb4d25e12"
+  },
+  "actors": {
+    "hr_admin": {
+      "userId": "cc8057d4-49be-441a-82ce-dc77745f8e20",
+      "employeeId": "d3dcc76c-a4e4-41a9-8391-caa9f33c45dc",
+      "email": "1525c767edf3-hr_admin@xe.test",
+      "role": "hr_admin"
+    },
+    "manager": {
+      "userId": "537f00d9-3beb-4e92-9d51-62725713c655",
+      "employeeId": "e8ce966d-54dd-4309-a5bd-f987f2063bec",
+      "email": "1525c767edf3-manager@xe.test",
+      "role": "manager"
+    },
+    "subject": {
+      "userId": "6215dac3-2353-402f-994b-00838cd4e275",
+      "employeeId": "09d9546b-74a5-4460-a45f-6d7ece3ef1f3",
+      "email": "1525c767edf3-subject@xe.test",
+      "role": "employee"
+    },
+    "peer_1": {
+      "userId": "158113b4-bde5-4ac4-8fc7-beaa4bead84d",
+      "employeeId": "93e9ef3d-75ed-4073-a835-e2bf139b558c",
+      "email": "1525c767edf3-peer_1@xe.test",
+      "role": "employee"
+    },
+    "peer_2": {
+      "userId": "f27bb08d-14bf-4739-aad2-10d12ee2dec6",
+      "employeeId": "c32b7568-b44a-4a85-8761-9f1f4bd5fac7",
+      "email": "1525c767edf3-peer_2@xe.test",
+      "role": "employee"
+    },
+    "peer_3": {
+      "userId": "948f6d95-4738-4781-ac3a-e053456a9068",
+      "employeeId": "4e8f58e9-0f58-40db-a693-574b34936239",
+      "email": "1525c767edf3-peer_3@xe.test",
+      "role": "employee"
+    },
+    "subordinate_1": {
+      "userId": "0317eff4-5690-43c2-b76c-d19a63d1ec8c",
+      "employeeId": "8fbf16a2-7104-411f-a937-f5744da6953e",
+      "email": "1525c767edf3-subordinate_1@xe.test",
+      "role": "employee"
+    },
+    "subordinate_2": {
+      "userId": "b6d508a7-6063-4235-a1a1-c7e2b72aef29",
+      "employeeId": "e9e33dd7-2c43-46fc-94cf-c61ffd2c42ff",
+      "email": "1525c767edf3-subordinate_2@xe.test",
+      "role": "employee"
+    },
+    "subordinate_3": {
+      "userId": "6f654d4c-e719-4184-a8a2-3994efa534e1",
+      "employeeId": "6017e7b7-4f45-4db9-a319-bf5b2957e358",
+      "email": "1525c767edf3-subordinate_3@xe.test",
+      "role": "employee"
+    }
+  },
+  "departments": {
+    "root": "32ad1eef-5290-4749-a132-fa91dbe5c417",
+    "engineering": "5c7877fa-2e54-4341-ae22-78ee8e51524b"
+  },
+  "competencies": {
+    "clarity": {
+      "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+      "indicatorIds": [
+        "1569887d-e2a9-4308-b880-f78220460376",
+        "79842349-7576-43fb-97ae-49d7951cfca4"
+      ]
+    },
+    "feedback": {
+      "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+      "indicatorIds": [
+        "515c3999-3d42-488d-be1f-df409bdfe920",
+        "343fb950-8131-496a-8b40-df507be19b44"
+      ]
+    },
+    "ownership": {
+      "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+      "indicatorIds": [
+        "8bf964f4-0b32-4937-b661-691d37cbc0f2",
+        "70d2cfcc-cf93-4a4b-83d3-fcea9cc1bdd4"
+      ]
+    },
+    "planning": {
+      "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+      "indicatorIds": [
+        "a2f0485a-66f9-4c0b-a7cb-2bfbdec513e7",
+        "1f4fc859-53d9-495e-b250-562c3cb4cc44"
+      ]
+    }
+  },
+  "createdEntities": [
+    {
+      "type": "company",
+      "id": "dd609327-b300-4689-a2a0-6c1e5a7d6cad"
+    },
+    {
+      "type": "campaign",
+      "id": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc"
+    },
+    {
+      "type": "model_version",
+      "id": "bf699be9-28b0-44b6-a4df-6c9cb4d25e12"
+    }
+  ]
+}

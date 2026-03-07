@@ -1,0 +1,58 @@
+{
+  "items": [
+    {
+      "actor": "peer_1",
+      "format": "storage-state",
+      "path": "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121525-c767edf3__XE-001/storage-state/peer_1.json",
+      "baseUrl": "https://beta.go360go.ru"
+    },
+    {
+      "actor": "peer_2",
+      "format": "storage-state",
+      "path": "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121525-c767edf3__XE-001/storage-state/peer_2.json",
+      "baseUrl": "https://beta.go360go.ru"
+    },
+    {
+      "actor": "peer_3",
+      "format": "storage-state",
+      "path": "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121525-c767edf3__XE-001/storage-state/peer_3.json",
+      "baseUrl": "https://beta.go360go.ru"
+    },
+    {
+      "actor": "manager",
+      "format": "storage-state",
+      "path": "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121525-c767edf3__XE-001/storage-state/manager.json",
+      "baseUrl": "https://beta.go360go.ru"
+    },
+    {
+      "actor": "subject",
+      "format": "storage-state",
+      "path": "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121525-c767edf3__XE-001/storage-state/subject.json",
+      "baseUrl": "https://beta.go360go.ru"
+    },
+    {
+      "actor": "hr_admin",
+      "format": "storage-state",
+      "path": "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121525-c767edf3__XE-001/storage-state/hr_admin.json",
+      "baseUrl": "https://beta.go360go.ru"
+    },
+    {
+      "actor": "subordinate_1",
+      "format": "storage-state",
+      "path": "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121525-c767edf3__XE-001/storage-state/subordinate_1.json",
+      "baseUrl": "https://beta.go360go.ru"
+    },
+    {
+      "actor": "subordinate_2",
+      "format": "storage-state",
+      "path": "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121525-c767edf3__XE-001/storage-state/subordinate_2.json",
+      "baseUrl": "https://beta.go360go.ru"
+    },
+    {
+      "actor": "subordinate_3",
+      "format": "storage-state",
+      "path": "/Users/deksden/Documents/_Projects/feedback-360/.xe-runs/RUN-20260307121525-c767edf3__XE-001/storage-state/subordinate_3.json",
+      "baseUrl": "https://beta.go360go.ru"
+    }
+  ]
+}
