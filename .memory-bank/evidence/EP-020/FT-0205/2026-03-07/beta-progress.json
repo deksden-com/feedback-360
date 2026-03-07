@@ -1,0 +1,14 @@
+{
+  "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+  "companyId": "dd609327-b300-4689-a2a0-6c1e5a7d6cad",
+  "totalQuestionnaires": 8,
+  "statusCounts": {
+    "notStarted": 0,
+    "inProgress": 0,
+    "submitted": 8
+  },
+  "campaignLockedAt": "2026-03-07T12:16:44.253Z",
+  "pendingQuestionnaires": [],
+  "pendingByRater": [],
+  "pendingBySubject": []
+}

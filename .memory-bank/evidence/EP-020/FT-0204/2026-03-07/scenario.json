@@ -1,0 +1,78 @@
+{
+  "scenarioId": "XE-001",
+  "version": "1",
+  "name": "First 360 campaign happy path",
+  "allowedEnvironments": [
+    "local",
+    "beta"
+  ],
+  "phases": [
+    {
+      "phaseId": "phase-01-seed",
+      "title": "Apply seed and capture bindings",
+      "failurePolicy": "fail_run",
+      "handler": "xe-001:seed",
+      "requiredArtifacts": [
+        "seed-summary.json",
+        "assertions.json"
+      ]
+    },
+    {
+      "phaseId": "phase-02-start-campaign",
+      "title": "Start campaign and generate notifications",
+      "failurePolicy": "fail_run",
+      "handler": "xe-001:start-campaign",
+      "requiredArtifacts": [
+        "campaign.json",
+        "notifications.json",
+        "assertions.json"
+      ]
+    },
+    {
+      "phaseId": "phase-03-bootstrap-sessions",
+      "title": "Issue actor storage states",
+      "failurePolicy": "fail_run",
+      "handler": "xe-001:bootstrap-sessions",
+      "requiredArtifacts": [
+        "sessions.json",
+        "assertions.json"
+      ]
+    },
+    {
+      "phaseId": "phase-04-fill-questionnaires",
+      "title": "Actors fill and submit questionnaires",
+      "failurePolicy": "fail_run",
+      "handler": "xe-001:fill-questionnaires",
+      "requiredArtifacts": [
+        "questionnaires.json",
+        "progress.json",
+        "assertions.json"
+      ]
+    },
+    {
+      "phaseId": "phase-05-verify-results",
+      "title": "End campaign and verify results",
+      "failurePolicy": "fail_run",
+      "handler": "xe-001:verify-results",
+      "requiredArtifacts": [
+        "results.json",
+        "assertions.json",
+        "employee-results.png",
+        "manager-results.png",
+        "hr-results.png"
+      ]
+    }
+  ],
+  "description": "HR starts the first 360 campaign, actors complete questionnaires, and results are verified end-to-end.",
+  "seed": {
+    "handle": "XE-001-first-campaign",
+    "extends": "system"
+  },
+  "artifacts": {
+    "rootDir": ".xe-runs",
+    "retainDays": 30
+  },
+  "phasePolicy": {
+    "defaultFailurePolicy": "fail_run"
+  }
+}

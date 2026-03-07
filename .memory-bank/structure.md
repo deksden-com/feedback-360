@@ -13,7 +13,9 @@ Status: Updated (2026-03-06)
 ## Top-level
 - `AGENTS.md`: правила для ИИ агентов и краткий системный контекст. Читать перед крупными изменениями, чтобы не нарушить ключевые ограничения.
 - `.memory-bank/`: SSoT документации проекта (spec/adr/plans) + assets/evidence. Читать/обновлять при изменении требований, решений, планов и visual references.
+- `.xe-runs/`: runtime workspaces cross-epic сценариев. Не SSoT; хранит state/artifacts конкретных run-ов до cleanup/TTL.
 - `README.md`: краткая точка входа для людей (ссылка на меморибанк).
+- `scenarios/`: каталог executable scenario materials (`scenario.json`, fixtures, phase-specific docs/skills). Читать, чтобы менять именно сценарий, а не общий runner.
 
 ## Memory bank structure
 - `.memory-bank/spec/`: WHAT — нормативные требования и ограничения.
@@ -50,6 +52,7 @@ Status: Updated (2026-03-06)
   - `src/index.ts`: thin CLI entrypoint.
   - `src/legacy.ts`: переходный registry/module с существующими командами; новые feature slices не должны наращивать его бесконтрольно.
 - `packages/db/`: Drizzle schema/migrations + seed scenarios (fixtures).
+- `packages/xe-runner/`: runtime XE runner, scenario registry, phase execution, artifacts/state helpers.
 - `packages/testkit/`: builders/fixtures/helpers для тестов (без доменных правил).
 - `packages/config/`: общие конфиги (tsconfig/biome/vitest).
 

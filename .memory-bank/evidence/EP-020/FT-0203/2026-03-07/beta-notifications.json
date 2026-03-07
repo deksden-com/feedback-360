@@ -1,0 +1,100 @@
+{
+  "items": [
+    {
+      "outboxId": "aaa054f7-59e5-4886-b0b0-d9583d73ab4f",
+      "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+      "recipientEmployeeId": "e8ce966d-54dd-4309-a5bd-f987f2063bec",
+      "channel": "email",
+      "eventType": "campaign_invite",
+      "templateKey": "campaign_invite@v1",
+      "status": "pending",
+      "idempotencyKey": "campaign:a7751a7b-ab43-43fe-9a19-997d0eb6b1bc:event:campaign_invite:employee:e8ce966d-54dd-4309-a5bd-f987f2063bec",
+      "toEmail": "1525c767edf3-manager@xe.test",
+      "attempts": 0
+    },
+    {
+      "outboxId": "2c50ffa8-94ba-496c-b2d0-3a36ebec2e16",
+      "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+      "recipientEmployeeId": "09d9546b-74a5-4460-a45f-6d7ece3ef1f3",
+      "channel": "email",
+      "eventType": "campaign_invite",
+      "templateKey": "campaign_invite@v1",
+      "status": "pending",
+      "idempotencyKey": "campaign:a7751a7b-ab43-43fe-9a19-997d0eb6b1bc:event:campaign_invite:employee:09d9546b-74a5-4460-a45f-6d7ece3ef1f3",
+      "toEmail": "1525c767edf3-subject@xe.test",
+      "attempts": 0
+    },
+    {
+      "outboxId": "99a03788-6c48-41cc-b3a4-12acf1c1fd14",
+      "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+      "recipientEmployeeId": "93e9ef3d-75ed-4073-a835-e2bf139b558c",
+      "channel": "email",
+      "eventType": "campaign_invite",
+      "templateKey": "campaign_invite@v1",
+      "status": "pending",
+      "idempotencyKey": "campaign:a7751a7b-ab43-43fe-9a19-997d0eb6b1bc:event:campaign_invite:employee:93e9ef3d-75ed-4073-a835-e2bf139b558c",
+      "toEmail": "1525c767edf3-peer_1@xe.test",
+      "attempts": 0
+    },
+    {
+      "outboxId": "851a02c4-4030-4a3f-a4f4-950968f22db6",
+      "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+      "recipientEmployeeId": "c32b7568-b44a-4a85-8761-9f1f4bd5fac7",
+      "channel": "email",
+      "eventType": "campaign_invite",
+      "templateKey": "campaign_invite@v1",
+      "status": "pending",
+      "idempotencyKey": "campaign:a7751a7b-ab43-43fe-9a19-997d0eb6b1bc:event:campaign_invite:employee:c32b7568-b44a-4a85-8761-9f1f4bd5fac7",
+      "toEmail": "1525c767edf3-peer_2@xe.test",
+      "attempts": 0
+    },
+    {
+      "outboxId": "42c52ebb-15ab-40dc-8e92-e8958780967e",
+      "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+      "recipientEmployeeId": "4e8f58e9-0f58-40db-a693-574b34936239",
+      "channel": "email",
+      "eventType": "campaign_invite",
+      "templateKey": "campaign_invite@v1",
+      "status": "pending",
+      "idempotencyKey": "campaign:a7751a7b-ab43-43fe-9a19-997d0eb6b1bc:event:campaign_invite:employee:4e8f58e9-0f58-40db-a693-574b34936239",
+      "toEmail": "1525c767edf3-peer_3@xe.test",
+      "attempts": 0
+    },
+    {
+      "outboxId": "92b107c1-ee78-4616-83a3-65e19bc1af3a",
+      "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+      "recipientEmployeeId": "8fbf16a2-7104-411f-a937-f5744da6953e",
+      "channel": "email",
+      "eventType": "campaign_invite",
+      "templateKey": "campaign_invite@v1",
+      "status": "pending",
+      "idempotencyKey": "campaign:a7751a7b-ab43-43fe-9a19-997d0eb6b1bc:event:campaign_invite:employee:8fbf16a2-7104-411f-a937-f5744da6953e",
+      "toEmail": "1525c767edf3-subordinate_1@xe.test",
+      "attempts": 0
+    },
+    {
+      "outboxId": "358f2af6-a640-4f2f-a43e-5f835f917697",
+      "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+      "recipientEmployeeId": "e9e33dd7-2c43-46fc-94cf-c61ffd2c42ff",
+      "channel": "email",
+      "eventType": "campaign_invite",
+      "templateKey": "campaign_invite@v1",
+      "status": "pending",
+      "idempotencyKey": "campaign:a7751a7b-ab43-43fe-9a19-997d0eb6b1bc:event:campaign_invite:employee:e9e33dd7-2c43-46fc-94cf-c61ffd2c42ff",
+      "toEmail": "1525c767edf3-subordinate_2@xe.test",
+      "attempts": 0
+    },
+    {
+      "outboxId": "ba7dc64d-60bf-47e3-969d-502a5784ea37",
+      "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+      "recipientEmployeeId": "6017e7b7-4f45-4db9-a319-bf5b2957e358",
+      "channel": "email",
+      "eventType": "campaign_invite",
+      "templateKey": "campaign_invite@v1",
+      "status": "pending",
+      "idempotencyKey": "campaign:a7751a7b-ab43-43fe-9a19-997d0eb6b1bc:event:campaign_invite:employee:6017e7b7-4f45-4db9-a319-bf5b2957e358",
+      "toEmail": "1525c767edf3-subordinate_3@xe.test",
+      "attempts": 0
+    }
+  ]
+}

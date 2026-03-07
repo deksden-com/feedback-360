@@ -1,0 +1,858 @@
+{
+  "employee": {
+    "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+    "companyId": "dd609327-b300-4689-a2a0-6c1e5a7d6cad",
+    "subjectEmployeeId": "09d9546b-74a5-4460-a45f-6d7ece3ef1f3",
+    "modelVersionId": "bf699be9-28b0-44b6-a4df-6c9cb4d25e12",
+    "modelKind": "indicators",
+    "anonymityThreshold": 3,
+    "smallGroupPolicy": "merge_to_other",
+    "groupVisibility": {
+      "manager": "shown",
+      "peers": "shown",
+      "subordinates": "shown",
+      "self": "shown"
+    },
+    "competencyScores": [
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "competencyName": "Clarity",
+        "groupId": "96f4c37b-a407-4d54-a57c-50aa4132e2f8",
+        "groupName": "Communication",
+        "managerScore": 4,
+        "managerRaters": 1,
+        "peersScore": 3.6667,
+        "peersRaters": 3,
+        "subordinatesScore": 4.3333,
+        "subordinatesRaters": 3,
+        "selfScore": 5,
+        "selfRaters": 1,
+        "otherRaters": 0,
+        "managerVisibility": "shown",
+        "peersVisibility": "shown",
+        "subordinatesVisibility": "shown",
+        "selfVisibility": "shown"
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "competencyName": "Feedback",
+        "groupId": "96f4c37b-a407-4d54-a57c-50aa4132e2f8",
+        "groupName": "Communication",
+        "managerScore": 4,
+        "managerRaters": 1,
+        "peersScore": 3.6667,
+        "peersRaters": 3,
+        "subordinatesScore": 4.3333,
+        "subordinatesRaters": 3,
+        "selfScore": 5,
+        "selfRaters": 1,
+        "otherRaters": 0,
+        "managerVisibility": "shown",
+        "peersVisibility": "shown",
+        "subordinatesVisibility": "shown",
+        "selfVisibility": "shown"
+      },
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "competencyName": "Ownership",
+        "groupId": "8224fcc0-f1ae-47b2-ac2b-3e98f6e26648",
+        "groupName": "Execution",
+        "managerScore": 4,
+        "managerRaters": 1,
+        "peersScore": 3.6667,
+        "peersRaters": 3,
+        "subordinatesScore": 4.3333,
+        "subordinatesRaters": 3,
+        "selfScore": 5,
+        "selfRaters": 1,
+        "otherRaters": 0,
+        "managerVisibility": "shown",
+        "peersVisibility": "shown",
+        "subordinatesVisibility": "shown",
+        "selfVisibility": "shown"
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "competencyName": "Planning",
+        "groupId": "8224fcc0-f1ae-47b2-ac2b-3e98f6e26648",
+        "groupName": "Execution",
+        "managerScore": 4,
+        "managerRaters": 1,
+        "peersScore": 3.6667,
+        "peersRaters": 3,
+        "subordinatesScore": 4.3333,
+        "subordinatesRaters": 3,
+        "selfScore": 5,
+        "selfRaters": 1,
+        "otherRaters": 0,
+        "managerVisibility": "shown",
+        "peersVisibility": "shown",
+        "subordinatesVisibility": "shown",
+        "selfVisibility": "shown"
+      }
+    ],
+    "groupOverall": {
+      "manager": 4,
+      "peers": 3.6667,
+      "subordinates": 4.3333,
+      "self": 5
+    },
+    "effectiveGroupWeights": {
+      "manager": 40,
+      "peers": 30,
+      "subordinates": 30,
+      "self": 0,
+      "other": 0
+    },
+    "overallScore": 4,
+    "openText": [
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "group": "manager",
+        "count": 1
+      },
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "group": "peers",
+        "count": 3
+      },
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "group": "subordinates",
+        "count": 3
+      },
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "group": "self",
+        "count": 1
+      },
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "group": "manager",
+        "count": 1
+      },
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "group": "peers",
+        "count": 3
+      },
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "group": "subordinates",
+        "count": 3
+      },
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "group": "self",
+        "count": 1
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "group": "manager",
+        "count": 1
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "group": "peers",
+        "count": 3
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "group": "subordinates",
+        "count": 3
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "group": "self",
+        "count": 1
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "group": "manager",
+        "count": 1
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "group": "peers",
+        "count": 3
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "group": "subordinates",
+        "count": 3
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "group": "self",
+        "count": 1
+      }
+    ]
+  },
+  "manager": {
+    "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+    "companyId": "dd609327-b300-4689-a2a0-6c1e5a7d6cad",
+    "subjectEmployeeId": "09d9546b-74a5-4460-a45f-6d7ece3ef1f3",
+    "modelVersionId": "bf699be9-28b0-44b6-a4df-6c9cb4d25e12",
+    "modelKind": "indicators",
+    "anonymityThreshold": 3,
+    "smallGroupPolicy": "merge_to_other",
+    "groupVisibility": {
+      "manager": "shown",
+      "peers": "shown",
+      "subordinates": "shown",
+      "self": "shown"
+    },
+    "competencyScores": [
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "competencyName": "Clarity",
+        "groupId": "96f4c37b-a407-4d54-a57c-50aa4132e2f8",
+        "groupName": "Communication",
+        "managerScore": 4,
+        "managerRaters": 1,
+        "peersScore": 3.6667,
+        "peersRaters": 3,
+        "subordinatesScore": 4.3333,
+        "subordinatesRaters": 3,
+        "selfScore": 5,
+        "selfRaters": 1,
+        "otherRaters": 0,
+        "managerVisibility": "shown",
+        "peersVisibility": "shown",
+        "subordinatesVisibility": "shown",
+        "selfVisibility": "shown"
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "competencyName": "Feedback",
+        "groupId": "96f4c37b-a407-4d54-a57c-50aa4132e2f8",
+        "groupName": "Communication",
+        "managerScore": 4,
+        "managerRaters": 1,
+        "peersScore": 3.6667,
+        "peersRaters": 3,
+        "subordinatesScore": 4.3333,
+        "subordinatesRaters": 3,
+        "selfScore": 5,
+        "selfRaters": 1,
+        "otherRaters": 0,
+        "managerVisibility": "shown",
+        "peersVisibility": "shown",
+        "subordinatesVisibility": "shown",
+        "selfVisibility": "shown"
+      },
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "competencyName": "Ownership",
+        "groupId": "8224fcc0-f1ae-47b2-ac2b-3e98f6e26648",
+        "groupName": "Execution",
+        "managerScore": 4,
+        "managerRaters": 1,
+        "peersScore": 3.6667,
+        "peersRaters": 3,
+        "subordinatesScore": 4.3333,
+        "subordinatesRaters": 3,
+        "selfScore": 5,
+        "selfRaters": 1,
+        "otherRaters": 0,
+        "managerVisibility": "shown",
+        "peersVisibility": "shown",
+        "subordinatesVisibility": "shown",
+        "selfVisibility": "shown"
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "competencyName": "Planning",
+        "groupId": "8224fcc0-f1ae-47b2-ac2b-3e98f6e26648",
+        "groupName": "Execution",
+        "managerScore": 4,
+        "managerRaters": 1,
+        "peersScore": 3.6667,
+        "peersRaters": 3,
+        "subordinatesScore": 4.3333,
+        "subordinatesRaters": 3,
+        "selfScore": 5,
+        "selfRaters": 1,
+        "otherRaters": 0,
+        "managerVisibility": "shown",
+        "peersVisibility": "shown",
+        "subordinatesVisibility": "shown",
+        "selfVisibility": "shown"
+      }
+    ],
+    "groupOverall": {
+      "manager": 4,
+      "peers": 3.6667,
+      "subordinates": 4.3333,
+      "self": 5
+    },
+    "effectiveGroupWeights": {
+      "manager": 40,
+      "peers": 30,
+      "subordinates": 30,
+      "self": 0,
+      "other": 0
+    },
+    "overallScore": 4,
+    "openText": [
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "group": "manager",
+        "count": 1
+      },
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "group": "peers",
+        "count": 3
+      },
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "group": "subordinates",
+        "count": 3
+      },
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "group": "self",
+        "count": 1
+      },
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "group": "manager",
+        "count": 1
+      },
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "group": "peers",
+        "count": 3
+      },
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "group": "subordinates",
+        "count": 3
+      },
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "group": "self",
+        "count": 1
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "group": "manager",
+        "count": 1
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "group": "peers",
+        "count": 3
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "group": "subordinates",
+        "count": 3
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "group": "self",
+        "count": 1
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "group": "manager",
+        "count": 1
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "group": "peers",
+        "count": 3
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "group": "subordinates",
+        "count": 3
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "group": "self",
+        "count": 1
+      }
+    ]
+  },
+  "hr": {
+    "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+    "companyId": "dd609327-b300-4689-a2a0-6c1e5a7d6cad",
+    "subjectEmployeeId": "09d9546b-74a5-4460-a45f-6d7ece3ef1f3",
+    "modelVersionId": "bf699be9-28b0-44b6-a4df-6c9cb4d25e12",
+    "modelKind": "indicators",
+    "anonymityThreshold": 3,
+    "smallGroupPolicy": "merge_to_other",
+    "groupVisibility": {
+      "manager": "shown",
+      "peers": "shown",
+      "subordinates": "shown",
+      "self": "shown"
+    },
+    "competencyScores": [
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "competencyName": "Clarity",
+        "groupId": "96f4c37b-a407-4d54-a57c-50aa4132e2f8",
+        "groupName": "Communication",
+        "managerScore": 4,
+        "managerRaters": 1,
+        "peersScore": 3.6667,
+        "peersRaters": 3,
+        "subordinatesScore": 4.3333,
+        "subordinatesRaters": 3,
+        "selfScore": 5,
+        "selfRaters": 1,
+        "otherRaters": 0,
+        "managerVisibility": "shown",
+        "peersVisibility": "shown",
+        "subordinatesVisibility": "shown",
+        "selfVisibility": "shown"
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "competencyName": "Feedback",
+        "groupId": "96f4c37b-a407-4d54-a57c-50aa4132e2f8",
+        "groupName": "Communication",
+        "managerScore": 4,
+        "managerRaters": 1,
+        "peersScore": 3.6667,
+        "peersRaters": 3,
+        "subordinatesScore": 4.3333,
+        "subordinatesRaters": 3,
+        "selfScore": 5,
+        "selfRaters": 1,
+        "otherRaters": 0,
+        "managerVisibility": "shown",
+        "peersVisibility": "shown",
+        "subordinatesVisibility": "shown",
+        "selfVisibility": "shown"
+      },
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "competencyName": "Ownership",
+        "groupId": "8224fcc0-f1ae-47b2-ac2b-3e98f6e26648",
+        "groupName": "Execution",
+        "managerScore": 4,
+        "managerRaters": 1,
+        "peersScore": 3.6667,
+        "peersRaters": 3,
+        "subordinatesScore": 4.3333,
+        "subordinatesRaters": 3,
+        "selfScore": 5,
+        "selfRaters": 1,
+        "otherRaters": 0,
+        "managerVisibility": "shown",
+        "peersVisibility": "shown",
+        "subordinatesVisibility": "shown",
+        "selfVisibility": "shown"
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "competencyName": "Planning",
+        "groupId": "8224fcc0-f1ae-47b2-ac2b-3e98f6e26648",
+        "groupName": "Execution",
+        "managerScore": 4,
+        "managerRaters": 1,
+        "peersScore": 3.6667,
+        "peersRaters": 3,
+        "subordinatesScore": 4.3333,
+        "subordinatesRaters": 3,
+        "selfScore": 5,
+        "selfRaters": 1,
+        "otherRaters": 0,
+        "managerVisibility": "shown",
+        "peersVisibility": "shown",
+        "subordinatesVisibility": "shown",
+        "selfVisibility": "shown"
+      }
+    ],
+    "raterScores": [
+      {
+        "raterEmployeeId": "e8ce966d-54dd-4309-a5bd-f987f2063bec",
+        "group": "manager",
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "e8ce966d-54dd-4309-a5bd-f987f2063bec",
+        "group": "manager",
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "e8ce966d-54dd-4309-a5bd-f987f2063bec",
+        "group": "manager",
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "e8ce966d-54dd-4309-a5bd-f987f2063bec",
+        "group": "manager",
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "4e8f58e9-0f58-40db-a693-574b34936239",
+        "group": "peers",
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "4e8f58e9-0f58-40db-a693-574b34936239",
+        "group": "peers",
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "4e8f58e9-0f58-40db-a693-574b34936239",
+        "group": "peers",
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "4e8f58e9-0f58-40db-a693-574b34936239",
+        "group": "peers",
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "93e9ef3d-75ed-4073-a835-e2bf139b558c",
+        "group": "peers",
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "score": 3,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "93e9ef3d-75ed-4073-a835-e2bf139b558c",
+        "group": "peers",
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "score": 3,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "93e9ef3d-75ed-4073-a835-e2bf139b558c",
+        "group": "peers",
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "score": 3,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "93e9ef3d-75ed-4073-a835-e2bf139b558c",
+        "group": "peers",
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "score": 3,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "c32b7568-b44a-4a85-8761-9f1f4bd5fac7",
+        "group": "peers",
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "c32b7568-b44a-4a85-8761-9f1f4bd5fac7",
+        "group": "peers",
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "c32b7568-b44a-4a85-8761-9f1f4bd5fac7",
+        "group": "peers",
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "c32b7568-b44a-4a85-8761-9f1f4bd5fac7",
+        "group": "peers",
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "6017e7b7-4f45-4db9-a319-bf5b2957e358",
+        "group": "subordinates",
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "score": 5,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "6017e7b7-4f45-4db9-a319-bf5b2957e358",
+        "group": "subordinates",
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "score": 5,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "6017e7b7-4f45-4db9-a319-bf5b2957e358",
+        "group": "subordinates",
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "score": 5,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "6017e7b7-4f45-4db9-a319-bf5b2957e358",
+        "group": "subordinates",
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "score": 5,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "8fbf16a2-7104-411f-a937-f5744da6953e",
+        "group": "subordinates",
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "8fbf16a2-7104-411f-a937-f5744da6953e",
+        "group": "subordinates",
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "8fbf16a2-7104-411f-a937-f5744da6953e",
+        "group": "subordinates",
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "8fbf16a2-7104-411f-a937-f5744da6953e",
+        "group": "subordinates",
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "e9e33dd7-2c43-46fc-94cf-c61ffd2c42ff",
+        "group": "subordinates",
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "e9e33dd7-2c43-46fc-94cf-c61ffd2c42ff",
+        "group": "subordinates",
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "e9e33dd7-2c43-46fc-94cf-c61ffd2c42ff",
+        "group": "subordinates",
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "e9e33dd7-2c43-46fc-94cf-c61ffd2c42ff",
+        "group": "subordinates",
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "score": 4,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "09d9546b-74a5-4460-a45f-6d7ece3ef1f3",
+        "group": "self",
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "score": 5,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "09d9546b-74a5-4460-a45f-6d7ece3ef1f3",
+        "group": "self",
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "score": 5,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "09d9546b-74a5-4460-a45f-6d7ece3ef1f3",
+        "group": "self",
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "score": 5,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      },
+      {
+        "raterEmployeeId": "09d9546b-74a5-4460-a45f-6d7ece3ef1f3",
+        "group": "self",
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "score": 5,
+        "validIndicatorCount": 2,
+        "totalIndicatorCount": 2
+      }
+    ],
+    "groupOverall": {
+      "manager": 4,
+      "peers": 3.6667,
+      "subordinates": 4.3333,
+      "self": 5
+    },
+    "configuredGroupWeights": {
+      "manager": 40,
+      "peers": 30,
+      "subordinates": 30,
+      "self": 0,
+      "other": 0
+    },
+    "effectiveGroupWeights": {
+      "manager": 40,
+      "peers": 30,
+      "subordinates": 30,
+      "self": 0,
+      "other": 0
+    },
+    "overallScore": 4,
+    "openText": [
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "group": "manager",
+        "count": 1,
+        "rawText": "Руководитель: доводит задачи до конца без лишнего шума."
+      },
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "group": "peers",
+        "count": 3,
+        "rawText": "Коллега: надёжный участник команды, но не всегда заранее поднимает риски.\n\nКоллега: держит ответственность за результат и качество.\n\nКоллега: держит слово и завершает задачи."
+      },
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "group": "subordinates",
+        "count": 3,
+        "rawText": "Подчинённый: помогает доводить работу до результата.\n\nПодчинённый: помогает держать общий темп исполнения.\n\nПодчинённый: помогает чувствовать уверенность в результате."
+      },
+      {
+        "competencyId": "5431b340-8866-4558-a816-4f43d2a32922",
+        "group": "self",
+        "count": 1,
+        "rawText": "Самооценка: беру ответственность за результат без эскалаций."
+      },
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "group": "manager",
+        "count": 1,
+        "rawText": "Руководитель: ясно объясняет решения и ожидания."
+      },
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "group": "peers",
+        "count": 3,
+        "rawText": "Коллега: коммуникация стала лучше, но иногда не хватает контекста.\n\nКоллега: хорошо формулирует решения и помогает команде.\n\nКоллега: общение понятное, конструктивное и спокойное."
+      },
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "group": "subordinates",
+        "count": 3,
+        "rawText": "Подчинённый: задачи объясняет понятно и последовательно.\n\nПодчинённый: хорошо структурирует обсуждения и задачи.\n\nПодчинённый: особенно силён в разъяснении контекста и ожиданий."
+      },
+      {
+        "competencyId": "86d25979-4d77-4fcc-9733-baee07805f7d",
+        "group": "self",
+        "count": 1,
+        "rawText": "Самооценка: коммуникация стала увереннее и структурнее."
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "group": "manager",
+        "count": 1,
+        "rawText": "Руководитель: планирование стало заметно стабильнее."
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "group": "peers",
+        "count": 3,
+        "rawText": "Коллега: планирование рабочее, но можно точнее синхронизироваться.\n\nКоллега: понятен в планах и сроках.\n\nКоллега: умеет раскладывать работу на понятные шаги."
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "group": "subordinates",
+        "count": 3,
+        "rawText": "Подчинённый: заранее объясняет приоритеты и ожидания.\n\nПодчинённый: планирование стало предсказуемым.\n\nПодчинённый: отлично задаёт ритм и рамки работы."
+      },
+      {
+        "competencyId": "aa9c439f-152f-48c4-b34e-64ce1678e492",
+        "group": "self",
+        "count": 1,
+        "rawText": "Самооценка: планирую работу прозрачно и заранее."
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "group": "manager",
+        "count": 1,
+        "rawText": "Руководитель: обратная связь полезная и спокойная."
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "group": "peers",
+        "count": 3,
+        "rawText": "Коллега: обратная связь полезна, хотя не всегда достаточно конкретна.\n\nКоллега: качественно и уважительно даёт обратную связь.\n\nКоллега: умеет замечать важное и доносить это без давления."
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "group": "subordinates",
+        "count": 3,
+        "rawText": "Подчинённый: обратная связь полезная и спокойная.\n\nПодчинённый: даёт понятную обратную связь по работе.\n\nПодчинённый: регулярно даёт поддерживающую и точную обратную связь."
+      },
+      {
+        "competencyId": "e7fa7c6f-1cb7-4059-8cf9-1b86d0e70e22",
+        "group": "self",
+        "count": 1,
+        "rawText": "Самооценка: чаще даю полезную обратную связь команде."
+      }
+    ]
+  },
+  "ai": {
+    "campaignId": "a7751a7b-ab43-43fe-9a19-997d0eb6b1bc",
+    "aiJobId": "1212d822-b5d1-48de-b14f-048acd09d879",
+    "provider": "mvp_stub",
+    "status": "completed",
+    "completedAt": "2026-03-07T12:17:28.828Z",
+    "wasAlreadyCompleted": false
+  }
+}
