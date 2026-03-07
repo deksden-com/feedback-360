@@ -1,5 +1,5 @@
 # FT-0213 — App shell and identity chrome
-Status: Draft (2026-03-07)
+Status: Completed (2026-03-07)
 
 ## User value
 Пользователь лучше понимает, **кто он**, **в какой компании работает** и **какой аккаунт/роль сейчас активны**. Приложение ощущается как привычный SaaS workspace, а не набор внутренних страниц.
@@ -63,3 +63,18 @@ Status: Draft (2026-03-07)
 - `spec/ui/design-principles.md`
 - `spec/ui/screens/internal-home.md`
 - tutorial screenshots if shell visibly changed
+
+## Quality checks evidence (2026-03-07)
+- `pnpm checks` → passed
+- `pnpm docs:audit` → passed
+- `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3108 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0111-app-shell.spec.ts tests/ft-0213-shell-identity-chrome.spec.ts --workers=1 --reporter=line` → passed
+- `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0111-app-shell.spec.ts tests/ft-0213-shell-identity-chrome.spec.ts --workers=1 --reporter=line` → passed
+
+## Acceptance evidence (2026-03-07)
+- Shell now exposes familiar SaaS identity chrome:
+  - company card in sidebar
+  - grouped nav sections
+  - avatar/initials and account summary in header
+  - sign-out in account menu
+- Updated shell proof captured at `.memory-bank/evidence/EP-021/FT-0213/2026-03-07/step-01-shell-account-menu__(SCR-APP-HOME).png`
+- Cross-check with shared shell regression also passes on beta through `ft-0111-app-shell.spec.ts`

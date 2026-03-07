@@ -1,5 +1,5 @@
 # EP-021 — Feature catalog
-Status: Draft (2026-03-07)
+Status: Completed (2026-03-07)
 
 - [FT-0211 Screen registry rollout](FT-0211-screen-registry-rollout/index.md): раскатка `screen_id`, `testIdScope`, frontmatter, screenshot naming и JSDoc по ключевым UI surfaces. Читать, чтобы traceability UI стала системной, а не “местами”.
 - [FT-0212 Test ID and POM normalization](FT-0212-testid-pom-normalization/index.md): нормализация `data-testid` и POM mapping под screen registry. Читать, чтобы automation и XE не жили на ad-hoc селекторах.

@@ -1,5 +1,5 @@
 # EP-021 — UI traceability and SaaS polish
-Status: In Progress (2026-03-07)
+Status: Completed (2026-03-07)
 
 ## Goal
 Сделать интерфейс более зрелым и привычным для современного SaaS, **не теряя ни одной текущей функции**, и одновременно ввести жёсткую трассируемость UI через `screen_id`, `testIdScope`, `data-testid`, docs и screenshots.
@@ -30,10 +30,10 @@ Status: In Progress (2026-03-07)
 ## Progress report (planned)
 - `as_of`: 2026-03-07
 - `total_features`: 5
-- `completed_features`: 1
-- `evidence_confirmed_features`: 1
+- `completed_features`: 5
+- `evidence_confirmed_features`: 5
 - verification link:
-  - [Verification matrix](../../verification-matrix.md): сюда будут записываться execution evidence по каждому UI polish slice. Читать, чтобы completion был подтверждён local + beta checks.
+  - [Verification matrix](../../verification-matrix.md): execution evidence по каждому UI polish slice. Читать, чтобы completion был подтверждён local + beta checks и merge в `develop`.
 
 ## Definition of done
 - Ключевые route-level screens имеют канонический `screen_id`, `testIdScope`, predictable `data-testid` и traceability до guides/screenshots/evidence.
@@ -41,3 +41,16 @@ Status: In Progress (2026-03-07)
 - Employees/org surfaces читаются как зрелые CRUD/hierarchy screens, а не как набор служебных блоков.
 - Questionnaire/results surfaces показывают в первую очередь контент и status/progress, а не вспомогательные controls.
 - Каждая FT подтверждена local acceptance, beta verification и обновлением memory-bank traceability.
+
+## Completion evidence (2026-03-07)
+- Pull request:
+  - `#54` — `https://github.com/deksden-com/feedback-360/pull/54`
+- Merge commit:
+  - `e6a248c204dc214384c4191e422e2f2c0fcfbda3`
+- Local quality gate:
+  - `pnpm checks`
+  - `pnpm docs:audit`
+  - `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3108 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0111-app-shell.spec.ts tests/ft-0212-testid-normalization.spec.ts tests/ft-0213-shell-identity-chrome.spec.ts tests/ft-0214-hr-crud-hierarchy-polish.spec.ts tests/ft-0215-content-first-surfaces.spec.ts --workers=1 --reporter=line`
+- Beta verification:
+  - `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0111-app-shell.spec.ts tests/ft-0212-testid-normalization.spec.ts tests/ft-0213-shell-identity-chrome.spec.ts tests/ft-0214-hr-crud-hierarchy-polish.spec.ts tests/ft-0215-content-first-surfaces.spec.ts --workers=1 --reporter=line`
+  - `vercel inspect beta.go360go.ru` → current alias points at `https://go360go-beta-k1gq49uel-deksdens-projects.vercel.app`

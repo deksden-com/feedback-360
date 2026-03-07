@@ -1,5 +1,5 @@
 # FT-0215 — Content-first results and questionnaires
-Status: Draft (2026-03-07)
+Status: Completed (2026-03-07)
 
 ## User value
 Ключевые продуктовые surfaces показывают в первую очередь **содержимое работы** — прогресс, компетенции, результаты, выводы — а не вторичные controls. Это делает систему ближе к сильным review/feedback SaaS продуктам и снижает cognitive load.
@@ -67,3 +67,19 @@ Status: Draft (2026-03-07)
 - `spec/ui/screen-by-screen-redesign.md`
 - results/questionnaire screen specs when introduced/expanded
 - guides/tutorials with updated screenshots
+
+## Quality checks evidence (2026-03-07)
+- `pnpm checks` → passed
+- `pnpm docs:audit` → passed
+- `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3108 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0215-content-first-surfaces.spec.ts --workers=1 --reporter=line` → passed
+- `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0215-content-first-surfaces.spec.ts --workers=1 --reporter=line` → passed
+
+## Acceptance evidence (2026-03-07)
+- Questionnaire inbox/fill now surface summary/progress/actions before secondary helpers
+- Employee/manager/HR results now lead with report hero + summary block while preserving visibility/anonymity behavior
+- Artifacts:
+  - `.memory-bank/evidence/EP-021/FT-0215/2026-03-07/step-01-inbox__(SCR-QUESTIONNAIRES-INBOX).png`
+  - `.memory-bank/evidence/EP-021/FT-0215/2026-03-07/step-02-fill__(SCR-QUESTIONNAIRES-FILL).png`
+  - `.memory-bank/evidence/EP-021/FT-0215/2026-03-07/step-03-results-employee__(SCR-RESULTS-EMPLOYEE).png`
+  - `.memory-bank/evidence/EP-021/FT-0215/2026-03-07/step-04-results-manager__(SCR-RESULTS-MANAGER).png`
+  - `.memory-bank/evidence/EP-021/FT-0215/2026-03-07/step-05-results-hr__(SCR-RESULTS-HR).png`

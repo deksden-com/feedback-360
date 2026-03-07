@@ -1,5 +1,5 @@
 # FT-0212 — Test ID and POM normalization
-Status: Draft (2026-03-07)
+Status: Completed (2026-03-07)
 
 ## User value
 Automation становится устойчивее: Playwright/XE используют predictable selectors, а UI можно рефакторить без массовых flaky падений.
@@ -62,3 +62,18 @@ Automation становится устойчивее: Playwright/XE исполь
 - `spec/ui/pom/*`
 - `spec/testing/ui-automation-contract.md`
 - relevant screen specs
+
+## Quality checks evidence (2026-03-07)
+- `pnpm checks` → passed
+- `pnpm docs:audit` → passed
+- `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3108 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0212-testid-normalization.spec.ts --workers=1 --reporter=line` → passed
+- `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0212-testid-normalization.spec.ts --workers=1 --reporter=line` → passed
+
+## Acceptance evidence (2026-03-07)
+- Critical routes expose normalized roots and primary scopes:
+  - `scr-hr-employees-root`
+  - `scr-hr-org-root`
+  - `scr-questionnaires-inbox-root`
+  - `scr-results-hr-root`
+- Playwright proof captured at `.memory-bank/evidence/EP-021/FT-0212/2026-03-07/step-01-normalized-selectors__(SCR-RESULTS-HR).png`
+- Existing shell/questionnaire/results acceptance suites still navigate through normalized ids without changing domain behavior
