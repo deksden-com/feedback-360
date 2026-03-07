@@ -54,6 +54,7 @@ test("FT-0151: employee gets a structured results dashboard without raw text", a
   await loginWithCompany(page, String(employeeUserId), String(companyId));
   await page.goto(`/results?campaignId=${campaignId}`);
 
+  await expect(page.getByTestId("scr-results-employee-root")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole("heading", { name: "Мои результаты" })).toBeVisible();
   await expect(page.getByTestId("results-summary")).toBeVisible();
   await expect(page.getByTestId("results-group-card-manager")).toBeVisible();

@@ -9,6 +9,11 @@ import { useEffect, useState } from "react";
 
 const isDevLike = process.env.NEXT_PUBLIC_APP_ENV !== "prod";
 
+/**
+ * Login screen.
+ * @screenId SCR-AUTH-LOGIN
+ * @testIdScope scr-auth-login
+ */
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -141,7 +146,10 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-lg items-center p-6">
+    <main
+      className="mx-auto flex min-h-dvh w-full max-w-lg items-center p-6"
+      data-testid="scr-auth-login-root"
+    >
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl">Вход в систему</CardTitle>
@@ -149,7 +157,7 @@ export default function LoginPage() {
             Введите рабочий email. Если он есть в HR-справочнике, отправим magic link.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4" data-testid="scr-auth-login-form">
           <div className="space-y-2">
             <Label htmlFor="email">Рабочий email</Label>
             <Input
@@ -166,6 +174,7 @@ export default function LoginPage() {
             className="w-full"
             onClick={submitMagicLink}
             disabled={isSubmitting || email.trim().length === 0}
+            data-testid="scr-auth-login-submit"
           >
             {isSubmitting ? "Отправка..." : "Отправить ссылку"}
           </Button>
@@ -173,7 +182,7 @@ export default function LoginPage() {
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
           {isDevLike ? (
-            <div className="rounded-md border border-dashed p-3">
+            <div className="rounded-md border border-dashed p-3" data-testid="scr-auth-login-dev">
               <div className="space-y-3">
                 <div>
                   <p className="mb-2 text-xs text-muted-foreground">
@@ -215,14 +224,14 @@ export default function LoginPage() {
                         value={xeToken}
                         onChange={(event) => setXeToken(event.target.value)}
                         disabled={isSubmitting}
-                        data-testid="xe-token-input"
+                        data-testid="scr-auth-login-xe-token"
                       />
                       <Button
                         variant="secondary"
                         className="w-full"
                         onClick={submitXeToken}
                         disabled={isSubmitting || xeToken.trim().length === 0}
-                        data-testid="xe-token-submit"
+                        data-testid="scr-auth-login-xe-submit"
                       >
                         {isSubmitting ? "Вход..." : "Войти по XE token"}
                       </Button>

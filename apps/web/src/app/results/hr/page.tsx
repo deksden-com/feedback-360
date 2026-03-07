@@ -29,6 +29,11 @@ const getQueryValue = (value: string | string[] | undefined): string | undefined
   return undefined;
 };
 
+/**
+ * HR results dashboard screen.
+ * @screenId SCR-RESULTS-HR
+ * @testIdScope scr-results-hr
+ */
 export default async function ResultsHrViewPage({
   searchParams,
 }: {
@@ -72,7 +77,11 @@ export default async function ResultsHrViewPage({
         title="HR результаты"
         subtitle="Доступно только для HR ролей."
       >
-        <ResultsPageLayout title="HR результаты" subtitle="Доступно только для HR ролей.">
+        <ResultsPageLayout
+          title="HR результаты"
+          subtitle="Доступно только для HR ролей."
+          testId="scr-results-hr-root"
+        >
           <PageErrorState
             title="Эта витрина доступна только HR-роли"
             description="Откройте личные результаты или переключите активную компанию, где у вас есть HR-доступ."
@@ -133,6 +142,7 @@ export default async function ResultsHrViewPage({
         <ResultsPageLayout
           title="HR результаты"
           subtitle="Выберите кампанию и сотрудника, чтобы открыть HR-витрину."
+          testId="scr-results-hr-root"
         >
           <PageEmptyState
             title="Нужно выбрать сотрудника и кампанию"
@@ -236,7 +246,11 @@ export default async function ResultsHrViewPage({
         title="HR результаты"
         subtitle={state.description}
       >
-        <ResultsPageLayout title="HR результаты" subtitle={state.description}>
+        <ResultsPageLayout
+          title="HR результаты"
+          subtitle={state.description}
+          testId="scr-results-hr-root"
+        >
           <PageErrorState
             title={state.title}
             description={state.description}
@@ -260,7 +274,7 @@ export default async function ResultsHrViewPage({
       title="HR результаты"
       subtitle={subtitle}
     >
-      <ResultsPageLayout title="HR результаты" subtitle={subtitle}>
+      <ResultsPageLayout title="HR результаты" subtitle={subtitle} testId="scr-results-hr-root">
         <Card data-testid="results-hr-toolbar">
           <CardHeader>
             <CardTitle className="text-lg">Рабочий режим HR</CardTitle>

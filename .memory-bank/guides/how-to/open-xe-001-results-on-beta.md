@@ -1,3 +1,11 @@
+---
+screen_ids:
+  - SCR-AUTH-LOGIN
+  - SCR-RESULTS-EMPLOYEE
+  - SCR-RESULTS-MANAGER
+  - SCR-RESULTS-HR
+---
+
 # How to open `XE-001` results on beta
 Status: Draft (2026-03-07)
 

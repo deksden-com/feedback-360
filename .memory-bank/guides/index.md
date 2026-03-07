@@ -13,6 +13,10 @@ Status: Draft (2026-03-07)
 Важно: `guides/` **не заменяет** `spec/`.  
 Нормативные требования и инварианты системы остаются в `spec/`.
 
+Правило traceability для guides:
+- если guide опирается на конкретные UI surfaces, он обязан иметь frontmatter `screen_id` или `screen_ids`;
+- screenshots внутри guides используют suffix `__(SCR-...)` в имени файла, чтобы их можно было быстро переснять и найти по screen registry.
+
 ## Разделы Diátaxis
 
 - [Tutorials](tutorials/index.md): учебные walkthrough-документы для первого знакомства с системой. Читать, когда нужно провести человека по “первому успешному пути” и дать контекст по ходу.

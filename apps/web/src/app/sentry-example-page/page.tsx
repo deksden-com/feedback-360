@@ -11,6 +11,11 @@ class SentryExampleFrontendError extends Error {
   }
 }
 
+/**
+ * Sentry example diagnostics screen.
+ * @screenId SCR-SENTRY-EXAMPLE
+ * @testIdScope scr-sentry-example
+ */
 export default function Page() {
   const [hasSentError, setHasSentError] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
@@ -30,7 +35,7 @@ export default function Page() {
         <meta name="description" content="Test Sentry for your Next.js app!" />
       </Head>
 
-      <main>
+      <main data-testid="scr-sentry-example-root">
         <div className="flex-spacer" />
         <svg
           height="40"

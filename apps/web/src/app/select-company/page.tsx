@@ -12,6 +12,11 @@ const roleLabels: Record<string, string> = {
   employee: "Сотрудник",
 };
 
+/**
+ * Active company switcher screen.
+ * @screenId SCR-COMPANY-SWITCHER
+ * @testIdScope scr-company-switcher
+ */
 export default async function SelectCompanyPage() {
   const session = await getAppSession();
   if (!session.userId) {
@@ -39,7 +44,10 @@ export default async function SelectCompanyPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-5xl items-center p-6">
+    <main
+      className="mx-auto flex min-h-dvh w-full max-w-5xl items-center p-6"
+      data-testid="scr-company-switcher-root"
+    >
       <div className="w-full space-y-4">
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight">Выберите компанию</h1>
@@ -48,7 +56,7 @@ export default async function SelectCompanyPage() {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2" data-testid="scr-company-switcher-list">
           {memberships.data.items.length === 0 ? (
             <PageEmptyState
               title="Нет доступных компаний"

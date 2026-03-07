@@ -5,6 +5,7 @@ Status: Draft (2026-03-07)
 
 ## Источники истины
 - screen specs — нормативное описание экранов, их структуры, действий и состояний;
+- screen registry — канонические `screen_id` и `testIdScope`;
 - POM mapping — техническая привязка screen specs к runtime automation API;
 - `data-testid` — стабильные идентификаторы для интерактивных и проверяемых элементов.
 
@@ -29,7 +30,9 @@ GUI login flow не является обязательным шагом для 
 
 ## Где храним спецификации
 В меморибанке:
+- `spec/ui/screen-registry.md` — registry экранов и их `screen_id`;
 - `spec/ui/screens/` — каталог экранов;
+- `spec/ui/test-id-registry.md` — naming contract для `data-testid`;
 - `spec/ui/pom/` — каталог POM mapping и automation conventions.
 
 В коде:
@@ -37,6 +40,7 @@ GUI login flow не является обязательным шагом для 
 
 ## Обязательные правила
 - ключевые интерактивные элементы и assertion targets получают стабильные `data-testid`;
+- `data-testid` выводится из `testIdScope`, привязанного к `screen_id`, а не придумывается локально каждым экраном;
 - screen spec не дублирует POM-код, а описывает смысл и contract экрана;
 - POM mapping не дублирует доменные правила, а ссылается на screen spec и UI spec;
 - XE phases обращаются к GUI через POM/runtime API, а не через случайные CSS selectors.

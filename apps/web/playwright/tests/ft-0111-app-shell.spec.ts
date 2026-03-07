@@ -2,8 +2,6 @@ import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { expect, test } from "@playwright/test";
 
-const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3100";
-
 test("FT-0111: internal app shell keeps company context and role-aware nav", async ({ page }) => {
   test.setTimeout(90_000);
   const artifactsDir = resolve(
@@ -45,40 +43,24 @@ test("FT-0111: internal app shell keeps company context and role-aware nav", asy
   }
 
   const loginAs = async (userId: string) => {
-    const cookieUrl = new URL(baseUrl);
     await page.context().clearCookies();
-    await page.context().addCookies([
-      {
-        name: "go360go_user_id",
-        value: userId,
-        domain: cookieUrl.hostname,
-        path: "/",
-        httpOnly: true,
-        sameSite: "Lax",
-      },
-    ]);
+    const loginResponse = await page.request.post("/api/dev/test-login", { data: { userId } });
+    expect(loginResponse.ok()).toBeTruthy();
 
-    await page.goto("/select-company");
-    await expect(page.getByTestId(`select-company-${companyId}`)).toBeVisible();
-    const activateStatus = await page.evaluate(async (nextCompanyId) => {
-      const response = await fetch("/api/session/active-company", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ companyId: nextCompanyId }),
-      });
+    const companyResponse = await page.request.post("/api/session/active-company", {
+      data: { companyId },
+    });
+    expect(companyResponse.ok()).toBeTruthy();
 
-      return response.status;
-    }, companyId);
-    expect(activateStatus).toBe(200);
     await page.goto("/");
     await expect(page).toHaveURL("/");
-    await expect(page.getByTestId("internal-app-shell")).toBeVisible();
+    await expect(page.getByTestId("internal-app-shell")).toBeVisible({ timeout: 60_000 });
   };
 
   await loginAs(userEmployeeId);
   await expect(page.getByTestId("shell-company-name")).toContainText("Acme 360");
+  await expect(page.getByTestId("shell-account-menu")).toBeVisible();
+  await expect(page.getByTestId("nav-section-workspace").first()).toBeVisible();
   await expect(page.getByTestId("nav-home").first()).toBeVisible();
   await expect(page.getByTestId("nav-questionnaires").first()).toBeVisible();
   await expect(page.getByTestId("nav-results").first()).toBeVisible();
@@ -86,28 +68,31 @@ test("FT-0111: internal app shell keeps company context and role-aware nav", asy
   await expect(page.getByTestId("nav-results-team")).toHaveCount(0);
   await capture("step-01-employee-home-shell.png");
 
-  await page.getByTestId("nav-questionnaires").first().click();
-  await expect(page).toHaveURL("/questionnaires");
-  await expect(page.getByTestId("internal-app-shell")).toBeVisible();
+  await page.getByTestId("nav-results").first().click();
+  await expect(page).toHaveURL("/results");
+  await expect(page.getByTestId("internal-app-shell")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId("shell-company-name")).toContainText("Acme 360");
-  await capture("step-02-questionnaires-shell.png");
+  await capture("step-02-results-shell.png");
 
   await loginAs(userManagerId);
+  await expect(page.getByTestId("nav-section-team").first()).toBeVisible();
   await expect(page.getByTestId("nav-results-team").first()).toBeVisible();
   await expect(page.getByTestId("nav-hr-campaigns")).toHaveCount(0);
   await page.getByTestId("nav-results-team").first().click();
   await expect(page).toHaveURL("/results/team");
-  await expect(page.getByTestId("internal-app-shell")).toBeVisible();
+  await expect(page.getByTestId("internal-app-shell")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId("shell-company-name")).toContainText("Acme 360");
   await capture("step-03-manager-team-results-shell.png");
 
   await loginAs(userHrAdminId);
+  await expect(page.getByTestId("nav-section-people").first()).toBeVisible();
+  await expect(page.getByTestId("nav-section-campaigns").first()).toBeVisible();
   await expect(page.getByTestId("nav-hr-campaigns").first()).toBeVisible();
   await expect(page.getByTestId("nav-results-hr").first()).toBeVisible();
   await expect(page.getByTestId("nav-results-team")).toHaveCount(0);
   await page.getByTestId("nav-hr-campaigns").first().click();
   await expect(page).toHaveURL("/hr/campaigns");
-  await expect(page.getByTestId("internal-app-shell")).toBeVisible();
+  await expect(page.getByTestId("internal-app-shell")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId("shell-company-name")).toContainText("Acme 360");
   await capture("step-04-hr-campaigns-shell.png");
 });

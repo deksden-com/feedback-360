@@ -1,3 +1,11 @@
+---
+screen_id: SCR-QUESTIONNAIRES-FILL
+route: /questionnaires/[questionnaireId]
+actors:
+  - questionnaire_assignee
+test_id_scope: scr-questionnaires-fill
+---
+
 # Screen spec — Questionnaire fill
 Status: Draft (2026-03-07)
 

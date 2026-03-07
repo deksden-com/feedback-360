@@ -51,6 +51,8 @@ test("FT-0161: HR filters employee directory and opens profile", async ({ page }
   );
 
   await expect(page.getByRole("heading", { name: "Сотрудники" })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId("scr-hr-employees-root")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId("scr-hr-employees-toolbar")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId("employee-directory-search")).toHaveValue("staff.a1@acme.example");
 
   await expect(page.getByTestId(`employee-row-${staffA1}`)).toBeVisible({ timeout: 60_000 });
@@ -58,6 +60,7 @@ test("FT-0161: HR filters employee directory and opens profile", async ({ page }
   await page.getByTestId(`employee-open-${staffA1}`).click();
 
   await expect(page).toHaveURL(new RegExp(`/hr/employees/${staffA1}$`));
+  await expect(page.getByTestId("scr-hr-employee-detail-root")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId("employee-profile-summary")).toBeVisible({ timeout: 60_000 });
   await page.screenshot({
     fullPage: true,

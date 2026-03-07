@@ -22,6 +22,11 @@ import {
   modelStatusLabels,
 } from "@/features/models-matrix/lib/models-matrix";
 
+/**
+ * HR models catalog screen.
+ * @screenId SCR-HR-MODELS
+ * @testIdScope scr-hr-models
+ */
 export default async function HrModelsPage({
   searchParams,
 }: {
@@ -128,152 +133,154 @@ export default async function HrModelsPage({
       title="Модели компетенций"
       subtitle="Version hub: draft/published, фильтры, usage hints и быстрый переход в редактор."
     >
-      {flash ? (
-        <InlineBanner
-          description={flash.description}
-          tone={flash.tone}
-          testId="model-catalog-flash"
-        />
-      ) : null}
-
-      <div className="flex flex-wrap gap-2">
-        <form className="flex flex-wrap gap-2" data-testid="model-catalog-filters">
-          <Input
-            name="search"
-            placeholder="Поиск по названию"
-            defaultValue={getQueryValue(params.search)}
-            data-testid="model-catalog-search"
+      <div className="space-y-4" data-testid="scr-hr-models-root">
+        {flash ? (
+          <InlineBanner
+            description={flash.description}
+            tone={flash.tone}
+            testId="model-catalog-flash"
           />
-          <select
-            name="kind"
-            defaultValue={getQueryValue(params.kind) ?? ""}
-            className="flex h-10 rounded-md border bg-background px-3 py-2 text-sm"
-            data-testid="model-catalog-kind-filter"
-          >
-            <option value="">Все режимы</option>
-            <option value="indicators">{modelKindLabels.indicators}</option>
-            <option value="levels">{modelKindLabels.levels}</option>
-          </select>
-          <select
-            name="status"
-            defaultValue={getQueryValue(params.status) ?? ""}
-            className="flex h-10 rounded-md border bg-background px-3 py-2 text-sm"
-            data-testid="model-catalog-status-filter"
-          >
-            <option value="">Все статусы</option>
-            <option value="draft">{modelStatusLabels.draft}</option>
-            <option value="published">{modelStatusLabels.published}</option>
-          </select>
-          <Button type="submit" variant="outline">
-            Применить
-          </Button>
-        </form>
-        {resolved.context.role === "hr_admin" ? (
-          <Button asChild data-testid="model-catalog-create">
-            <a href="/hr/models/new">Создать draft</a>
-          </Button>
         ) : null}
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Всего версий</CardTitle>
-          </CardHeader>
-          <CardContent className="text-3xl font-semibold">{list.data.items.length}</CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Черновики</CardTitle>
-          </CardHeader>
-          <CardContent className="text-3xl font-semibold">
-            {list.data.items.filter((item) => item.status === "draft").length}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Опубликованы</CardTitle>
-          </CardHeader>
-          <CardContent className="text-3xl font-semibold">
-            {list.data.items.filter((item) => item.status === "published").length}
-          </CardContent>
-        </Card>
-      </div>
-
-      {list.data.items.length === 0 ? (
-        <PageEmptyState
-          title="Пока нет моделей компетенций"
-          description="Создайте первый draft competency model и затем привяжите его к campaign draft."
-          actions={
-            resolved.context.role === "hr_admin"
-              ? [{ href: "/hr/models/new", label: "Создать draft", variant: "outline" }]
-              : [{ href: "/", label: "Вернуться на главную", variant: "outline" }]
-          }
-          testId="model-catalog-empty"
-        />
-      ) : (
-        <div className="grid gap-4">
-          {list.data.items.map((item) => (
-            <Card key={item.modelVersionId} data-testid={`model-row-${item.modelVersionId}`}>
-              <CardHeader>
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">{item.name}</CardTitle>
-                    <CardDescription>
-                      v{item.version} · {modelKindLabels[item.kind]} · обновлено{" "}
-                      {formatDateLabel(item.updatedAt ?? item.createdAt)}
-                    </CardDescription>
-                  </div>
-                  <div
-                    className="rounded-full border px-3 py-1 text-sm"
-                    data-testid={`model-status-${item.modelVersionId}`}
-                  >
-                    {modelStatusLabels[item.status]}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
-                <div className="grid gap-2 text-sm text-muted-foreground md:grid-cols-3">
-                  <p>
-                    Режим:{" "}
-                    <span className="font-medium text-foreground">
-                      {modelKindLabels[item.kind]}
-                    </span>
-                  </p>
-                  <p>
-                    Active campaigns:{" "}
-                    <span className="font-medium text-foreground">
-                      {item.usedByActiveCampaigns ?? 0}
-                    </span>
-                  </p>
-                  <p>
-                    Создана:{" "}
-                    <span className="font-medium text-foreground">
-                      {formatDateLabel(item.createdAt)}
-                    </span>
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    asChild
-                    variant="outline"
-                    data-testid={`model-open-${item.modelVersionId}`}
-                  >
-                    <a href={`/hr/models/${item.modelVersionId}`}>Открыть</a>
-                  </Button>
-                  {resolved.context.role === "hr_admin" ? (
-                    <HrModelCloneButton
-                      sourceModelVersionId={item.modelVersionId}
-                      returnTo="/hr/models"
-                      testId={`model-clone-${item.modelVersionId}`}
-                    />
-                  ) : null}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="flex flex-wrap gap-2" data-testid="scr-hr-models-toolbar">
+          <form className="flex flex-wrap gap-2" data-testid="scr-hr-models-filters">
+            <Input
+              name="search"
+              placeholder="Поиск по названию"
+              defaultValue={getQueryValue(params.search)}
+              data-testid="model-catalog-search"
+            />
+            <select
+              name="kind"
+              defaultValue={getQueryValue(params.kind) ?? ""}
+              className="flex h-10 rounded-md border bg-background px-3 py-2 text-sm"
+              data-testid="model-catalog-kind-filter"
+            >
+              <option value="">Все режимы</option>
+              <option value="indicators">{modelKindLabels.indicators}</option>
+              <option value="levels">{modelKindLabels.levels}</option>
+            </select>
+            <select
+              name="status"
+              defaultValue={getQueryValue(params.status) ?? ""}
+              className="flex h-10 rounded-md border bg-background px-3 py-2 text-sm"
+              data-testid="model-catalog-status-filter"
+            >
+              <option value="">Все статусы</option>
+              <option value="draft">{modelStatusLabels.draft}</option>
+              <option value="published">{modelStatusLabels.published}</option>
+            </select>
+            <Button type="submit" variant="outline">
+              Применить
+            </Button>
+          </form>
+          {resolved.context.role === "hr_admin" ? (
+            <Button asChild data-testid="scr-hr-models-create">
+              <a href="/hr/models/new">Создать draft</a>
+            </Button>
+          ) : null}
         </div>
-      )}
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Всего версий</CardTitle>
+            </CardHeader>
+            <CardContent className="text-3xl font-semibold">{list.data.items.length}</CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Черновики</CardTitle>
+            </CardHeader>
+            <CardContent className="text-3xl font-semibold">
+              {list.data.items.filter((item) => item.status === "draft").length}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Опубликованы</CardTitle>
+            </CardHeader>
+            <CardContent className="text-3xl font-semibold">
+              {list.data.items.filter((item) => item.status === "published").length}
+            </CardContent>
+          </Card>
+        </div>
+
+        {list.data.items.length === 0 ? (
+          <PageEmptyState
+            title="Пока нет моделей компетенций"
+            description="Создайте первый draft competency model и затем привяжите его к campaign draft."
+            actions={
+              resolved.context.role === "hr_admin"
+                ? [{ href: "/hr/models/new", label: "Создать draft", variant: "outline" }]
+                : [{ href: "/", label: "Вернуться на главную", variant: "outline" }]
+            }
+            testId="model-catalog-empty"
+          />
+        ) : (
+          <div className="grid gap-4">
+            {list.data.items.map((item) => (
+              <Card key={item.modelVersionId} data-testid={`model-row-${item.modelVersionId}`}>
+                <CardHeader>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <CardTitle className="text-lg">{item.name}</CardTitle>
+                      <CardDescription>
+                        v{item.version} · {modelKindLabels[item.kind]} · обновлено{" "}
+                        {formatDateLabel(item.updatedAt ?? item.createdAt)}
+                      </CardDescription>
+                    </div>
+                    <div
+                      className="rounded-full border px-3 py-1 text-sm"
+                      data-testid={`model-status-${item.modelVersionId}`}
+                    >
+                      {modelStatusLabels[item.status]}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+                  <div className="grid gap-2 text-sm text-muted-foreground md:grid-cols-3">
+                    <p>
+                      Режим:{" "}
+                      <span className="font-medium text-foreground">
+                        {modelKindLabels[item.kind]}
+                      </span>
+                    </p>
+                    <p>
+                      Active campaigns:{" "}
+                      <span className="font-medium text-foreground">
+                        {item.usedByActiveCampaigns ?? 0}
+                      </span>
+                    </p>
+                    <p>
+                      Создана:{" "}
+                      <span className="font-medium text-foreground">
+                        {formatDateLabel(item.createdAt)}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      asChild
+                      variant="outline"
+                      data-testid={`model-open-${item.modelVersionId}`}
+                    >
+                      <a href={`/hr/models/${item.modelVersionId}`}>Открыть</a>
+                    </Button>
+                    {resolved.context.role === "hr_admin" ? (
+                      <HrModelCloneButton
+                        sourceModelVersionId={item.modelVersionId}
+                        returnTo="/hr/models"
+                        testId={`model-clone-${item.modelVersionId}`}
+                      />
+                    ) : null}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </InternalAppShell>
   );
 }

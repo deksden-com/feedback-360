@@ -29,6 +29,11 @@ const getQueryValue = (value: string | string[] | undefined): string | undefined
   return undefined;
 };
 
+/**
+ * Employee results dashboard screen.
+ * @screenId SCR-RESULTS-EMPLOYEE
+ * @testIdScope scr-results-employee
+ */
 export default async function ResultsMyDashboardPage({
   searchParams,
 }: {
@@ -92,6 +97,7 @@ export default async function ResultsMyDashboardPage({
         <ResultsPageLayout
           title="Мои результаты"
           subtitle="Выберите кампанию для просмотра итогов."
+          testId="scr-results-employee-root"
         >
           <PageEmptyState
             title="Пока не выбрана кампания"
@@ -162,7 +168,11 @@ export default async function ResultsMyDashboardPage({
         title="Мои результаты"
         subtitle={state.description}
       >
-        <ResultsPageLayout title="Мои результаты" subtitle={state.description}>
+        <ResultsPageLayout
+          title="Мои результаты"
+          subtitle={state.description}
+          testId="scr-results-employee-root"
+        >
           <PageErrorState
             title={state.title}
             description={state.description}
@@ -181,7 +191,11 @@ export default async function ResultsMyDashboardPage({
       title="Мои результаты"
       subtitle="Агрегаты по завершённой кампании 360."
     >
-      <ResultsPageLayout title="Мои результаты" subtitle="Агрегаты по завершённой кампании 360.">
+      <ResultsPageLayout
+        title="Мои результаты"
+        subtitle="Агрегаты по завершённой кампании 360."
+        testId="scr-results-employee-root"
+      >
         {campaignOptions.length > 0 ? (
           <Card data-testid="results-my-campaign-switcher">
             <CardHeader>

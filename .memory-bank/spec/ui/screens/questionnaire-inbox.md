@@ -1,3 +1,14 @@
+---
+screen_id: SCR-QUESTIONNAIRES-INBOX
+route: /questionnaires
+actors:
+  - employee
+  - manager
+  - hr_admin
+  - hr_reader
+test_id_scope: scr-questionnaires-inbox
+---
+
 # Screen spec — Questionnaire inbox
 Status: Draft (2026-03-07)
 

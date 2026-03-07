@@ -8,6 +8,11 @@ import { resolveAppOperationContext } from "@/lib/operation-context";
 import { getFriendlyErrorCopy } from "@/lib/page-state";
 import { redirect } from "next/navigation";
 
+/**
+ * Role-aware internal home dashboard.
+ * @screenId SCR-APP-HOME
+ * @testIdScope scr-app-home
+ */
 export default async function HomePage({
   searchParams,
 }: {
@@ -51,22 +56,33 @@ export default async function HomePage({
       title={dashboard.title}
       subtitle={dashboard.subtitle}
     >
-      <div className="space-y-4" data-testid={`home-role-${resolved.context.role}`}>
-        <Card>
-          <CardHeader className="space-y-2">
+      <div className="space-y-5" data-testid={`home-role-${resolved.context.role}`}>
+        <Card
+          className="overflow-hidden border-border/80 shadow-sm"
+          data-testid="scr-app-home-root"
+        >
+          <CardHeader className="space-y-3 border-b bg-muted/25">
             <CardTitle className="text-2xl font-semibold tracking-tight">
               {dashboard.introTitle}
             </CardTitle>
+            <p className="max-w-2xl text-sm text-muted-foreground">{dashboard.introDescription}</p>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-md border p-4 text-sm">
-              <p className="text-muted-foreground">Активная роль</p>
-              <p className="font-medium" data-testid="home-role-label">
-                {dashboard.roleLabel}
-              </p>
-              <p className="mt-2 text-muted-foreground" data-testid="home-intro-description">
-                {dashboard.introDescription}
-              </p>
+          <CardContent className="space-y-4 pt-6">
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+              <div className="rounded-2xl border border-border/80 bg-background p-4 text-sm">
+                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                  Активная роль
+                </p>
+                <p className="mt-2 text-lg font-semibold" data-testid="home-role-label">
+                  {dashboard.roleLabel}
+                </p>
+                <p className="mt-2 text-muted-foreground" data-testid="home-intro-description">
+                  {dashboard.introDescription}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm text-primary">
+                Все действия открываются в текущем company context.
+              </div>
             </div>
           </CardContent>
         </Card>

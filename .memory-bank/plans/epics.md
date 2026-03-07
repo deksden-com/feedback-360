@@ -140,3 +140,10 @@ Status: Draft (2026-03-03)
 - XE CLI + scenario runner
 - XE-001 first campaign happy path
   - Детали: [EP-020 Feature catalog](epics/EP-020-cross-epic-scenarios/features/index.md) — first-class сквозные сценарии, которые запускаются через CLI и дают artifacts/evidence. Читать, чтобы продукт проверялся end-to-end, а не только по slice acceptance.
+
+## Epic 23 — UI traceability and SaaS polish
+- screen registry + test-id registry rollout
+- app shell identity chrome and familiar account controls
+- CRUD hierarchy polish for employees/org
+- content-first questionnaire/results hierarchy
+  - Детали: [EP-021 Feature catalog](epics/EP-021-ui-traceability-saas-polish/features/index.md) — UI traceability и product-feel polish без потери текущей функциональности. Читать, чтобы рефакторить интерфейс системно и с воспроизводимыми acceptance сценариями.

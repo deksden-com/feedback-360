@@ -52,6 +52,9 @@ test("FT-0132: structured questionnaire restores draft and submits successfully"
   await loginWithCompany(page, String(userId), String(companyId));
 
   await page.goto(`/questionnaires/${questionnaireId}`);
+  await expect(page.getByTestId("scr-questionnaires-fill-root")).toBeVisible({
+    timeout: 60_000,
+  });
   await expect(page.getByTestId("questionnaire-progress")).toContainText("3/4", {
     timeout: 60_000,
   });

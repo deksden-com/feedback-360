@@ -1,3 +1,24 @@
+---
+screen_ids:
+  - SCR-AUTH-LOGIN
+  - SCR-COMPANY-SWITCHER
+  - SCR-APP-HOME
+  - SCR-HR-EMPLOYEES
+  - SCR-HR-EMPLOYEE-CREATE
+  - SCR-HR-EMPLOYEE-DETAIL
+  - SCR-HR-ORG
+  - SCR-HR-MODELS
+  - SCR-HR-CAMPAIGNS
+  - SCR-HR-CAMPAIGN-CREATE
+  - SCR-HR-CAMPAIGN-DETAIL
+  - SCR-HR-CAMPAIGN-MATRIX
+  - SCR-QUESTIONNAIRES-INBOX
+  - SCR-QUESTIONNAIRES-FILL
+  - SCR-RESULTS-EMPLOYEE
+  - SCR-RESULTS-MANAGER
+  - SCR-RESULTS-HR
+---
+
 # Tutorial — запустить первую 360-кампанию руками
 Status: Draft (2026-03-07)
 
@@ -61,7 +82,7 @@ HR открывает приложение, проходит login и попад
 
 Ниже — реальный screenshot такого входа в компании `Acme 360 A`.
 
-![HR home](../assets/manual-first-campaign/step-01-hr-home.png)
+![HR home](../assets/manual-first-campaign/step-01-hr-home__(SCR-APP-HOME).png)
 
 ### Шаг 2. HR заводит сотрудников
 
@@ -78,15 +99,15 @@ HR открывает справочник сотрудников и:
 
 Сейчас в интерфейсе это выглядит так:
 
-![Employee directory](../assets/manual-first-campaign/step-02-employees.png)
+![Employee directory](../assets/manual-first-campaign/step-02-employees__(SCR-HR-EMPLOYEES).png)
 
 Экран создания сотрудника:
 
-![Employee create](../assets/manual-first-campaign/step-02b-employee-create.png)
+![Employee create](../assets/manual-first-campaign/step-02b-employee-create__(SCR-HR-EMPLOYEE-CREATE).png)
 
 И карточка отдельного сотрудника:
 
-![Employee profile](../assets/manual-first-campaign/step-02c-employee-profile.png)
+![Employee profile](../assets/manual-first-campaign/step-02c-employee-profile__(SCR-HR-EMPLOYEE-DETAIL).png)
 
 Что руками проверить на этом шаге:
 
@@ -109,7 +130,7 @@ HR открывает редактор оргструктуры и:
 
 Текущий экран оргструктуры:
 
-![Org editor](../assets/manual-first-campaign/step-03-org.png)
+![Org editor](../assets/manual-first-campaign/step-03-org__(SCR-HR-ORG).png)
 
 Что руками проверить на этом шаге:
 
@@ -132,11 +153,11 @@ HR открывает каталог моделей и:
 
 Текущий каталог моделей:
 
-![Model catalog](../assets/manual-first-campaign/step-04-models.png)
+![Model catalog](../assets/manual-first-campaign/step-04-models__(SCR-HR-MODELS).png)
 
 Экран создания draft-модели:
 
-![Model create](../assets/manual-first-campaign/step-04b-model-create.png)
+![Model create](../assets/manual-first-campaign/step-04b-model-create__(SCR-HR-MODEL-CREATE).png)
 
 Что руками проверить на этом шаге:
 
@@ -160,11 +181,11 @@ HR открывает раздел кампаний и:
 
 Текущий список HR-кампаний:
 
-![Campaign list](../assets/manual-first-campaign/step-05-campaigns.png)
+![Campaign list](../assets/manual-first-campaign/step-05-campaigns__(SCR-HR-CAMPAIGNS).png)
 
 Экран создания draft-кампании:
 
-![Campaign create](../assets/manual-first-campaign/step-05b-campaign-create.png)
+![Campaign create](../assets/manual-first-campaign/step-05b-campaign-create__(SCR-HR-CAMPAIGN-CREATE).png)
 
 Что руками проверить на этом шаге:
 
@@ -192,11 +213,11 @@ HR добавляет в кампанию сотрудников и провер
 
 Карточка кампании / operational detail:
 
-![Campaign detail](../assets/manual-first-campaign/step-06-campaign-detail.png)
+![Campaign detail](../assets/manual-first-campaign/step-06-campaign-detail__(SCR-HR-CAMPAIGN-DETAIL).png)
 
 Матрица оценивания:
 
-![Matrix builder](../assets/manual-first-campaign/step-07-matrix-builder.png)
+![Matrix builder](../assets/manual-first-campaign/step-07-matrix-builder__(SCR-HR-CAMPAIGN-MATRIX).png)
 
 Что руками проверить на этом шаге:
 
@@ -218,7 +239,7 @@ HR добавляет в кампанию сотрудников и провер
 
 Ниже — реальный beta-screen той же кампании уже в рабочем состоянии. Он полезен как ориентир, что после старта HR работает уже не с draft, а с operational detail кампании.
 
-![Campaign started detail](../assets/manual-first-campaign/step-07b-campaign-started-detail.png)
+![Campaign started detail](../assets/manual-first-campaign/step-07b-campaign-started-detail__(SCR-HR-CAMPAIGN-DETAIL).png)
 
 Что руками проверить на этом шаге:
 
@@ -243,25 +264,25 @@ HR добавляет в кампанию сотрудников и провер
 
 Экран входа с XE token helper:
 
-![XE token login helper](../assets/manual-first-campaign/step-08a-xe-token-login.png)
+![XE token login helper](../assets/manual-first-campaign/step-08a-xe-token-login__(SCR-AUTH-LOGIN).png)
 
 Дальше участник открывает список своих анкет.
 
 > Ниже — representative screenshot продукта из acceptance/XE evidence. Он показывает реальный экран анкеты, но не из того же самого HR demo workspace, что шаги `1–7`.
 
-![Questionnaire list](../assets/manual-first-campaign/step-08b-questionnaire-list.png)
+![Questionnaire list](../assets/manual-first-campaign/step-08b-questionnaire-list__(SCR-QUESTIONNAIRES-INBOX).png)
 
 Если участник не готов отправить ответы сразу, он сохраняет draft и возвращается позже.
 
 > Representative screenshot из acceptance/evidence.
 
-![Questionnaire draft](../assets/manual-first-campaign/step-08c-questionnaire-draft.png)
+![Questionnaire draft](../assets/manual-first-campaign/step-08c-questionnaire-draft__(SCR-QUESTIONNAIRES-FILL).png)
 
 Когда анкета заполнена, участник отправляет её, и она становится read-only.
 
 > Representative screenshot из acceptance/evidence.
 
-![Questionnaire submitted](../assets/manual-first-campaign/step-08d-questionnaire-submitted.png)
+![Questionnaire submitted](../assets/manual-first-campaign/step-08d-questionnaire-submitted__(SCR-QUESTIONNAIRES-FILL).png)
 
 Что руками проверить на этом шаге:
 
@@ -294,15 +315,15 @@ HR добавляет в кампанию сотрудников и провер
 
 Сотрудник видит личный dashboard без raw comments:
 
-![Employee results](../assets/manual-first-campaign/step-10a-employee-results.png)
+![Employee results](../assets/manual-first-campaign/step-10a-employee-results__(SCR-RESULTS-EMPLOYEE).png)
 
 Руководитель видит командный экран результатов:
 
-![Manager results](../assets/manual-first-campaign/step-10b-manager-results.png)
+![Manager results](../assets/manual-first-campaign/step-10b-manager-results__(SCR-RESULTS-MANAGER).png)
 
 HR видит полную витрину результатов:
 
-![HR results](../assets/manual-first-campaign/step-10c-hr-results.png)
+![HR results](../assets/manual-first-campaign/step-10c-hr-results__(SCR-RESULTS-HR).png)
 
 Что руками проверить на этом шаге:
 

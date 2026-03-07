@@ -8,6 +8,11 @@ import { redirect } from "next/navigation";
 import { HrModelEditor } from "@/features/models-matrix/components/hr-model-editor";
 import { buildEmptyModelDraft, getQueryValue } from "@/features/models-matrix/lib/models-matrix";
 
+/**
+ * HR model create screen.
+ * @screenId SCR-HR-MODEL-CREATE
+ * @testIdScope scr-hr-model-create
+ */
 export default async function NewHrModelPage({
   searchParams,
 }: {
@@ -68,7 +73,9 @@ export default async function NewHrModelPage({
       title="Создать draft модели"
       subtitle="Выберите режим оценки, опишите groups/competencies и сохраните draft перед publish."
     >
-      <HrModelEditor initialDraft={buildEmptyModelDraft(kind)} mode="create" canMutate />
+      <div data-testid="scr-hr-model-create-root">
+        <HrModelEditor initialDraft={buildEmptyModelDraft(kind)} mode="create" canMutate />
+      </div>
     </InternalAppShell>
   );
 }

@@ -50,6 +50,10 @@ test("FT-0131: questionnaire inbox supports status filters and resume flow", asy
   await loginWithCompany(page, String(userId), String(companyId));
 
   await page.goto("/questionnaires");
+  await expect(page.getByTestId("scr-questionnaires-inbox-root")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId("scr-questionnaires-inbox-toolbar")).toBeVisible({
+    timeout: 60_000,
+  });
   await expect(page.getByTestId("questionnaire-summary-total")).toContainText("3", {
     timeout: 60_000,
   });

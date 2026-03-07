@@ -13,6 +13,11 @@ Status: Updated (2026-03-05)
 - Tailwind v4 — текущий основной путь для Next.js и минимальный runtime overhead для utility-first стилизации.
 - shadcn/ui даёт быстрый и контролируемый старт UI без vendor lock-in: код компонентов хранится у нас в репозитории и адаптируется под доменные экраны.
 
+## Design-system layering
+- `Tailwind v4 + shadcn/ui` — foundation stack.
+- Visual tokens, status semantics и repeated product patterns живут не “по месту”, а в [UI design system](../ui/design-system/index.md).
+- Любой заметный UI polish/refactor должен сначала сверяться с design-system docs, а уже потом менять screen-level implementation.
+
 ## Implementation baseline (MVP)
 - `apps/web/postcss.config.mjs`: `@tailwindcss/postcss` plugin.
 - `apps/web/src/app/globals.css`: `@import "tailwindcss"` + shadcn theme variables.

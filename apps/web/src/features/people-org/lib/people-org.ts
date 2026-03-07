@@ -24,6 +24,31 @@ export const getEmployeeDisplayName = (
   return parts.length > 0 ? parts.join(" ") : employee.email;
 };
 
+export const getDisplayInitials = (value: string): string => {
+  const parts = value
+    .split(/\s+/)
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+
+  if (parts.length === 0) {
+    return "—";
+  }
+
+  if (parts.length === 1) {
+    return (parts[0]?.slice(0, 2) ?? "—").toUpperCase();
+  }
+
+  return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
+};
+
+export const getShortIdentifier = (value: string, visible = 6): string => {
+  if (value.length <= visible) {
+    return value;
+  }
+
+  return `${value.slice(0, visible)}…`;
+};
+
 export const getRoleLabel = (role?: MembershipRole): string | undefined => {
   if (!role) {
     return undefined;
@@ -65,6 +90,18 @@ export const getBadgeClassName = (tone: "default" | "warning" | "error"): string
     return "border-destructive/40 bg-destructive/5 text-destructive";
   }
   return "border-border bg-muted/20 text-foreground";
+};
+
+export const getBadgeVariant = (
+  tone: "default" | "warning" | "error",
+): "neutral" | "warning" | "danger" => {
+  if (tone === "warning") {
+    return "warning";
+  }
+  if (tone === "error") {
+    return "danger";
+  }
+  return "neutral";
 };
 
 export const buildDepartmentTree = (items: DepartmentListItem[]) => {

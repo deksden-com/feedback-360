@@ -15,5 +15,6 @@ Status: Draft (2026-03-03)
 - [AI](ai/index.md) — запуск job, статусы, формат результатов и связка с webhook. Читать, чтобы AI-обработка была устойчивой и предсказуемой.
 - [CLI](cli/index.md) — CLI контракт и команды (human+json). Читать, чтобы агент/разработчик мог воспроизводить сценарии без UI.
 - [UI](ui/index.md) — sitemap/flows и минимальные wireframes (без дизайна). Читать, чтобы UI оставался “тонким” поверх typed client.
+- [UI design system](ui/design-system/index.md) — tokens, semantic colors, component usage и sync policy. Читать, чтобы visual language эволюционировал системно и не расходился по экранным patch-ам.
 - [Testing](testing/index.md) — стратегия тестирования и “golden scenarios”. Читать, чтобы понимать минимальный набор автопроверок на MVP.
 - [Operations](operations/index.md) — runbook, env vars, cron jobs, observability, privacy/retention. Читать, чтобы система была эксплуатационно жизнеспособной.
