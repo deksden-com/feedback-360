@@ -7,7 +7,7 @@ describe("FT-0204 XE CLI", () => {
     process.exitCode = undefined;
   });
 
-  it("lists scenarios, creates run, inspects lock, and issues actor storage state", async () => {
+  it("lists scenarios, creates run, inspects lock, and issues actor auth bootstrap", async () => {
     vi.doMock("@feedback-360/xe-runner", () => ({
       listAvailableXeScenarios: async () => [
         {
@@ -50,6 +50,12 @@ describe("FT-0204 XE CLI", () => {
         format: "storage-state",
         path: ".xe-runs/RUN-001__XE-001/storage-state/subject.json",
         baseUrl: "http://127.0.0.1:3000",
+      }),
+      issueXeActorLoginToken: async () => ({
+        actor: "subject",
+        format: "token",
+        token: "xe1.test-token",
+        baseUrl: "https://beta.go360go.ru",
       }),
       listXeRunNotifications: async () => ({
         items: [
@@ -142,6 +148,20 @@ describe("FT-0204 XE CLI", () => {
       "--base-url",
       "http://127.0.0.1:3000",
     ]);
+    await runCli([
+      "node",
+      "feedback360",
+      "xe",
+      "auth",
+      "issue",
+      "RUN-001",
+      "--actor",
+      "subject",
+      "--base-url",
+      "https://beta.go360go.ru",
+      "--format",
+      "token",
+    ]);
 
     expect(errorSpy).toHaveBeenCalledTimes(0);
     const output = logSpy.mock.calls.map((call) => String(call[0] ?? "")).join("\n");
@@ -149,5 +169,6 @@ describe("FT-0204 XE CLI", () => {
     expect(output).toContain("XE run: RUN-001");
     expect(output).toContain("XE lock:");
     expect(output).toContain("Issued storage-state for subject");
+    expect(output).toContain("Issued token for subject: xe1.test-token");
   });
 });

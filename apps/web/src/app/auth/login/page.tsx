@@ -5,14 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const isDevLike = process.env.NEXT_PUBLIC_APP_ENV !== "prod";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [xeToken, setXeToken] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showXeToken, setShowXeToken] = useState(false);
   const [message, setMessage] = useState<string | undefined>();
   const [error, setError] = useState<string | undefined>();
 
@@ -88,6 +90,56 @@ export default function LoginPage() {
     }
   };
 
+  const submitXeToken = async () => {
+    setError(undefined);
+    setMessage(undefined);
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/dev/xe-token-login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ token: xeToken }),
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        actor?: string;
+        runId?: string;
+      };
+      if (!response.ok || !payload.ok) {
+        setError(payload.error ?? "Не удалось выполнить XE-вход.");
+        return;
+      }
+
+      setMessage(`XE-вход выполнен: ${payload.actor ?? "actor"} (${payload.runId ?? "run"}).`);
+      router.push("/");
+    } catch {
+      setError("Не удалось выполнить XE-вход.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isDevLike) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === "x") {
+        event.preventDefault();
+        setShowXeToken((current) => !current);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
+
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-lg items-center p-6">
       <Card className="w-full">
@@ -122,17 +174,62 @@ export default function LoginPage() {
 
           {isDevLike ? (
             <div className="rounded-md border border-dashed p-3">
-              <p className="mb-2 text-xs text-muted-foreground">
-                Dev helper: вход тестовым shared-user (seed `S1_multi_tenant_min`).
-              </p>
-              <Button
-                variant="secondary"
-                className="w-full"
-                onClick={runDemoLogin}
-                disabled={isSubmitting}
-              >
-                Войти в demo-режиме
-              </Button>
+              <div className="space-y-3">
+                <div>
+                  <p className="mb-2 text-xs text-muted-foreground">
+                    Dev helper: вход тестовым shared-user (seed `S1_multi_tenant_min`).
+                  </p>
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    onClick={runDemoLogin}
+                    disabled={isSubmitting}
+                  >
+                    Войти в demo-режиме
+                  </Button>
+                </div>
+
+                <div className="border-t pt-3">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <p className="text-xs text-muted-foreground">
+                      XE helper: вход по short-lived token из CLI (`Ctrl/Cmd+Shift+X`).
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      type="button"
+                      onClick={() => setShowXeToken((current) => !current)}
+                    >
+                      {showXeToken ? "Скрыть" : "Показать"}
+                    </Button>
+                  </div>
+
+                  {showXeToken ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="xe-token">XE token</Label>
+                      <Input
+                        id="xe-token"
+                        type="password"
+                        autoComplete="off"
+                        placeholder="xe1.…"
+                        value={xeToken}
+                        onChange={(event) => setXeToken(event.target.value)}
+                        disabled={isSubmitting}
+                        data-testid="xe-token-input"
+                      />
+                      <Button
+                        variant="secondary"
+                        className="w-full"
+                        onClick={submitXeToken}
+                        disabled={isSubmitting || xeToken.trim().length === 0}
+                        data-testid="xe-token-submit"
+                      >
+                        {isSubmitting ? "Вход..." : "Войти по XE token"}
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
             </div>
           ) : null}
         </CardContent>

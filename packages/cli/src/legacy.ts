@@ -294,6 +294,7 @@ type XeRunDeleteOptions = XeBaseOptions & {
 type XeAuthIssueOptions = XeBaseOptions & {
   actor: string;
   baseUrl: string;
+  format?: "storage-state" | "token";
 };
 
 type XeLockStatusOptions = XeBaseOptions & {
@@ -3350,25 +3351,37 @@ Examples:
 
   xeAuthCommand
     .command("issue <runId>")
-    .description("Issue actor storage state for XE browser automation.")
+    .description("Issue actor browser bootstrap for XE automation or manual beta login.")
     .requiredOption("--actor <actor>", "Actor key from bindings.")
     .requiredOption("--base-url <url>", "Base URL for dev/beta app.")
+    .option("--format <format>", "Bootstrap format: storage-state|token.", "storage-state")
     .option("--json", "Output machine-readable JSON.")
     .action(async (runId: string, options: XeAuthIssueOptions) => {
       try {
-        const { issueXeActorStorageState } = await loadXeRunner();
-        const issued = await issueXeActorStorageState({
-          runId,
-          actor: options.actor,
-          baseUrl: options.baseUrl,
-        });
+        const { issueXeActorLoginToken, issueXeActorStorageState } = await loadXeRunner();
+        const issued =
+          options.format === "token"
+            ? await issueXeActorLoginToken({
+                runId,
+                actor: options.actor,
+                baseUrl: options.baseUrl,
+              })
+            : await issueXeActorStorageState({
+                runId,
+                actor: options.actor,
+                baseUrl: options.baseUrl,
+              });
         if (options.json) {
           console.log(JSON.stringify({ ok: true, data: issued }, null, 2));
           return;
         }
-        console.log(
-          `Issued ${issued.format} for ${issued.actor}: ${issued.path ?? issued.baseUrl}`,
-        );
+        if (issued.format === "token") {
+          console.log(
+            `Issued token for ${issued.actor}: ${issued.token}\nOpen ${issued.baseUrl}/auth/login and use XE token login.`,
+          );
+          return;
+        }
+        console.log(`Issued storage-state for ${issued.actor}: ${issued.path ?? issued.baseUrl}`);
       } catch (error) {
         emitError(
           errorFromUnknown(error, "invalid_input", "Failed to issue XE auth bootstrap."),

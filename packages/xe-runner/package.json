@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "exports": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./token": "./src/token.ts"
+  },
   "scripts": {
     "lint": "biome check .",
     "format": "biome format --write .",

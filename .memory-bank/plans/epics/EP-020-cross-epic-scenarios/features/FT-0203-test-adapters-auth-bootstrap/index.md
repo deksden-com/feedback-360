@@ -18,6 +18,7 @@ Acceptance scenario:
 ## Progress note (2026-03-07)
 - XE runner использует notification intents как проверяемый test-adapter surface и test-only storage-state bootstrap для actor sessions на `local|beta`.
 - Для сценариев каждая actor session создаётся отдельно и потом живёт как обычная product session.
+- Для ручной beta-проверки добавлен XE token login: CLI выпускает short-lived signed token, login page принимает его только в `local|beta`.
 
 ## Quality checks evidence (2026-03-07)
 - `pnpm --filter @feedback-360/xe-runner lint` → passed.
@@ -32,6 +33,7 @@ Acceptance scenario:
 - Covered acceptance:
   - `campaign.start` создаёт invite intents, которые видны раннеру;
   - `xe auth issue ... --format storage-state` создаёт usable browser session для actor;
+  - `xe auth issue ... --format token` даёт manual login path для beta-проверки;
   - actor screen открывается без GUI magic-link flow.
 - Artifacts:
   - notifications snapshot.
