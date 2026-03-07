@@ -20,6 +20,7 @@
 
 ## Key folders (SSoT map)
 - [Specifications (`spec/`)](spec/index.md): все нормативные требования (WHAT) по домену, безопасности, тестам, ops и интерфейсам. Читать как главный источник правил поведения системы.
+- [Guides (`guides/`)](guides/index.md): потребительская документация в стиле Diátaxis — tutorials/how-to/explanation/reference. Читать, когда нужно объяснить, как пользоваться системой, не смешивая это с нормативным SSoT.
 - [Plans (`plans/`)](plans/index.md): roadmap, эпики/фичи, implementation playbook и verification matrix. Читать, чтобы понимать порядок работ и критерии приёмки.
 - [ADR (`adr/`)](adr/index.md): решения уровня “почему” и ключевые компромиссы. Читать перед изменением архитектурных подходов.
 - [Memory Bank Bible (`mbb/`)](mbb/index.md): правила ведения документации (SSoT, аннотированные ссылки, индексы, шаблоны). Читать при любом изменении меморибанка.
@@ -35,6 +36,7 @@
 - [Testing package (`spec/testing/`)](spec/testing/index.md): seed-сценарии, golden scenarios, traceability и test strategy. Читать, чтобы строить проверяемые и воспроизводимые тесты.
 - [XE contracts (`spec/testing/xe-*.md`)](spec/testing/index.md): XE run model, CLI contract, JSON schemas и runner structure. Читать, чтобы строить cross-epic сценарии на одном согласованном основании.
 - [Operations package (`spec/operations/`)](spec/operations/index.md): git flow, deployment architecture, runbook, DNS, privacy/retention. Читать перед релизом и настройкой окружений.
+- [Guides package (`guides/`)](guides/index.md): пользовательские how-to/tutorial/explanation/reference документы поверх продукта и сценариев. Читать, когда нужен понятный product walkthrough без перегруза внутренними спецификациями.
 - [CLI spec (`spec/cli/`)](spec/cli/index.md): каталог команд, human/`--json` форматы, контракт CLI-first процесса. Читать для расширения и стабилизации автоматизируемых сценариев.
 - [UI spec (`spec/ui/`)](spec/ui/index.md): sitemap/flows и минимальные wireframes без логики в клиенте. Читать для согласованной эволюции интерфейса.
 - [UI screen specs (`spec/ui/screens/`)](spec/ui/screens/index.md): отдельные экранные контракты для UI и XE automation. Читать, чтобы не смешивать sitemap с подробным поведением конкретных экранов.

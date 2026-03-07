@@ -22,6 +22,7 @@ Status: Updated (2026-03-06)
   - `spec/ui/screens/`: screen specs по отдельным экранам.
   - `spec/ui/pom/`: mapping screen specs → automation/POM/test ids.
   - `spec/testing/xe-*.md`: нормативные правила XE run/scenario model.
+- `.memory-bank/guides/`: пользовательские документы в стиле Diátaxis (`tutorials/`, `how-to/`, `explanation/`, `reference/`). Храним здесь operational/product docs “как пользоваться”, не дублируя нормативные правила из `spec/`.
 - `.memory-bank/plans/`: roadmap, эпики/фичи, acceptance сценарии и verification matrix.
   - `plans/xe/`: каталог cross-epic сценариев и их фаз.
 - `.memory-bank/adr/`: WHY — архитектурные решения.

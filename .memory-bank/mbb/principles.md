@@ -12,6 +12,7 @@ Status: Draft (2026-03-03)
 
 ## 4) WHY vs WHAT vs HOW
 - `spec/` — WHAT (норматив: как система должна работать).
+- `guides/` — user-facing docs: tutorials/how-to/explanation/reference (как системой пользоваться и как объяснять её поведение людям).
 - `adr/` — WHY (почему приняли такое решение).
 - `plans/` — как делаем по шагам (что в каком порядке и как проверяем).
 Код — HOW (детали реализации), и не должен копироваться в меморибанк (кроме ссылок).
@@ -31,6 +32,7 @@ Status: Draft (2026-03-03)
 Для новых UI/XE документов это правило применяется явно:
 - новые `spec/ui/screens/*` и `spec/ui/pom/*` документы обязаны быть добавлены в `spec/ui/index.md` и соответствующий подиндекс;
 - новые `plans/xe/*` и `spec/testing/xe-*` документы обязаны быть добавлены в `plans/index.md`, `plans/xe/index.md` или `spec/testing/index.md`.
+- новые `guides/*` документы обязаны быть добавлены в `guides/index.md` и индекс соответствующего Diátaxis-раздела (`tutorials/`, `how-to/`, `explanation/`, `reference/`).
 
 ## 7) Annotated links (обязательное правило)
 Каждая ссылка в markdown должна быть аннотирована:
