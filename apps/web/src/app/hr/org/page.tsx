@@ -156,12 +156,96 @@ export default async function HrOrgPage({
           />
         ) : null}
 
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_320px]">
+          <Card className="overflow-hidden rounded-[2rem] border-0 bg-[#2563eb] text-white shadow-[0_20px_50px_-24px_rgba(37,99,235,0.9)]">
+            <CardContent className="relative p-8 md:p-10">
+              <div className="relative z-10 max-w-2xl space-y-4">
+                <div className="inline-flex items-center rounded-full bg-white/12 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-white/80">
+                  Organization Design
+                </div>
+                <div className="space-y-3">
+                  <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+                    Иерархия подразделений должна читаться с первого взгляда
+                  </h2>
+                  <p className="max-w-xl text-sm leading-6 text-white/80 md:text-base">
+                    Слева — дерево подразделений, справа — контекст выбранного узла и move flow для
+                    сотрудников. Это основной источник структуры для кампаний и матрицы.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {resolved.context.role === "hr_admin" ? (
+                    <Button
+                      asChild
+                      size="lg"
+                      className="rounded-xl bg-white px-5 text-primary shadow-none hover:bg-white/90"
+                    >
+                      <a href="/hr/employees/new">Добавить сотрудника</a>
+                    </Button>
+                  ) : null}
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="rounded-xl border-white/20 bg-white/10 px-5 text-white hover:bg-white/15 hover:text-white"
+                  >
+                    <a href="/hr/employees">К справочнику</a>
+                  </Button>
+                </div>
+              </div>
+              <div className="absolute right-6 top-6 hidden h-36 w-36 rounded-[2rem] bg-white/10 lg:block" />
+              <div className="absolute bottom-6 right-8 hidden h-24 w-24 rounded-[1.5rem] border border-white/10 bg-white/8 lg:block" />
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+            <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Подразделений
+              </p>
+              <p className="mt-3 text-3xl font-semibold tracking-tight">
+                {departments.data.items.length}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Всего узлов в иерархии active company.
+              </p>
+            </div>
+            <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Сотрудников
+              </p>
+              <p className="mt-3 text-3xl font-semibold tracking-tight">
+                {directory.data.items.length}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Актуальное HR-состояние во всей компании.
+              </p>
+            </div>
+            <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                В выбранном узле
+              </p>
+              <p className="mt-3 text-3xl font-semibold tracking-tight">
+                {selectedDepartment?.memberCount ?? 0}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Сотрудники, которых видит текущий узел.
+              </p>
+            </div>
+          </div>
+        </section>
+
         <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-          <Card className="border-border/80 shadow-sm" data-testid="org-tree-card">
+          <Card
+            className="rounded-[1.75rem] border-border/70 shadow-sm"
+            data-testid="org-tree-card"
+          >
             <CardHeader>
-              <CardTitle className="text-xl">Дерево подразделений</CardTitle>
+              <CardTitle className="text-2xl font-semibold tracking-tight">
+                Дерево подразделений
+              </CardTitle>
               <CardDescription>
-                Иерархия departments внутри active company с подсказкой по числу сотрудников.
+                Иерархия departments внутри active company с числом сотрудников и быстрым входом в
+                detail view.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -175,22 +259,22 @@ export default async function HrOrgPage({
                 departmentTree.map((department) => (
                   <div
                     key={department.departmentId}
-                    className={`rounded-2xl border p-3 transition ${
+                    className={`rounded-[1.5rem] border p-4 transition ${
                       department.departmentId === selectedDepartment?.departmentId
-                        ? "border-primary/30 bg-primary/5"
-                        : "border-border/80 bg-background"
+                        ? "border-primary/25 bg-primary/5 shadow-sm"
+                        : "border-border/70 bg-background"
                     }`}
                     style={{ marginLeft: `${department.depth * 20}px` }}
                     data-testid={`org-tree-row-${department.departmentId}`}
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div>
-                        <p className="font-medium">{department.name}</p>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="space-y-1">
+                        <p className="font-semibold">{department.name}</p>
                         <p className="text-sm text-muted-foreground">
                           Сотрудников: {department.memberCount}
                         </p>
                       </div>
-                      <Button asChild variant="outline">
+                      <Button asChild variant="outline" className="rounded-xl">
                         <a
                           href={`/hr/org?departmentId=${department.departmentId}${selectedEmployee ? `&employeeId=${selectedEmployee.employeeId}` : ""}`}
                         >
@@ -206,7 +290,7 @@ export default async function HrOrgPage({
 
           <div className="space-y-4">
             <Card
-              className="border-border/80 shadow-sm"
+              className="rounded-[1.75rem] border-border/70 shadow-sm"
               data-testid="scr-hr-org-selected-department"
             >
               <CardHeader>
@@ -235,7 +319,7 @@ export default async function HrOrgPage({
               </CardContent>
             </Card>
 
-            <Card className="border-border/80 shadow-sm">
+            <Card className="rounded-[1.75rem] border-border/70 shadow-sm">
               <CardHeader>
                 <CardTitle className="text-xl">Редактор подразделения</CardTitle>
                 <CardDescription>

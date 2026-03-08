@@ -147,3 +147,9 @@ Status: Draft (2026-03-03)
 - CRUD hierarchy polish for employees/org
 - content-first questionnaire/results hierarchy
   - Детали: [EP-021 Feature catalog](epics/EP-021-ui-traceability-saas-polish/features/index.md) — UI traceability и product-feel polish без потери текущей функциональности. Читать, чтобы рефакторить интерфейс системно и с воспроизводимыми acceptance сценариями.
+
+## Epic 24 — Unified visual system rollout
+- design system v2 based on the new login/dashboard/questionnaire baseline
+- auth, shell, CRUD, questionnaire and results screens in one visual family
+- screenshot and guide refresh after material redesign
+  - Детали: [EP-022 Feature catalog](epics/EP-022-visual-system-rollout/features/index.md) — rollout нового visual baseline по screen groups. Читать, чтобы продолжить редизайн поэтапно и без потери функциональности.

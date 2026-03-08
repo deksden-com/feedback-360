@@ -120,39 +120,94 @@ export default async function HrCampaignsPage({
       subtitle="Campaign portfolio: список, статусы, быстрый переход в detail dashboard и создание новых draft."
     >
       <div className="space-y-4" data-testid="scr-hr-campaigns-root">
-        <div className="flex flex-wrap gap-2" data-testid="scr-hr-campaigns-toolbar">
-          <Button asChild variant="outline">
-            <a href="/results/hr">HR результаты</a>
-          </Button>
-          {resolved.context.role === "hr_admin" ? (
-            <Button asChild data-testid="scr-hr-campaigns-create">
-              <a href="/hr/campaigns/new">Создать draft</a>
-            </Button>
-          ) : null}
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <Card data-testid="campaign-count-all">
-            <CardHeader>
-              <CardTitle className="text-base">Все кампании</CardTitle>
-            </CardHeader>
-            <CardContent className="text-3xl font-semibold">
-              {campaigns.data.items.length}
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_320px]">
+          <Card className="overflow-hidden rounded-[2rem] border-0 bg-[#2563eb] text-white shadow-[0_20px_50px_-24px_rgba(37,99,235,0.9)]">
+            <CardContent className="relative p-8 md:p-10">
+              <div className="relative z-10 max-w-2xl space-y-4">
+                <div className="inline-flex items-center rounded-full bg-white/12 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-white/80">
+                  Campaign Portfolio
+                </div>
+                <div className="space-y-3">
+                  <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+                    Рабочий стол кампаний должен показывать цикл оценки целиком
+                  </h2>
+                  <p className="max-w-xl text-sm leading-6 text-white/80 md:text-base">
+                    Сначала активные кампании и стадии lifecycle, потом quick actions и detail
+                    dashboards. Экран помогает быстро понять, что уже идёт, что заблокировано и где
+                    нужен HR.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3" data-testid="scr-hr-campaigns-toolbar">
+                  {resolved.context.role === "hr_admin" ? (
+                    <Button
+                      asChild
+                      size="lg"
+                      className="rounded-xl bg-white px-5 text-primary shadow-none hover:bg-white/90"
+                      data-testid="scr-hr-campaigns-create"
+                    >
+                      <a href="/hr/campaigns/new">Создать draft</a>
+                    </Button>
+                  ) : null}
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="rounded-xl border-white/20 bg-white/10 px-5 text-white hover:bg-white/15 hover:text-white"
+                  >
+                    <a href="/results/hr">HR результаты</a>
+                  </Button>
+                </div>
+              </div>
+              <div className="absolute right-6 top-6 hidden h-36 w-36 rounded-[2rem] bg-white/10 lg:block" />
+              <div className="absolute bottom-6 right-8 hidden h-24 w-24 rounded-[1.5rem] border border-white/10 bg-white/8 lg:block" />
             </CardContent>
           </Card>
-          {campaignStatusOrder.map((status) => (
-            <Card key={status} data-testid={`campaign-count-${status}`}>
-              <CardHeader>
-                <CardTitle className="text-base">{campaignStatusLabels[status]}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-3xl font-semibold">
-                {getCampaignStatusCount(campaigns.data.items, status)}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
 
-        <Card data-testid="scr-hr-campaigns-filters">
+          <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+            <div
+              className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm"
+              data-testid="campaign-count-all"
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Все кампании
+              </p>
+              <p className="mt-3 text-3xl font-semibold tracking-tight">
+                {campaigns.data.items.length}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Полный каталог кампаний в active company.
+              </p>
+            </div>
+            <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Активные
+              </p>
+              <p className="mt-3 text-3xl font-semibold tracking-tight">
+                {getCampaignStatusCount(campaigns.data.items, "started")}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Кампании, которые сейчас собирают ответы.
+              </p>
+            </div>
+            <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Требуют внимания
+              </p>
+              <p className="mt-3 text-3xl font-semibold tracking-tight">
+                {getCampaignStatusCount(campaigns.data.items, "processing_ai") +
+                  getCampaignStatusCount(campaigns.data.items, "ai_failed")}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                AI processing и failed кампании, где HR чаще нужен первым.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <Card
+          className="rounded-[1.75rem] border-border/70 shadow-sm"
+          data-testid="scr-hr-campaigns-filters"
+        >
           <CardHeader>
             <CardTitle className="text-xl">Фильтры</CardTitle>
             <CardDescription>
@@ -165,13 +220,16 @@ export default async function HrCampaignsPage({
               variant={!activeStatus ? "secondary" : "outline"}
               data-testid="campaign-filter-all"
             >
-              <a href="/hr/campaigns">Все</a>
+              <a href="/hr/campaigns" className="rounded-xl">
+                Все
+              </a>
             </Button>
             {campaignStatusOrder.map((status) => (
               <Button
                 asChild
                 key={status}
                 variant={activeStatus === status ? "secondary" : "outline"}
+                className="rounded-xl"
                 data-testid={`campaign-filter-${status}`}
               >
                 <a href={`/hr/campaigns?status=${status}`}>
@@ -203,6 +261,7 @@ export default async function HrCampaignsPage({
             {filteredItems.map((campaign) => (
               <Card
                 key={campaign.campaignId}
+                className="rounded-[1.75rem] border-border/70 shadow-sm"
                 data-testid={`campaign-list-row-${campaign.campaignId}`}
               >
                 <CardHeader className="space-y-2">
@@ -215,7 +274,7 @@ export default async function HrCampaignsPage({
                       </CardDescription>
                     </div>
                     <div
-                      className="rounded-full border px-3 py-1 text-sm"
+                      className="rounded-full border border-border/70 bg-muted/20 px-3 py-1 text-sm"
                       data-testid={`campaign-row-status-${campaign.campaignId}`}
                     >
                       {campaignStatusLabels[campaign.status] ?? campaign.status}
@@ -223,34 +282,44 @@ export default async function HrCampaignsPage({
                   </div>
                 </CardHeader>
                 <CardContent className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
-                  <div className="grid gap-2 text-sm text-muted-foreground md:grid-cols-3">
-                    <p>
-                      Модель:{" "}
-                      <span className="font-medium text-foreground">
+                  <div className="grid gap-3 text-sm md:grid-cols-3">
+                    <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        Модель
+                      </p>
+                      <p className="mt-2 font-medium text-foreground">
                         {campaign.modelName
                           ? `${campaign.modelName} · v${campaign.modelVersion ?? "?"}`
                           : "Не выбрана"}
-                      </span>
-                    </p>
-                    <p>
-                      Start:{" "}
-                      <span className="font-medium text-foreground">
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        Start
+                      </p>
+                      <p className="mt-2 font-medium text-foreground">
                         {formatCampaignDateTimeLabel(campaign.startAt)}
-                      </span>
-                    </p>
-                    <p>
-                      End:{" "}
-                      <span className="font-medium text-foreground">
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        End
+                      </p>
+                      <p className="mt-2 font-medium text-foreground">
                         {formatCampaignDateTimeLabel(campaign.endAt)}
-                      </span>
-                    </p>
+                      </p>
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Button asChild variant="outline">
+                    <Button asChild variant="outline" className="rounded-xl">
                       <a href={`/hr/campaigns/${campaign.campaignId}`}>Открыть detail</a>
                     </Button>
                     {resolved.context.role === "hr_admin" && campaign.status === "draft" ? (
-                      <Button asChild data-testid={`campaign-edit-${campaign.campaignId}`}>
+                      <Button
+                        asChild
+                        className="rounded-xl"
+                        data-testid={`campaign-edit-${campaign.campaignId}`}
+                      >
                         <a href={`/hr/campaigns/${campaign.campaignId}/edit`}>
                           Редактировать draft
                         </a>

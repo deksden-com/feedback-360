@@ -61,3 +61,16 @@ Use:
 - one competency per stable content block,
 - score + comment grouped visually,
 - progress and save state always visible.
+
+## Auth card
+Use:
+- centered, focused card on clean app background,
+- single primary auth action,
+- developer/XE helpers visually secondary,
+- small brand header above the card, not a heavy full app shell.
+
+## Activity feed
+Use:
+- compact feed rows with icon + main sentence + muted timestamp,
+- consistent dividers inside a shared card,
+- “load more” or archive action at the bottom, not a separate competing panel.

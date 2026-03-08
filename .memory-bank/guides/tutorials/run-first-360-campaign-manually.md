@@ -80,7 +80,15 @@ HR открывает приложение, проходит login и попад
 3. выбрать компанию;
 4. попасть на HR home.
 
-Ниже — реальный screenshot такого входа в компании `Acme 360 A`.
+Экран входа:
+
+![Login](../assets/manual-first-campaign/step-01a-login__(SCR-AUTH-LOGIN).png)
+
+Выбор активной компании:
+
+![Company switcher](../assets/manual-first-campaign/step-01b-company-switcher__(SCR-COMPANY-SWITCHER).png)
+
+И уже после выбора — HR home в контексте компании `Acme 360 A`:
 
 ![HR home](../assets/manual-first-campaign/step-01-hr-home__(SCR-APP-HOME).png)
 
@@ -280,7 +288,7 @@ HR добавляет в кампанию сотрудников и провер
 
 Когда анкета заполнена, участник отправляет её, и она становится read-only.
 
-> Representative screenshot из acceptance/evidence.
+> Representative screenshot из acceptance/evidence. Здесь показан привычный post-submit вид: анкета остаётся в inbox как read-only история, доступная только для просмотра.
 
 ![Questionnaire submitted](../assets/manual-first-campaign/step-08d-questionnaire-submitted__(SCR-QUESTIONNAIRES-FILL).png)
 

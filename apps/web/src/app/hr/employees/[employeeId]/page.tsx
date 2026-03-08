@@ -153,62 +153,81 @@ export default async function EmployeeProfilePage({
           />
         ) : null}
 
-        <Card className="overflow-hidden border-border/80 shadow-sm">
-          <CardHeader className="gap-4 border-b bg-muted/25">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="flex min-w-0 items-start gap-4">
-                <Avatar className="size-14 rounded-3xl bg-primary/10 text-primary">
-                  <AvatarLabel>{getDisplayInitials(profileName)}</AvatarLabel>
-                </Avatar>
-                <div className="space-y-2">
-                  <div className="space-y-1">
-                    <CardTitle className="text-2xl">{profileName}</CardTitle>
-                    <CardDescription className="text-sm">
-                      {profile.data.currentPositionTitle ?? "Должность не указана"} ·{" "}
-                      {profile.data.currentDepartmentName ?? "Без подразделения"}
-                    </CardDescription>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="inline-flex items-center rounded-full border border-border/80 bg-background px-3 py-1 text-xs font-medium text-foreground">
-                      {getRoleLabel(profile.data.membershipRole) ?? "Нет доступа"}
-                    </span>
-                    <span className="inline-flex items-center rounded-full border border-border/80 bg-background px-3 py-1 text-xs text-muted-foreground">
-                      {profile.data.currentManagerName ?? "Руководитель не назначен"}
-                    </span>
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_320px]">
+          <Card className="overflow-hidden rounded-[2rem] border-0 bg-[#2563eb] text-white shadow-[0_20px_50px_-24px_rgba(37,99,235,0.9)]">
+            <CardContent className="relative p-8 md:p-10">
+              <div className="relative z-10 max-w-2xl space-y-4">
+                <div className="flex min-w-0 items-start gap-4">
+                  <Avatar className="size-16 rounded-[1.75rem] bg-white/15 text-white">
+                    <AvatarLabel>{getDisplayInitials(profileName)}</AvatarLabel>
+                  </Avatar>
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <div className="inline-flex items-center rounded-full bg-white/12 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-white/80">
+                        Employee Profile
+                      </div>
+                      <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+                        {profileName}
+                      </h2>
+                      <p className="text-sm text-white/80">
+                        {profile.data.currentPositionTitle ?? "Должность не указана"} ·{" "}
+                        {profile.data.currentDepartmentName ?? "Без подразделения"}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white">
+                        {getRoleLabel(profile.data.membershipRole) ?? "Нет доступа"}
+                      </span>
+                      <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-white/80">
+                        {profile.data.currentManagerName ?? "Руководитель не назначен"}
+                      </span>
+                    </div>
                   </div>
                 </div>
+                <div className="flex flex-wrap gap-3" data-testid="scr-hr-employee-detail-toolbar">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="rounded-xl bg-white px-5 text-primary shadow-none hover:bg-white/90"
+                  >
+                    <a href="/hr/employees">К справочнику</a>
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="rounded-xl border-white/20 bg-white/10 px-5 text-white hover:bg-white/15 hover:text-white"
+                  >
+                    <a href={`/hr/org?employeeId=${employeeId}`}>Открыть в оргструктуре</a>
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2" data-testid="scr-hr-employee-detail-toolbar">
-                <Button asChild variant="outline">
-                  <a href="/hr/employees">К справочнику</a>
-                </Button>
-                <Button asChild variant="outline">
-                  <a href={`/hr/org?employeeId=${employeeId}`}>Открыть в оргструктуре</a>
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="grid gap-3 pt-6 md:grid-cols-4">
-            <div className="rounded-2xl border border-border/80 bg-background p-4">
-              <p className="text-sm text-muted-foreground">Email</p>
-              <p className="mt-2 text-lg font-semibold">{profile.data.email}</p>
-            </div>
-            <div className="rounded-2xl border border-border/80 bg-background p-4">
-              <p className="text-sm text-muted-foreground">Подразделение</p>
-              <p className="mt-2 text-lg font-semibold">
-                {profile.data.currentDepartmentName ?? "—"}
+              <div className="absolute right-6 top-6 hidden h-36 w-36 rounded-[2rem] bg-white/10 lg:block" />
+              <div className="absolute bottom-6 right-8 hidden h-24 w-24 rounded-[1.5rem] border border-white/10 bg-white/8 lg:block" />
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Email
+              </p>
+              <p className="mt-3 text-base font-semibold">{profile.data.email}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Основной identifier для invite и magic link.
               </p>
             </div>
-            <div className="rounded-2xl border border-border/80 bg-background p-4">
-              <p className="text-sm text-muted-foreground">Руководитель</p>
-              <p className="mt-2 text-lg font-semibold">{profile.data.currentManagerName ?? "—"}</p>
+            <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                User link
+              </p>
+              <p className="mt-3 text-base font-semibold">{profile.data.userId ?? "Не привязан"}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Employee и User остаются разными сущностями.
+              </p>
             </div>
-            <div className="rounded-2xl border border-border/80 bg-background p-4">
-              <p className="text-sm text-muted-foreground">User link</p>
-              <p className="mt-2 text-lg font-semibold">{profile.data.userId ?? "Не привязан"}</p>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
 
         <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
           <Card data-testid="employee-profile-summary">

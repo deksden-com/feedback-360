@@ -40,7 +40,9 @@
 - [Guides package (`guides/`)](guides/index.md): пользовательские how-to/tutorial/explanation/reference документы поверх продукта и сценариев. Читать, когда нужен понятный product walkthrough без перегруза внутренними спецификациями.
 - [CLI spec (`spec/cli/`)](spec/cli/index.md): каталог команд, human/`--json` форматы, контракт CLI-first процесса. Читать для расширения и стабилизации автоматизируемых сценариев.
 - [UI spec (`spec/ui/`)](spec/ui/index.md): sitemap/flows и минимальные wireframes без логики в клиенте. Читать для согласованной эволюции интерфейса.
+- [UI redesign handoff](spec/ui/redesign-screen-catalog.md): единый экранный handoff для внешнего редизайна — переходы, информационные блоки, действия и доменные ограничения. Читать, когда нужно отдавать интерфейс в специализированный инструмент/дизайнеру без потери продуктовых инвариантов.
 - [UI redesign principles](spec/ui/design-principles.md): как делать интерфейс content-first и ближе к familiar SaaS patterns, не ломая доменную логику. Читать перед редизайном, чтобы улучшать hierarchy и UX системно.
+- [Design system v2 baseline](spec/ui/design-system/visual-baseline-v2.md): новый visual baseline на основе refined auth/dashboard/questionnaire references. Читать, если продолжаем раскатывать единый стиль по продукту.
 - [UI redesign audit](spec/ui/screen-by-screen-redesign.md): экран-за-экраном список улучшений текущих маршрутов. Читать перед UI planning, чтобы понимать, какие surfaces давать в работу первыми.
 - [Screen registry](spec/ui/screen-registry.md): канонический реестр `screen_id` и `testIdScope` для экранов. Читать перед правками UI/docs/evidence, чтобы все говорили об одном и том же surface.
 - [Test ID registry](spec/ui/test-id-registry.md): единый паттерн именования `data-testid` от screen scope. Читать перед UI automation и рефакторингом экранов, чтобы селекторы не расползались.
@@ -56,6 +58,7 @@
 - [Epic plans (`plans/epics/`)](plans/epics/index.md): детальные страницы эпиков и фич с deliverables/acceptance. Читать перед стартом конкретной фичи.
 - [GUI wave — EP-011..EP-019](plans/epics/EP-011-app-shell-navigation/index.md): следующая серия GUI-эпиков после MVP/prod readiness, включая post-EP-013 structural refactor EP-014. Читать, чтобы видеть план эволюции интерфейса и supporting codebase от shell до ops UI.
 - [UI traceability and SaaS polish — EP-021](plans/epics/EP-021-ui-traceability-saas-polish/index.md): следующий слой UI после XE foundation — screen ids, predictable test ids и content-first polish для ключевых surfaces. Читать перед UI refactor, чтобы продуктовый facelift не потерял проверяемость.
+- [Unified visual system rollout — EP-022](plans/epics/EP-022-visual-system-rollout/index.md): следующая визуальная волна после EP-021 — единый стиль для auth, shell, CRUD, questionnaire и results. Читать, если продолжаем продуктовый редизайн по новому baseline.
 - [Implementation playbook](plans/implementation-playbook.md): практический чеклист “FT → код → тесты → docs”. Читать как рабочую инструкцию для реализации vertical slice.
 - [Verification matrix](plans/verification-matrix.md): обязательные тесты/сценарии и execution evidence по эпикам. Читать как финальный критерий готовности фич.
 - [XE scenario catalog](plans/xe/index.md): first-class cross-epic runs, начиная с `XE-001`. Читать, чтобы строить сквозные проверки поверх уже существующих feature/golden tests.

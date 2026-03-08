@@ -14,23 +14,34 @@ import {
 } from "@/lib/questionnaire-ui";
 import { cn } from "@/lib/utils";
 import { createInprocClient } from "@feedback-360/client";
+import {
+  ArrowRight,
+  Bookmark,
+  BriefcaseBusiness,
+  CheckCircle2,
+  CircleHelp,
+  ClipboardCheck,
+  Clock3,
+  MessageSquareText,
+  Target,
+} from "lucide-react";
 import { redirect } from "next/navigation";
 
 const indicatorScale = [
-  { value: "1", label: "1" },
-  { value: "2", label: "2" },
-  { value: "3", label: "3" },
-  { value: "4", label: "4" },
-  { value: "5", label: "5" },
-  { value: "NA", label: "Не могу оценить" },
+  { value: "1", label: "1", caption: "Needs Improvement" },
+  { value: "2", label: "2", caption: "Below Expectations" },
+  { value: "3", label: "3", caption: "Meets Expectations" },
+  { value: "4", label: "4", caption: "Exceeds Expectations" },
+  { value: "5", label: "5", caption: "Outstanding" },
+  { value: "NA", label: "N/A", caption: "Not Applicable" },
 ] as const;
 
 const levelScale = [
-  { value: "1", label: "Уровень 1" },
-  { value: "2", label: "Уровень 2" },
-  { value: "3", label: "Уровень 3" },
-  { value: "4", label: "Уровень 4" },
-  { value: "UNSURE", label: "Затрудняюсь ответить" },
+  { value: "1", label: "1", caption: "Уровень 1" },
+  { value: "2", label: "2", caption: "Уровень 2" },
+  { value: "3", label: "3", caption: "Уровень 3" },
+  { value: "4", label: "4", caption: "Уровень 4" },
+  { value: "UNSURE", label: "?", caption: "Затрудняюсь ответить" },
 ] as const;
 
 const getQueryValue = (value: string | string[] | undefined): string | undefined => {
@@ -88,6 +99,74 @@ const isReadonlyState = (status: string, campaignStatus: string): boolean => {
     campaignStatus === "ai_failed" ||
     campaignStatus === "completed"
   );
+};
+
+const formatDeadlineDistance = (value?: string) => {
+  if (!value) {
+    return "Дедлайн не указан";
+  }
+
+  const target = new Date(value).getTime();
+  const diff = target - Date.now();
+  if (diff <= 0) {
+    return "Дедлайн наступил";
+  }
+
+  const totalHours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(totalHours / 24);
+  if (days > 0) {
+    return `Осталось ${days} дн.`;
+  }
+
+  const hours = Math.max(totalHours, 1);
+  return `Осталось ${hours} ч.`;
+};
+
+const getProgressPercent = (answeredPrompts: number, totalPrompts: number) => {
+  if (totalPrompts <= 0) {
+    return 0;
+  }
+
+  return Math.min(100, Math.round((answeredPrompts / totalPrompts) * 100));
+};
+
+const getFocusedCompetencyId = (
+  definition:
+    | {
+        modelKind: "indicators" | "levels";
+        groups: Array<{
+          competencies: Array<{
+            competencyId: string;
+            indicators?: Array<{ indicatorId: string }>;
+          }>;
+        }>;
+      }
+    | undefined,
+  draft: ReturnType<typeof normalizeQuestionnaireDraft>,
+) => {
+  if (!definition) {
+    return undefined;
+  }
+
+  for (const group of definition.groups) {
+    for (const competency of group.competencies) {
+      if (definition.modelKind === "indicators") {
+        const indicatorValues = draft.indicatorResponses[competency.competencyId] ?? {};
+        const totalIndicators = competency.indicators?.length ?? 0;
+        const answeredIndicators = Object.values(indicatorValues).filter(Boolean).length;
+        if (answeredIndicators < totalIndicators) {
+          return competency.competencyId;
+        }
+      } else {
+        const levelValue = draft.levelResponses[competency.competencyId] ?? "";
+        if (!levelValue) {
+          return competency.competencyId;
+        }
+      }
+    }
+  }
+
+  return definition.groups.flatMap((group) => group.competencies)[0]?.competencyId;
 };
 
 /**
@@ -162,20 +241,21 @@ export default async function QuestionnaireDetailsPage({
   }
 
   const data = questionnaire.data;
+  const definition = data.definition;
   const readonly = isReadonlyState(data.status, data.campaignStatus);
   const normalizedDraft = normalizeQuestionnaireDraft(data.draft);
-  const progress = getQuestionnaireProgress(data.definition, normalizedDraft);
+  const progress = getQuestionnaireProgress(definition, normalizedDraft);
+  const progressPercent = getProgressPercent(progress.answeredPrompts, progress.totalPrompts);
+  const focusedCompetencyId = getFocusedCompetencyId(definition, normalizedDraft);
 
   return (
     <InternalAppShell
       context={resolved.context}
       currentPath="/questionnaires"
-      title={data.subjectDisplayName ?? `Анкета ${data.questionnaireId}`}
-      subtitle={`${data.campaignName} · ${
-        questionnaireStatusLabels[data.status] ?? data.status
-      } · ${campaignStatusLabels[data.campaignStatus] ?? data.campaignStatus}`}
+      title={`Assessing: ${data.subjectDisplayName ?? data.questionnaireId}`}
+      subtitle={`${data.subjectPositionTitle ?? "Сотрудник"} · ${data.campaignName}`}
     >
-      <div className="space-y-6" data-testid="scr-questionnaires-fill-root">
+      <div className="mx-auto max-w-5xl space-y-8" data-testid="scr-questionnaires-fill-root">
         {saved ? (
           <InlineBanner
             description="Черновик сохранён. Можно вернуться к нему в любой момент до завершения кампании."
@@ -208,216 +288,310 @@ export default async function QuestionnaireDetailsPage({
           />
         ) : null}
 
-        <div
-          className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]"
-          data-testid="scr-questionnaires-fill-summary"
-        >
-          <Card className="overflow-hidden border-border/80 shadow-sm">
-            <CardHeader className="space-y-4 border-b bg-muted/25">
-              <div className="space-y-1">
-                <CardTitle className="text-2xl">
-                  {data.subjectDisplayName ?? `Сотрудник ${data.subjectEmployeeId}`}
-                </CardTitle>
-                <CardDescription>
-                  {data.subjectPositionTitle ? `${data.subjectPositionTitle} · ` : ""}
-                  {data.raterRole ? questionnaireRaterRoleLabels[data.raterRole] : "Оценивающий"}
-                </CardDescription>
+        <section className="space-y-6" data-testid="scr-questionnaires-fill-summary">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <ClipboardCheck className="size-6" />
               </div>
-              <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
-                <p>
-                  Кампания: <span className="font-medium text-foreground">{data.campaignName}</span>
-                </p>
-                <p>
-                  Дедлайн:{" "}
-                  <span className="font-medium text-foreground">
-                    {formatDate(data.campaignEndAt)}
-                  </span>
-                </p>
-                <p>
-                  Статус анкеты:{" "}
-                  <span className="font-medium text-foreground">
-                    {questionnaireStatusLabels[data.status]}
-                  </span>
-                </p>
-                <p>
-                  Состояние кампании:{" "}
-                  <span className="font-medium text-foreground">
-                    {campaignStatusLabels[data.campaignStatus]}
-                  </span>
+              <div>
+                <h2 className="text-lg font-bold tracking-tight text-slate-950">
+                  Оцениваете: {data.subjectDisplayName ?? `Сотрудник ${data.subjectEmployeeId}`}
+                </h2>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                  {data.subjectPositionTitle ?? "Сотрудник"}
                 </p>
               </div>
-            </CardHeader>
-          </Card>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-4 py-2">
+                <Clock3 className="size-4 text-slate-500" />
+                <span className="text-xs font-bold uppercase tracking-[0.14em] text-slate-700">
+                  {formatDeadlineDistance(data.campaignEndAt)}
+                </span>
+              </div>
+              <div className="inline-flex items-center gap-2">
+                <BriefcaseBusiness className="size-4 text-slate-400" />
+                <span className="text-sm font-bold text-slate-600">{data.campaignName}</span>
+              </div>
+            </div>
+          </div>
 
-          <Card
-            className="border-border/80 shadow-sm lg:sticky lg:top-6"
+          <div
+            className="rounded-xl border border-slate-100 bg-white p-8 shadow-sm"
             data-testid="questionnaire-progress-card"
           >
-            <CardHeader className="space-y-1">
-              <CardDescription>Прогресс заполнения</CardDescription>
-              <CardTitle className="text-3xl" data-testid="questionnaire-progress">
-                {progress.answeredPrompts}/{progress.totalPrompts}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>
-                Компетенции готовы:{" "}
-                <span className="font-medium text-foreground">
-                  {progress.completedCompetencies}/{progress.totalCompetencies}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-sm font-bold uppercase tracking-[0.14em] text-slate-500">
+                  Competencies Completed
+                </p>
+                <p className="text-sm font-bold text-primary" data-testid="questionnaire-progress">
+                  {progress.completedCompetencies} / {progress.totalCompetencies}
+                </p>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className="h-full rounded-full bg-primary transition-[width]"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">
+                  <Target className="size-4" />
+                  Ответов: {progress.answeredPrompts}/{progress.totalPrompts}
                 </span>
-              </p>
-              <p>
-                {data.firstDraftAt
-                  ? `Первый черновик сохранён ${formatDate(data.firstDraftAt)}`
-                  : "Черновик ещё не сохранялся."}
-              </p>
-              {data.submittedAt ? <p>Отправлена {formatDate(data.submittedAt)}</p> : null}
-            </CardContent>
-          </Card>
-        </div>
+                <span>
+                  {data.raterRole ? questionnaireRaterRoleLabels[data.raterRole] : "Оценивающий"}
+                </span>
+                <span>Статус: {questionnaireStatusLabels[data.status]}</span>
+                {data.submittedAt ? (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-700">
+                    <CheckCircle2 className="size-4" />
+                    Отправлена {formatDate(data.submittedAt)}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </section>
 
-        <form method="post" className="space-y-6" data-testid="scr-questionnaires-fill-form">
+        <form method="post" className="space-y-8" data-testid="scr-questionnaires-fill-form">
           <input type="hidden" name="questionnaireId" value={data.questionnaireId} />
 
-          {data.definition ? (
-            data.definition.groups.map((group) => (
-              <Card key={group.groupId} className="border-border/80 shadow-sm">
-                <CardHeader className="space-y-2">
-                  <CardTitle className="text-xl">{group.name}</CardTitle>
-                  <CardDescription>
-                    Вес группы: {group.weight}% · Компетенций: {group.competencies.length}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
+          {definition ? (
+            definition.groups.map((group) => (
+              <div key={group.groupId} className="space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                      {group.name}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      Вес группы: {group.weight}% · Компетенций: {group.competencies.length}
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-500">
+                    <CircleHelp className="size-4" />
+                    {definition.modelKind === "indicators"
+                      ? "Оцените каждый индикатор"
+                      : "Выберите один уровень"}
+                  </div>
+                </div>
+
+                <div className="space-y-8">
                   {group.competencies.map((competency) => (
-                    <section
+                    <article
                       key={competency.competencyId}
-                      className="space-y-4 border-t pt-6 first:border-t-0 first:pt-0"
+                      className={cn(
+                        "overflow-hidden rounded-xl bg-white transition-all",
+                        focusedCompetencyId === competency.competencyId
+                          ? "border-2 border-primary shadow-md ring-8 ring-primary/15"
+                          : "border border-slate-100 shadow-sm",
+                      )}
                       data-testid={`competency-${competency.competencyId}`}
                     >
-                      <div className="space-y-1">
-                        <h2 className="text-lg font-semibold">{competency.name}</h2>
-                        <p className="text-sm text-muted-foreground">
-                          {data.definition?.modelKind === "indicators"
-                            ? "Оцените каждый индикатор по шкале 1–5 или выберите «Не могу оценить»."
-                            : "Выберите уровень, который лучше всего описывает текущее проявление компетенции."}
-                        </p>
+                      <div className="border-b border-slate-100 p-8">
+                        <div className="flex items-start gap-5">
+                          <div className="mt-1 rounded-xl bg-primary/10 p-3 text-primary">
+                            <Bookmark className="size-6" />
+                          </div>
+                          <div className="space-y-3">
+                            <h2 className="text-xl font-bold tracking-tight text-slate-950">
+                              {competency.name}
+                            </h2>
+                            <p className="text-base leading-7 text-slate-600">
+                              {definition.modelKind === "indicators"
+                                ? "Оцените каждый индикатор по шкале 1–5 или выберите «Не могу оценить», если наблюдений недостаточно."
+                                : "Выберите уровень, который лучше всего описывает текущее проявление компетенции."}
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
-                      {data.definition?.modelKind === "indicators" ? (
-                        <div className="space-y-4">
-                          {competency.indicators?.map((indicator) => {
-                            const selectedValue =
-                              normalizedDraft.indicatorResponses[competency.competencyId]?.[
-                                indicator.indicatorId
-                              ] ?? "";
-
-                            return (
-                              <div
-                                key={indicator.indicatorId}
-                                className="rounded-xl border p-4"
-                                data-testid={`indicator-${indicator.indicatorId}`}
-                              >
-                                <p className="mb-3 font-medium">{indicator.text}</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {indicatorScale.map((option) => (
-                                    <label
-                                      key={option.value}
-                                      className={cn(
-                                        "inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm",
-                                        selectedValue === option.value &&
-                                          "border-primary bg-primary/10 text-primary",
-                                        readonly && "cursor-not-allowed opacity-70",
-                                      )}
-                                    >
-                                      <input
-                                        type="radio"
-                                        name={`indicator:${competency.competencyId}:${indicator.indicatorId}`}
-                                        value={option.value}
-                                        defaultChecked={selectedValue === option.value}
-                                        disabled={readonly}
-                                        className="sr-only"
-                                        data-testid={`indicator-input-${indicator.indicatorId}-${option.value}`}
-                                      />
-                                      <span>{option.label}</span>
-                                    </label>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <div className="rounded-xl border p-4">
-                          <div className="flex flex-wrap gap-2">
-                            {levelScale.map((option) => {
+                      <div className="space-y-8 bg-slate-50/30 p-8">
+                        {definition.modelKind === "indicators" ? (
+                          <div className="space-y-6">
+                            <p className="block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                              Rating Scale
+                            </p>
+                            {competency.indicators?.map((indicator) => {
                               const selectedValue =
-                                normalizedDraft.levelResponses[competency.competencyId] ?? "";
+                                normalizedDraft.indicatorResponses[competency.competencyId]?.[
+                                  indicator.indicatorId
+                                ] ?? "";
 
                               return (
-                                <label
-                                  key={option.value}
-                                  className={cn(
-                                    "inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm",
-                                    selectedValue === option.value &&
-                                      "border-primary bg-primary/10 text-primary",
-                                    readonly && "cursor-not-allowed opacity-70",
-                                  )}
+                                <div
+                                  key={indicator.indicatorId}
+                                  className="space-y-5"
+                                  data-testid={`indicator-${indicator.indicatorId}`}
                                 >
-                                  <input
-                                    type="radio"
-                                    name={`level:${competency.competencyId}`}
-                                    value={option.value}
-                                    defaultChecked={selectedValue === option.value}
-                                    disabled={readonly}
-                                    className="sr-only"
-                                    data-testid={`level-input-${competency.competencyId}-${option.value}`}
-                                  />
-                                  <span>{option.label}</span>
-                                </label>
+                                  <p className="text-base font-medium leading-7 text-slate-700">
+                                    {indicator.text}
+                                  </p>
+                                  <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-6">
+                                    {indicatorScale.map((option) => {
+                                      const selected = selectedValue === option.value;
+                                      const isNa = option.value === "NA";
+
+                                      return (
+                                        <label
+                                          key={option.value}
+                                          className={cn(
+                                            "cursor-pointer",
+                                            readonly && "cursor-not-allowed opacity-70",
+                                          )}
+                                        >
+                                          <input
+                                            type="radio"
+                                            name={`indicator:${competency.competencyId}:${indicator.indicatorId}`}
+                                            value={option.value}
+                                            defaultChecked={selected}
+                                            disabled={readonly}
+                                            className="peer sr-only"
+                                            data-testid={`indicator-input-${indicator.indicatorId}-${option.value}`}
+                                          />
+                                          <div
+                                            className={cn(
+                                              "flex h-full flex-col justify-between rounded-xl border border-slate-100 bg-white p-4 text-center transition-all duration-200 hover:border-slate-300",
+                                              selected &&
+                                                !isNa &&
+                                                "border-2 border-primary bg-primary/10 ring-2 ring-primary/20",
+                                              selected &&
+                                                isNa &&
+                                                "border-slate-400 bg-slate-100 ring-1 ring-slate-400",
+                                              isNa && "bg-slate-50/60",
+                                            )}
+                                          >
+                                            <div
+                                              className={cn(
+                                                "mb-3 text-xl font-bold text-slate-950",
+                                                selected && !isNa && "text-primary",
+                                                isNa && "text-slate-400",
+                                              )}
+                                            >
+                                              {option.label}
+                                            </div>
+                                            <div
+                                              className={cn(
+                                                "min-h-[28px] text-[10px] font-bold uppercase tracking-tight text-slate-400",
+                                                selected && !isNa && "text-primary",
+                                              )}
+                                            >
+                                              {option.caption}
+                                            </div>
+                                          </div>
+                                        </label>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
                               );
                             })}
                           </div>
-                          <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                            {competency.levels?.map((level) => (
-                              <li key={level.levelId}>
-                                <span className="font-medium text-foreground">
-                                  Уровень {level.level}:
-                                </span>{" "}
-                                {level.text}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                        ) : (
+                          <div className="space-y-6">
+                            <p className="block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                              Rating Scale
+                            </p>
+                            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-5">
+                              {levelScale.map((option) => {
+                                const selectedValue =
+                                  normalizedDraft.levelResponses[competency.competencyId] ?? "";
+                                const selected = selectedValue === option.value;
+                                const isUnsure = option.value === "UNSURE";
 
-                      <div className="space-y-2">
-                        <label
-                          htmlFor={`comment-${competency.competencyId}`}
-                          className="text-sm font-medium"
-                        >
-                          Комментарий по компетенции
-                        </label>
-                        <textarea
-                          id={`comment-${competency.competencyId}`}
-                          name={`comment:${competency.competencyId}`}
-                          defaultValue={
-                            normalizedDraft.competencyComments[competency.competencyId] ?? ""
-                          }
-                          rows={4}
-                          disabled={readonly}
-                          className="w-full rounded-md border p-3 text-sm"
-                          placeholder="Добавьте примеры поведения или наблюдения — комментарий опционален."
-                          data-testid={`competency-comment-${competency.competencyId}`}
-                        />
+                                return (
+                                  <label
+                                    key={option.value}
+                                    className={cn(
+                                      "cursor-pointer",
+                                      readonly && "cursor-not-allowed opacity-70",
+                                    )}
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={`level:${competency.competencyId}`}
+                                      value={option.value}
+                                      defaultChecked={selected}
+                                      disabled={readonly}
+                                      className="peer sr-only"
+                                      data-testid={`level-input-${competency.competencyId}-${option.value}`}
+                                    />
+                                    <div
+                                      className={cn(
+                                        "flex h-full flex-col justify-between rounded-xl border border-slate-100 bg-white p-4 text-center transition-all duration-200 hover:border-slate-300",
+                                        selected &&
+                                          !isUnsure &&
+                                          "border-2 border-primary bg-primary/10 ring-2 ring-primary/20",
+                                        selected &&
+                                          isUnsure &&
+                                          "border-slate-400 bg-slate-100 ring-1 ring-slate-400",
+                                      )}
+                                    >
+                                      <div
+                                        className={cn(
+                                          "mb-3 text-xl font-bold text-slate-950",
+                                          selected && !isUnsure && "text-primary",
+                                        )}
+                                      >
+                                        {option.label}
+                                      </div>
+                                      <div
+                                        className={cn(
+                                          "min-h-[28px] text-[10px] font-bold uppercase tracking-tight text-slate-400",
+                                          selected && !isUnsure && "text-primary",
+                                        )}
+                                      >
+                                        {option.caption}
+                                      </div>
+                                    </div>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                            <ul className="space-y-2 text-sm text-slate-500">
+                              {competency.levels?.map((level) => (
+                                <li key={level.levelId}>
+                                  <span className="font-medium text-slate-950">
+                                    Уровень {level.level}:
+                                  </span>{" "}
+                                  {level.text}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <div className="space-y-3">
+                          <label
+                            htmlFor={`comment-${competency.competencyId}`}
+                            className="block text-sm font-bold text-slate-700"
+                          >
+                            Comments (Optional)
+                          </label>
+                          <textarea
+                            id={`comment-${competency.competencyId}`}
+                            name={`comment:${competency.competencyId}`}
+                            defaultValue={
+                              normalizedDraft.competencyComments[competency.competencyId] ?? ""
+                            }
+                            rows={4}
+                            disabled={readonly}
+                            className="w-full resize-none rounded-xl border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
+                            placeholder="Provide specific examples to support your rating..."
+                            data-testid={`competency-comment-${competency.competencyId}`}
+                          />
+                        </div>
                       </div>
-                    </section>
+                    </article>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))
           ) : (
-            <Card className="border-border/80 shadow-sm">
+            <Card className="rounded-xl border-slate-100 shadow-sm">
               <CardHeader>
                 <CardTitle className="text-xl">Комментарий по анкете</CardTitle>
                 <CardDescription>
@@ -430,7 +604,7 @@ export default async function QuestionnaireDetailsPage({
                   name="note"
                   defaultValue={normalizedDraft.note}
                   rows={8}
-                  className="w-full rounded-md border p-3 text-sm"
+                  className="w-full rounded-xl border-slate-200 bg-white px-4 py-3 text-sm shadow-sm outline-none transition placeholder:text-slate-400 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   placeholder="Опишите наблюдения и примеры поведения."
                   disabled={readonly}
                   data-testid="questionnaire-note"
@@ -439,43 +613,49 @@ export default async function QuestionnaireDetailsPage({
             </Card>
           )}
 
-          <Card className="border-border/80 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl">Итоговый комментарий</CardTitle>
-              <CardDescription>
-                Необязательное summary для всей анкеты — полезно, если хотите связать наблюдения по
-                нескольким компетенциям.
+          <Card className="rounded-xl border-slate-100 shadow-sm">
+            <CardHeader className="space-y-4 p-8 pb-0">
+              <CardTitle className="flex items-center gap-3 text-xl font-bold">
+                <span className="rounded-lg bg-primary/10 p-2 text-primary">
+                  <MessageSquareText className="size-5" />
+                </span>
+                General Feedback
+              </CardTitle>
+              <CardDescription className="text-sm leading-6 text-slate-500">
+                Please provide any overall comments, strengths, or areas for development that were
+                not covered in the specific competencies above.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-8">
               <textarea
                 name="finalComment"
                 defaultValue={normalizedDraft.finalComment}
-                rows={5}
+                rows={6}
                 disabled={readonly}
-                className="w-full rounded-md border p-3 text-sm"
-                placeholder="Сформулируйте итоговые наблюдения по сотруднику."
+                className="w-full resize-none rounded-xl border-slate-200 bg-slate-50/50 px-5 py-5 text-sm text-slate-900 shadow-inner outline-none transition placeholder:text-slate-400 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
+                placeholder="Enter your general feedback here..."
                 data-testid="questionnaire-final-comment"
               />
             </CardContent>
           </Card>
 
-          <Card
-            className="border-border/80 shadow-sm"
+          <section
+            className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-slate-200 py-10 sm:flex-row"
             data-testid="scr-questionnaires-fill-actions"
           >
-            <CardHeader>
-              <CardTitle className="text-xl">Действия</CardTitle>
-              <CardDescription>
-                Сначала можно сохранить черновик, а когда всё готово — отправить анкету.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-2">
+            <div className="text-sm text-slate-500">
+              {data.firstDraftAt
+                ? `Первый черновик сохранён ${formatDate(data.firstDraftAt)}`
+                : "Черновик можно сохранять до завершения кампании."}
+            </div>
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
               <Button
                 type="submit"
                 formAction={`/api/questionnaires/draft?returnTo=%2Fquestionnaires%2F${data.questionnaireId}`}
                 disabled={readonly}
                 data-testid="save-draft-button"
+                variant="outline"
+                className="h-12 rounded-xl border-slate-200 px-8 text-sm font-bold text-slate-600"
               >
                 Сохранить черновик
               </Button>
@@ -484,21 +664,23 @@ export default async function QuestionnaireDetailsPage({
                 formAction="/api/questionnaires/submit?returnTo=%2Fquestionnaires"
                 disabled={readonly}
                 data-testid="submit-questionnaire-button"
+                className="h-12 rounded-xl px-10 text-sm font-bold shadow-lg shadow-primary/25"
               >
                 Отправить анкету
+                <ArrowRight className="ml-2 size-4" />
               </Button>
-              <Button asChild variant="outline">
+              <Button asChild variant="outline" className="rounded-xl">
                 <a href="/questionnaires">К списку анкет</a>
               </Button>
               {readonly ? (
-                <Button asChild variant="outline">
+                <Button asChild variant="outline" className="rounded-xl">
                   <a href="/results" data-testid="go-to-results">
                     К результатам
                   </a>
                 </Button>
               ) : null}
-            </CardContent>
-          </Card>
+            </div>
+          </section>
         </form>
       </div>
     </InternalAppShell>

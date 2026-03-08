@@ -2,6 +2,7 @@
 Status: Draft (2026-03-03)
 
 - [Sitemap & flows](sitemap-and-flows.md) — список экранов и переходов. Читать, чтобы UI покрывал “сквозные” сценарии и оставался тонким.
+- [UI redesign handoff](redesign-screen-catalog.md) — единый документ для редизайна: экраны, переходы, структура информации, действия и доменные ограничения. Читать, когда нужно передать продукт в специализированный UI/UX инструмент без потери поведения системы.
 - [UI design principles](design-principles.md) — общие принципы content-first UI, familiar SaaS shell и common CRUD/dashboard patterns. Читать перед UI refactor, чтобы улучшения были системными, а не точечными.
 - [Design system](design-system/index.md) — tokens, semantic colors, component patterns и sync policy для visual language приложения. Читать перед UI polish и theme work, чтобы экранные улучшения собирались в систему, а не в локальные patch-и.
 - [Screen-by-screen redesign](screen-by-screen-redesign.md) — рекомендации по каждому текущему маршруту: что оставить, что перестроить и в каком порядке. Читать, чтобы планировать UI polish и redesign поэтапно.

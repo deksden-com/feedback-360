@@ -162,54 +162,83 @@ export default async function HrEmployeesPage({
           />
         ) : null}
 
-        <Card className="overflow-hidden border-border/80 shadow-sm">
-          <CardHeader className="gap-4 border-b bg-muted/25">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="space-y-2">
-                <CardTitle className="text-2xl">Справочник сотрудников</CardTitle>
-                <CardDescription className="max-w-3xl">
-                  Рабочее место HR для поиска, открытия и сопровождения сотрудников в активной
-                  компании. Сначала человек и оргконтекст, потом служебные действия.
-                </CardDescription>
-              </div>
-              <div className="flex flex-wrap gap-2" data-testid="scr-hr-employees-toolbar">
-                {resolved.context.role === "hr_admin" ? (
-                  <Button asChild data-testid="employee-directory-create">
-                    <a href="/hr/employees/new" data-testid="scr-hr-employees-create">
-                      Добавить сотрудника
-                    </a>
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_320px]">
+          <Card className="overflow-hidden rounded-[2rem] border-0 bg-[#2563eb] text-white shadow-[0_20px_50px_-24px_rgba(37,99,235,0.9)]">
+            <CardContent className="relative p-8 md:p-10">
+              <div className="relative z-10 max-w-2xl space-y-4">
+                <div className="inline-flex items-center rounded-full bg-white/12 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-white/80">
+                  People Directory
+                </div>
+                <div className="space-y-3">
+                  <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+                    Работайте со структурой людей, а не с набором полей
+                  </h2>
+                  <p className="max-w-xl text-sm leading-6 text-white/80 md:text-base">
+                    Сначала человек, роль и оргконтекст. Потом доступ, статус и служебные действия.
+                    Экран помогает быстро найти сотрудника и перейти в профиль или оргструктуру.
+                  </p>
+                </div>
+                <div
+                  className="flex flex-wrap items-center gap-3"
+                  data-testid="scr-hr-employees-toolbar"
+                >
+                  {resolved.context.role === "hr_admin" ? (
+                    <Button
+                      asChild
+                      size="lg"
+                      className="rounded-xl bg-white px-5 text-primary shadow-none hover:bg-white/90"
+                      data-testid="employee-directory-create"
+                    >
+                      <a href="/hr/employees/new" data-testid="scr-hr-employees-create">
+                        Добавить сотрудника
+                      </a>
+                    </Button>
+                  ) : null}
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="rounded-xl border-white/20 bg-white/10 px-5 text-white hover:bg-white/15 hover:text-white"
+                  >
+                    <a href="/hr/org">Открыть оргструктуру</a>
                   </Button>
-                ) : null}
-                <Button asChild variant="outline">
-                  <a href="/hr/org">Открыть оргструктуру</a>
-                </Button>
+                </div>
               </div>
+              <div className="absolute right-6 top-6 hidden h-36 w-36 rounded-[2rem] bg-white/10 lg:block" />
+              <div className="absolute bottom-6 right-8 hidden h-24 w-24 rounded-[1.5rem] border border-white/10 bg-white/8 lg:block" />
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+            <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                В выборке
+              </p>
+              <p className="mt-3 text-3xl font-semibold tracking-tight">{filteredCount}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Сотрудники после текущих фильтров и поиска.
+              </p>
             </div>
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-2xl border border-border/80 bg-background p-4">
-                <p className="text-sm text-muted-foreground">В выборке</p>
-                <p className="mt-2 text-3xl font-semibold">{filteredCount}</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Сотрудники после текущих фильтров и поиска.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-border/80 bg-background p-4">
-                <p className="text-sm text-muted-foreground">Активные записи</p>
-                <p className="mt-2 text-3xl font-semibold">{activeCount}</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Доступны для кампаний и ручного HR сопровождения.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-border/80 bg-background p-4">
-                <p className="text-sm text-muted-foreground">Подразделения в выборке</p>
-                <p className="mt-2 text-3xl font-semibold">{departmentCount}</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Быстрый переход к оргструктуре остаётся рядом.
-                </p>
-              </div>
+            <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Активные записи
+              </p>
+              <p className="mt-3 text-3xl font-semibold tracking-tight">{activeCount}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Доступны для кампаний и ручного HR сопровождения.
+              </p>
             </div>
-          </CardHeader>
-        </Card>
+            <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Подразделения
+              </p>
+              <p className="mt-3 text-3xl font-semibold tracking-tight">{departmentCount}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Видим оргструктуру рядом с каталогом сотрудников.
+              </p>
+            </div>
+          </div>
+        </section>
 
         <Card className="border-border/80 shadow-sm">
           <CardHeader>

@@ -131,7 +131,27 @@ export default async function NewHrCampaignPage({
       title="Создать draft кампании"
       subtitle="Draft-first flow: создаём кампанию, затем открываем detail dashboard для запуска и daily operations."
     >
-      <div data-testid="scr-hr-campaign-create-root">
+      <div className="space-y-4" data-testid="scr-hr-campaign-create-root">
+        <div className="overflow-hidden rounded-[2rem] border-0 bg-[#2563eb] text-white shadow-[0_20px_50px_-24px_rgba(37,99,235,0.9)]">
+          <div className="relative p-8 md:p-10">
+            <div className="relative z-10 max-w-2xl space-y-4">
+              <div className="inline-flex items-center rounded-full bg-white/12 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-white/80">
+                Campaign Create
+              </div>
+              <div className="space-y-3">
+                <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+                  Кампания начинается с аккуратного draft
+                </h2>
+                <p className="max-w-xl text-sm leading-6 text-white/80 md:text-base">
+                  Выберите модель, даты, таймзону и веса групп. После сохранения вы перейдёте в
+                  detail dashboard, где уже настраивается operational work.
+                </p>
+              </div>
+            </div>
+            <div className="absolute right-6 top-6 hidden h-36 w-36 rounded-[2rem] bg-white/10 lg:block" />
+            <div className="absolute bottom-6 right-8 hidden h-24 w-24 rounded-[1.5rem] border border-white/10 bg-white/8 lg:block" />
+          </div>
+        </div>
         <HrCampaignDraftForm
           mode="create"
           values={values}
