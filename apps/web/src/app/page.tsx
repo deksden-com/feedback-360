@@ -14,6 +14,7 @@ import {
   BriefcaseBusiness,
   ClipboardList,
   FolderKanban,
+  History,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -22,6 +23,7 @@ import { redirect } from "next/navigation";
 const metricIcons = [Users, FolderKanban, Sparkles, BarChart3];
 const taskIcons = [ClipboardList, Sparkles, BriefcaseBusiness];
 const shortcutIcons = [FolderKanban, Users, Activity, BarChart3];
+const activityIcons = [Users, Sparkles, History];
 
 const toneClassNames: Record<string, string> = {
   default: "border-border/80 bg-card text-card-foreground",
@@ -143,7 +145,7 @@ export default async function HomePage({
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                           {metric.title}
                         </p>
-                        <div className="text-4xl font-semibold tracking-tight text-slate-950">
+                        <div className="text-[2.5rem] font-semibold tracking-tight text-slate-950">
                           {metric.value}
                         </div>
                         <p className="text-sm leading-5 text-slate-500">{metric.description}</p>
@@ -230,11 +232,11 @@ export default async function HomePage({
                   <a
                     key={shortcut.testId}
                     href={shortcut.href}
-                    className="group block rounded-[1.5rem] border border-slate-200/80 bg-slate-50/60 p-5 transition hover:border-primary/30 hover:bg-primary/5"
+                    className="group block rounded-[1.75rem] border border-slate-200/80 bg-slate-50/60 p-6 text-center transition hover:border-primary/30 hover:bg-primary/5"
                     data-testid={shortcut.testId}
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-primary/5 text-primary">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="flex size-14 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/5 text-primary">
                         <Icon className="size-5" />
                       </div>
                       <div className="space-y-2">
@@ -264,15 +266,28 @@ export default async function HomePage({
               </p>
             </CardHeader>
             <CardContent className="space-y-3">
-              {dashboard.activity.map((item, index) => (
-                <div
-                  key={`${item.title}-${index}`}
-                  className="rounded-[1.25rem] border border-slate-200/80 bg-slate-50/60 p-4"
-                >
-                  <p className="font-semibold text-slate-950">{item.title}</p>
-                  <p className="mt-1 text-sm leading-5 text-slate-500">{item.description}</p>
-                </div>
-              ))}
+              {dashboard.activity.map((item, index) => {
+                const Icon = activityIcons[index % activityIcons.length] ?? Activity;
+                return (
+                  <div
+                    key={`${item.title}-${index}`}
+                    className="flex items-start gap-4 rounded-[1.25rem] border border-slate-200/80 bg-slate-50/60 p-4"
+                  >
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500">
+                      <Icon className="size-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="font-semibold text-slate-950">{item.title}</p>
+                        {item.timestamp ? (
+                          <span className="text-xs text-slate-400">{item.timestamp}</span>
+                        ) : null}
+                      </div>
+                      <p className="mt-1 text-sm leading-5 text-slate-500">{item.description}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
         </section>

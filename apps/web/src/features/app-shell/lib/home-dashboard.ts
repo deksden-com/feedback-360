@@ -25,6 +25,7 @@ export type HomeDashboardAction = {
 export type HomeDashboardActivityItem = {
   title: string;
   description: string;
+  timestamp?: string;
   tone?: "default" | "primary" | "success" | "warning";
 };
 
@@ -228,10 +229,12 @@ const buildEmployeeDashboard = async (context: AppOperationContext): Promise<Hom
       {
         title: "Компания уже выбрана",
         description: "Все анкеты и результаты открываются в активном company context.",
+        timestamp: "Сейчас",
       },
       {
         title: "Самооценка отделена от итогового результата",
         description: "Self feedback нужен для сравнения разрывов, но не влияет на общий score.",
+        timestamp: "Методология",
       },
     ],
     ...(summary.total === 0
@@ -332,11 +335,13 @@ const buildManagerDashboard = async (context: AppOperationContext): Promise<Home
       {
         title: "Manager view остаётся безопасным",
         description: "Экран команды показывает только разрешённые агрегаты без raw comments.",
+        timestamp: "Политика доступа",
       },
       {
         title: "Questionnaire flow не дублируется на home",
         description:
           "Домашний экран ведёт в существующие рабочие маршруты, не ломая core workflow.",
+        timestamp: "Навигация",
       },
     ],
   };
@@ -458,14 +463,22 @@ const buildHrDashboard = async (context: AppOperationContext): Promise<HomeDashb
     ],
     activity: [
       {
-        title: "Campaign lifecycle остаётся в campaign workbench",
+        title: "Новый ответ сотрудника обновил progress кампании",
         description:
-          "Домашний экран показывает приоритеты и быстрые действия, но не переносит сюда всю бизнес-логику кампаний.",
+          "Сценарий progress остаётся в campaign workbench, а dashboard показывает только управленческий срез.",
+        timestamp: "14 минут назад",
+      },
+      {
+        title: "AI processing completed for one campaign",
+        description:
+          "Проверьте AI feedback и подтвердите готовность результатов перед финальной публикацией.",
+        timestamp: "2 часа назад",
       },
       {
         title: "Role-based visibility сохраняется",
         description:
           "HR Reader получает тот же контекст, но без write-actions, которых роль не может выполнить.",
+        timestamp: "Права доступа",
       },
     ],
   };
