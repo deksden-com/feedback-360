@@ -10,13 +10,17 @@
 - `./scenarios/XE-001/scripts/manager-token.sh [run-id]`
 - `./scenarios/XE-001/scripts/hr-admin-token.sh [run-id]`
 
-Если `run-id` не передан, скрипт возьмёт последний активный `XE-001` run для `XE_ENV` (по умолчанию `beta`).
+Если `run-id` не передан, скрипт:
+
+- возьмёт самый свежий активный `XE-001` run, у которого actor/company bindings всё ещё существуют в целевом окружении;
+- на `beta` автоматически создаст новый `XE-001` run, если локальный registry содержит только устаревшие run-ы.
 
 Полезные переменные окружения:
 
 - `XE_ENV=beta|local`
 - `XE_BASE_URL=https://beta.go360go.ru`
 - `XE_OUTPUT=token|human`
+- `XE_AUTO_RUN_MISSING=1|0`
 
 ## Manual walkthrough
 

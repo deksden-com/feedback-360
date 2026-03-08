@@ -8,6 +8,7 @@ fi
 SCRIPT_DIR="$(dirname "${SCRIPT_PATH}")"
 REPO_ROOT="$(realpath "${SCRIPT_DIR}/../../..")"
 SCENARIO_ID="XE-001"
+cd "${REPO_ROOT}"
 
 usage() {
   cat <<'EOF'
@@ -23,6 +24,8 @@ Environment variables:
   XE_ENV       local|beta (default: beta)
   XE_BASE_URL  App base URL (default: beta => https://beta.go360go.ru, local => http://127.0.0.1:3000)
   XE_OUTPUT    token|human (default: token)
+  XE_AUTO_RUN_MISSING  1|0. Create a fresh run when no valid active run exists
+                       (default: beta => 1, local => 0)
 
 Examples:
   ./scenarios/XE-001/scripts/issue-token.sh subject
@@ -45,6 +48,7 @@ ACTOR="$1"
 RUN_ID="${2:-}"
 XE_ENV="${XE_ENV:-beta}"
 XE_OUTPUT="${XE_OUTPUT:-token}"
+XE_AUTO_RUN_MISSING="${XE_AUTO_RUN_MISSING:-}"
 
 default_base_url() {
   case "${XE_ENV}" in
@@ -125,10 +129,23 @@ process.exit(1);
 
 run_cli_capture() {
   (
-    cd "${REPO_ROOT}"
     pnpm --filter @feedback-360/cli cli -- "$@"
   ) 2>&1
 }
+
+default_auto_run_missing() {
+  case "${XE_ENV}" in
+    beta) printf '%s' "1" ;;
+    local) printf '%s' "0" ;;
+    *)
+      printf '%s' "0"
+      ;;
+  esac
+}
+
+if [[ -z "${XE_AUTO_RUN_MISSING}" ]]; then
+  XE_AUTO_RUN_MISSING="$(default_auto_run_missing)"
+fi
 
 resolve_run_id() {
   local raw
@@ -151,12 +168,121 @@ if (items.length === 0) {
   process.stderr.write(`No active ${scenarioId} runs found for environment ${environment}.\n`);
   process.exit(1);
 }
-process.stdout.write(items[0].runId);
+process.stdout.write(items.map((item) => item.runId).join("\n"));
 ' "${XE_ENV}" "${SCENARIO_ID}"
 }
 
+read_binding_pair() {
+  local run_id="$1"
+  local actor="$2"
+  local bindings_path="${REPO_ROOT}/.xe-runs/${run_id}__${SCENARIO_ID}/bindings.json"
+
+  if [[ ! -f "${bindings_path}" ]]; then
+    return 1
+  fi
+
+  node -e '
+const fs = require("node:fs");
+const bindingsPath = process.argv[1];
+const actor = process.argv[2];
+const bindings = JSON.parse(fs.readFileSync(bindingsPath, "utf8"));
+const actorBinding = bindings.actors?.[actor];
+const companyId = bindings.company?.id;
+if (!actorBinding?.userId || !companyId) {
+  process.exit(1);
+}
+process.stdout.write(`${actorBinding.userId}|${companyId}`);
+' "${bindings_path}" "${actor}"
+}
+
+validate_binding_in_db() {
+  local user_id="$1"
+  local company_id="$2"
+
+  set -a
+  # shellcheck disable=SC1091
+  source "${REPO_ROOT}/.env" >/dev/null 2>&1 || true
+  set +a
+
+  pnpm --dir "${REPO_ROOT}" --filter @feedback-360/db exec node - "${user_id}" "${company_id}" <<'NODE' >/dev/null
+const { Client } = require("pg");
+
+const userId = process.argv[2];
+const companyId = process.argv[3];
+
+const client = new Client({
+  connectionString: process.env.SUPABASE_DB_POOLER_URL || process.env.DATABASE_URL,
+});
+
+(async () => {
+  await client.connect();
+  const membership = await client.query(
+    "select role from company_memberships where user_id = $1 and company_id = $2 limit 1",
+    [userId, companyId],
+  );
+  await client.end();
+  if (membership.rowCount !== 1) {
+    process.exit(1);
+  }
+})().catch(async () => {
+  try {
+    await client.end();
+  } catch {}
+  process.exit(1);
+});
+NODE
+}
+
+pick_valid_run_id() {
+  local candidates raw_candidates candidate pair user_id company_id
+  raw_candidates="$(resolve_run_id)"
+
+  while IFS= read -r candidate; do
+    [[ -z "${candidate}" ]] && continue
+    pair="$(read_binding_pair "${candidate}" "${ACTOR}" || true)"
+    [[ -z "${pair}" ]] && continue
+    user_id="${pair%%|*}"
+    company_id="${pair#*|}"
+    if validate_binding_in_db "${user_id}" "${company_id}"; then
+      printf '%s' "${candidate}"
+      return 0
+    fi
+  done <<< "${raw_candidates}"
+
+  if [[ "${XE_AUTO_RUN_MISSING}" == "1" ]]; then
+    create_fresh_run_id
+    return 0
+  fi
+
+  cat >&2 <<EOF
+No valid active ${SCENARIO_ID} run found for actor ${ACTOR} in environment ${XE_ENV}.
+The XE run registry still exists locally, but the corresponding beta data is stale or missing.
+
+Create a fresh beta run, then retry:
+  pnpm --filter @feedback-360/cli cli -- xe runs run ${SCENARIO_ID} --env ${XE_ENV} --owner \${USER:-manual} --base-url ${XE_BASE_URL} --json
+EOF
+  exit 1
+}
+
+create_fresh_run_id() {
+  local raw
+  raw="$(run_cli_capture xe runs run "${SCENARIO_ID}" --env "${XE_ENV}" --owner "${USER:-manual}" --base-url "${XE_BASE_URL}" --json)"
+  printf '%s' "${raw}" \
+    | extract_json \
+    | node -e '
+const fs = require("node:fs");
+const payload = JSON.parse(fs.readFileSync(0, "utf8"));
+const runId = payload.data?.runId;
+if (!runId) {
+  process.stderr.write("Failed to create a fresh XE run.\n");
+  process.exit(1);
+}
+process.stdout.write(runId);
+'
+}
+
 if [[ -z "${RUN_ID}" ]]; then
-  RUN_ID="$(resolve_run_id)"
+  RUN_ID="$(pick_valid_run_id)"
 fi
 
 ISSUE_OUTPUT="$(
