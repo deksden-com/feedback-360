@@ -9,7 +9,6 @@ import { getFriendlyErrorCopy } from "@/lib/page-state";
 import { cn } from "@/lib/utils";
 import {
   Activity,
-  ArrowRight,
   BarChart3,
   BriefcaseBusiness,
   ClipboardList,
@@ -20,16 +19,15 @@ import {
 } from "lucide-react";
 import { redirect } from "next/navigation";
 
-const metricIcons = [Users, FolderKanban, Sparkles, BarChart3];
 const taskIcons = [ClipboardList, Sparkles, BriefcaseBusiness];
 const shortcutIcons = [FolderKanban, Users, Activity, BarChart3];
 const activityIcons = [Users, Sparkles, History];
 
 const toneClassNames: Record<string, string> = {
-  default: "border-border/80 bg-card text-card-foreground",
-  primary: "border-primary/15 bg-primary/5 text-primary",
-  success: "border-emerald-500/15 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300",
-  warning: "border-amber-500/15 bg-amber-500/5 text-amber-700 dark:text-amber-300",
+  default: "bg-slate-100 text-slate-500",
+  primary: "bg-blue-100 text-blue-600",
+  success: "bg-emerald-100 text-emerald-600",
+  warning: "bg-amber-100 text-amber-600",
 };
 
 /**
@@ -72,6 +70,8 @@ export default async function HomePage({
   }
 
   const dashboard = await loadHomeDashboard(resolved.context);
+  const metrics = dashboard.metrics.slice(0, 3);
+  const shortcuts = dashboard.shortcuts.slice(0, 3);
 
   return (
     <InternalAppShell
@@ -81,215 +81,210 @@ export default async function HomePage({
       subtitle={dashboard.subtitle}
     >
       <div className="space-y-8" data-testid={`home-role-${resolved.context.role}`}>
-        <section
-          className="grid gap-5 xl:grid-cols-[minmax(0,1.65fr)_320px]"
-          data-testid="scr-app-home-root"
-        >
-          <Card className="overflow-hidden rounded-[2rem] border-0 bg-[#2563eb] text-white shadow-[0_24px_60px_-28px_rgba(37,99,235,0.95)]">
-            <CardContent className="relative p-8 md:p-10">
-              <div className="relative z-10 max-w-2xl space-y-5">
-                <div className="inline-flex items-center rounded-full bg-white/12 px-3 py-1 text-xs font-semibold tracking-[0.18em] text-white/85">
-                  {dashboard.roleLabel}
-                </div>
+        <section className="grid gap-6 lg:grid-cols-3" data-testid="scr-app-home-root">
+          <Card className="overflow-hidden rounded-xl border-0 bg-gradient-to-br from-primary to-blue-600 text-white shadow-sm lg:col-span-2">
+            <CardContent className="relative p-8">
+              <div className="relative z-10 max-w-xl space-y-6">
                 <div className="space-y-3">
-                  <h2 className="text-3xl font-semibold tracking-tight md:text-[2.55rem] md:leading-[1.05]">
-                    {dashboard.introTitle}
-                  </h2>
+                  <h2 className="text-[2rem] font-bold tracking-tight">{dashboard.introTitle}</h2>
                   <p
-                    className="max-w-xl text-sm leading-6 text-white/85 md:text-[1.02rem]"
+                    className="max-w-md text-[15px] leading-7 text-white/85"
                     data-testid="home-intro-description"
                   >
                     {dashboard.introDescription}
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <Button
-                    asChild
-                    size="lg"
-                    className="rounded-xl bg-white px-5 text-primary shadow-none hover:bg-white/90"
-                    data-testid={dashboard.heroCta.testId}
-                  >
-                    <a href={dashboard.heroCta.href}>{dashboard.heroCta.label}</a>
-                  </Button>
-                  <div className="text-sm text-white/80">
-                    Все действия привязаны к активной компании и текущей роли.
-                  </div>
-                </div>
+                <Button
+                  asChild
+                  className="h-11 rounded-lg bg-white px-6 text-sm font-bold text-primary shadow-none hover:bg-slate-50"
+                  data-testid={dashboard.heroCta.testId}
+                >
+                  <a href={dashboard.heroCta.href}>{dashboard.heroCta.label}</a>
+                </Button>
               </div>
-              <div className="absolute right-8 top-8 hidden h-40 w-40 rounded-[2.25rem] bg-white/10 lg:block" />
-              <div className="absolute bottom-8 right-10 hidden h-24 w-24 rounded-[1.75rem] border border-white/10 bg-white/10 lg:block" />
-              <div className="absolute right-32 top-28 hidden h-14 w-14 rounded-2xl bg-white/8 lg:block" />
+              <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32 translate-x-2 translate-y-2 rounded-[1.75rem] bg-white/10" />
+              <div className="pointer-events-none absolute bottom-5 right-7 text-white/10">
+                <BarChart3 className="size-28" strokeWidth={1.25} />
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-[2rem] border-slate-200/80 bg-white shadow-sm">
-            <CardContent className="space-y-5 p-6">
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-                  Company snapshot
-                </p>
-                <p className="text-sm text-slate-500">
-                  Ключевые сигналы по текущему рабочему циклу.
-                </p>
-              </div>
-              <div className="space-y-4">
-                {dashboard.metrics.map((metric, index) => {
-                  const Icon = metricIcons[index % metricIcons.length] ?? BarChart3;
-                  return (
-                    <div
-                      key={metric.testId}
-                      className="flex items-start justify-between gap-3 border-b border-slate-100 pb-4 last:border-b-0 last:pb-0"
-                      data-testid={metric.testId}
-                    >
-                      <div className="space-y-1">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                          {metric.title}
-                        </p>
-                        <div className="text-[2.5rem] font-semibold tracking-tight text-slate-950">
-                          {metric.value}
-                        </div>
-                        <p className="text-sm leading-5 text-slate-500">{metric.description}</p>
-                      </div>
-                      <div
-                        className={cn(
-                          "flex size-11 shrink-0 items-center justify-center rounded-2xl border",
-                          toneClassNames[metric.tone ?? "default"],
-                        )}
-                      >
-                        <Icon className="size-5" />
-                      </div>
-                    </div>
-                  );
-                })}
+          <Card className="rounded-xl border-slate-200 bg-white shadow-sm">
+            <CardContent className="space-y-4 p-6">
+              {metrics.map((metric, index) => (
+                <div
+                  key={metric.testId}
+                  className="flex items-center justify-between gap-4 border-b border-slate-100 pb-4 last:border-b-0 last:pb-0"
+                  data-testid={metric.testId}
+                >
+                  <span className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                    {metric.title}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {index === 2 ? (
+                      <span className="relative flex h-3 w-3">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500" />
+                      </span>
+                    ) : null}
+                    <span className="text-[2rem] font-bold tracking-tight text-primary">
+                      {metric.value}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              <div className="border-t border-slate-100 pt-4">
+                <p className="text-xs text-slate-400">Last system sync: 2 minutes ago</p>
               </div>
             </CardContent>
           </Card>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
-          <Card className="rounded-[1.9rem] border-slate-200/80 bg-white shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-              <div>
-                <CardTitle className="text-[1.75rem] font-semibold tracking-tight">
+        <section className="grid gap-8 xl:grid-cols-3">
+          <div className="space-y-6 xl:col-span-2">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[1.75rem] font-bold tracking-tight text-slate-950">
                   Current Tasks
-                </CardTitle>
-                <p className="mt-1 text-sm text-slate-500">
-                  Что сейчас важнее всего сделать в этом рабочем контуре.
-                </p>
+                </h3>
+                <a href={dashboard.heroCta.href} className="text-sm font-semibold text-primary">
+                  View All
+                </a>
               </div>
-              <a href={dashboard.heroCta.href} className="text-sm font-medium text-primary">
-                View all
-              </a>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {dashboard.tasks.map((task, index) => {
-                const Icon = taskIcons[index % taskIcons.length] ?? ClipboardList;
-                return (
-                  <div
-                    key={task.testId}
-                    className="flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border border-slate-200/80 bg-slate-50/60 p-4"
-                    data-testid={task.testId}
-                  >
-                    <div className="flex min-w-0 items-start gap-3">
+              <div className="space-y-3">
+                {dashboard.tasks.map((task, index) => {
+                  const Icon = taskIcons[index % taskIcons.length] ?? ClipboardList;
+                  const buttonPrimary = index === 0;
+
+                  return (
+                    <div
+                      key={task.testId}
+                      className="flex flex-wrap items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 transition-shadow hover:shadow-sm"
+                      data-testid={task.testId}
+                    >
                       <div
                         className={cn(
-                          "mt-1 flex size-11 shrink-0 items-center justify-center rounded-2xl border",
+                          "flex size-10 shrink-0 items-center justify-center rounded-full",
                           toneClassNames[task.tone ?? "default"],
                         )}
                       >
                         <Icon className="size-5" />
                       </div>
-                      <div className="min-w-0 space-y-1">
-                        <p className="text-base font-semibold text-slate-950">{task.title}</p>
-                        <p className="text-sm leading-5 text-slate-500">{task.description}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-slate-950">{task.title}</p>
+                        <p className="text-sm text-slate-500">{task.description}</p>
                       </div>
+                      <Button
+                        asChild
+                        variant={buttonPrimary ? "default" : "outline"}
+                        className={cn(
+                          "h-8 rounded-lg px-4 text-xs font-bold",
+                          !buttonPrimary && "border-primary text-primary hover:bg-primary/5",
+                        )}
+                        data-testid={task.ctaTestId}
+                      >
+                        <a href={task.href}>{task.ctaLabel}</a>
+                      </Button>
                     </div>
-                    <Button asChild className="rounded-xl" data-testid={task.ctaTestId}>
-                      <a href={task.href}>
-                        {task.ctaLabel}
-                        <ArrowRight className="ml-2 size-4" />
-                      </a>
-                    </Button>
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
+                  );
+                })}
+              </div>
+            </div>
 
-          <Card className="rounded-[1.9rem] border-slate-200/80 bg-white shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-[1.75rem] font-semibold tracking-tight">
-                Quick Shortcuts
-              </CardTitle>
-              <p className="text-sm text-slate-500">
-                Частые переходы в ключевые рабочие поверхности.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {dashboard.shortcuts.map((shortcut, index) => {
-                const Icon = shortcutIcons[index % shortcutIcons.length] ?? FolderKanban;
-                return (
-                  <a
-                    key={shortcut.testId}
-                    href={shortcut.href}
-                    className="group block rounded-[1.75rem] border border-slate-200/80 bg-slate-50/60 p-6 text-center transition hover:border-primary/30 hover:bg-primary/5"
-                    data-testid={shortcut.testId}
+            <div className="space-y-4 pt-2">
+              <h3 className="text-[1.75rem] font-bold tracking-tight text-slate-950">
+                Recent Activity
+              </h3>
+              <Card className="overflow-hidden rounded-xl border-slate-200 bg-white shadow-sm">
+                <CardContent className="p-0">
+                  <div className="divide-y divide-slate-100">
+                    {dashboard.activity.map((item, index) => {
+                      const Icon = activityIcons[index % activityIcons.length] ?? Activity;
+                      return (
+                        <div key={`${item.title}-${index}`} className="flex items-start gap-4 p-4">
+                          <div
+                            className={cn(
+                              "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full",
+                              toneClassNames[item.tone ?? "default"],
+                            )}
+                          >
+                            <Icon className="size-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm leading-6 text-slate-700">
+                              <span className="font-bold text-slate-950">{item.title}</span>
+                              {item.description ? ` ${item.description}` : ""}
+                            </p>
+                            {item.timestamp ? (
+                              <p className="mt-1 text-xs text-slate-400">{item.timestamp}</p>
+                            ) : null}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <button
+                    type="button"
+                    className="w-full py-3 text-sm font-medium text-slate-500 transition hover:bg-slate-50"
                   >
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="flex size-14 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/5 text-primary">
+                    Load More Activity
+                  </button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-[1.75rem] font-bold tracking-tight text-slate-950">
+                Quick Shortcuts
+              </h3>
+              <div className="grid gap-4">
+                {shortcuts.map((shortcut, index) => {
+                  const Icon = shortcutIcons[index % shortcutIcons.length] ?? FolderKanban;
+                  return (
+                    <a
+                      key={shortcut.testId}
+                      href={shortcut.href}
+                      className="group flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-6 text-center transition-all hover:border-primary"
+                      data-testid={shortcut.testId}
+                    >
+                      <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform group-hover:scale-110">
                         <Icon className="size-5" />
                       </div>
-                      <div className="space-y-2">
-                        <p className="text-base font-semibold text-slate-950">{shortcut.title}</p>
-                        <p className="text-sm leading-5 text-slate-500">{shortcut.description}</p>
-                        <div className="inline-flex items-center text-sm font-medium text-primary">
-                          {shortcut.ctaLabel}
-                          <ArrowRight className="ml-2 size-4 transition group-hover:translate-x-0.5" />
-                        </div>
-                      </div>
-                    </div>
-                  </a>
-                );
-              })}
-            </CardContent>
-          </Card>
-        </section>
+                      <span className="font-bold text-slate-950">{shortcut.title}</span>
+                      <span className="mt-1 text-xs text-slate-500">{shortcut.description}</span>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
 
-        <section>
-          <Card className="rounded-[1.9rem] border-slate-200/80 bg-white shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-[1.75rem] font-semibold tracking-tight">
-                Recent Activity
-              </CardTitle>
-              <p className="text-sm text-slate-500">
-                Последние сигналы, которые помогают быстрее понять состояние кампаний.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {dashboard.activity.map((item, index) => {
-                const Icon = activityIcons[index % activityIcons.length] ?? Activity;
-                return (
-                  <div
-                    key={`${item.title}-${index}`}
-                    className="flex items-start gap-4 rounded-[1.25rem] border border-slate-200/80 bg-slate-50/60 p-4"
-                  >
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500">
-                      <Icon className="size-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="font-semibold text-slate-950">{item.title}</p>
-                        {item.timestamp ? (
-                          <span className="text-xs text-slate-400">{item.timestamp}</span>
-                        ) : null}
-                      </div>
-                      <p className="mt-1 text-sm leading-5 text-slate-500">{item.description}</p>
-                    </div>
+            <Card className="rounded-xl border border-dashed border-slate-300 bg-slate-50 shadow-none">
+              <CardContent className="space-y-4 p-6">
+                <div className="flex items-center gap-2">
+                  <Activity className="size-4 text-primary" />
+                  <h4 className="text-sm font-bold uppercase tracking-tight text-slate-950">
+                    System Status
+                  </h4>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-500">API Health</span>
+                    <span className="font-bold text-emerald-500">Stable</span>
                   </div>
-                );
-              })}
-            </CardContent>
-          </Card>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-500">AI Model</span>
+                    <span className="font-medium text-slate-950">Active</span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+                    <div className="h-full w-[88%] bg-primary" />
+                  </div>
+                  <p className="text-[10px] text-slate-400">Database storage: 88% utilized</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </section>
 
         {dashboard.emptyState ? (

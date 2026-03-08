@@ -12,13 +12,14 @@ import { Avatar, AvatarLabel } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  ArrowLeftRight,
   Bell,
   BriefcaseBusiness,
-  Building2,
   FolderKanban,
   HelpCircle,
   Home,
   LayoutDashboard,
+  LogOut,
   Megaphone,
   Network,
   Search,
@@ -45,6 +46,7 @@ const NavLinks = ({
   className?: string;
 }) => {
   const sections = getInternalNavSections(role);
+  const items = sections.flatMap((section) => section.items);
   const iconMap: Record<string, typeof Home> = {
     "/": LayoutDashboard,
     "/questionnaires": BriefcaseBusiness,
@@ -61,39 +63,30 @@ const NavLinks = ({
 
   return (
     <nav className={className}>
-      <div className="space-y-5">
-        {sections.map((section) => (
-          <div key={section.key} className="space-y-2" data-testid={`nav-section-${section.key}`}>
-            <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/80">
-              {section.label}
-            </p>
-            <div className="grid gap-1">
-              {section.items.map((item) => {
-                const active = isActivePath(currentPath, item.href);
-                const Icon = iconMap[item.href] ?? Home;
+      <div className="grid gap-1">
+        {items.map((item) => {
+          const active = isActivePath(currentPath, item.href);
+          const Icon = iconMap[item.href] ?? Home;
 
-                return (
-                  <Button
-                    key={item.href}
-                    asChild
-                    variant={active ? "secondary" : "ghost"}
-                    className={cn(
-                      "h-11 justify-start rounded-2xl px-3 text-sm",
-                      active &&
-                        "bg-primary/10 text-primary shadow-none hover:bg-primary/10 hover:text-primary",
-                    )}
-                    data-testid={item.testId}
-                  >
-                    <a href={item.href} aria-current={active ? "page" : undefined}>
-                      <Icon className="mr-3 size-4 shrink-0" />
-                      {item.label}
-                    </a>
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+          return (
+            <Button
+              key={item.href}
+              asChild
+              variant={active ? "secondary" : "ghost"}
+              className={cn(
+                "h-11 justify-start rounded-xl px-3 text-sm font-medium text-slate-600 shadow-none hover:bg-slate-100 hover:text-slate-900",
+                active &&
+                  "bg-primary/10 text-primary shadow-none hover:bg-primary/10 hover:text-primary",
+              )}
+              data-testid={item.testId}
+            >
+              <a href={item.href} aria-current={active ? "page" : undefined}>
+                <Icon className="mr-3 size-4 shrink-0" />
+                {item.label}
+              </a>
+            </Button>
+          );
+        })}
       </div>
     </nav>
   );
@@ -115,82 +108,52 @@ export const InternalAppShell = async ({
   const meta = await loadInternalShellMeta(context);
 
   return (
-    <div className="min-h-dvh bg-slate-50/80" data-testid="internal-app-shell">
+    <div className="min-h-dvh bg-[#f6f6f8]" data-testid="internal-app-shell">
       <div className="flex min-h-dvh">
-        <aside className="hidden w-[228px] shrink-0 border-r border-slate-200/80 bg-white lg:flex lg:flex-col">
-          <div className="border-b border-slate-200/80 px-6 py-5">
+        <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white lg:flex lg:flex-col">
+          <div className="border-b border-slate-200 px-6 py-5">
             <div className="flex items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-white shadow-sm">
+              <div className="flex size-11 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
                 <Sparkles className="size-5" />
               </div>
               <div className="space-y-0.5">
-                <p className="text-lg font-semibold tracking-tight">go360go</p>
-                <p className="text-sm text-muted-foreground">{meta.roleLabel} workspace</p>
+                <p className="text-lg font-bold tracking-tight">go360go</p>
+                <p className="text-xs text-slate-500">{meta.roleLabel} portal</p>
               </div>
             </div>
           </div>
 
-          <div className="space-y-4 px-4 py-5">
-            <div
-              className="rounded-3xl border border-slate-200/80 bg-slate-50 px-4 py-3"
-              data-testid="shell-company-card"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex size-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <Building2 className="size-4" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/80">
-                    Active workspace
-                  </p>
-                  <p className="truncate text-sm font-semibold" data-testid="shell-company-name">
-                    {meta.companyName}
-                  </p>
-                </div>
-              </div>
-            </div>
-
+          <div className="flex-1 px-4 py-4">
             <NavLinks currentPath={currentPath} role={context.role} className="grid gap-1" />
           </div>
 
-          <div className="mt-auto border-t border-slate-200/80 px-4 py-4">
-            <div className="rounded-3xl border border-slate-200/80 bg-white p-3 shadow-sm">
-              <div className="flex items-center gap-3">
-                <Avatar className="size-11 rounded-2xl bg-primary/10 text-primary">
-                  <AvatarLabel>{meta.accountInitials}</AvatarLabel>
-                </Avatar>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold" data-testid="shell-account-name">
-                    {meta.accountLabel}
-                  </p>
-                  <p
-                    className="truncate text-xs text-muted-foreground"
-                    data-testid="shell-account-meta"
-                  >
-                    {meta.roleLabel}
-                  </p>
-                </div>
+          <div className="mt-auto border-t border-slate-200 px-4 py-4">
+            <div
+              className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-slate-50"
+              data-testid="shell-company-card"
+            >
+              <Avatar className="size-9 rounded-full bg-primary/15 text-primary">
+                <AvatarLabel>{meta.accountInitials}</AvatarLabel>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold" data-testid="shell-account-name">
+                  {meta.accountLabel}
+                </p>
+                <p className="truncate text-xs text-slate-500" data-testid="shell-account-meta">
+                  {meta.accountMeta}
+                </p>
               </div>
-              <div className="mt-4 grid gap-2">
-                <Button
-                  asChild
-                  variant="outline"
-                  className="h-10 justify-start rounded-2xl"
-                  data-testid="shell-switch-company"
+              <form action="/api/session/logout" method="post">
+                <button
+                  type="submit"
+                  className="inline-flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                  data-testid="shell-sign-out"
+                  aria-label="Выйти"
                 >
-                  <a href="/select-company">Сменить компанию</a>
-                </Button>
-                <form action="/api/session/logout" method="post">
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    className="h-10 w-full justify-start rounded-2xl"
-                    data-testid="shell-sign-out"
-                  >
-                    Выйти
-                  </Button>
-                </form>
-              </div>
+                  <span className="sr-only">Выйти</span>
+                  <LogOut className="size-4" aria-hidden="true" />
+                </button>
+              </form>
             </div>
           </div>
         </aside>
@@ -226,84 +189,65 @@ export const InternalAppShell = async ({
             </CardContent>
           </Card>
 
-          <div className="border-b border-slate-200/80 bg-white/90 backdrop-blur">
-            <div className="flex min-h-[72px] items-center justify-between gap-4 px-4 md:px-6 lg:px-8">
+          <div className="border-b border-slate-200 bg-white">
+            <div className="flex min-h-16 items-center justify-between gap-4 px-4 md:px-6 lg:px-8">
               <div className="hidden min-w-0 flex-1 md:flex">
-                <div className="flex h-11 w-full max-w-sm items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-muted-foreground">
+                <div className="flex h-10 w-full max-w-xs items-center gap-3 rounded-lg bg-slate-100 px-4 text-sm text-slate-400">
                   <Search className="size-4" />
                   <span>Search campaigns, people, questionnaires…</span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="hidden items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 md:flex">
+                <a
+                  href="/select-company"
+                  className="hidden items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-primary md:flex"
+                  data-testid="shell-switch-company"
+                >
                   <span>{meta.companyName}</span>
-                </div>
+                  <ArrowLeftRight className="size-4 text-slate-400" />
+                </a>
+                <div className="hidden h-6 w-px bg-slate-200 md:block" />
                 <button
                   type="button"
-                  className="hidden size-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 md:inline-flex"
+                  className="hidden size-10 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 md:inline-flex"
                   aria-label="Уведомления"
                 >
                   <Bell className="size-4" />
                 </button>
                 <button
                   type="button"
-                  className="hidden size-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 md:inline-flex"
+                  className="hidden size-10 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 md:inline-flex"
                   aria-label="Помощь"
                 >
                   <HelpCircle className="size-4" />
                 </button>
-                <details className="group relative" data-testid="shell-account-menu">
-                  <summary className="flex list-none cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-left shadow-sm">
-                    <Avatar className="size-10 rounded-2xl bg-primary/10 text-primary">
-                      <AvatarLabel>{meta.accountInitials}</AvatarLabel>
-                    </Avatar>
-                    <div className="hidden min-w-0 md:block">
-                      <p
-                        className="truncate text-sm font-semibold"
-                        data-testid="shell-account-name-desktop"
-                      >
-                        {meta.accountLabel}
-                      </p>
-                      <p
-                        className="truncate text-xs text-muted-foreground"
-                        data-testid="shell-account-role-desktop"
-                      >
-                        {meta.roleLabel}
-                      </p>
-                    </div>
-                  </summary>
-                  <div className="absolute right-0 top-[calc(100%+12px)] z-20 hidden w-72 rounded-3xl border border-slate-200 bg-white p-4 shadow-xl group-open:block">
-                    <div className="space-y-1 border-b border-slate-100 pb-3">
-                      <p className="text-sm font-semibold">{meta.companyName}</p>
-                      <p className="text-xs text-muted-foreground" data-testid="shell-company-id">
-                        {meta.accountMeta}
-                      </p>
-                    </div>
-                    <div className="mt-3 grid gap-2">
-                      <Button asChild variant="outline" className="h-10 justify-start rounded-2xl">
-                        <a href="/select-company">Сменить компанию</a>
-                      </Button>
-                      <form action="/api/session/logout" method="post">
-                        <Button
-                          type="submit"
-                          variant="outline"
-                          className="h-10 w-full justify-start rounded-2xl"
-                          data-testid="shell-sign-out-desktop"
-                        >
-                          Выйти из аккаунта
-                        </Button>
-                      </form>
-                    </div>
+                <div className="hidden items-center gap-3 md:flex">
+                  <Avatar className="size-9 rounded-full bg-primary/15 text-primary">
+                    <AvatarLabel>{meta.accountInitials}</AvatarLabel>
+                  </Avatar>
+                  <div className="hidden min-w-0 lg:block">
+                    <p
+                      className="truncate text-sm font-semibold"
+                      data-testid="shell-account-name-desktop"
+                    >
+                      {meta.accountLabel}
+                    </p>
+                    <p
+                      className="truncate text-xs text-slate-500"
+                      data-testid="shell-account-role-desktop"
+                    >
+                      {meta.roleLabel}
+                    </p>
                   </div>
-                </details>
+                </div>
               </div>
             </div>
           </div>
 
-          <section className="space-y-6 px-4 py-6 md:px-6 lg:px-8">
+          <section className="space-y-8 px-4 py-8 md:px-6 lg:px-8">
             <div className="space-y-1">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-950">{title}</h1>
-              <p className="text-sm text-slate-500 md:text-base">{subtitle}</p>
+              <h1 className="text-4xl font-black tracking-tight text-slate-950">{title}</h1>
+              <p className="text-base text-slate-500">{subtitle}</p>
             </div>
             {children}
           </section>
