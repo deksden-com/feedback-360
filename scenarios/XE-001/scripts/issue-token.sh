@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+if [[ "${SCRIPT_PATH}" != /* ]]; then
+  SCRIPT_PATH="$(realpath "${SCRIPT_PATH}")"
+fi
+SCRIPT_DIR="$(dirname "${SCRIPT_PATH}")"
+REPO_ROOT="$(realpath "${SCRIPT_DIR}/../../..")"
 SCENARIO_ID="XE-001"
 
 usage() {
@@ -59,25 +63,71 @@ extract_json() {
   node -e '
 const fs = require("node:fs");
 const text = fs.readFileSync(0, "utf8");
-const lines = text.split(/\r?\n/);
-const startLine = lines.findIndex((line) => line.trim() === "{");
-let endLine = -1;
-for (let index = lines.length - 1; index >= 0; index -= 1) {
-  if (lines[index].trim() === "}") {
-    endLine = index;
-    break;
+const tryExtract = (startIndex) => {
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let index = startIndex; index < text.length; index += 1) {
+    const char = text[index];
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === "\\\\") {
+        escaped = true;
+      } else if (char === "\"") {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === "\"") {
+      inString = true;
+      continue;
+    }
+
+    if (char === "{") {
+      depth += 1;
+      continue;
+    }
+
+    if (char === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        const candidate = text.slice(startIndex, index + 1);
+        try {
+          JSON.parse(candidate);
+          return candidate;
+        } catch {
+          return null;
+        }
+      }
+    }
+  }
+  return null;
+};
+
+for (let index = 0; index < text.length; index += 1) {
+  if (text[index] !== "{") {
+    continue;
+  }
+
+  const candidate = tryExtract(index);
+  if (candidate) {
+    process.stdout.write(candidate);
+    process.exit(0);
   }
 }
-if (startLine < 0 || endLine < startLine) {
+
   process.stderr.write("Failed to locate JSON payload in CLI output.\n");
-  process.exit(1);
-}
-process.stdout.write(lines.slice(startLine, endLine + 1).join("\n"));
+process.exit(1);
 '
 }
 
 run_cli_capture() {
-  pnpm --dir "${REPO_ROOT}" --filter @feedback-360/cli cli -- "$@" 2>&1
+  (
+    cd "${REPO_ROOT}"
+    pnpm --filter @feedback-360/cli cli -- "$@"
+  ) 2>&1
 }
 
 resolve_run_id() {
