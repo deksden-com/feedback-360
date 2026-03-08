@@ -24,26 +24,26 @@ Status: Draft (2026-03-07)
 - локальный доступ к репозиторию;
 - рабочий `.env` с `XE_AUTH_SECRET`;
 - доступ к `https://beta.go360go.ru`;
-- существующий XE run, например `RUN-20260307121525-c767edf3`.
+- рабочий `beta` deploy; helper сам найдёт или создаст валидный `XE-001` run.
 
 ## Выпусти token
 
 Сотрудник:
 
 ```bash
-./scenarios/XE-001/scripts/subject-token.sh RUN-20260307121525-c767edf3
+./scenarios/XE-001/scripts/subject-token.sh
 ```
 
 Руководитель:
 
 ```bash
-./scenarios/XE-001/scripts/manager-token.sh RUN-20260307121525-c767edf3
+./scenarios/XE-001/scripts/manager-token.sh
 ```
 
 HR:
 
 ```bash
-./scenarios/XE-001/scripts/hr-admin-token.sh RUN-20260307121525-c767edf3
+./scenarios/XE-001/scripts/hr-admin-token.sh
 ```
 
 ## Войди в систему
@@ -54,6 +54,7 @@ HR:
 4. Нажми `Войти по XE token`
 
 После этого приложение создаёт обычную пользовательскую сессию.
+Если локальный registry содержит только устаревшие XE run-ы, helper сначала автоматически создаст новый `XE-001` run на `beta`, а затем выпустит token.
 
 ## Открой нужный экран
 

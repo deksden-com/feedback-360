@@ -153,9 +153,9 @@ HR открывает полную витрину результатов.
 
 Для быстрого ручного просмотра используй:
 
-- `./scenarios/XE-001/scripts/subject-token.sh RUN-20260307121525-c767edf3`
-- `./scenarios/XE-001/scripts/manager-token.sh RUN-20260307121525-c767edf3`
-- `./scenarios/XE-001/scripts/hr-admin-token.sh RUN-20260307121525-c767edf3`
+- `./scenarios/XE-001/scripts/subject-token.sh`
+- `./scenarios/XE-001/scripts/manager-token.sh`
+- `./scenarios/XE-001/scripts/hr-admin-token.sh`
 
 А подробная инструкция ручной проверки лежит здесь:
 

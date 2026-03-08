@@ -35,11 +35,12 @@
 
 ## Проверенный beta run
 
-Для ручной проверки используй **прошедший** beta run:
+Сейчас удобнее всего использовать helper-скрипты **без явного `run-id`**:
 
-- `RUN-20260307121525-c767edf3`
+- они найдут самый свежий валидный `XE-001` run на `beta`;
+- если локальный registry содержит только устаревшие run-ы, helper автоматически создаст новый `XE-001` run и затем выпустит token.
 
-Именно на нём были зафиксированы результаты и сделаны screenshot evidence.
+При необходимости можно всё ещё передать конкретный `run-id` вручную.
 
 ## Быстрый вход по ролям
 
@@ -48,7 +49,7 @@
 Сгенерировать токен:
 
 ```bash
-./scenarios/XE-001/scripts/subject-token.sh RUN-20260307121525-c767edf3
+./scenarios/XE-001/scripts/subject-token.sh
 ```
 
 Дальше:
@@ -74,7 +75,7 @@
 Сгенерировать токен:
 
 ```bash
-./scenarios/XE-001/scripts/manager-token.sh RUN-20260307121525-c767edf3
+./scenarios/XE-001/scripts/manager-token.sh
 ```
 
 После входа открой:
@@ -97,7 +98,7 @@
 Сгенерировать токен:
 
 ```bash
-./scenarios/XE-001/scripts/hr-admin-token.sh RUN-20260307121525-c767edf3
+./scenarios/XE-001/scripts/hr-admin-token.sh
 ```
 
 После входа открой:
@@ -131,7 +132,8 @@
 
 - вызывают CLI `xe auth issue`
 - могут принять явный `run-id`
-- если `run-id` не передан — ищут последний активный `XE-001` run
+- если `run-id` не передан — ищут самый свежий валидный `XE-001` run
+- на `beta` могут автоматически поднять новый run, если все найденные run-ы уже устарели
 
 Полезные переменные:
 
@@ -142,7 +144,7 @@
 Пример human-режима:
 
 ```bash
-XE_OUTPUT=human ./scenarios/XE-001/scripts/manager-token.sh RUN-20260307121525-c767edf3
+XE_OUTPUT=human ./scenarios/XE-001/scripts/manager-token.sh
 ```
 
 ## Что уже проверено
@@ -162,7 +164,7 @@ XE_OUTPUT=human ./scenarios/XE-001/scripts/manager-token.sh RUN-20260307121525-c
 
 Проверь по порядку:
 
-1. что ты используешь именно `RUN-20260307121525-c767edf3`;
+1. что helper успел закончить поиск/создание валидного run-а на `beta`;
 2. что открыт `https://beta.go360go.ru/auth/login`;
 3. что XE helper раскрыт (`Cmd+Shift+X`);
 4. что token вставлен полностью, без лишних пробелов;
