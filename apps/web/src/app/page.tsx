@@ -78,23 +78,23 @@ export default async function HomePage({
       title={dashboard.title}
       subtitle={dashboard.subtitle}
     >
-      <div className="space-y-6" data-testid={`home-role-${resolved.context.role}`}>
+      <div className="space-y-8" data-testid={`home-role-${resolved.context.role}`}>
         <section
-          className="grid gap-4 xl:grid-cols-[minmax(0,1.7fr)_340px]"
+          className="grid gap-5 xl:grid-cols-[minmax(0,1.65fr)_320px]"
           data-testid="scr-app-home-root"
         >
-          <Card className="overflow-hidden rounded-[2rem] border-0 bg-[#2563eb] text-white shadow-[0_20px_50px_-24px_rgba(37,99,235,0.9)]">
+          <Card className="overflow-hidden rounded-[2rem] border-0 bg-[#2563eb] text-white shadow-[0_24px_60px_-28px_rgba(37,99,235,0.95)]">
             <CardContent className="relative p-8 md:p-10">
               <div className="relative z-10 max-w-2xl space-y-5">
-                <div className="inline-flex items-center rounded-full bg-white/12 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-white/80">
+                <div className="inline-flex items-center rounded-full bg-white/12 px-3 py-1 text-xs font-semibold tracking-[0.18em] text-white/85">
                   {dashboard.roleLabel}
                 </div>
                 <div className="space-y-3">
-                  <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+                  <h2 className="text-3xl font-semibold tracking-tight md:text-[2.55rem] md:leading-[1.05]">
                     {dashboard.introTitle}
                   </h2>
                   <p
-                    className="max-w-xl text-sm leading-6 text-white/80 md:text-base"
+                    className="max-w-xl text-sm leading-6 text-white/85 md:text-[1.02rem]"
                     data-testid="home-intro-description"
                   >
                     {dashboard.introDescription}
@@ -109,131 +109,117 @@ export default async function HomePage({
                   >
                     <a href={dashboard.heroCta.href}>{dashboard.heroCta.label}</a>
                   </Button>
-                  <div className="text-sm text-white/75">
-                    Все действия работают в текущем company context.
+                  <div className="text-sm text-white/80">
+                    Все действия привязаны к активной компании и текущей роли.
                   </div>
                 </div>
               </div>
-              <div className="absolute right-6 top-6 hidden h-36 w-36 rounded-[2rem] bg-white/10 lg:block" />
-              <div className="absolute bottom-6 right-8 hidden h-24 w-24 rounded-[1.5rem] border border-white/10 bg-white/8 lg:block" />
+              <div className="absolute right-8 top-8 hidden h-40 w-40 rounded-[2.25rem] bg-white/10 lg:block" />
+              <div className="absolute bottom-8 right-10 hidden h-24 w-24 rounded-[1.75rem] border border-white/10 bg-white/10 lg:block" />
+              <div className="absolute right-32 top-28 hidden h-14 w-14 rounded-2xl bg-white/8 lg:block" />
             </CardContent>
           </Card>
 
-          <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-            {dashboard.metrics.map((metric, index) => {
-              const Icon = metricIcons[index % metricIcons.length] ?? BarChart3;
-              return (
-                <Card
-                  key={metric.testId}
-                  className="rounded-[1.75rem] border-border/70 shadow-sm"
-                  data-testid={metric.testId}
-                >
-                  <CardContent className="flex items-start justify-between gap-3 p-5">
-                    <div className="space-y-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                        {metric.title}
-                      </p>
-                      <div className="text-3xl font-semibold tracking-tight">{metric.value}</div>
-                      <p className="text-sm leading-5 text-muted-foreground">
-                        {metric.description}
-                      </p>
-                    </div>
-                    <div
-                      className={cn(
-                        "flex size-11 shrink-0 items-center justify-center rounded-2xl border",
-                        toneClassNames[metric.tone ?? "default"],
-                      )}
-                    >
-                      <Icon className="size-5" />
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_320px]">
-          <div className="space-y-6">
-            <Card className="rounded-[1.75rem] border-border/70 shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-                <div>
-                  <CardTitle className="text-2xl font-semibold tracking-tight">
-                    Current Tasks
-                  </CardTitle>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Что сейчас важнее всего сделать в этом рабочем контуре.
-                  </p>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {dashboard.tasks.map((task, index) => {
-                  const Icon = taskIcons[index % taskIcons.length] ?? ClipboardList;
+          <Card className="rounded-[2rem] border-slate-200/80 bg-white shadow-sm">
+            <CardContent className="space-y-5 p-6">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Company snapshot
+                </p>
+                <p className="text-sm text-slate-500">
+                  Ключевые сигналы по текущему рабочему циклу.
+                </p>
+              </div>
+              <div className="space-y-4">
+                {dashboard.metrics.map((metric, index) => {
+                  const Icon = metricIcons[index % metricIcons.length] ?? BarChart3;
                   return (
                     <div
-                      key={task.testId}
-                      className="flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border border-border/70 bg-background p-4"
-                      data-testid={task.testId}
+                      key={metric.testId}
+                      className="flex items-start justify-between gap-3 border-b border-slate-100 pb-4 last:border-b-0 last:pb-0"
+                      data-testid={metric.testId}
                     >
-                      <div className="flex min-w-0 items-start gap-3">
-                        <div
-                          className={cn(
-                            "mt-1 flex size-11 shrink-0 items-center justify-center rounded-2xl border",
-                            toneClassNames[task.tone ?? "default"],
-                          )}
-                        >
-                          <Icon className="size-5" />
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          {metric.title}
+                        </p>
+                        <div className="text-4xl font-semibold tracking-tight text-slate-950">
+                          {metric.value}
                         </div>
-                        <div className="min-w-0 space-y-1">
-                          <p className="text-base font-semibold">{task.title}</p>
-                          <p className="text-sm leading-5 text-muted-foreground">
-                            {task.description}
-                          </p>
-                        </div>
+                        <p className="text-sm leading-5 text-slate-500">{metric.description}</p>
                       </div>
-                      <Button asChild className="rounded-xl" data-testid={task.ctaTestId}>
-                        <a href={task.href}>
-                          {task.ctaLabel}
-                          <ArrowRight className="ml-2 size-4" />
-                        </a>
-                      </Button>
+                      <div
+                        className={cn(
+                          "flex size-11 shrink-0 items-center justify-center rounded-2xl border",
+                          toneClassNames[metric.tone ?? "default"],
+                        )}
+                      >
+                        <Icon className="size-5" />
+                      </div>
                     </div>
                   );
                 })}
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
-            <Card className="rounded-[1.75rem] border-border/70 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold tracking-tight">
-                  Recent Context
+        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
+          <Card className="rounded-[1.9rem] border-slate-200/80 bg-white shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
+              <div>
+                <CardTitle className="text-[1.75rem] font-semibold tracking-tight">
+                  Current Tasks
                 </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Важные пояснения и сигналы, которые помогают работать с системой увереннее.
+                <p className="mt-1 text-sm text-slate-500">
+                  Что сейчас важнее всего сделать в этом рабочем контуре.
                 </p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {dashboard.activity.map((item, index) => (
+              </div>
+              <a href={dashboard.heroCta.href} className="text-sm font-medium text-primary">
+                View all
+              </a>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {dashboard.tasks.map((task, index) => {
+                const Icon = taskIcons[index % taskIcons.length] ?? ClipboardList;
+                return (
                   <div
-                    key={`${item.title}-${index}`}
-                    className="rounded-[1.25rem] border border-border/70 bg-muted/20 p-4"
+                    key={task.testId}
+                    className="flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border border-slate-200/80 bg-slate-50/60 p-4"
+                    data-testid={task.testId}
                   >
-                    <p className="font-semibold">{item.title}</p>
-                    <p className="mt-1 text-sm leading-5 text-muted-foreground">
-                      {item.description}
-                    </p>
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div
+                        className={cn(
+                          "mt-1 flex size-11 shrink-0 items-center justify-center rounded-2xl border",
+                          toneClassNames[task.tone ?? "default"],
+                        )}
+                      >
+                        <Icon className="size-5" />
+                      </div>
+                      <div className="min-w-0 space-y-1">
+                        <p className="text-base font-semibold text-slate-950">{task.title}</p>
+                        <p className="text-sm leading-5 text-slate-500">{task.description}</p>
+                      </div>
+                    </div>
+                    <Button asChild className="rounded-xl" data-testid={task.ctaTestId}>
+                      <a href={task.href}>
+                        {task.ctaLabel}
+                        <ArrowRight className="ml-2 size-4" />
+                      </a>
+                    </Button>
                   </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
+                );
+              })}
+            </CardContent>
+          </Card>
 
-          <Card className="rounded-[1.75rem] border-border/70 shadow-sm">
+          <Card className="rounded-[1.9rem] border-slate-200/80 bg-white shadow-sm">
             <CardHeader>
-              <CardTitle className="text-2xl font-semibold tracking-tight">
+              <CardTitle className="text-[1.75rem] font-semibold tracking-tight">
                 Quick Shortcuts
               </CardTitle>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-slate-500">
                 Частые переходы в ключевые рабочие поверхности.
               </p>
             </CardHeader>
@@ -244,7 +230,7 @@ export default async function HomePage({
                   <a
                     key={shortcut.testId}
                     href={shortcut.href}
-                    className="group block rounded-[1.5rem] border border-border/70 bg-background p-5 transition hover:border-primary/30 hover:bg-primary/5"
+                    className="group block rounded-[1.5rem] border border-slate-200/80 bg-slate-50/60 p-5 transition hover:border-primary/30 hover:bg-primary/5"
                     data-testid={shortcut.testId}
                   >
                     <div className="flex items-start gap-4">
@@ -252,10 +238,8 @@ export default async function HomePage({
                         <Icon className="size-5" />
                       </div>
                       <div className="space-y-2">
-                        <p className="text-base font-semibold">{shortcut.title}</p>
-                        <p className="text-sm leading-5 text-muted-foreground">
-                          {shortcut.description}
-                        </p>
+                        <p className="text-base font-semibold text-slate-950">{shortcut.title}</p>
+                        <p className="text-sm leading-5 text-slate-500">{shortcut.description}</p>
                         <div className="inline-flex items-center text-sm font-medium text-primary">
                           {shortcut.ctaLabel}
                           <ArrowRight className="ml-2 size-4 transition group-hover:translate-x-0.5" />
@@ -265,6 +249,30 @@ export default async function HomePage({
                   </a>
                 );
               })}
+            </CardContent>
+          </Card>
+        </section>
+
+        <section>
+          <Card className="rounded-[1.9rem] border-slate-200/80 bg-white shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-[1.75rem] font-semibold tracking-tight">
+                Recent Activity
+              </CardTitle>
+              <p className="text-sm text-slate-500">
+                Последние сигналы, которые помогают быстрее понять состояние кампаний.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {dashboard.activity.map((item, index) => (
+                <div
+                  key={`${item.title}-${index}`}
+                  className="rounded-[1.25rem] border border-slate-200/80 bg-slate-50/60 p-4"
+                >
+                  <p className="font-semibold text-slate-950">{item.title}</p>
+                  <p className="mt-1 text-sm leading-5 text-slate-500">{item.description}</p>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </section>

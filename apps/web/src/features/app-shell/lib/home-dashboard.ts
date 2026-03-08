@@ -349,13 +349,12 @@ const buildHrDashboard = async (context: AppOperationContext): Promise<HomeDashb
   const isAdmin = context.role === "hr_admin";
 
   return {
-    title: isAdmin ? "HR workspace" : "HR reader workspace",
-    subtitle:
-      "Основные HR surfaces: активные сотрудники, витрина результатов и рабочее место кампаний.",
-    introTitle: isAdmin ? "Контур HR-администратора" : "Контур HR-читателя",
+    title: "Dashboard",
+    subtitle: "Управляйте циклами оценки, оргконтекстом компании и итоговыми результатами.",
+    introTitle: isAdmin ? "С возвращением, HR Admin!" : "С возвращением, HR Reader!",
     introDescription: isAdmin
-      ? "Управляйте кампаниями 360 и быстро переходите к operational surfaces из одного home dashboard."
-      : "Просматривайте результаты и состояние контура без действий, которые доступны только HR Admin.",
+      ? `Система работает в штатном режиме. Сейчас в работе ${campaignSummary.active} кампаний, а в вашем контуре ждут внимания сотрудники, матрицы и результаты.`
+      : "Следите за состоянием кампаний и витриной результатов без write-actions, которые доступны только HR Admin.",
     roleLabel: getRoleLabel(context.role),
     heroCta: {
       href: "/hr/campaigns",
@@ -364,36 +363,36 @@ const buildHrDashboard = async (context: AppOperationContext): Promise<HomeDashb
     },
     metrics: [
       {
-        title: "Активные сотрудники",
+        title: "Active employees",
         value: String(employeeSummary.activeEmployees),
         description: "Текущий размер HR-справочника в активной компании.",
         testId: "home-card-active-employees",
         tone: "default",
       },
       {
-        title: "Активные кампании",
+        title: "Active campaigns",
         value: String(campaignSummary.active),
         description: `Всего кампаний: ${campaignSummary.total} · Завершено: ${campaignSummary.completed}`,
         testId: "home-card-hr-campaigns",
         tone: "primary",
       },
       {
-        title: "AI и модели",
-        value: `${campaignSummary.aiProcessing}/${modelSummary.published}`,
-        description: `AI processing: ${campaignSummary.aiProcessing} · Published models: ${modelSummary.published}`,
+        title: "AI processing",
+        value: String(campaignSummary.aiProcessing),
+        description: `Published models: ${modelSummary.published} · Drafts: ${modelSummary.draft}`,
         testId: "home-card-hr-ai-models",
         tone: campaignSummary.aiProcessing > 0 ? "warning" : "success",
       },
     ],
     tasks: [
       {
-        title: "Перейти к активным кампаниям",
+        title: "Запустить следующий цикл кампании",
         description:
           campaignSummary.active > 0
-            ? `Сейчас в работе ${campaignSummary.active} кампаний.`
-            : "Активных кампаний нет — можно подготовить следующий цикл.",
+            ? `Сейчас в работе ${campaignSummary.active} кампаний. Проверьте сроки, прогресс и включение новых участников.`
+            : "Активных кампаний нет — можно подготовить и запустить следующий цикл оценки.",
         href: "/hr/campaigns",
-        ctaLabel: isAdmin ? "Открыть кампании" : "Просмотреть",
+        ctaLabel: isAdmin ? "Открыть" : "Просмотреть",
         testId: "home-task-hr-campaigns",
         ctaTestId: "home-task-cta-hr-campaigns",
         tone: "primary",
@@ -401,27 +400,27 @@ const buildHrDashboard = async (context: AppOperationContext): Promise<HomeDashb
       {
         title:
           campaignSummary.aiProcessing > 0
-            ? "Проверить AI-обработку"
-            : "Подготовить следующую модель",
+            ? "Проверить AI feedback"
+            : "Подготовить модель компетенций",
         description:
           campaignSummary.aiProcessing > 0
-            ? `В AI processing находится ${campaignSummary.aiProcessing} кампаний.`
+            ? `В AI processing находится ${campaignSummary.aiProcessing} кампаний — проверьте post-processing и итоговую готовность.`
             : modelSummary.draft > 0
-              ? `Есть ${modelSummary.draft} draft-моделей, готовых к публикации.`
-              : "Каталог моделей можно использовать для следующего цикла оценки.",
+              ? `Есть ${modelSummary.draft} draft-моделей, готовых к публикации или донастройке.`
+              : "Каталог моделей готов для следующего цикла оценки.",
         href: campaignSummary.aiProcessing > 0 ? "/hr/notifications" : "/hr/models",
-        ctaLabel: campaignSummary.aiProcessing > 0 ? "Открыть центр" : "Открыть модели",
+        ctaLabel: campaignSummary.aiProcessing > 0 ? "Review" : "Открыть",
         testId: "home-task-hr-secondary",
         ctaTestId: "home-task-cta-hr-secondary",
         tone: campaignSummary.aiProcessing > 0 ? "warning" : "default",
       },
       {
-        title: isAdmin ? "Подготовить сотрудников и оргструктуру" : "Проверить контекст компании",
+        title: isAdmin ? "Подготовить сотрудников и оргструктуру" : "Проверить people context",
         description: isAdmin
-          ? "Справочник сотрудников и оргструктура — первый шаг перед новой кампанией."
+          ? "Справочник сотрудников и оргструктура — первый шаг перед новой кампанией и корректной матрицей."
           : "Вы можете просматривать сотрудников, оргструктуру и результаты в текущем company context.",
         href: "/hr/employees",
-        ctaLabel: isAdmin ? "Открыть people" : "Открыть справочник",
+        ctaLabel: isAdmin ? "Assign" : "Открыть",
         testId: "home-task-hr-people",
         ctaTestId: "home-task-cta-hr-people",
         tone: "default",
@@ -431,10 +430,10 @@ const buildHrDashboard = async (context: AppOperationContext): Promise<HomeDashb
       {
         title: isAdmin ? "Create campaign" : "Campaign workbench",
         description: isAdmin
-          ? "Создать новый цикл оценки и перейти к draft configuration."
+          ? "Стартовать новый цикл оценки и перейти к draft configuration."
           : "Открыть список кампаний и их текущее состояние.",
         href: "/hr/campaigns",
-        ctaLabel: isAdmin ? "К кампаниям" : "Открыть",
+        ctaLabel: isAdmin ? "Launch" : "Открыть",
         testId: "home-shortcut-campaigns",
         ctaTestId: "home-shortcut-cta-campaigns",
       },
@@ -444,7 +443,7 @@ const buildHrDashboard = async (context: AppOperationContext): Promise<HomeDashb
           ? "Добавить сотрудника и затем привязать его к оргструктуре."
           : "Просмотреть сотрудников и их текущие профили.",
         href: isAdmin ? "/hr/employees/new" : "/hr/employees",
-        ctaLabel: isAdmin ? "Добавить" : "Открыть",
+        ctaLabel: isAdmin ? "Add" : "Открыть",
         testId: "home-shortcut-employees",
         ctaTestId: "home-shortcut-cta-employees",
       },
@@ -452,20 +451,21 @@ const buildHrDashboard = async (context: AppOperationContext): Promise<HomeDashb
         title: "View reports",
         description: "Перейти к HR workbench результатов и сравнить кампании/сотрудников.",
         href: "/results/hr",
-        ctaLabel: "Открыть",
+        ctaLabel: "Open",
         testId: "home-shortcut-results",
         ctaTestId: "home-shortcut-cta-results",
       },
     ],
     activity: [
       {
-        title: "Campaign lifecycle остаётся в workbench",
+        title: "Campaign lifecycle остаётся в campaign workbench",
         description:
-          "Домашний экран подсказывает, что делать дальше, но не переносит сюда бизнес-логику кампаний.",
+          "Домашний экран показывает приоритеты и быстрые действия, но не переносит сюда всю бизнес-логику кампаний.",
       },
       {
-        title: "HR Reader получает тот же контекст, но без write-actions",
-        description: "UI не обещает действий, которых роль не может выполнить.",
+        title: "Role-based visibility сохраняется",
+        description:
+          "HR Reader получает тот же контекст, но без write-actions, которых роль не может выполнить.",
       },
     ],
   };
