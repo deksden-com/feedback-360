@@ -63,30 +63,39 @@ const NavLinks = ({
 
   return (
     <nav className={className}>
-      <div className="grid gap-1">
-        {items.map((item) => {
-          const active = isActivePath(currentPath, item.href);
-          const Icon = iconMap[item.href] ?? Home;
+      <div className="grid gap-5">
+        {sections.map((section) => (
+          <div key={section.key} className="space-y-1.5" data-testid={`nav-section-${section.key}`}>
+            <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              {section.label}
+            </p>
+            <div className="grid gap-1">
+              {section.items.map((item) => {
+                const active = isActivePath(currentPath, item.href);
+                const Icon = iconMap[item.href] ?? Home;
 
-          return (
-            <Button
-              key={item.href}
-              asChild
-              variant={active ? "secondary" : "ghost"}
-              className={cn(
-                "h-11 justify-start rounded-xl px-3 text-sm font-medium text-slate-600 shadow-none hover:bg-slate-100 hover:text-slate-900",
-                active &&
-                  "bg-primary/10 text-primary shadow-none hover:bg-primary/10 hover:text-primary",
-              )}
-              data-testid={item.testId}
-            >
-              <a href={item.href} aria-current={active ? "page" : undefined}>
-                <Icon className="mr-3 size-4 shrink-0" />
-                {item.label}
-              </a>
-            </Button>
-          );
-        })}
+                return (
+                  <Button
+                    key={item.href}
+                    asChild
+                    variant={active ? "secondary" : "ghost"}
+                    className={cn(
+                      "h-11 justify-start rounded-xl px-3 text-sm font-medium text-slate-600 shadow-none hover:bg-slate-100 hover:text-slate-900",
+                      active &&
+                        "bg-primary/10 text-primary shadow-none hover:bg-primary/10 hover:text-primary",
+                    )}
+                    data-testid={item.testId}
+                  >
+                    <a href={item.href} aria-current={active ? "page" : undefined}>
+                      <Icon className="mr-3 size-4 shrink-0" />
+                      {item.label}
+                    </a>
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     </nav>
   );
@@ -128,33 +137,55 @@ export const InternalAppShell = async ({
           </div>
 
           <div className="mt-auto border-t border-slate-200 px-4 py-4">
-            <div
-              className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-slate-50"
-              data-testid="shell-company-card"
+            <details
+              className="group rounded-xl"
+              data-testid="shell-account-menu"
+              name="shell-account-menu"
             >
-              <Avatar className="size-9 rounded-full bg-primary/15 text-primary">
-                <AvatarLabel>{meta.accountInitials}</AvatarLabel>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold" data-testid="shell-account-name">
-                  {meta.accountLabel}
-                </p>
-                <p className="truncate text-xs text-slate-500" data-testid="shell-account-meta">
-                  {meta.accountMeta}
-                </p>
+              <summary
+                className="flex cursor-pointer list-none items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-slate-50 [&::-webkit-details-marker]:hidden"
+                data-testid="shell-company-card"
+              >
+                <Avatar className="size-9 rounded-full bg-primary/15 text-primary">
+                  <AvatarLabel>{meta.accountInitials}</AvatarLabel>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold" data-testid="shell-company-name">
+                    {meta.companyName}
+                  </p>
+                  <p className="truncate text-xs text-slate-500" data-testid="shell-account-meta">
+                    {meta.roleLabel} · {meta.accountLabel}
+                  </p>
+                </div>
+                <LogOut className="size-4 text-slate-300 transition group-open:rotate-180" />
+              </summary>
+              <div className="mt-2 space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="space-y-1">
+                  <p className="truncate text-sm font-semibold" data-testid="shell-account-name">
+                    {meta.accountLabel}
+                  </p>
+                  <p className="truncate text-xs text-slate-500">{meta.accountMeta}</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button asChild variant="outline" className="h-9 rounded-lg px-3 text-xs">
+                    <a href="/select-company" data-testid="shell-switch-company-sidebar">
+                      Сменить компанию
+                    </a>
+                  </Button>
+                  <form action="/api/session/logout" method="post" className="flex-1">
+                    <Button
+                      type="submit"
+                      variant="secondary"
+                      className="h-9 w-full rounded-lg bg-slate-900 px-3 text-xs text-white hover:bg-slate-800"
+                      data-testid="shell-sign-out-desktop"
+                    >
+                      <LogOut className="size-4" />
+                      Выйти
+                    </Button>
+                  </form>
+                </div>
               </div>
-              <form action="/api/session/logout" method="post">
-                <button
-                  type="submit"
-                  className="inline-flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                  data-testid="shell-sign-out"
-                  aria-label="Выйти"
-                >
-                  <span className="sr-only">Выйти</span>
-                  <LogOut className="size-4" aria-hidden="true" />
-                </button>
-              </form>
-            </div>
+            </details>
           </div>
         </aside>
 
@@ -203,7 +234,7 @@ export const InternalAppShell = async ({
                   className="hidden items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-primary md:flex"
                   data-testid="shell-switch-company"
                 >
-                  <span>{meta.companyName}</span>
+                  <span data-testid="active-company-name">{meta.companyName}</span>
                   <ArrowLeftRight className="size-4 text-slate-400" />
                 </a>
                 <div className="hidden h-6 w-px bg-slate-200 md:block" />

@@ -8,6 +8,7 @@ Status: Draft (2026-03-07)
 - [Screen-by-screen redesign](screen-by-screen-redesign.md) — конкретные рекомендации по каждому экрану. Читать после этого документа, чтобы перевести принципы в изменения по маршрутам.
 - [Screen specs](screens/index.md) — нормативные contracts отдельных экранов. Читать, чтобы редизайн не расходился с purpose/actions/states.
 - [Design references (stitch)](design-references-stitch.md) — визуальные референсы из Stitch bundle. Читать как источник композиционных идей, но не как SSoT поведения.
+- [Design system — visual baseline v2](design-system/visual-baseline-v2.md) — актуальный stylistic baseline на основе новых auth/dashboard/questionnaire references. Читать, когда нужно выравнивать весь продукт под одну visual family.
 
 ## External product references
 - [Leapsome Home Dashboard](https://help.leapsome.com/hc/en-us/articles/8701421692061-Home-Dashboard) — показывает сильный dashboard-first подход: pending tasks, quick actions, overview blocks. Читать, чтобы заимствовать композицию home/landing screens без копирования доменной логики.
@@ -139,6 +140,7 @@ Suggested groups:
 - cards with purposeful density,
 - consistent spacing and typography,
 - obvious empty/loading/error states.
+- one coherent visual family across auth, shell, CRUD, forms and reports.
 
 ### Avoid
 - одинаково тяжёлые блоки для primary и secondary информации,

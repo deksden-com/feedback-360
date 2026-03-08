@@ -283,6 +283,29 @@ Status: Draft (2026-03-03)
 - FT-0214: what=employee directory, profile and org hierarchy polished into familiar CRUD/hierarchy surfaces; where=local workspace + `https://beta.go360go.ru`; how=`pnpm checks`, `pnpm docs:audit`, `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3108 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0214-hr-crud-hierarchy-polish.spec.ts --workers=1 --reporter=line`, `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0214-hr-crud-hierarchy-polish.spec.ts --workers=1 --reporter=line`; quality_gate=passed; acceptance_gate=passed locally and on beta; artifacts=`.memory-bank/evidence/EP-021/FT-0214/2026-03-07/`; deploy=`https://go360go-beta-k1gq49uel-deksdens-projects.vercel.app`; result=passed.
 - FT-0215: what=questionnaire/results surfaces rebalanced around content, progress and report context; where=local workspace + `https://beta.go360go.ru`; how=`pnpm checks`, `pnpm docs:audit`, `cd apps/web && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3108 node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0215-content-first-surfaces.spec.ts --workers=1 --reporter=line`, `cd apps/web && PLAYWRIGHT_BASE_URL=https://beta.go360go.ru node ../../node_modules/@playwright/test/cli.js test --config playwright/playwright.config.mjs tests/ft-0215-content-first-surfaces.spec.ts --workers=1 --reporter=line`; quality_gate=passed; acceptance_gate=passed locally and on beta; artifacts=`.memory-bank/evidence/EP-021/FT-0215/2026-03-07/`; deploy=`https://go360go-beta-k1gq49uel-deksdens-projects.vercel.app`; result=passed.
 
+## EP-022 Unified visual system rollout
+- FT-0221
+  - Must add test: design-system documentation refresh for visual baseline v2 and already-ready anchor screens.
+  - Must run: `pnpm docs:audit`, visual baseline/tokens/component rules sync check.
+- FT-0222
+  - Must run: login and company-switcher refresh proof with live screenshots and preserved entry actions.
+- FT-0223
+  - Must run: workspace shell/home dashboard refresh with same SaaS visual family and preserved nav/account behavior.
+- FT-0224
+  - Must run: employees/org/models/campaigns surfaces still work in unified visual system and keep familiar admin CRUD patterns.
+- FT-0225
+  - Must run: questionnaire inbox/fill and results surfaces stay role-safe while moving into the same visual family.
+- FT-0226
+  - Must run: guides/evidence/handoff screenshots refreshed after material visual changes.
+
+### EP-022 execution evidence (2026-03-08)
+- FT-0221: what=visual baseline v2, updated design-system docs and explicit anchor-screen grounding; where=local docs/codebase; how=`pnpm docs:audit`, `rg -n "EP-022|visual baseline v2|SCR-APP-HOME|SCR-QUESTIONNAIRES-FILL" .memory-bank/spec/ui .memory-bank/plans/epics/EP-022-visual-system-rollout`; quality_gate=passed (`pnpm docs:audit`); acceptance_gate=passed (design system updated, already-ready screens explicitly called out in epic and feature docs); result=passed.
+- FT-0222: what=auth/entry surfaces moved into the new visual family; where=local workspace; how=`pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `pnpm --filter @feedback-360/web build`; quality_gate=passed; acceptance_gate=passed (live screenshots refreshed for `SCR-AUTH-LOGIN` and `SCR-COMPANY-SWITCHER`, tutorial entry flow updated); artifacts=`.memory-bank/evidence/EP-022/FT-0222/2026-03-08/step-01-login__(SCR-AUTH-LOGIN).png`, `.memory-bank/evidence/EP-022/FT-0222/2026-03-08/step-02-company-switcher__(SCR-COMPANY-SWITCHER).png`; result=passed.
+- FT-0223: what=workspace shell and dashboard aligned to the same SaaS baseline; where=local workspace; how=`pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `pnpm --filter @feedback-360/web build`; quality_gate=passed; acceptance_gate=passed (home dashboard screenshot refreshed, shell/account chrome preserved, tutorial home screenshot replaced); artifacts=`.memory-bank/evidence/EP-022/FT-0223/2026-03-08/step-01-home-dashboard__(SCR-APP-HOME).png`; result=passed.
+- FT-0224: what=HR CRUD/admin surfaces kept familiar admin patterns while moving into the same visual system; where=local workspace; how=`pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `pnpm --filter @feedback-360/web build`; quality_gate=passed; acceptance_gate=passed (employees, org, models, campaigns and campaign detail refreshed screenshots captured); artifacts=`.memory-bank/evidence/EP-022/FT-0224/2026-03-08/`; result=passed.
+- FT-0225: what=questionnaire inbox/fill and results surfaces aligned to the same typography/surface system; where=local workspace; how=`pnpm --filter @feedback-360/web lint`, `pnpm --filter @feedback-360/web typecheck`, `pnpm --filter @feedback-360/web build`; quality_gate=passed; acceptance_gate=passed (inbox, structured questionnaire and employee results screenshots refreshed; `SCR-QUESTIONNAIRES-FILL` kept as anchor screen and refined); artifacts=`.memory-bank/evidence/EP-022/FT-0225/2026-03-08/`; result=passed.
+- FT-0226: what=guides/evidence/handoff refresh after material redesign; where=memory-bank docs/assets; how=`pnpm docs:audit`, `node scripts/audit-memory-bank.mjs --ep EP-022`; quality_gate=passed; acceptance_gate=passed (tutorial updated with new entry flow and handoff screens point at current visual baseline); artifacts=`.memory-bank/guides/tutorials/run-first-360-campaign-manually.md`, `.memory-bank/guides/assets/manual-first-campaign/`; result=passed.
+
 ## EP-010 Production readiness
 - FT-0101
   - Must add test: `apps/web/playwright/tests/ft-0101-results-privacy.spec.ts`

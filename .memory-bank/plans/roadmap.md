@@ -30,6 +30,7 @@ Status: Draft (2026-03-03)
 22) Admin + ops UI.
 23) Cross-epic scenarios (XE) foundation.
 24) UI traceability + SaaS polish foundation.
+25) Unified visual system rollout from the new auth/dashboard/questionnaire baseline.
 
 Отложено после GUI wave:
 - Реальная внешняя AI integration beyond current MVP stub.

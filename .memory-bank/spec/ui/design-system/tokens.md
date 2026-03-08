@@ -41,5 +41,12 @@ Status: Draft (2026-03-07)
 - UI components consume semantic tokens, not raw ad-hoc colors.
 - Screen-level classes may compose tokens but do not invent new semantic meanings locally.
 
+## Visual baseline v2 additions
+- `primary` remains `#1152d4` and is the canonical blue accent for auth, dashboard and active selection states.
+- App background should use a light neutral close to `#f6f6f8`.
+- White cards on light background are the default product surface.
+- Borders stay subtle (`slate-100/200` range), shadows low by default, stronger only for focused/active blocks.
+- Typography should tighten around an `Inter`-like feel: bold page titles, compact uppercase meta labels, muted helper copy.
+
 ## Rule
 Если новый UI feature требует новый repeated visual meaning, сначала он появляется в design-system doc, а уже потом в коде.
