@@ -21,6 +21,15 @@ import {
 } from "@/lib/questionnaire-ui";
 import { cn } from "@/lib/utils";
 import { createInprocClient } from "@feedback-360/client";
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  CheckCircle2,
+  ClipboardCheck,
+  Clock3,
+  FolderKanban,
+  Sparkles,
+} from "lucide-react";
 import { redirect } from "next/navigation";
 
 const getQueryValue = (value: string | string[] | undefined): string | undefined => {
@@ -37,6 +46,30 @@ const errorLabels: Record<string, string> = {
 };
 
 const statusOrder = ["in_progress", "not_started", "submitted"] as const;
+
+const sectionMeta: Record<
+  (typeof statusOrder)[number],
+  { title: string; description: string; icon: typeof ClipboardCheck; tone: string }
+> = {
+  in_progress: {
+    title: "Черновики",
+    description: "Сначала завершите уже начатые формы — это самый короткий путь к отправке.",
+    icon: ClipboardCheck,
+    tone: "border-primary/15 bg-primary/5 text-primary",
+  },
+  not_started: {
+    title: "Новые анкеты",
+    description: "Формы, которые ещё ждут первого черновика и первого сохранения.",
+    icon: FolderKanban,
+    tone: "border-amber-500/15 bg-amber-500/5 text-amber-700 dark:text-amber-300",
+  },
+  submitted: {
+    title: "История отправок",
+    description: "Уже отправленные формы остаются здесь как read-only история по кампании.",
+    icon: CheckCircle2,
+    tone: "border-emerald-500/15 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300",
+  },
+};
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -198,41 +231,111 @@ export default async function QuestionnairesPage({
           />
         ) : null}
 
-        <Card className="overflow-hidden border-border/80 shadow-sm">
-          <CardHeader className="gap-4 border-b bg-muted/25">
-            <CardTitle className="text-2xl">Рабочий список анкет</CardTitle>
-            <CardDescription className="max-w-3xl">
-              Начните с черновиков, затем возвращайтесь к новым анкетам. Отправленные анкеты
-              остаются здесь же, но уже как read-only история.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <section
+          className="grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_320px]"
+          data-testid="scr-questionnaires-inbox-summary"
+        >
+          <Card className="overflow-hidden rounded-[2rem] border-0 bg-[#2563eb] text-white shadow-[0_20px_50px_-24px_rgba(37,99,235,0.9)]">
+            <CardContent className="relative p-8 md:p-10">
+              <div className="relative z-10 max-w-2xl space-y-4">
+                <div className="inline-flex items-center rounded-full bg-white/12 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-white/80">
+                  Questionnaire Workspace
+                </div>
+                <div className="space-y-3">
+                  <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+                    Двигайтесь от черновиков к отправке
+                  </h2>
+                  <p className="max-w-xl text-sm leading-6 text-white/80 md:text-base">
+                    Начните с уже открытых анкет, затем вернитесь к новым назначениям. Отправленные
+                    формы остаются в inbox как история, но уже без редактирования.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="rounded-xl bg-white px-5 text-primary shadow-none hover:bg-white/90"
+                  >
+                    <a
+                      href={
+                        filteredItems.find((item) => item.status === "in_progress")
+                          ? `/questionnaires/${
+                              filteredItems.find((item) => item.status === "in_progress")
+                                ?.questionnaireId
+                            }`
+                          : filteredItems[0]
+                            ? `/questionnaires/${filteredItems[0].questionnaireId}`
+                            : "/questionnaires"
+                      }
+                    >
+                      {counts.inProgress > 0 ? "Продолжить черновик" : "Открыть следующую анкету"}
+                    </a>
+                  </Button>
+                  <span className="text-sm text-white/75">
+                    Все анкеты уже привязаны к активной компании и вашей роли в кампании.
+                  </span>
+                </div>
+              </div>
+              <div className="absolute right-6 top-6 hidden h-36 w-36 rounded-[2rem] bg-white/10 lg:block" />
+              <div className="absolute bottom-6 right-8 hidden h-24 w-24 rounded-[1.5rem] border border-white/10 bg-white/8 lg:block" />
+            </CardContent>
+          </Card>
 
-        <div className="grid gap-4 md:grid-cols-3" data-testid="scr-questionnaires-inbox-summary">
-          <Card data-testid="questionnaire-summary-total">
-            <CardHeader className="space-y-1">
-              <CardDescription>Всего назначено</CardDescription>
-              <CardTitle className="text-3xl">{counts.total}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card data-testid="questionnaire-summary-drafts">
-            <CardHeader className="space-y-1">
-              <CardDescription>В работе</CardDescription>
-              <CardTitle className="text-3xl">{counts.inProgress}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card data-testid="questionnaire-summary-submitted">
-            <CardHeader className="space-y-1">
-              <CardDescription>Отправлено</CardDescription>
-              <CardTitle className="text-3xl">{counts.submitted}</CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
+          <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+            <Card
+              className="rounded-[1.75rem] border-border/70 shadow-sm"
+              data-testid="questionnaire-summary-total"
+            >
+              <CardContent className="p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Всего назначено
+                </p>
+                <p className="mt-3 text-3xl font-semibold tracking-tight">{counts.total}</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Все формы, в которых вы участвуете как оценивающий.
+                </p>
+              </CardContent>
+            </Card>
+            <Card
+              className="rounded-[1.75rem] border-border/70 shadow-sm"
+              data-testid="questionnaire-summary-drafts"
+            >
+              <CardContent className="p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  В работе
+                </p>
+                <p className="mt-3 text-3xl font-semibold tracking-tight">{counts.inProgress}</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Формы с первым сохранением черновика, к которым стоит вернуться раньше всего.
+                </p>
+              </CardContent>
+            </Card>
+            <Card
+              className="rounded-[1.75rem] border-border/70 shadow-sm"
+              data-testid="questionnaire-summary-submitted"
+            >
+              <CardContent className="p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Отправлено
+                </p>
+                <p className="mt-3 text-3xl font-semibold tracking-tight">{counts.submitted}</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Read-only история уже закрытых анкет по текущим кампаниям.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
 
-        <Card data-testid="scr-questionnaires-inbox-toolbar">
-          <CardHeader className="space-y-3">
+        <Card
+          className="rounded-[1.75rem] border-border/70 shadow-sm"
+          data-testid="scr-questionnaires-inbox-toolbar"
+        >
+          <CardHeader className="space-y-4">
             <div className="space-y-1">
-              <CardTitle className="text-xl">Фильтры и быстрый возврат</CardTitle>
+              <CardTitle className="text-2xl font-semibold tracking-tight">
+                Фильтры и быстрый возврат
+              </CardTitle>
               <CardDescription>
                 Сфокусируйтесь на черновиках или конкретной кампании, не теряя контекст активной
                 компании.
@@ -328,34 +431,62 @@ export default async function QuestionnairesPage({
                   className="space-y-3"
                   data-testid={`questionnaire-section-${statusKey}`}
                 >
-                  <div className="space-y-1">
-                    <h2 className="text-xl font-semibold">
-                      {questionnaireStatusLabels[statusKey]} · {items.length}
-                    </h2>
-                    <p className="text-sm text-muted-foreground">
-                      {statusKey === "in_progress"
-                        ? "Сначала вернитесь к уже начатым анкетам — это самый короткий путь к завершению."
-                        : statusKey === "not_started"
-                          ? "Новые анкеты, которые ещё ждут первого черновика."
-                          : "Уже отправленные анкеты доступны только для просмотра."}
-                    </p>
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div
+                        className={cn(
+                          "flex size-11 shrink-0 items-center justify-center rounded-2xl border",
+                          sectionMeta[statusKey].tone,
+                        )}
+                      >
+                        {(() => {
+                          const Icon = sectionMeta[statusKey].icon;
+                          return <Icon className="size-5" />;
+                        })()}
+                      </div>
+                      <div className="space-y-1">
+                        <h2 className="text-2xl font-semibold tracking-tight">
+                          {sectionMeta[statusKey].title} · {items.length}
+                        </h2>
+                        <p className="max-w-3xl text-sm text-muted-foreground">
+                          {sectionMeta[statusKey].description}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="rounded-full border border-border/70 bg-muted/20 px-3 py-1 text-sm text-muted-foreground">
+                      {questionnaireStatusLabels[statusKey]}
+                    </div>
                   </div>
                   <div className="grid gap-4">
                     {items.map((item) => (
                       <Card
                         key={item.questionnaireId}
+                        className="rounded-[1.75rem] border-border/70 shadow-sm"
                         data-testid={`questionnaire-row-${item.questionnaireId}`}
                       >
-                        <CardHeader className="gap-3">
+                        <CardHeader className="gap-4 pb-3">
                           <div className="flex flex-wrap items-start justify-between gap-3">
-                            <div className="space-y-1">
-                              <CardTitle className="text-lg">
-                                {item.subjectDisplayName ?? `Сотрудник ${item.subjectEmployeeId}`}
-                              </CardTitle>
-                              <CardDescription>
-                                {item.campaignName}
-                                {item.subjectPositionTitle ? ` · ${item.subjectPositionTitle}` : ""}
-                              </CardDescription>
+                            <div className="flex min-w-0 items-start gap-3">
+                              <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/8 text-primary">
+                                {statusKey === "submitted" ? (
+                                  <CheckCircle2 className="size-5" />
+                                ) : statusKey === "in_progress" ? (
+                                  <Sparkles className="size-5" />
+                                ) : (
+                                  <BriefcaseBusiness className="size-5" />
+                                )}
+                              </div>
+                              <div className="space-y-1">
+                                <CardTitle className="text-xl font-semibold tracking-tight">
+                                  {item.subjectDisplayName ?? `Сотрудник ${item.subjectEmployeeId}`}
+                                </CardTitle>
+                                <CardDescription className="text-sm">
+                                  {item.campaignName}
+                                  {item.subjectPositionTitle
+                                    ? ` · ${item.subjectPositionTitle}`
+                                    : ""}
+                                </CardDescription>
+                              </div>
                             </div>
                             <span
                               className={cn(
@@ -368,47 +499,64 @@ export default async function QuestionnairesPage({
                             </span>
                           </div>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="grid gap-2 text-sm text-muted-foreground md:grid-cols-2">
-                            <p>
-                              Роль:{" "}
-                              <span className="font-medium text-foreground">
+                        <CardContent className="space-y-5">
+                          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                            <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4 text-sm">
+                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                                Роль
+                              </p>
+                              <p className="mt-2 font-medium text-foreground">
                                 {item.raterRole
                                   ? questionnaireRaterRoleLabels[item.raterRole]
                                   : "Оценивающий"}
-                              </span>
-                            </p>
-                            <p>
-                              Дедлайн:{" "}
-                              <span className="font-medium text-foreground">
+                              </p>
+                            </div>
+                            <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4 text-sm">
+                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                                Дедлайн
+                              </p>
+                              <p className="mt-2 font-medium text-foreground">
                                 {formatDate(item.campaignEndAt) ?? "—"}
-                              </span>
-                            </p>
-                            <p>
-                              Состояние кампании:{" "}
-                              <span className="font-medium text-foreground">
+                              </p>
+                            </div>
+                            <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4 text-sm">
+                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                                Кампания
+                              </p>
+                              <p className="mt-2 font-medium text-foreground">
                                 {item.campaignStatus
                                   ? campaignStatusLabels[item.campaignStatus]
                                   : campaignStatusLabels.started}
-                              </span>
-                            </p>
-                            <p>
-                              {item.submittedAt
-                                ? `Отправлена ${formatDate(item.submittedAt)}`
-                                : item.firstDraftAt
-                                  ? `Черновик сохранён ${formatDate(item.firstDraftAt)}`
-                                  : "Черновик ещё не сохранялся"}
-                            </p>
+                              </p>
+                            </div>
+                            <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4 text-sm">
+                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                                Последнее действие
+                              </p>
+                              <p className="mt-2 font-medium text-foreground">
+                                {item.submittedAt
+                                  ? `Отправлена ${formatDate(item.submittedAt)}`
+                                  : item.firstDraftAt
+                                    ? `Черновик ${formatDate(item.firstDraftAt)}`
+                                    : "Нет сохранений"}
+                              </p>
+                            </div>
                           </div>
                           <div className="flex flex-wrap gap-2">
                             <Button
                               asChild
+                              className="rounded-xl"
                               data-testid={`open-questionnaire-${item.questionnaireId}`}
                             >
                               <a href={`/questionnaires/${item.questionnaireId}`}>
                                 {getQuestionnaireCtaLabel(item.status)}
+                                <ArrowRight className="ml-2 size-4" />
                               </a>
                             </Button>
+                            <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-muted/20 px-3 py-2 text-sm text-muted-foreground">
+                              <Clock3 className="size-4" />
+                              После отправки форма остаётся только для чтения.
+                            </div>
                           </div>
                         </CardContent>
                       </Card>

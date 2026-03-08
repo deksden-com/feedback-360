@@ -40,6 +40,7 @@
 - [Guides package (`guides/`)](guides/index.md): пользовательские how-to/tutorial/explanation/reference документы поверх продукта и сценариев. Читать, когда нужен понятный product walkthrough без перегруза внутренними спецификациями.
 - [CLI spec (`spec/cli/`)](spec/cli/index.md): каталог команд, human/`--json` форматы, контракт CLI-first процесса. Читать для расширения и стабилизации автоматизируемых сценариев.
 - [UI spec (`spec/ui/`)](spec/ui/index.md): sitemap/flows и минимальные wireframes без логики в клиенте. Читать для согласованной эволюции интерфейса.
+- [UI redesign handoff](spec/ui/redesign-screen-catalog.md): единый экранный handoff для внешнего редизайна — переходы, информационные блоки, действия и доменные ограничения. Читать, когда нужно отдавать интерфейс в специализированный инструмент/дизайнеру без потери продуктовых инвариантов.
 - [UI redesign principles](spec/ui/design-principles.md): как делать интерфейс content-first и ближе к familiar SaaS patterns, не ломая доменную логику. Читать перед редизайном, чтобы улучшать hierarchy и UX системно.
 - [UI redesign audit](spec/ui/screen-by-screen-redesign.md): экран-за-экраном список улучшений текущих маршрутов. Читать перед UI planning, чтобы понимать, какие surfaces давать в работу первыми.
 - [Screen registry](spec/ui/screen-registry.md): канонический реестр `screen_id` и `testIdScope` для экранов. Читать перед правками UI/docs/evidence, чтобы все говорили об одном и том же surface.

@@ -8,6 +8,7 @@ import { applyDebugPageDelay } from "@/lib/debug-page-delay";
 import { resolveAppOperationContext } from "@/lib/operation-context";
 import { getFriendlyErrorCopy } from "@/lib/page-state";
 import { createInprocClient } from "@feedback-360/client";
+import { ArrowRight, Layers3, ShieldCheck, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import {
@@ -80,6 +81,7 @@ export default async function ResultsTeamDashboardPage({
           title="Результаты команды"
           subtitle="Доступно только для роли Manager."
           testId="scr-results-manager-root"
+          resetHref="/results/team"
         >
           <PageErrorState
             title="Эта витрина доступна только руководителю"
@@ -143,6 +145,7 @@ export default async function ResultsTeamDashboardPage({
           title="Результаты команды"
           subtitle="Выберите кампанию и сотрудника, чтобы открыть витрину руководителя."
           testId="scr-results-manager-root"
+          resetHref="/results/team"
         >
           <PageEmptyState
             title="Нужно выбрать сотрудника и кампанию"
@@ -150,7 +153,7 @@ export default async function ResultsTeamDashboardPage({
             testId="results-team-empty"
           />
           <form
-            className="grid gap-3 rounded-md border p-4"
+            className="grid gap-4 rounded-[1.75rem] border border-border/70 bg-background p-5 shadow-sm"
             method="get"
             data-testid="team-results-form"
           >
@@ -169,16 +172,22 @@ export default async function ResultsTeamDashboardPage({
             <div>
               <button
                 type="submit"
-                className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+                className="inline-flex h-11 items-center rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground"
               >
                 Открыть результаты
+                <ArrowRight className="ml-2 size-4" />
               </button>
             </div>
           </form>
           {campaignOptions.length > 0 ? (
-            <Card data-testid="results-team-campaign-switcher">
+            <Card
+              className="rounded-[1.75rem] border-border/70 shadow-sm"
+              data-testid="results-team-campaign-switcher"
+            >
               <CardHeader>
-                <CardTitle className="text-lg">Доступные кампании</CardTitle>
+                <CardTitle className="text-xl font-semibold tracking-tight">
+                  Доступные кампании
+                </CardTitle>
                 <CardDescription>
                   Берём кампании из ваших manager-назначений, чтобы сразу перейти к нужному отчёту.
                 </CardDescription>
@@ -195,9 +204,14 @@ export default async function ResultsTeamDashboardPage({
             </Card>
           ) : null}
           {subjectOptions.length > 0 ? (
-            <Card data-testid="results-team-subject-switcher">
+            <Card
+              className="rounded-[1.75rem] border-border/70 shadow-sm"
+              data-testid="results-team-subject-switcher"
+            >
               <CardHeader>
-                <CardTitle className="text-lg">Подчинённые с результатами</CardTitle>
+                <CardTitle className="text-xl font-semibold tracking-tight">
+                  Подчинённые с результатами
+                </CardTitle>
                 <CardDescription>
                   Видны только сотрудники, которые уже встречаются в ваших manager-назначениях.
                 </CardDescription>
@@ -249,6 +263,7 @@ export default async function ResultsTeamDashboardPage({
           title="Результаты команды"
           subtitle={state.description}
           testId="scr-results-manager-root"
+          resetHref="/results/team"
         >
           <PageErrorState
             title={state.title}
@@ -272,15 +287,60 @@ export default async function ResultsTeamDashboardPage({
         title="Результаты команды"
         subtitle="Витрина руководителя: только агрегаты и обработанные комментарии."
         testId="scr-results-manager-root"
+        resetHref="/results/team"
       >
-        <Card data-testid="results-team-toolbar">
+        <Card
+          className="rounded-[1.75rem] border-border/70 shadow-sm"
+          data-testid="results-team-toolbar"
+        >
           <CardHeader>
-            <CardTitle className="text-lg">Навигация по команде</CardTitle>
+            <CardTitle className="text-2xl font-semibold tracking-tight">
+              Навигация по команде
+            </CardTitle>
             <CardDescription>
               Переключайте кампанию и сотрудника без ручного ввода идентификаторов.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4">
+                <div className="flex items-start gap-3">
+                  <Layers3 className="mt-0.5 size-4 text-primary" />
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Кампаний
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight">
+                      {campaignOptions.length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4">
+                <div className="flex items-start gap-3">
+                  <Users className="mt-0.5 size-4 text-primary" />
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Подчинённые
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight">
+                      {subjectOptions.length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 size-4 text-primary" />
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Privacy
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight">Applied</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             {campaignOptions.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {campaignOptions.map((campaign) => (
@@ -288,6 +348,7 @@ export default async function ResultsTeamDashboardPage({
                     key={campaign.campaignId}
                     asChild
                     variant={campaign.campaignId === campaignId ? "secondary" : "outline"}
+                    className="rounded-xl"
                     data-testid={`results-team-campaign-${campaign.campaignId}`}
                   >
                     <a
@@ -312,6 +373,7 @@ export default async function ResultsTeamDashboardPage({
                     variant={
                       subject.subjectEmployeeId === subjectEmployeeId ? "secondary" : "outline"
                     }
+                    className="rounded-xl"
                     data-testid={`results-team-subject-${subject.subjectEmployeeId}`}
                   >
                     <a

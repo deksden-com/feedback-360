@@ -8,6 +8,7 @@ import { applyDebugPageDelay } from "@/lib/debug-page-delay";
 import { resolveAppOperationContext } from "@/lib/operation-context";
 import { getFriendlyErrorCopy } from "@/lib/page-state";
 import { createInprocClient } from "@feedback-360/client";
+import { ArrowRight, BarChart3, Layers3, Sparkles, UserRound } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import {
@@ -98,6 +99,7 @@ export default async function ResultsMyDashboardPage({
           title="Мои результаты"
           subtitle="Выберите кампанию для просмотра итогов."
           testId="scr-results-employee-root"
+          resetHref="/results"
         >
           <PageEmptyState
             title="Пока не выбрана кампания"
@@ -105,7 +107,7 @@ export default async function ResultsMyDashboardPage({
             testId="results-my-empty"
           />
           <form
-            className="grid gap-3 rounded-md border p-4"
+            className="grid gap-4 rounded-[1.75rem] border border-border/70 bg-background p-5 shadow-sm"
             method="get"
             data-testid="my-results-form"
           >
@@ -116,16 +118,22 @@ export default async function ResultsMyDashboardPage({
             <div>
               <button
                 type="submit"
-                className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+                className="inline-flex h-11 items-center rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground"
               >
                 Открыть результаты
+                <ArrowRight className="ml-2 size-4" />
               </button>
             </div>
           </form>
           {campaignOptions.length > 0 ? (
-            <Card data-testid="my-results-suggestions">
+            <Card
+              className="rounded-[1.75rem] border-border/70 shadow-sm"
+              data-testid="my-results-suggestions"
+            >
               <CardHeader>
-                <CardTitle className="text-lg">Быстрый выбор кампании</CardTitle>
+                <CardTitle className="text-xl font-semibold tracking-tight">
+                  Быстрый выбор кампании
+                </CardTitle>
                 <CardDescription>
                   Используем кампании из ваших анкет, чтобы быстрее открыть готовый отчёт.
                 </CardDescription>
@@ -172,6 +180,7 @@ export default async function ResultsMyDashboardPage({
           title="Мои результаты"
           subtitle={state.description}
           testId="scr-results-employee-root"
+          resetHref="/results"
         >
           <PageErrorState
             title={state.title}
@@ -195,28 +204,74 @@ export default async function ResultsMyDashboardPage({
         title="Мои результаты"
         subtitle="Агрегаты по завершённой кампании 360."
         testId="scr-results-employee-root"
+        resetHref="/results"
       >
         {campaignOptions.length > 0 ? (
-          <Card data-testid="results-my-campaign-switcher">
+          <Card
+            className="rounded-[1.75rem] border-border/70 shadow-sm"
+            data-testid="results-my-campaign-switcher"
+          >
             <CardHeader>
-              <CardTitle className="text-lg">Переключение между кампаниями</CardTitle>
+              <CardTitle className="text-2xl font-semibold tracking-tight">
+                Переключение между кампаниями
+              </CardTitle>
               <CardDescription>
                 Откройте другой завершённый отчёт, не теряя контекст текущей компании.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-wrap gap-2">
-              {campaignOptions.map((campaign) => (
-                <Button
-                  key={campaign.campaignId}
-                  asChild
-                  variant={campaign.campaignId === campaignId ? "secondary" : "outline"}
-                  data-testid={`results-my-campaign-${campaign.campaignId}`}
-                >
-                  <a href={`/results?campaignId=${encodeURIComponent(campaign.campaignId)}`}>
-                    {campaign.label}
-                  </a>
-                </Button>
-              ))}
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4">
+                  <div className="flex items-start gap-3">
+                    <Layers3 className="mt-0.5 size-4 text-primary" />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        Кампаний
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold tracking-tight">
+                        {campaignOptions.length}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4">
+                  <div className="flex items-start gap-3">
+                    <UserRound className="mt-0.5 size-4 text-primary" />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        Режим
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold tracking-tight">Личный</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4">
+                  <div className="flex items-start gap-3">
+                    <BarChart3 className="mt-0.5 size-4 text-primary" />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        Представление
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold tracking-tight">Report</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {campaignOptions.map((campaign) => (
+                  <Button
+                    key={campaign.campaignId}
+                    asChild
+                    variant={campaign.campaignId === campaignId ? "secondary" : "outline"}
+                    className="rounded-xl"
+                    data-testid={`results-my-campaign-${campaign.campaignId}`}
+                  >
+                    <a href={`/results?campaignId=${encodeURIComponent(campaign.campaignId)}`}>
+                      {campaign.label}
+                    </a>
+                  </Button>
+                ))}
+              </div>
             </CardContent>
           </Card>
         ) : null}

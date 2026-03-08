@@ -55,7 +55,7 @@ export const HrCampaignDraftForm = ({
         />
       ) : null}
 
-      <Card>
+      <Card className="rounded-[1.75rem] border-border/70 shadow-sm">
         <CardHeader>
           <CardTitle className="text-xl">{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
@@ -135,7 +135,7 @@ export const HrCampaignDraftForm = ({
               </div>
             </div>
 
-            <Card className="border-dashed">
+            <Card className="rounded-[1.5rem] border-dashed border-border/70 bg-muted/10">
               <CardHeader>
                 <CardTitle className="text-lg">Веса групп</CardTitle>
                 <CardDescription>
@@ -182,7 +182,7 @@ export const HrCampaignDraftForm = ({
               </CardContent>
             </Card>
 
-            <Card className="border-dashed">
+            <Card className="rounded-[1.5rem] border-dashed border-border/70 bg-muted/10">
               <CardHeader>
                 <CardTitle className="text-lg">Notification policy</CardTitle>
                 <CardDescription>

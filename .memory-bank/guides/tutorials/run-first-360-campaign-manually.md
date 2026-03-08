@@ -280,7 +280,7 @@ HR добавляет в кампанию сотрудников и провер
 
 Когда анкета заполнена, участник отправляет её, и она становится read-only.
 
-> Representative screenshot из acceptance/evidence.
+> Representative screenshot из acceptance/evidence. Здесь показан привычный post-submit вид: анкета остаётся в inbox как read-only история, доступная только для просмотра.
 
 ![Questionnaire submitted](../assets/manual-first-campaign/step-08d-questionnaire-submitted__(SCR-QUESTIONNAIRES-FILL).png)
 

@@ -156,58 +156,62 @@ export default async function HrCampaignDetailPage({
           />
         ) : null}
 
-        <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
-          <Card data-testid="campaign-detail-overview">
-            <CardHeader>
-              <CardTitle className="text-xl">Overview</CardTitle>
-              <CardDescription>{getCampaignActionHint(campaign.data)}</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-lg border bg-muted/20 p-4">
-                <p className="text-sm text-muted-foreground">Кампания</p>
-                <p className="text-lg font-semibold" data-testid="campaign-detail-name">
-                  {campaign.data.name}
-                </p>
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_320px]">
+          <Card
+            className="overflow-hidden rounded-[2rem] border-0 bg-[#2563eb] text-white shadow-[0_20px_50px_-24px_rgba(37,99,235,0.9)]"
+            data-testid="campaign-detail-overview"
+          >
+            <CardContent className="relative p-8 md:p-10">
+              <div className="relative z-10 max-w-2xl space-y-4">
+                <div className="inline-flex items-center rounded-full bg-white/12 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-white/80">
+                  Campaign Detail
+                </div>
+                <div className="space-y-3">
+                  <h2
+                    className="text-3xl font-semibold tracking-tight md:text-4xl"
+                    data-testid="campaign-detail-name"
+                  >
+                    {campaign.data.name}
+                  </h2>
+                  <p className="max-w-xl text-sm leading-6 text-white/80 md:text-base">
+                    {getCampaignActionHint(campaign.data)}
+                  </p>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="rounded-[1.25rem] border border-white/10 bg-white/8 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/70">
+                      Status
+                    </p>
+                    <p className="mt-2 text-lg font-semibold" data-testid="campaign-detail-status">
+                      {campaignStatusLabels[campaign.data.status] ?? campaign.data.status}
+                    </p>
+                  </div>
+                  <div className="rounded-[1.25rem] border border-white/10 bg-white/8 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/70">
+                      Model
+                    </p>
+                    <p className="mt-2 text-lg font-semibold" data-testid="campaign-detail-model">
+                      {campaign.data.modelName
+                        ? `${campaign.data.modelName} · v${campaign.data.modelVersion ?? "?"}`
+                        : "Не выбрана"}
+                    </p>
+                    <p className="text-sm text-white/70">
+                      {campaign.data.modelKind ?? "kind unknown"}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="rounded-lg border bg-muted/20 p-4">
-                <p className="text-sm text-muted-foreground">Status</p>
-                <p className="text-lg font-semibold" data-testid="campaign-detail-status">
-                  {campaignStatusLabels[campaign.data.status] ?? campaign.data.status}
-                </p>
-              </div>
-              <div className="rounded-lg border bg-muted/20 p-4">
-                <p className="text-sm text-muted-foreground">Model</p>
-                <p className="text-lg font-semibold" data-testid="campaign-detail-model">
-                  {campaign.data.modelName
-                    ? `${campaign.data.modelName} · v${campaign.data.modelVersion ?? "?"}`
-                    : "Не выбрана"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {campaign.data.modelKind ?? "kind unknown"}
-                </p>
-              </div>
-              <div className="rounded-lg border bg-muted/20 p-4">
-                <p className="text-sm text-muted-foreground">Сроки</p>
-                <p className="font-medium">
-                  {formatCampaignDateTimeLabel(campaign.data.startAt)} →{" "}
-                  {formatCampaignDateTimeLabel(campaign.data.endAt)}
-                </p>
-                <p className="text-sm text-muted-foreground">{campaign.data.timezone}</p>
-              </div>
-              <div className="rounded-lg border bg-muted/20 p-4">
-                <p className="text-sm text-muted-foreground">Веса</p>
-                <p className="font-medium">
-                  M {campaign.data.managerWeight}% · P {campaign.data.peersWeight}% · S{" "}
-                  {campaign.data.subordinatesWeight}%
-                </p>
-                <p className="text-sm text-muted-foreground">Self {campaign.data.selfWeight}%</p>
-              </div>
+              <div className="absolute right-6 top-6 hidden h-36 w-36 rounded-[2rem] bg-white/10 lg:block" />
+              <div className="absolute bottom-6 right-8 hidden h-24 w-24 rounded-[1.5rem] border border-white/10 bg-white/8 lg:block" />
             </CardContent>
           </Card>
 
-          <Card data-testid="campaign-detail-actions">
+          <Card
+            className="rounded-[1.75rem] border-border/70 shadow-sm"
+            data-testid="campaign-detail-actions"
+          >
             <CardHeader>
-              <CardTitle className="text-xl">Quick actions</CardTitle>
+              <CardTitle className="text-2xl font-semibold tracking-tight">Quick actions</CardTitle>
               <CardDescription>
                 HR detail page остаётся источником daily operations без дублирования domain rules.
               </CardDescription>
@@ -215,14 +219,19 @@ export default async function HrCampaignDetailPage({
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-2">
                 {canEditCampaignDraft(campaign.data) && resolved.context.role === "hr_admin" ? (
-                  <Button asChild data-testid="campaign-detail-edit-draft">
+                  <Button asChild className="rounded-xl" data-testid="campaign-detail-edit-draft">
                     <a href={`/hr/campaigns/${campaignId}/edit`}>Редактировать draft</a>
                   </Button>
                 ) : null}
-                <Button asChild variant="outline" data-testid="campaign-detail-open-matrix">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="rounded-xl"
+                  data-testid="campaign-detail-open-matrix"
+                >
                   <a href={`/hr/campaigns/${campaignId}/matrix`}>Открыть матрицу</a>
                 </Button>
-                <Button asChild variant="outline">
+                <Button asChild variant="outline" className="rounded-xl">
                   <a href="/hr/campaigns">К списку кампаний</a>
                 </Button>
               </div>
@@ -251,36 +260,64 @@ export default async function HrCampaignDetailPage({
               </div>
             </CardContent>
           </Card>
-        </div>
+        </section>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card data-testid="campaign-detail-progress-total">
-            <CardHeader>
-              <CardTitle className="text-base">Questionnaires</CardTitle>
-              <CardDescription>Общее количество назначенных анкет.</CardDescription>
-            </CardHeader>
-            <CardContent className="text-3xl font-semibold">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Questionnaires
+            </p>
+            <p
+              className="mt-3 text-3xl font-semibold tracking-tight"
+              data-testid="campaign-detail-progress-total"
+            >
               {progressData?.totalQuestionnaires ?? "—"}
-            </CardContent>
-          </Card>
-          <Card data-testid="campaign-detail-progress-pending">
-            <CardHeader>
-              <CardTitle className="text-base">Pending</CardTitle>
-              <CardDescription>Не начатые и незавершённые анкеты.</CardDescription>
-            </CardHeader>
-            <CardContent className="text-3xl font-semibold">{pendingCount ?? "—"}</CardContent>
-          </Card>
-          <Card data-testid="campaign-detail-progress-lock">
-            <CardHeader>
-              <CardTitle className="text-base">Lock state</CardTitle>
-              <CardDescription>Freeze-правило после первого draft save.</CardDescription>
-            </CardHeader>
-            <CardContent className="text-sm font-medium">
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Общее количество назначенных анкет.
+            </p>
+          </div>
+          <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Pending
+            </p>
+            <p
+              className="mt-3 text-3xl font-semibold tracking-tight"
+              data-testid="campaign-detail-progress-pending"
+            >
+              {pendingCount ?? "—"}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">Не начатые и незавершённые анкеты.</p>
+          </div>
+          <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Start
+            </p>
+            <p className="mt-3 text-base font-semibold">
+              {formatCampaignDateTimeLabel(campaign.data.startAt)}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{campaign.data.timezone}</p>
+          </div>
+          <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              End
+            </p>
+            <p className="mt-3 text-base font-semibold">
+              {formatCampaignDateTimeLabel(campaign.data.endAt)}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">Read-only после дедлайна.</p>
+          </div>
+          <div className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Lock state
+            </p>
+            <p className="mt-3 text-base font-semibold" data-testid="campaign-detail-progress-lock">
               {progressData?.campaignLockedAt
                 ? formatCampaignDateTimeLabel(progressData.campaignLockedAt)
                 : "not_locked"}
-            </CardContent>
-          </Card>
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">Freeze после первого draft save.</p>
+          </div>
         </div>
 
         <HrCampaignWorkbench

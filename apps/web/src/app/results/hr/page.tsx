@@ -8,6 +8,7 @@ import { applyDebugPageDelay } from "@/lib/debug-page-delay";
 import { resolveAppOperationContext } from "@/lib/operation-context";
 import { getFriendlyErrorCopy } from "@/lib/page-state";
 import { createInprocClient } from "@feedback-360/client";
+import { ArrowRight, Layers3, ShieldCheck, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import {
@@ -81,6 +82,7 @@ export default async function ResultsHrViewPage({
           title="HR результаты"
           subtitle="Доступно только для HR ролей."
           testId="scr-results-hr-root"
+          resetHref="/results/hr"
         >
           <PageErrorState
             title="Эта витрина доступна только HR-роли"
@@ -143,6 +145,7 @@ export default async function ResultsHrViewPage({
           title="HR результаты"
           subtitle="Выберите кампанию и сотрудника, чтобы открыть HR-витрину."
           testId="scr-results-hr-root"
+          resetHref="/results/hr"
         >
           <PageEmptyState
             title="Нужно выбрать сотрудника и кампанию"
@@ -150,7 +153,7 @@ export default async function ResultsHrViewPage({
             testId="results-hr-empty"
           />
           <form
-            className="grid gap-3 rounded-md border p-4"
+            className="grid gap-4 rounded-[1.75rem] border border-border/70 bg-background p-5 shadow-sm"
             method="get"
             data-testid="hr-results-form"
           >
@@ -169,16 +172,20 @@ export default async function ResultsHrViewPage({
             <div>
               <button
                 type="submit"
-                className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+                className="inline-flex h-11 items-center rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground"
               >
                 Открыть результаты
+                <ArrowRight className="ml-2 size-4" />
               </button>
             </div>
           </form>
           {campaignOptions.length > 0 ? (
-            <Card data-testid="results-hr-campaign-switcher">
+            <Card
+              className="rounded-[1.75rem] border-border/70 shadow-sm"
+              data-testid="results-hr-campaign-switcher"
+            >
               <CardHeader>
-                <CardTitle className="text-lg">Кампании</CardTitle>
+                <CardTitle className="text-xl font-semibold tracking-tight">Кампании</CardTitle>
                 <CardDescription>
                   Откройте completed или `ai_failed` кампанию из HR-каталога.
                 </CardDescription>
@@ -195,9 +202,12 @@ export default async function ResultsHrViewPage({
             </Card>
           ) : null}
           {subjectOptions.length > 0 ? (
-            <Card data-testid="results-hr-subject-switcher">
+            <Card
+              className="rounded-[1.75rem] border-border/70 shadow-sm"
+              data-testid="results-hr-subject-switcher"
+            >
               <CardHeader>
-                <CardTitle className="text-lg">Сотрудники</CardTitle>
+                <CardTitle className="text-xl font-semibold tracking-tight">Сотрудники</CardTitle>
                 <CardDescription>
                   После выбора кампании список берётся из snapshot, чтобы HR работал с исторически
                   зафиксированным составом.
@@ -250,6 +260,7 @@ export default async function ResultsHrViewPage({
           title="HR результаты"
           subtitle={state.description}
           testId="scr-results-hr-root"
+          resetHref="/results/hr"
         >
           <PageErrorState
             title={state.title}
@@ -274,15 +285,66 @@ export default async function ResultsHrViewPage({
       title="HR результаты"
       subtitle={subtitle}
     >
-      <ResultsPageLayout title="HR результаты" subtitle={subtitle} testId="scr-results-hr-root">
-        <Card data-testid="results-hr-toolbar">
+      <ResultsPageLayout
+        title="HR результаты"
+        subtitle={subtitle}
+        testId="scr-results-hr-root"
+        resetHref="/results/hr"
+      >
+        <Card
+          className="rounded-[1.75rem] border-border/70 shadow-sm"
+          data-testid="results-hr-toolbar"
+        >
           <CardHeader>
-            <CardTitle className="text-lg">Рабочий режим HR</CardTitle>
+            <CardTitle className="text-2xl font-semibold tracking-tight">
+              Рабочий режим HR
+            </CardTitle>
             <CardDescription>
               Фильтры и представление текста привязаны к текущей роли и не обходят privacy rules.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4">
+                <div className="flex items-start gap-3">
+                  <Layers3 className="mt-0.5 size-4 text-primary" />
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Кампаний
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight">
+                      {campaignOptions.length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4">
+                <div className="flex items-start gap-3">
+                  <Users className="mt-0.5 size-4 text-primary" />
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Сотрудников
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight">
+                      {subjectOptions.length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 size-4 text-primary" />
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Роль
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight">
+                      {showRawText ? "Admin" : "Reader"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
             {campaignOptions.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {campaignOptions.map((campaign) => (
@@ -290,6 +352,7 @@ export default async function ResultsHrViewPage({
                     key={campaign.campaignId}
                     asChild
                     variant={campaign.campaignId === campaignId ? "secondary" : "outline"}
+                    className="rounded-xl"
                     data-testid={`results-hr-campaign-${campaign.campaignId}`}
                   >
                     <a
@@ -314,6 +377,7 @@ export default async function ResultsHrViewPage({
                     variant={
                       subject.subjectEmployeeId === subjectEmployeeId ? "secondary" : "outline"
                     }
+                    className="rounded-xl"
                     data-testid={`results-hr-subject-${subject.subjectEmployeeId}`}
                   >
                     <a
@@ -332,6 +396,7 @@ export default async function ResultsHrViewPage({
                 <Button
                   asChild
                   variant={normalizedTextView === "combined" ? "secondary" : "outline"}
+                  className="rounded-xl"
                 >
                   <a
                     href={`/results/hr?campaignId=${encodeURIComponent(
@@ -344,6 +409,7 @@ export default async function ResultsHrViewPage({
                 <Button
                   asChild
                   variant={normalizedTextView === "processed" ? "secondary" : "outline"}
+                  className="rounded-xl"
                 >
                   <a
                     href={`/results/hr?campaignId=${encodeURIComponent(
@@ -353,7 +419,11 @@ export default async function ResultsHrViewPage({
                     Processed only
                   </a>
                 </Button>
-                <Button asChild variant={normalizedTextView === "raw" ? "secondary" : "outline"}>
+                <Button
+                  asChild
+                  variant={normalizedTextView === "raw" ? "secondary" : "outline"}
+                  className="rounded-xl"
+                >
                   <a
                     href={`/results/hr?campaignId=${encodeURIComponent(
                       campaignId,
