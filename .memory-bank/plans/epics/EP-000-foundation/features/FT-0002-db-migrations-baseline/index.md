@@ -1,3 +1,14 @@
+---
+description: FT-0002-db-migrations-baseline feature plan and evidence entry for EP-000-foundation.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-000-foundation/index.md
+epic: EP-000
+feature: FT-0002
+---
+
+
 # FT-0002 — DB migrations baseline
 Status: Completed (2026-03-04)
 

@@ -1,3 +1,14 @@
+---
+description: FT-0012-typed-client-transport feature plan and evidence entry for EP-001-core-contract-client-cli.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-001-core-contract-client-cli/index.md
+epic: EP-001
+feature: FT-0012
+---
+
+
 # FT-0012 — Typed client transport (HTTP + in-proc)
 Status: Completed (2026-03-04)
 

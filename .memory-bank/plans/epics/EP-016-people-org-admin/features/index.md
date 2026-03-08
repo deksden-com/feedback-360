@@ -1,3 +1,13 @@
+---
+description: Feature catalog for EP-016-people-org-admin.
+purpose: Read to see the slice breakdown inside the epic and navigate to individual feature plans.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-016-people-org-admin/index.md
+epic: EP-016
+---
+
+
 # EP-016 — Feature catalog
 Status: Completed (2026-03-06)
 

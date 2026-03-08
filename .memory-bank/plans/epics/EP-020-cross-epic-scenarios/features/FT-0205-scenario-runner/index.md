@@ -1,3 +1,14 @@
+---
+description: FT-0205-scenario-runner feature plan and evidence entry for EP-020-cross-epic-scenarios.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-020-cross-epic-scenarios/index.md
+epic: EP-020
+feature: FT-0205
+---
+
+
 # FT-0205 — Scenario spec and phase runner
 Status: Completed (2026-03-07)
 

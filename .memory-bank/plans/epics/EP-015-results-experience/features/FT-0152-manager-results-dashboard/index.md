@@ -1,3 +1,14 @@
+---
+description: FT-0152-manager-results-dashboard feature plan and evidence entry for EP-015-results-experience.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-015-results-experience/index.md
+epic: EP-015
+feature: FT-0152
+---
+
+
 # FT-0152 — Manager team results dashboard
 Status: Completed (2026-03-06)
 

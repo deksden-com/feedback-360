@@ -1,3 +1,14 @@
+---
+description: FT-0211-screen-registry-rollout feature plan and evidence entry for EP-021-ui-traceability-saas-polish.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-021-ui-traceability-saas-polish/index.md
+epic: EP-021
+feature: FT-0211
+---
+
+
 # FT-0211 — Screen registry rollout
 Status: Completed (2026-03-07)
 

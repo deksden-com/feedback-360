@@ -1,3 +1,13 @@
+---
+description: Feature catalog for EP-021-ui-traceability-saas-polish.
+purpose: Read to see the slice breakdown inside the epic and navigate to individual feature plans.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-021-ui-traceability-saas-polish/index.md
+epic: EP-021
+---
+
+
 # EP-021 — Feature catalog
 Status: Completed (2026-03-07)
 

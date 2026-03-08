@@ -1,3 +1,14 @@
+---
+description: FT-0033-matrix-autogen feature plan and evidence entry for EP-003-org-snapshots.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-003-org-snapshots/index.md
+epic: EP-003
+feature: FT-0033
+---
+
+
 # FT-0033 — Matrix autogeneration (from selected departments)
 Status: Completed (2026-03-04)
 

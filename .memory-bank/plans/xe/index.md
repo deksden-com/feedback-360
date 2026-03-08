@@ -1,3 +1,12 @@
+---
+description: Catalog of cross-epic XE scenarios and related execution materials.
+purpose: Read to navigate the executable product scenarios and their supporting documents.
+status: Draft
+date: 2026-03-09
+parent: .memory-bank/plans/index.md
+---
+
+
 # XE scenarios — index
 Status: Draft (2026-03-07)
 

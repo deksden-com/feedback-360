@@ -1,3 +1,13 @@
+---
+description: Feature catalog for EP-007-ai-webhooks.
+purpose: Read to see the slice breakdown inside the epic and navigate to individual feature plans.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-007-ai-webhooks/index.md
+epic: EP-007
+---
+
+
 # EP-007 — Feature catalog
 Status: Completed (2026-03-05)
 

@@ -1,3 +1,12 @@
+---
+description: Index of UI screen specifications and screen-level contracts.
+purpose: Read to find the canonical contract for a screen before changing UI, guides, or automation.
+status: Draft
+date: 2026-03-09
+parent: .memory-bank/spec/ui/index.md
+---
+
+
 # UI screen specs — index
 Status: Draft (2026-03-07)
 

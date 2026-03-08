@@ -1,3 +1,14 @@
+---
+description: FT-0063-scheduling feature plan and evidence entry for EP-006-notifications-outbox.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-006-notifications-outbox/index.md
+epic: EP-006
+feature: FT-0063
+---
+
+
 # FT-0063 — Scheduling (timezone + quiet hours)
 Status: Completed (2026-03-05)
 

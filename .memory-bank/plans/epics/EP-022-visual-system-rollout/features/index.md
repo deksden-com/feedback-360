@@ -1,3 +1,13 @@
+---
+description: Feature catalog for EP-022-visual-system-rollout.
+purpose: Read to see the slice breakdown inside the epic and navigate to individual feature plans.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-022-visual-system-rollout/index.md
+epic: EP-022
+---
+
+
 # EP-022 — Feature catalog
 Status: Completed (2026-03-08)
 

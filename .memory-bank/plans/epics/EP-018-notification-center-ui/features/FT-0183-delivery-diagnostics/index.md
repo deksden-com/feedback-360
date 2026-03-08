@@ -1,3 +1,14 @@
+---
+description: FT-0183-delivery-diagnostics feature plan and evidence entry for EP-018-notification-center-ui.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-018-notification-center-ui/index.md
+epic: EP-018
+feature: FT-0183
+---
+
+
 # FT-0183 — Delivery diagnostics and outbox view
 Status: Completed (2026-03-06)
 

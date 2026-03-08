@@ -1,3 +1,14 @@
+---
+description: FT-0094-docs-evidence-sync feature plan and evidence entry for EP-009-test-release-hardening.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-009-test-release-hardening/index.md
+epic: EP-009
+feature: FT-0094
+---
+
+
 # FT-0094 — Docs and evidence sync
 Status: Completed (2026-03-05)
 

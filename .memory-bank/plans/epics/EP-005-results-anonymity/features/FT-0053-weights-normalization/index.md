@@ -1,3 +1,14 @@
+---
+description: FT-0053-weights-normalization feature plan and evidence entry for EP-005-results-anonymity.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-005-results-anonymity/index.md
+epic: EP-005
+feature: FT-0053
+---
+
+
 # FT-0053 — Weights normalization (missing/hidden groups)
 Status: Completed (2026-03-05)
 

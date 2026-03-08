@@ -1,3 +1,14 @@
+---
+description: FT-0021-identity-model feature plan and evidence entry for EP-002-identity-tenancy-rbac.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-002-identity-tenancy-rbac/index.md
+epic: EP-002
+feature: FT-0021
+---
+
+
 # FT-0021 — Identity model (User/Employee/Membership + active company)
 Status: Completed (2026-03-04)
 

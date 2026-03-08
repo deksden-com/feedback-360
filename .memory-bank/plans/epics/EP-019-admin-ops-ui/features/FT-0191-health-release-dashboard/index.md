@@ -1,3 +1,14 @@
+---
+description: FT-0191-health-release-dashboard feature plan and evidence entry for EP-019-admin-ops-ui.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-019-admin-ops-ui/index.md
+epic: EP-019
+feature: FT-0191
+---
+
+
 # FT-0191 — Health and release dashboard
 Status: Completed (2026-03-06)
 

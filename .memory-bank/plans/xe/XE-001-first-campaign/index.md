@@ -1,3 +1,13 @@
+---
+description: XE-001-first-campaign cross-epic scenario specification and execution guide.
+purpose: Read to understand the scenario phases, fixtures, expectations, and manual/beta walkthroughs.
+status: Draft
+date: 2026-03-09
+parent: .memory-bank/plans/xe/index.md
+scenario: XE-001
+---
+
+
 # XE-001 — First 360 campaign happy path
 Status: Draft (2026-03-07)
 

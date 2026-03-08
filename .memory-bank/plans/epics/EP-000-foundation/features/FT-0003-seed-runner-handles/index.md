@@ -1,3 +1,14 @@
+---
+description: FT-0003-seed-runner-handles feature plan and evidence entry for EP-000-foundation.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-000-foundation/index.md
+epic: EP-000
+feature: FT-0003
+---
+
+
 # FT-0003 — Seed runner + handles contract
 Status: Completed (2026-03-04)
 

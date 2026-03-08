@@ -71,6 +71,8 @@
 
 ## MBB — writing rules
 - [Principles](mbb/principles.md): базовые правила SSoT, traceability и evidence-first completion. Читать перед правками документации, чтобы не расползались стандарты.
-- [Templates](mbb/templates/index.md): каноничные шаблоны для epic/feature документов. Читать при создании новых планов, чтобы структура была единообразной.
+- [Templates](mbb/templates/index.md): каноничные шаблоны для epic/feature/component/subsystem документов. Читать при создании новых планов и subsystem/spec entrypoints, чтобы структура была единообразной.
+- [Frontmatter standards](mbb/frontmatter.md): где frontmatter обязателен и как маркировать `screen_id`, `screen_ids`, epic/feature/scenario metadata. Читать при создании guides, screen specs и машиночитаемых entrypoints.
 - [Indexing](mbb/indexing.md): правила построения `index.md` (в т.ч. progressive disclosure). Читать при обновлении навигации и индексов папок.
+- [Duo pattern](mbb/duo-pattern.md): когда и как дробить большие темы на summary + detail файлы без дублей. Читать, если раздел начинает разрастаться и смешивать уровни абстракции.
 - [Visual references](mbb/visual-references.md): правила работы с mockups, screenshots и design bundles. Читать, чтобы новый visual source не ломал структуру меморибанка.

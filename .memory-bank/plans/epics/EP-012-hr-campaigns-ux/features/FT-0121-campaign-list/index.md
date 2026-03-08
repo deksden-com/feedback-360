@@ -1,3 +1,14 @@
+---
+description: FT-0121-campaign-list feature plan and evidence entry for EP-012-hr-campaigns-ux.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-012-hr-campaigns-ux/index.md
+epic: EP-012
+feature: FT-0121
+---
+
+
 # FT-0121 — Campaign list and filters
 Status: Completed (2026-03-06)
 

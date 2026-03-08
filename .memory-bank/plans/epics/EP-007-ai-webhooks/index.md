@@ -1,3 +1,13 @@
+---
+description: EP-007-ai-webhooks epic plan, scope, progress, and evidence entrypoint.
+purpose: Read to understand the user value, feature map, and completion state of this epic.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/index.md
+epic: EP-007
+---
+
+
 # EP-007 — AI processing + webhook security
 Status: Completed (2026-03-05)
 

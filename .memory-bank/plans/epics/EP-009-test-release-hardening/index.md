@@ -1,3 +1,13 @@
+---
+description: EP-009-test-release-hardening epic plan, scope, progress, and evidence entrypoint.
+purpose: Read to understand the user value, feature map, and completion state of this epic.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/index.md
+epic: EP-009
+---
+
+
 # EP-009 — Test & release hardening
 Status: Completed (2026-03-05)
 

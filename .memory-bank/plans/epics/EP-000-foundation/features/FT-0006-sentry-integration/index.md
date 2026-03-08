@@ -1,3 +1,14 @@
+---
+description: FT-0006-sentry-integration feature plan and evidence entry for EP-000-foundation.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-000-foundation/index.md
+epic: EP-000
+feature: FT-0006
+---
+
+
 # FT-0006 — Sentry integration (Next.js)
 Status: Completed (2026-03-04)
 

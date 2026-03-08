@@ -1,3 +1,12 @@
+---
+description: Tutorial index for product learning paths.
+purpose: Read when you want end-to-end guided onboarding flows rather than normative specs.
+status: Draft
+date: 2026-03-09
+parent: .memory-bank/guides/index.md
+---
+
+
 # Tutorials
 Status: Draft (2026-03-07)
 

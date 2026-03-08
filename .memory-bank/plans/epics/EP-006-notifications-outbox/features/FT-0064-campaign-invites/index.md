@@ -1,3 +1,14 @@
+---
+description: FT-0064-campaign-invites feature plan and evidence entry for EP-006-notifications-outbox.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-006-notifications-outbox/index.md
+epic: EP-006
+feature: FT-0064
+---
+
+
 # FT-0064 — Campaign start invites (magic link emails)
 Status: Completed (2026-03-05)
 

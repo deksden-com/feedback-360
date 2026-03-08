@@ -1,3 +1,14 @@
+---
+description: FT-0081-auth-company-switcher-ui feature plan and evidence entry for EP-008-ui-minimal.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-008-ui-minimal/index.md
+epic: EP-008
+feature: FT-0081
+---
+
+
 # FT-0081 — Auth + company switcher UI (thin)
 Status: Completed (2026-03-05)
 

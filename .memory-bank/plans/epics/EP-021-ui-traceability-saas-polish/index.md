@@ -1,3 +1,13 @@
+---
+description: EP-021-ui-traceability-saas-polish epic plan, scope, progress, and evidence entrypoint.
+purpose: Read to understand the user value, feature map, and completion state of this epic.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/index.md
+epic: EP-021
+---
+
+
 # EP-021 — UI traceability and SaaS polish
 Status: Completed (2026-03-07)
 

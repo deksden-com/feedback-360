@@ -1,3 +1,14 @@
+---
+description: FT-0023-rls-deny-by-default feature plan and evidence entry for EP-002-identity-tenancy-rbac.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-002-identity-tenancy-rbac/index.md
+epic: EP-002
+feature: FT-0023
+---
+
+
 # FT-0023 — RLS deny-by-default + service role contours
 Status: Completed (2026-03-04)
 

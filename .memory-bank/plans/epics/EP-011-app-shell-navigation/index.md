@@ -1,3 +1,13 @@
+---
+description: EP-011-app-shell-navigation epic plan, scope, progress, and evidence entrypoint.
+purpose: Read to understand the user value, feature map, and completion state of this epic.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/index.md
+epic: EP-011
+---
+
+
 # EP-011 — App shell and navigation
 Status: Completed (2026-03-06)
 

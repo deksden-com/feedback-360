@@ -1,3 +1,14 @@
+---
+description: FT-0215-content-first-results-questionnaires feature plan and evidence entry for EP-021-ui-traceability-saas-polish.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-021-ui-traceability-saas-polish/index.md
+epic: EP-021
+feature: FT-0215
+---
+
+
 # FT-0215 — Content-first results and questionnaires
 Status: Completed (2026-03-07)
 

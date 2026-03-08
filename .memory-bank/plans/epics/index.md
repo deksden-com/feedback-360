@@ -1,3 +1,12 @@
+---
+description: Catalog of epic plans and their ordering in feedback-360.
+purpose: Read to navigate the epic tree and find the right EP/FT entrypoint before implementation.
+status: Draft
+date: 2026-03-09
+parent: .memory-bank/plans/index.md
+---
+
+
 # Epic plans — index
 Status: Draft (2026-03-03)
 
