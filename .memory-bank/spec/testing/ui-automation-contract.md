@@ -41,9 +41,16 @@ GUI login flow не является обязательным шагом для 
 ## Обязательные правила
 - ключевые интерактивные элементы и assertion targets получают стабильные `data-testid`;
 - `data-testid` выводится из `testIdScope`, привязанного к `screen_id`, а не придумывается локально каждым экраном;
+- каждый governed route-level screen обязан рендерить root selector вида `<testIdScope>-root` на top-level screen container или на screen-level layout root;
+- root selector считается runtime contract между screen registry, route page, POM и e2e/XE tooling;
 - screen spec не дублирует POM-код, а описывает смысл и contract экрана;
 - POM mapping не дублирует доменные правила, а ссылается на screen spec и UI spec;
 - XE phases обращаются к GUI через POM/runtime API, а не через случайные CSS selectors.
+
+## Root selector derivation
+- canonical formula: `rootTestId = \`${testIdScope}-root\``;
+- route-level page обязана либо сама рендерить этот selector, либо передавать его в screen-level layout/component, который становится runtime root;
+- POM, screen docs и audits должны ссылаться именно на derived root selector, а не придумывать отдельные root aliases.
 
 ## Implementation entrypoints
 - `apps/web/playwright/tests/`

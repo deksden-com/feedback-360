@@ -52,6 +52,11 @@ Status: Draft (2026-03-07)
 - main status/progress block;
 - assertion-critical text or state targets.
 
+## Governed runtime rule
+- каждый governed route-level screen из `screen-registry.md` обязан рендерить root `data-testid`, derived from `testIdScope` по формуле `<scope>-root`;
+- если route page использует shared layout/component, именно этот shared root может нести selector, но строковое значение должно оставаться derived and stable;
+- reusable inner components не обязаны иметь собственный governed root, если они не выступают отдельным screen surface.
+
 ## Registry maintenance
 Полный построчный список test ids можно держать в POM mapping или screen-level automation docs. Этот registry фиксирует именно **модель именования** и обязательные root patterns.
 
