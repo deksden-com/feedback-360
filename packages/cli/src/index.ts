@@ -1,3 +1,8 @@
+/**
+ * CLI entrypoint.
+ * @docs .memory-bank/spec/cli/cli.md
+ * @see .memory-bank/spec/cli/command-catalog.md
+ */
 import { pathToFileURL } from "node:url";
 
 import { cliReady, runCli } from "./legacy";

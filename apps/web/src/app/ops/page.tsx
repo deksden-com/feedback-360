@@ -11,6 +11,8 @@ import { OpsConsole } from "@/features/ops/components/ops-console";
 
 /**
  * Ops console screen.
+ * @docs .memory-bank/spec/ui/screens/ops.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-OPS
  * @testIdScope scr-ops
  */

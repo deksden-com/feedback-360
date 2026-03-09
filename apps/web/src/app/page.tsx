@@ -32,6 +32,8 @@ const toneClassNames: Record<string, string> = {
 
 /**
  * Role-aware internal home dashboard.
+ * @docs .memory-bank/spec/ui/screens/internal-home.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-APP-HOME
  * @testIdScope scr-app-home
  */

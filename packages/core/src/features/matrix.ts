@@ -1,3 +1,8 @@
+/**
+ * Assignment matrix feature-area entrypoint.
+ * @docs .memory-bank/spec/domain/assignments-and-matrix.md
+ * @see .memory-bank/spec/domain/org-structure.md
+ */
 import {
   type CampaignParticipantsAddFromDepartmentsInput,
   type CampaignParticipantsAddFromDepartmentsOutput,

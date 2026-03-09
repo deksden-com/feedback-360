@@ -1,3 +1,8 @@
+/**
+ * Models client feature methods.
+ * @docs .memory-bank/spec/client-api/operation-catalog.md
+ * @see .memory-bank/spec/domain/competency-models.md
+ */
 import {
   type ModelVersionCloneDraftInput,
   type ModelVersionCloneDraftOutput,

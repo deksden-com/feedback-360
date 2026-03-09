@@ -19,6 +19,8 @@ import {
 
 /**
  * Employee detail and provisioning surface for HR roles.
+ * @docs .memory-bank/spec/ui/screens/hr-employee-detail.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-HR-EMPLOYEE-DETAIL
  * @testIdScope scr-hr-employee-detail
  */

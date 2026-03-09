@@ -1,3 +1,8 @@
+/**
+ * Matrix client feature methods.
+ * @docs .memory-bank/spec/client-api/operation-catalog.md
+ * @see .memory-bank/spec/domain/assignments-and-matrix.md
+ */
 import {
   type CampaignParticipantsAddFromDepartmentsInput,
   type CampaignParticipantsAddFromDepartmentsOutput,

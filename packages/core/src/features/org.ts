@@ -1,3 +1,8 @@
+/**
+ * Org feature-area entrypoint.
+ * @docs .memory-bank/spec/domain/org-structure.md
+ * @see .memory-bank/spec/domain/soft-delete-and-history.md
+ */
 import {
   type DepartmentListInput,
   type DepartmentListOutput,

@@ -1,3 +1,8 @@
+/**
+ * AI feature-area entrypoint.
+ * @docs .memory-bank/spec/ai/ai-processing.md
+ * @see .memory-bank/spec/security/webhooks-ai.md
+ */
 import {
   type AiRunForCampaignInput,
   type AiRunForCampaignOutput,

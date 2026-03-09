@@ -1,3 +1,8 @@
+/**
+ * Results client feature methods.
+ * @docs .memory-bank/spec/client-api/operation-catalog.md
+ * @see .memory-bank/spec/domain/results-visibility.md
+ */
 import {
   type OperationContext,
   type OperationResult,

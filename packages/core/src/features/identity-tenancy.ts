@@ -1,3 +1,8 @@
+/**
+ * Identity and tenancy feature-area entrypoint.
+ * @docs .memory-bank/spec/security/auth-and-identity.md
+ * @see .memory-bank/spec/security/rbac.md
+ */
 import {
   type CompanyUpdateProfileInput,
   type CompanyUpdateProfileOutput,

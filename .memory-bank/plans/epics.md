@@ -153,3 +153,10 @@ Status: Draft (2026-03-03)
 - auth, shell, CRUD, questionnaire and results screens in one visual family
 - screenshot and guide refresh after material redesign
   - Детали: [EP-022 Feature catalog](epics/EP-022-visual-system-rollout/features/index.md) — rollout нового visual baseline по screen groups. Читать, чтобы продолжить редизайн поэтапно и без потери функциональности.
+
+## Epic 25 — Documentation traceability and SSoT hardening
+- `@docs` / `@see` rollout across key entrypoints
+- screen specs completion and deepening
+- docs → code/test ownership links
+- metadata normalization + reference docs + audit automation
+  - Детали: [EP-023 Feature catalog](epics/EP-023-documentation-traceability-hardening/features/index.md) — systematic hardening of docs/code/JSDoc traceability and memory-bank usability. Читать, чтобы quality gaps закрывались по категориям, а не разрозненными cleanup-патчами.

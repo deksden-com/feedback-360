@@ -1,4 +1,8 @@
 ---
+description: Explanation of how XE-001 works across runner setup, UI access, and result verification.
+purpose: Read to understand the scenario model behind XE-001 without confusing it with a pure manual walkthrough.
+status: Active
+date: 2026-03-09
 screen_ids:
   - SCR-AUTH-LOGIN
   - SCR-QUESTIONNAIRES-INBOX
@@ -9,7 +13,7 @@ screen_ids:
 ---
 
 # How `XE-001` works
-Status: Draft (2026-03-07)
+Status: Active (2026-03-09)
 
 Этот документ объясняет `XE-001` как end-to-end сценарий продукта.
 

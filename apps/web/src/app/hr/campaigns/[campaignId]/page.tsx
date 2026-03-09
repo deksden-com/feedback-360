@@ -30,6 +30,8 @@ const getQueryValue = (value: string | string[] | undefined): string | undefined
 
 /**
  * HR campaign detail screen.
+ * @docs .memory-bank/spec/ui/screens/hr-campaign-detail.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-HR-CAMPAIGN-DETAIL
  * @testIdScope scr-hr-campaign-detail
  */

@@ -34,6 +34,8 @@ const statuses = [
 
 /**
  * Employee directory for HR roles.
+ * @docs .memory-bank/spec/ui/screens/hr-employees.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-HR-EMPLOYEES
  * @testIdScope scr-hr-employees
  */

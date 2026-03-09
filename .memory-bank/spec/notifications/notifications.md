@@ -34,3 +34,14 @@ MVP default:
 Invite/started уведомления содержат magic-link для входа:
 - так как `User` создаётся заранее HR Admin’ом, magic-link используется как способ входа, а не “публичная регистрация”.
 - доступ разрешён только если email присутствует в HR-справочнике (см. auth spec).
+
+## Implementation entrypoints
+- `packages/core/src/features/notifications.ts`
+- `packages/client/src/features/notifications.ts`
+- `apps/web/src/app/hr/notifications/page.tsx`
+
+## Primary tests
+- `packages/cli/src/ft-0061-notifications-cli.test.ts`
+- `apps/web/playwright/tests/ft-0181-reminder-schedule-editor.spec.ts`
+- `apps/web/playwright/tests/ft-0182-template-catalog.spec.ts`
+- `apps/web/playwright/tests/ft-0183-delivery-diagnostics.spec.ts`

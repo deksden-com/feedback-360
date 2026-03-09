@@ -1,3 +1,8 @@
+/**
+ * Legacy CLI implementation and command wiring.
+ * @docs .memory-bank/spec/cli/command-catalog.md
+ * @see .memory-bank/spec/client-api/operation-catalog.md
+ */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";

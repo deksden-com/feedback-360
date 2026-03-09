@@ -10,6 +10,8 @@ import { buildEmptyModelDraft, getQueryValue } from "@/features/models-matrix/li
 
 /**
  * HR model create screen.
+ * @docs .memory-bank/spec/ui/screens/hr-model-create.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-HR-MODEL-CREATE
  * @testIdScope scr-hr-model-create
  */
