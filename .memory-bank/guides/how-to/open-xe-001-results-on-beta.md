@@ -1,4 +1,8 @@
 ---
+description: How-to for issuing an XE token and opening XE-001 results on beta.
+purpose: Read when you need the fastest operational path to inspect a live XE run on beta.
+status: Active
+date: 2026-03-09
 screen_ids:
   - SCR-AUTH-LOGIN
   - SCR-RESULTS-EMPLOYEE
@@ -7,7 +11,7 @@ screen_ids:
 ---
 
 # How to open `XE-001` results on beta
-Status: Draft (2026-03-07)
+Status: Active (2026-03-09)
 
 Эта инструкция показывает, как открыть готовый сценарий `XE-001` на `beta` и посмотреть результаты от лица разных ролей.
 

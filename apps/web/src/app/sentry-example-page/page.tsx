@@ -13,6 +13,8 @@ class SentryExampleFrontendError extends Error {
 
 /**
  * Sentry example diagnostics screen.
+ * @docs .memory-bank/spec/ui/screens/sentry-example.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-SENTRY-EXAMPLE
  * @testIdScope scr-sentry-example
  */

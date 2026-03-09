@@ -1,3 +1,14 @@
+---
+description: FT-0226-screenshot-guide-refresh feature plan and evidence entry for EP-022-visual-system-rollout.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-022-visual-system-rollout/index.md
+epic: EP-022
+feature: FT-0226
+---
+
+
 # FT-0226 — Screenshot and guide refresh
 Status: Completed (2026-03-08)
 

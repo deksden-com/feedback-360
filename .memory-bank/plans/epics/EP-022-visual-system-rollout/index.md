@@ -1,3 +1,13 @@
+---
+description: EP-022-visual-system-rollout epic plan, scope, progress, and evidence entrypoint.
+purpose: Read to understand the user value, feature map, and completion state of this epic.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/index.md
+epic: EP-022
+---
+
+
 # EP-022 — Unified visual system rollout
 Status: Completed (2026-03-08)
 

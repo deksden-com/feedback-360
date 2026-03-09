@@ -1,3 +1,14 @@
+---
+description: FT-0046-campaign-progress feature plan and evidence entry for EP-004-campaigns-questionnaires.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-004-campaigns-questionnaires/index.md
+epic: EP-004
+feature: FT-0046
+---
+
+
 # FT-0046 — Campaign progress view (HR)
 Status: Completed (2026-03-04)
 

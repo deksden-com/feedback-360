@@ -28,6 +28,8 @@ Status: Draft (2026-03-07)
 
 - [Open `XE-001` results on beta](how-to/open-xe-001-results-on-beta.md): как выпустить XE token, войти на `beta` и открыть результаты как `subject`, `manager` или `hr_admin`. Читать, когда нужно быстро показать живой сценарный run.
 - [How `XE-001` works](explanation/xe-001-walkthrough.md): как устроен `XE-001` как end-to-end сценарий и где в нём runner, а где UI. Читать, чтобы не путать автоматический setup и ручную проверку.
+- [Roles and visibility](reference/roles-and-visibility.md): быстрый lookup по ролям и основным правилам видимости. Читать, когда нужен short-form operational answer без глубоких specs.
+- [Campaign statuses](reference/campaign-statuses.md): краткое значение lifecycle статусов кампании. Читать, когда нужно быстро вспомнить, что означает текущий статус и какие ограничения с ним связаны.
 
 ## Связанные источники
 

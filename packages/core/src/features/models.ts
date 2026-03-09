@@ -1,3 +1,8 @@
+/**
+ * Competency models feature-area entrypoint.
+ * @docs .memory-bank/spec/domain/competency-models.md
+ * @see .memory-bank/spec/domain/calculations.md
+ */
 import {
   type DispatchOperationInput,
   type ModelVersionCloneDraftInput,

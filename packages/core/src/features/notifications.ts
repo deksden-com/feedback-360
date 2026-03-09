@@ -1,3 +1,8 @@
+/**
+ * Notifications feature-area entrypoint.
+ * @docs .memory-bank/spec/notifications/notifications.md
+ * @see .memory-bank/spec/notifications/outbox-and-retries.md
+ */
 import {
   type DispatchOperationInput,
   type NotificationDeliveryDiagnosticsInput,

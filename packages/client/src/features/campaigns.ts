@@ -1,3 +1,8 @@
+/**
+ * Campaign client feature methods.
+ * @docs .memory-bank/spec/client-api/operation-catalog.md
+ * @see .memory-bank/spec/domain/campaign-lifecycle.md
+ */
 import {
   type CampaignCreateInput,
   type CampaignCreateOutput,

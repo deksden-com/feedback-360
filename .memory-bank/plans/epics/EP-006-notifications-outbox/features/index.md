@@ -1,3 +1,13 @@
+---
+description: Feature catalog for EP-006-notifications-outbox.
+purpose: Read to see the slice breakdown inside the epic and navigate to individual feature plans.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-006-notifications-outbox/index.md
+epic: EP-006
+---
+
+
 # EP-006 — Feature catalog
 Status: Completed (2026-03-05)
 

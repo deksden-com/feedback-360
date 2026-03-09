@@ -59,6 +59,7 @@
 - [GUI wave — EP-011..EP-019](plans/epics/EP-011-app-shell-navigation/index.md): следующая серия GUI-эпиков после MVP/prod readiness, включая post-EP-013 structural refactor EP-014. Читать, чтобы видеть план эволюции интерфейса и supporting codebase от shell до ops UI.
 - [UI traceability and SaaS polish — EP-021](plans/epics/EP-021-ui-traceability-saas-polish/index.md): следующий слой UI после XE foundation — screen ids, predictable test ids и content-first polish для ключевых surfaces. Читать перед UI refactor, чтобы продуктовый facelift не потерял проверяемость.
 - [Unified visual system rollout — EP-022](plans/epics/EP-022-visual-system-rollout/index.md): следующая визуальная волна после EP-021 — единый стиль для auth, shell, CRUD, questionnaire и results. Читать, если продолжаем продуктовый редизайн по новому baseline.
+- [Documentation traceability and SSoT hardening — EP-023](plans/epics/EP-023-documentation-traceability-hardening/index.md): отдельный quality epic для docs/code/JSDoc traceability, screen specs, ownership links и metadata normalization. Читать, если доводим memory-bank и код до более строгого двустороннего графа.
 - [Implementation playbook](plans/implementation-playbook.md): практический чеклист “FT → код → тесты → docs”. Читать как рабочую инструкцию для реализации vertical slice.
 - [Verification matrix](plans/verification-matrix.md): обязательные тесты/сценарии и execution evidence по эпикам. Читать как финальный критерий готовности фич.
 - [XE scenario catalog](plans/xe/index.md): first-class cross-epic runs, начиная с `XE-001`. Читать, чтобы строить сквозные проверки поверх уже существующих feature/golden tests.
@@ -71,6 +72,8 @@
 
 ## MBB — writing rules
 - [Principles](mbb/principles.md): базовые правила SSoT, traceability и evidence-first completion. Читать перед правками документации, чтобы не расползались стандарты.
-- [Templates](mbb/templates/index.md): каноничные шаблоны для epic/feature документов. Читать при создании новых планов, чтобы структура была единообразной.
+- [Templates](mbb/templates/index.md): каноничные шаблоны для epic/feature/component/subsystem документов. Читать при создании новых планов и subsystem/spec entrypoints, чтобы структура была единообразной.
+- [Frontmatter standards](mbb/frontmatter.md): где frontmatter обязателен и как маркировать `screen_id`, `screen_ids`, epic/feature/scenario metadata. Читать при создании guides, screen specs и машиночитаемых entrypoints.
 - [Indexing](mbb/indexing.md): правила построения `index.md` (в т.ч. progressive disclosure). Читать при обновлении навигации и индексов папок.
+- [Duo pattern](mbb/duo-pattern.md): когда и как дробить большие темы на summary + detail файлы без дублей. Читать, если раздел начинает разрастаться и смешивать уровни абстракции.
 - [Visual references](mbb/visual-references.md): правила работы с mockups, screenshots и design bundles. Читать, чтобы новый visual source не ломал структуру меморибанка.

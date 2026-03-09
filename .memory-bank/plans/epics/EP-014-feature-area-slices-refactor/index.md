@@ -1,3 +1,13 @@
+---
+description: EP-014-feature-area-slices-refactor epic plan, scope, progress, and evidence entrypoint.
+purpose: Read to understand the user value, feature map, and completion state of this epic.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/index.md
+epic: EP-014
+---
+
+
 # EP-014 — Feature-area slice refactor
 Status: Completed (2026-03-06)
 

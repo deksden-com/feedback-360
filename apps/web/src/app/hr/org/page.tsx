@@ -26,6 +26,8 @@ import {
 
 /**
  * HR organization structure editor.
+ * @docs .memory-bank/spec/ui/screens/hr-org.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-HR-ORG
  * @testIdScope scr-hr-org
  */

@@ -1,3 +1,8 @@
+/**
+ * Ops feature-area entrypoint.
+ * @docs .memory-bank/spec/operations/runbook.md
+ * @see .memory-bank/spec/operations/deployment-architecture.md
+ */
 import {
   type DispatchOperationInput,
   type OperationResult,

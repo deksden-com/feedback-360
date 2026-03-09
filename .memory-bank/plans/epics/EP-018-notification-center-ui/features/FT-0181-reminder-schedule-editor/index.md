@@ -1,3 +1,14 @@
+---
+description: FT-0181-reminder-schedule-editor feature plan and evidence entry for EP-018-notification-center-ui.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-018-notification-center-ui/index.md
+epic: EP-018
+feature: FT-0181
+---
+
+
 # FT-0181 — Reminder schedule editor
 Status: Completed (2026-03-06)
 

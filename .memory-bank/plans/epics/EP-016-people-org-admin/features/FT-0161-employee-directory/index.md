@@ -1,3 +1,14 @@
+---
+description: FT-0161-employee-directory feature plan and evidence entry for EP-016-people-org-admin.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-016-people-org-admin/index.md
+epic: EP-016
+feature: FT-0161
+---
+
+
 # FT-0161 — Employee directory
 Status: Completed (2026-03-06)
 

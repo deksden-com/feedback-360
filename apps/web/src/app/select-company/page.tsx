@@ -14,6 +14,8 @@ const roleLabels: Record<string, string> = {
 
 /**
  * Active company switcher screen.
+ * @docs .memory-bank/spec/ui/screens/company-switcher.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-COMPANY-SWITCHER
  * @testIdScope scr-company-switcher
  */

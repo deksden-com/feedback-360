@@ -10,6 +10,8 @@ import { redirect } from "next/navigation";
 
 /**
  * HR employee create screen.
+ * @docs .memory-bank/spec/ui/screens/hr-employee-create.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-HR-EMPLOYEE-CREATE
  * @testIdScope scr-hr-employee-create
  */

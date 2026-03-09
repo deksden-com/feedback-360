@@ -1,3 +1,13 @@
+---
+description: EP-006-notifications-outbox epic plan, scope, progress, and evidence entrypoint.
+purpose: Read to understand the user value, feature map, and completion state of this epic.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/index.md
+epic: EP-006
+---
+
+
 # EP-006 — Notifications outbox (email)
 Status: Completed (2026-03-05)
 

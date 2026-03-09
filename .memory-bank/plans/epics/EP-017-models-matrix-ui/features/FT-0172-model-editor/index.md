@@ -1,3 +1,14 @@
+---
+description: FT-0172-model-editor feature plan and evidence entry for EP-017-models-matrix-ui.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-017-models-matrix-ui/index.md
+epic: EP-017
+feature: FT-0172
+---
+
+
 # FT-0172 — Model editor
 Status: Completed (2026-03-06)
 

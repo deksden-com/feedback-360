@@ -1,3 +1,8 @@
+/**
+ * Questionnaires client feature methods.
+ * @docs .memory-bank/spec/client-api/operation-catalog.md
+ * @see .memory-bank/spec/domain/questionnaires.md
+ */
 import {
   type OperationContext,
   type OperationResult,

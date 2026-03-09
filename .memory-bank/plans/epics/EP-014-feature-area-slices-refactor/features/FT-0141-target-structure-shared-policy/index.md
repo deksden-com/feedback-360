@@ -1,3 +1,14 @@
+---
+description: FT-0141-target-structure-shared-policy feature plan and evidence entry for EP-014-feature-area-slices-refactor.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-014-feature-area-slices-refactor/index.md
+epic: EP-014
+feature: FT-0141
+---
+
+
 # FT-0141 — Feature-area target structure and shared-module policy
 Status: Completed (2026-03-06)
 

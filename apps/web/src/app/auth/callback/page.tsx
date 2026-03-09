@@ -20,6 +20,8 @@ const syncSessionToApp = async (userId: string) => {
 
 /**
  * Auth callback bridge screen.
+ * @docs .memory-bank/spec/ui/screens/auth-callback.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-AUTH-CALLBACK
  * @testIdScope scr-auth-callback
  */

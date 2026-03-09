@@ -1,3 +1,13 @@
+---
+description: Feature catalog for EP-018-notification-center-ui.
+purpose: Read to see the slice breakdown inside the epic and navigate to individual feature plans.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-018-notification-center-ui/index.md
+epic: EP-018
+---
+
+
 # EP-018 — Feature catalog
 Status: Completed (2026-03-06)
 

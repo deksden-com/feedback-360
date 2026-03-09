@@ -1,3 +1,8 @@
+/**
+ * Org client feature methods.
+ * @docs .memory-bank/spec/client-api/operation-catalog.md
+ * @see .memory-bank/spec/domain/org-structure.md
+ */
 import {
   type DepartmentListInput,
   type DepartmentListOutput,

@@ -108,6 +108,8 @@ const buildFilterHref = (
 
 /**
  * Questionnaire inbox screen.
+ * @docs .memory-bank/spec/ui/screens/questionnaire-inbox.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-QUESTIONNAIRES-INBOX
  * @testIdScope scr-questionnaires-inbox
  */

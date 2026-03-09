@@ -1,3 +1,12 @@
+---
+description: How-to index for concrete operational tasks.
+purpose: Read when you need a short task-oriented instruction without full tutorial context.
+status: Draft
+date: 2026-03-09
+parent: .memory-bank/guides/index.md
+---
+
+
 # How-to Guides
 Status: Draft (2026-03-07)
 

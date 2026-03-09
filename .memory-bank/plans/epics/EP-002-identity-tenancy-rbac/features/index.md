@@ -1,3 +1,13 @@
+---
+description: Feature catalog for EP-002-identity-tenancy-rbac.
+purpose: Read to see the slice breakdown inside the epic and navigate to individual feature plans.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-002-identity-tenancy-rbac/index.md
+epic: EP-002
+---
+
+
 # EP-002 — Feature catalog
 Status: Completed (2026-03-04)
 

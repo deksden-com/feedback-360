@@ -11,6 +11,8 @@ const isDevLike = process.env.NEXT_PUBLIC_APP_ENV !== "prod";
 
 /**
  * Login screen.
+ * @docs .memory-bank/spec/ui/screens/auth-login.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-AUTH-LOGIN
  * @testIdScope scr-auth-login
  */

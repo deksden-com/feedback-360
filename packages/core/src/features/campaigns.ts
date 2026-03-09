@@ -1,3 +1,8 @@
+/**
+ * Campaigns feature-area entrypoint.
+ * @docs .memory-bank/spec/domain/campaign-lifecycle.md
+ * @see .memory-bank/spec/domain/assignments-and-matrix.md
+ */
 import {
   type CampaignCreateInput,
   type CampaignCreateOutput,

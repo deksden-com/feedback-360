@@ -1,3 +1,12 @@
+---
+description: Explanation index for conceptual product walkthroughs and system behavior notes.
+purpose: Read when you need the why/how behind flows rather than a strict step-by-step instruction.
+status: Draft
+date: 2026-03-09
+parent: .memory-bank/guides/index.md
+---
+
+
 # Explanation
 Status: Draft (2026-03-07)
 

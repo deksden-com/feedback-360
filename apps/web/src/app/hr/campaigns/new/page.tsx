@@ -21,6 +21,8 @@ const getQueryValue = (value: string | string[] | undefined): string | undefined
 
 /**
  * HR campaign create screen.
+ * @docs .memory-bank/spec/ui/screens/hr-campaign-create.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-HR-CAMPAIGN-CREATE
  * @testIdScope scr-hr-campaign-create
  */

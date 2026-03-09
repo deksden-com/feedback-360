@@ -13,6 +13,8 @@ import { getQueryValue, modelToDraft } from "@/features/models-matrix/lib/models
 
 /**
  * HR model detail screen.
+ * @docs .memory-bank/spec/ui/screens/hr-model-detail.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-HR-MODEL-DETAIL
  * @testIdScope scr-hr-model-detail
  */

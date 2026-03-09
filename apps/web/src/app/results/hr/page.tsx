@@ -32,6 +32,8 @@ const getQueryValue = (value: string | string[] | undefined): string | undefined
 
 /**
  * HR results dashboard screen.
+ * @docs .memory-bank/spec/ui/screens/hr-results-workbench.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-RESULTS-HR
  * @testIdScope scr-results-hr
  */

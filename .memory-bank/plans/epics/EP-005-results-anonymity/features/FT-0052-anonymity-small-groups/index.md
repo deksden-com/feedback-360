@@ -1,3 +1,14 @@
+---
+description: FT-0052-anonymity-small-groups feature plan and evidence entry for EP-005-results-anonymity.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-005-results-anonymity/index.md
+epic: EP-005
+feature: FT-0052
+---
+
+
 # FT-0052 — Anonymity threshold + small groups (hide/merge)
 Status: Completed (2026-03-05)
 

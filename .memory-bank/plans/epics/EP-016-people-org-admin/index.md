@@ -1,3 +1,13 @@
+---
+description: EP-016-people-org-admin epic plan, scope, progress, and evidence entrypoint.
+purpose: Read to understand the user value, feature map, and completion state of this epic.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/index.md
+epic: EP-016
+---
+
+
 # EP-016 — People and org admin
 Status: Completed (2026-03-06)
 

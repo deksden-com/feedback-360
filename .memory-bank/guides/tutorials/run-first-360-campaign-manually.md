@@ -1,4 +1,8 @@
 ---
+description: Tutorial for running a first 360 campaign manually through the product UI.
+purpose: Read to onboard a human operator into the main HR-led workflow step by step.
+status: Active
+date: 2026-03-09
 screen_ids:
   - SCR-AUTH-LOGIN
   - SCR-COMPANY-SWITCHER
@@ -20,7 +24,7 @@ screen_ids:
 ---
 
 # Tutorial — запустить первую 360-кампанию руками
-Status: Draft (2026-03-07)
+Status: Active (2026-03-09)
 
 Этот tutorial показывает продуктовый путь **глазами HR**, а не глазами XE runner.
 

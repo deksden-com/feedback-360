@@ -32,6 +32,8 @@ const getQueryValue = (value: string | string[] | undefined): string | undefined
 
 /**
  * Employee results dashboard screen.
+ * @docs .memory-bank/spec/ui/screens/employee-results-dashboard.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-RESULTS-EMPLOYEE
  * @testIdScope scr-results-employee
  */

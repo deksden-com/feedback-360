@@ -1,29 +1,53 @@
 ---
+description: HR campaign detail screen contract for campaign operations, status, and related actions.
+purpose: Read before changing campaign detail UX, lifecycle operations, or progress visibility.
+status: Active
+date: 2026-03-09
 screen_id: SCR-HR-CAMPAIGN-DETAIL
 route: /hr/campaigns/[campaignId]
 actors:
   - hr_admin
   - hr_reader
 test_id_scope: scr-hr-campaign-detail
+implementation_files:
+  - apps/web/src/app/hr/campaigns/[campaignId]/page.tsx
+test_files:
+  - apps/web/playwright/tests/ft-0123-campaign-detail-dashboard.spec.ts
 ---
 
 # Screen spec — HR campaign detail
-Status: Draft (2026-03-07)
+Status: Active (2026-03-09)
 
-Экран: operational detail кампании.
+## Purpose
+Operational detail кампании.
 
-Что внутри:
+## Information blocks
 - summary hero со статусом, сроками, progress, lock и AI state;
 - operational sections: participants, assignments/matrix, reminders, results entry points;
 - secondary diagnostics/actions.
 
-Ключевые состояния:
+## Primary actions
+- start/stop/end/retry AI where allowed;
+- inspect progress and move into matrix/results flows.
+
+## Secondary actions
+- review lock reasons;
+- open related campaign edit/matrix/results surfaces.
+
+## States
 - draft campaign;
 - started campaign;
 - ended/processing/completed campaign;
 - locked-after-first-draft-save note;
 - read-only role (`hr_reader`) without destructive actions.
 
-Зачем читать:
-- чтобы detail screenshots и campaign walkthrough имели единый SSoT surface;
-- чтобы UI changes сохраняли operational смысл detail page, а не только визуальный слой.
+## Domain-specific behavior
+- first questionnaire draft save locks matrix/weights campaign-wide;
+- after start, model and participant composition become immutable;
+- after end, questionnaires are read-only and AI lifecycle governs later status transitions.
+
+## Implementation entrypoints
+- `apps/web/src/app/hr/campaigns/[campaignId]/page.tsx`
+
+## Primary tests
+- `apps/web/playwright/tests/ft-0123-campaign-detail-dashboard.spec.ts`

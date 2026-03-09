@@ -171,6 +171,8 @@ const getFocusedCompetencyId = (
 
 /**
  * Questionnaire fill/read-only screen.
+ * @docs .memory-bank/spec/ui/screens/questionnaire-fill.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-QUESTIONNAIRES-FILL
  * @testIdScope scr-questionnaires-fill
  */

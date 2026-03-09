@@ -1,3 +1,8 @@
+/**
+ * Auth provisioning helper for CLI-driven identity bootstrap.
+ * @docs .memory-bank/spec/security/auth-and-identity.md
+ * @see .memory-bank/spec/operations/runbook.md
+ */
 import {
   type MembershipRole,
   createOperationError,

@@ -1,5 +1,5 @@
 # Screen registry
-Status: Draft (2026-03-07)
+Status: Active (2026-03-09)
 
 Цель: дать каждому экрану канонический `screen_id`, чтобы связывать:
 - screen specs,
@@ -41,30 +41,30 @@ Status: Draft (2026-03-07)
 ## Canonical registry
 | screen_id | Route | Actors | Screen spec | testIdScope |
 |---|---|---|---|---|
-| `SCR-AUTH-LOGIN` | `/auth/login` | guest | planned | `scr-auth-login` |
-| `SCR-AUTH-CALLBACK` | `/auth/callback` | guest | planned | `scr-auth-callback` |
-| `SCR-COMPANY-SWITCHER` | `/select-company` | authenticated user | planned | `scr-company-switcher` |
+| `SCR-AUTH-LOGIN` | `/auth/login` | guest | [Auth login](screens/auth-login.md) | `scr-auth-login` |
+| `SCR-AUTH-CALLBACK` | `/auth/callback` | guest | [Auth callback](screens/auth-callback.md) | `scr-auth-callback` |
+| `SCR-COMPANY-SWITCHER` | `/select-company` | authenticated user | [Company switcher](screens/company-switcher.md) | `scr-company-switcher` |
 | `SCR-APP-HOME` | `/` | employee, manager, hr_admin, hr_reader | [Internal home](screens/internal-home.md) | `scr-app-home` |
 | `SCR-HR-EMPLOYEES` | `/hr/employees` | hr_admin, hr_reader | [HR employees](screens/hr-employees.md) | `scr-hr-employees` |
 | `SCR-HR-EMPLOYEE-DETAIL` | `/hr/employees/[employeeId]` | hr_admin, hr_reader | [HR employee detail](screens/hr-employee-detail.md) | `scr-hr-employee-detail` |
-| `SCR-HR-EMPLOYEE-CREATE` | `/hr/employees/new` | hr_admin | planned | `scr-hr-employee-create` |
+| `SCR-HR-EMPLOYEE-CREATE` | `/hr/employees/new` | hr_admin | [HR employee create](screens/hr-employee-create.md) | `scr-hr-employee-create` |
 | `SCR-HR-ORG` | `/hr/org` | hr_admin, hr_reader | [HR org](screens/hr-org.md) | `scr-hr-org` |
-| `SCR-HR-MODELS` | `/hr/models` | hr_admin, hr_reader | planned | `scr-hr-models` |
-| `SCR-HR-MODEL-DETAIL` | `/hr/models/[modelVersionId]` | hr_admin, hr_reader | planned | `scr-hr-model-detail` |
-| `SCR-HR-MODEL-CREATE` | `/hr/models/new` | hr_admin | planned | `scr-hr-model-create` |
+| `SCR-HR-MODELS` | `/hr/models` | hr_admin, hr_reader | [HR models](screens/hr-models.md) | `scr-hr-models` |
+| `SCR-HR-MODEL-DETAIL` | `/hr/models/[modelVersionId]` | hr_admin, hr_reader | [HR model detail](screens/hr-model-detail.md) | `scr-hr-model-detail` |
+| `SCR-HR-MODEL-CREATE` | `/hr/models/new` | hr_admin | [HR model create](screens/hr-model-create.md) | `scr-hr-model-create` |
 | `SCR-HR-CAMPAIGNS` | `/hr/campaigns` | hr_admin, hr_reader | [HR campaigns](screens/hr-campaigns.md) | `scr-hr-campaigns` |
-| `SCR-HR-CAMPAIGN-CREATE` | `/hr/campaigns/new` | hr_admin | planned | `scr-hr-campaign-create` |
+| `SCR-HR-CAMPAIGN-CREATE` | `/hr/campaigns/new` | hr_admin | [HR campaign create](screens/hr-campaign-create.md) | `scr-hr-campaign-create` |
 | `SCR-HR-CAMPAIGN-DETAIL` | `/hr/campaigns/[campaignId]` | hr_admin, hr_reader | [HR campaign detail](screens/hr-campaign-detail.md) | `scr-hr-campaign-detail` |
-| `SCR-HR-CAMPAIGN-EDIT` | `/hr/campaigns/[campaignId]/edit` | hr_admin | planned | `scr-hr-campaign-edit` |
-| `SCR-HR-CAMPAIGN-MATRIX` | `/hr/campaigns/[campaignId]/matrix` | hr_admin, hr_reader | planned | `scr-hr-campaign-matrix` |
+| `SCR-HR-CAMPAIGN-EDIT` | `/hr/campaigns/[campaignId]/edit` | hr_admin | [HR campaign edit](screens/hr-campaign-edit.md) | `scr-hr-campaign-edit` |
+| `SCR-HR-CAMPAIGN-MATRIX` | `/hr/campaigns/[campaignId]/matrix` | hr_admin, hr_reader | [HR campaign matrix](screens/hr-campaign-matrix.md) | `scr-hr-campaign-matrix` |
 | `SCR-QUESTIONNAIRES-INBOX` | `/questionnaires` | employee, manager, hr_admin, hr_reader | [Questionnaire inbox](screens/questionnaire-inbox.md) | `scr-questionnaires-inbox` |
 | `SCR-QUESTIONNAIRES-FILL` | `/questionnaires/[questionnaireId]` | questionnaire assignee | [Questionnaire fill](screens/questionnaire-fill.md) | `scr-questionnaires-fill` |
 | `SCR-RESULTS-EMPLOYEE` | `/results` | employee | [Employee results dashboard](screens/employee-results-dashboard.md) | `scr-results-employee` |
 | `SCR-RESULTS-MANAGER` | `/results/team` | manager | [Manager results dashboard](screens/manager-results-dashboard.md) | `scr-results-manager` |
 | `SCR-RESULTS-HR` | `/results/hr` | hr_admin, hr_reader | [HR results workbench](screens/hr-results-workbench.md) | `scr-results-hr` |
-| `SCR-HR-NOTIFICATIONS` | `/hr/notifications` | hr_admin, hr_reader | planned | `scr-hr-notifications` |
-| `SCR-OPS` | `/ops` | hr_admin, hr_reader | planned | `scr-ops` |
-| `SCR-SENTRY-EXAMPLE` | `/sentry-example-page` | developer | planned | `scr-sentry-example` |
+| `SCR-HR-NOTIFICATIONS` | `/hr/notifications` | hr_admin, hr_reader | [HR notifications](screens/hr-notifications.md) | `scr-hr-notifications` |
+| `SCR-OPS` | `/ops` | hr_admin, hr_reader | [Ops console](screens/ops.md) | `scr-ops` |
+| `SCR-SENTRY-EXAMPLE` | `/sentry-example-page` | developer | [Sentry example](screens/sentry-example.md) | `scr-sentry-example` |
 
 ## Usage rules
 ### Markdown docs

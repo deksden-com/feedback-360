@@ -1,3 +1,14 @@
+---
+description: FT-0213-app-shell-identity-chrome feature plan and evidence entry for EP-021-ui-traceability-saas-polish.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-021-ui-traceability-saas-polish/index.md
+epic: EP-021
+feature: FT-0213
+---
+
+
 # FT-0213 — App shell and identity chrome
 Status: Completed (2026-03-07)
 

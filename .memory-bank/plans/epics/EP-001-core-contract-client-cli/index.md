@@ -1,3 +1,13 @@
+---
+description: EP-001-core-contract-client-cli epic plan, scope, progress, and evidence entrypoint.
+purpose: Read to understand the user value, feature map, and completion state of this epic.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/index.md
+epic: EP-001
+---
+
+
 # EP-001 — Core + Contract + Client + CLI-first
 Status: Completed (2026-03-04)
 

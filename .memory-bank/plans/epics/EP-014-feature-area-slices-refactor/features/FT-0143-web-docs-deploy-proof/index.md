@@ -1,3 +1,14 @@
+---
+description: FT-0143-web-docs-deploy-proof feature plan and evidence entry for EP-014-feature-area-slices-refactor.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-014-feature-area-slices-refactor/index.md
+epic: EP-014
+feature: FT-0143
+---
+
+
 # FT-0143 — Web/lib realignment, docs sync and deployment proof
 Status: Completed (2026-03-06)
 

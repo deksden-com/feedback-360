@@ -1,3 +1,8 @@
+/**
+ * Identity and tenancy client feature methods.
+ * @docs .memory-bank/spec/client-api/auth-and-tenancy.md
+ * @see .memory-bank/spec/security/auth-and-identity.md
+ */
 import {
   type IdentityProvisionAccessInput,
   type IdentityProvisionAccessOutput,

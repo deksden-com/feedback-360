@@ -11,6 +11,8 @@ import { buildMatrixPeople } from "@/features/models-matrix/lib/models-matrix";
 
 /**
  * HR campaign matrix builder screen.
+ * @docs .memory-bank/spec/ui/screens/hr-campaign-matrix.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-HR-CAMPAIGN-MATRIX
  * @testIdScope scr-hr-campaign-matrix
  */

@@ -1,3 +1,8 @@
+/**
+ * System client feature methods.
+ * @docs .memory-bank/spec/client-api/overview.md
+ * @see .memory-bank/spec/testing/seed-scenarios.md
+ */
 import {
   type OperationContext,
   type OperationResult,

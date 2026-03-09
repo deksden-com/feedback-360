@@ -32,6 +32,8 @@ const getQueryValue = (value: string | string[] | undefined): string | undefined
 
 /**
  * Manager results dashboard screen.
+ * @docs .memory-bank/spec/ui/screens/manager-results-dashboard.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-RESULTS-MANAGER
  * @testIdScope scr-results-manager
  */

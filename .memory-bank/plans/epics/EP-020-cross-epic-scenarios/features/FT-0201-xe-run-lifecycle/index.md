@@ -1,3 +1,14 @@
+---
+description: FT-0201-xe-run-lifecycle feature plan and evidence entry for EP-020-cross-epic-scenarios.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-020-cross-epic-scenarios/index.md
+epic: EP-020
+feature: FT-0201
+---
+
+
 # FT-0201 — XE run lifecycle and cleanup
 Status: Completed (2026-03-07)
 

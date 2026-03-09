@@ -1,3 +1,14 @@
+---
+description: FT-0084-hr-campaign-ui feature plan and evidence entry for EP-008-ui-minimal.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-008-ui-minimal/index.md
+epic: EP-008
+feature: FT-0084
+---
+
+
 # FT-0084 — HR campaign UI (draft/start/matrix/progress/AI retry)
 Status: Completed (2026-03-05)
 

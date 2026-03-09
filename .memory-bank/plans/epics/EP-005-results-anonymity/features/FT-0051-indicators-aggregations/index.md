@@ -1,3 +1,14 @@
+---
+description: FT-0051-indicators-aggregations feature plan and evidence entry for EP-005-results-anonymity.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-005-results-anonymity/index.md
+epic: EP-005
+feature: FT-0051
+---
+
+
 # FT-0051 — Indicators aggregations (numbers)
 Status: Completed (2026-03-04)
 

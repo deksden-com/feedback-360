@@ -29,3 +29,14 @@ Status: Draft (2026-03-03)
 - Требуемые секреты и доступ:
   - `SUPABASE_ACCESS_TOKEN` (получение `service_role` key через Management API),
   - `SUPABASE_BETA_DB_POOLER_URL` или `SUPABASE_PROD_DB_POOLER_URL` (запись в project DB).
+
+## Implementation entrypoints
+- `packages/core/src/features/identity-tenancy.ts`: доменные и access-related операции identity/tenancy.
+- `packages/client/src/features/identity-tenancy.ts`: typed client surface для identity/tenancy ops.
+- `packages/cli/src/auth-provisioning.ts`: operational bootstrap пути для `auth provision-email`.
+- `apps/web/src/app/auth/login/page.tsx`: magic-link и XE/dev token entry surface.
+- `apps/web/src/app/auth/callback/page.tsx`: завершение callback и app-session bridge.
+
+## Primary tests
+- `apps/web/playwright/tests/ft-0081-auth-company-switcher.spec.ts`
+- `packages/cli/src/ft-0085-auth-provision-cli.test.ts`

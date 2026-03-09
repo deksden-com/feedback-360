@@ -1,3 +1,14 @@
+---
+description: FT-0153-hr-results-workbench feature plan and evidence entry for EP-015-results-experience.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-015-results-experience/index.md
+epic: EP-015
+feature: FT-0153
+---
+
+
 # FT-0153 — HR results workbench
 Status: Completed (2026-03-06)
 

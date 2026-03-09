@@ -1,3 +1,8 @@
+/**
+ * Questionnaires feature-area entrypoint.
+ * @docs .memory-bank/spec/domain/questionnaires.md
+ * @see .memory-bank/spec/domain/campaign-lifecycle.md
+ */
 import {
   type DispatchOperationInput,
   type OperationResult,

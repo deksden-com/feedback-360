@@ -1,3 +1,12 @@
+---
+description: Catalog of epic plans and their ordering in feedback-360.
+purpose: Read to navigate the epic tree and find the right EP/FT entrypoint before implementation.
+status: Draft
+date: 2026-03-09
+parent: .memory-bank/plans/index.md
+---
+
+
 # Epic plans — index
 Status: Draft (2026-03-03)
 
@@ -36,3 +45,4 @@ Status: Draft (2026-03-03)
 - [EP-020 Cross-epic scenarios (XE) foundation](EP-020-cross-epic-scenarios/index.md): run registry, named seeds, XE CLI, phase runner и первый golden XE scenario. Читать, чтобы система умела выполнять полноценные сквозные прогоны как first-class capability.
 - [EP-021 UI traceability and SaaS polish](EP-021-ui-traceability-saas-polish/index.md): screen registry rollout, predictable test ids, shell identity chrome и content-first UI polish для ключевых surfaces. Читать, чтобы следующий UI refactor шёл по общим правилам traceability и familiar SaaS patterns.
 - [EP-022 Unified visual system rollout](EP-022-visual-system-rollout/index.md): единый visual baseline на основе refined auth/dashboard/questionnaire style и rollout этого языка по остальным screens. Читать, чтобы следующий редизайн был системным, а не набором локальных косметических правок.
+- [EP-023 Documentation traceability and SSoT hardening](EP-023-documentation-traceability-hardening/index.md): раскатка `@docs/@see`, completion screen specs, ownership links docs → code/tests, metadata normalization и audit automation. Читать, чтобы memory-bank и код стали по-настоящему двусторонне связаны и машинно-предсказуемы.

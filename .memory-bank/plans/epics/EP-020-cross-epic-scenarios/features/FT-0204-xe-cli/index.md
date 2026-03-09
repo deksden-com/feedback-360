@@ -1,3 +1,14 @@
+---
+description: FT-0204-xe-cli feature plan and evidence entry for EP-020-cross-epic-scenarios.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-020-cross-epic-scenarios/index.md
+epic: EP-020
+feature: FT-0204
+---
+
+
 # FT-0204 — XE CLI
 Status: Completed (2026-03-07)
 

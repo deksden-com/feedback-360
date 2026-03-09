@@ -25,6 +25,8 @@ import {
 
 /**
  * HR models catalog screen.
+ * @docs .memory-bank/spec/ui/screens/hr-models.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-HR-MODELS
  * @testIdScope scr-hr-models
  */

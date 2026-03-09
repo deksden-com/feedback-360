@@ -1,3 +1,13 @@
+---
+description: Feature catalog for EP-019-admin-ops-ui.
+purpose: Read to see the slice breakdown inside the epic and navigate to individual feature plans.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-019-admin-ops-ui/index.md
+epic: EP-019
+---
+
+
 # EP-019 — Feature catalog
 Status: Completed (2026-03-06)
 

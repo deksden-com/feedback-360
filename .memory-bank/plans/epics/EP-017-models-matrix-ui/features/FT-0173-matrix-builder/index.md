@@ -1,3 +1,14 @@
+---
+description: FT-0173-matrix-builder feature plan and evidence entry for EP-017-models-matrix-ui.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-017-models-matrix-ui/index.md
+epic: EP-017
+feature: FT-0173
+---
+
+
 # FT-0173 — Matrix builder with freeze preview
 Status: Completed (2026-03-06)
 

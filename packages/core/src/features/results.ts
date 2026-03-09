@@ -1,3 +1,9 @@
+/**
+ * Results feature-area entrypoint.
+ * @docs .memory-bank/spec/domain/results-visibility.md
+ * @see .memory-bank/spec/domain/calculations.md
+ * @see .memory-bank/spec/domain/anonymity-policy.md
+ */
 import {
   type DispatchOperationInput,
   type OperationResult,

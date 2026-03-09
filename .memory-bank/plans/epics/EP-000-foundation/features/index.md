@@ -1,3 +1,13 @@
+---
+description: Feature catalog for EP-000-foundation.
+purpose: Read to see the slice breakdown inside the epic and navigate to individual feature plans.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-000-foundation/index.md
+epic: EP-000
+---
+
+
 # EP-000 — Feature catalog
 Status: Completed (2026-03-04)
 

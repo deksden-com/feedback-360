@@ -1,3 +1,13 @@
+---
+description: EP-018-notification-center-ui epic plan, scope, progress, and evidence entrypoint.
+purpose: Read to understand the user value, feature map, and completion state of this epic.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/index.md
+epic: EP-018
+---
+
+
 # EP-018 — Notification center UI
 Status: Completed (2026-03-06)
 

@@ -1,3 +1,13 @@
+---
+description: EP-012-hr-campaigns-ux epic plan, scope, progress, and evidence entrypoint.
+purpose: Read to understand the user value, feature map, and completion state of this epic.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/index.md
+epic: EP-012
+---
+
+
 # EP-012 — HR campaigns UX
 Status: Completed (2026-03-06)
 

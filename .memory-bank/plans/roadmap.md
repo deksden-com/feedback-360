@@ -31,6 +31,7 @@ Status: Draft (2026-03-03)
 23) Cross-epic scenarios (XE) foundation.
 24) UI traceability + SaaS polish foundation.
 25) Unified visual system rollout from the new auth/dashboard/questionnaire baseline.
+26) Documentation traceability and SSoT hardening.
 
 Отложено после GUI wave:
 - Реальная внешняя AI integration beyond current MVP stub.

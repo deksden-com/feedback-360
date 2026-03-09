@@ -11,6 +11,8 @@ import { HrNotificationCenter } from "@/features/notifications-center/components
 
 /**
  * HR notification center screen.
+ * @docs .memory-bank/spec/ui/screens/hr-notifications.md
+ * @see .memory-bank/spec/ui/screen-registry.md
  * @screenId SCR-HR-NOTIFICATIONS
  * @testIdScope scr-hr-notifications
  */

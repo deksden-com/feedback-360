@@ -1,3 +1,14 @@
+---
+description: FT-0111-internal-app-shell feature plan and evidence entry for EP-011-app-shell-navigation.
+purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
+status: Active
+date: 2026-03-09
+parent: .memory-bank/plans/epics/EP-011-app-shell-navigation/index.md
+epic: EP-011
+feature: FT-0111
+---
+
+
 # FT-0111 — Internal app shell
 Status: Completed (2026-03-06)
 
