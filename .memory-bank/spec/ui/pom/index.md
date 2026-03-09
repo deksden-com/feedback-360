@@ -4,6 +4,7 @@ Status: Draft (2026-03-07)
 Этот раздел хранит **POM mapping**: как screen specs отображаются на automation-level page objects и stable test ids.
 
 - [POM conventions](conventions.md) — naming, `data-testid`, actor sessions и связь POM ↔ screen specs. Читать, чтобы XE/browser automation были единообразными.
+- [Root selectors](root-selectors.md) — derived root `data-testid` mapping for governed screens. Читать, чтобы POM и audits искали одинаковый top-level selector на каждом route-level surface.
 
 POM mapping — это не место для доменных правил. Он описывает:
 - какой page object покрывает экран,

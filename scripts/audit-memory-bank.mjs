@@ -236,15 +236,60 @@ const runTraceabilityAudit = async () => {
   const registryRows = screenRegistry
     .split("\n")
     .filter((line) => line.startsWith("| `SCR-") && line.includes("|"));
-  const registryIds = new Set(
-    registryRows
-      .map((line) => line.match(/\|\s*`(SCR-[^`]+)`\s*\|/)?.[1])
-      .filter(Boolean),
+  const registryEntries = registryRows
+    .map((line) => {
+      const match = line.match(
+        /\|\s*`(SCR-[^`]+)`\s*\|\s*`([^`]+)`\s*\|.*\|\s*`([^`]+)`\s*\|$/,
+      );
+
+      if (!match) {
+        return undefined;
+      }
+
+      return {
+        screenId: match[1],
+        route: match[2],
+        testIdScope: match[3],
+      };
+    })
+    .filter(Boolean);
+  const registryIds = new Set(registryEntries.map((entry) => entry.screenId));
+  const registryByScreenId = new Map(
+    registryEntries.map((entry) => [entry.screenId, entry]),
   );
 
   for (const row of registryRows) {
     if (row.includes("| planned |")) {
       errors.push(`Screen registry still has planned entry: ${row}`);
+    }
+  }
+
+  for (const relativePath of pageFiles) {
+    const contents = await readText(relativePath);
+    const screenId = contents.match(/@screenId\s+(SCR-[\w-]+)/)?.[1];
+    const testIdScope = contents.match(/@testIdScope\s+([\w-]+)/)?.[1];
+
+    if (!screenId || !testIdScope) {
+      continue;
+    }
+
+    const registryEntry = registryByScreenId.get(screenId);
+    if (!registryEntry) {
+      errors.push(`${relativePath} references unknown screen id ${screenId}.`);
+      continue;
+    }
+
+    if (registryEntry.testIdScope !== testIdScope) {
+      errors.push(
+        `${relativePath} has @testIdScope ${testIdScope}, but screen registry expects ${registryEntry.testIdScope} for ${screenId}.`,
+      );
+    }
+
+    const expectedRootTestId = `${testIdScope}-root`;
+    if (!contents.includes(expectedRootTestId)) {
+      errors.push(
+        `${relativePath} is missing governed root selector ${expectedRootTestId}.`,
+      );
     }
   }
 
