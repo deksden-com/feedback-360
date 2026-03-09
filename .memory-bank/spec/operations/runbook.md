@@ -264,3 +264,14 @@ Status: Draft (2026-03-04)
 - beta smoke green,
 - controlled backend error produces Sentry-correlated request evidence,
 - evidence written into memory bank.
+
+## Implementation entrypoints
+- `.github/workflows/ci.yml`
+- `.github/workflows/beta-smoke.yml`
+- `apps/web/playwright/tests/smoke/`
+- `apps/web/src/app/api/`
+
+## Primary tests
+- `pnpm docs:audit`
+- `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web test:smoke:beta`
+- `vercel inspect beta.go360go.ru`

@@ -1,7 +1,7 @@
 ---
 description: FT-0234-metadata-frontmatter-normalization feature plan for normalizing frontmatter and status conventions across memory-bank docs.
 purpose: Read to align machine-readable metadata and reduce drift between legacy and current document patterns.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-023-documentation-traceability-hardening/index.md
 epic: EP-023

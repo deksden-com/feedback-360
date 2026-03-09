@@ -25,6 +25,11 @@ import {
   summarizeAuditTrail,
 } from "../lib/ops";
 
+/**
+ * Ops console for health, AI diagnostics, and audit inspection.
+ * @docs .memory-bank/spec/ui/screens/ops.md
+ * @see .memory-bank/spec/operations/runbook.md
+ */
 type ActionResponse<T> = { ok: true; data: T } | { ok: false; error: OperationError };
 
 const sortCampaigns = (items: CampaignListItem[]) =>

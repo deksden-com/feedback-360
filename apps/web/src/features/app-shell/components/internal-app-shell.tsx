@@ -28,6 +28,13 @@ import {
   Users,
 } from "lucide-react";
 
+/**
+ * Internal workspace shell shared by authenticated users.
+ * @docs .memory-bank/spec/ui/screens/internal-home.md
+ * @see .memory-bank/spec/ui/screen-registry.md
+ * @screenId SCR-APP-HOME
+ * @testIdScope scr-app-home
+ */
 const isActivePath = (currentPath: string, href: string): boolean => {
   if (href === "/") {
     return currentPath === "/";

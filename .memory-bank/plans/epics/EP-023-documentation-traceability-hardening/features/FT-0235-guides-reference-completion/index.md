@@ -1,7 +1,7 @@
 ---
 description: FT-0235-guides-reference-completion feature plan for strengthening user/operator lookup docs and guide completeness.
 purpose: Read to close obvious guide/reference gaps without duplicating internal specs.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-023-documentation-traceability-hardening/index.md
 epic: EP-023

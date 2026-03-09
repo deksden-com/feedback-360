@@ -1,7 +1,7 @@
 ---
 description: FT-0233-docs-to-code-ownership-links feature plan for adding owning implementation and test links to priority docs.
 purpose: Read to strengthen navigation from SSoT docs to real implementation and verification paths.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-023-documentation-traceability-hardening/index.md
 epic: EP-023

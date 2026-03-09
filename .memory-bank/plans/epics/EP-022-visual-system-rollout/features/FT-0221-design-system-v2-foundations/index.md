@@ -1,7 +1,7 @@
 ---
 description: FT-0221-design-system-v2-foundations feature plan and evidence entry for EP-022-visual-system-rollout.
 purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-022-visual-system-rollout/index.md
 epic: EP-022

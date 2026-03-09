@@ -1,7 +1,7 @@
 ---
 description: EP-023-documentation-traceability-hardening epic plan, scope, progress, and evidence entry for strengthening docs quality, traceability, and ownership links.
 purpose: Read to understand the scope, completion state, and verification evidence for the documentation hardening wave.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/index.md
 epic: EP-023

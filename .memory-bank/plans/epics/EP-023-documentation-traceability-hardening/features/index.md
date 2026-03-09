@@ -1,7 +1,7 @@
 ---
 description: Feature catalog for EP-023-documentation-traceability-hardening with completed slice references.
 purpose: Read to navigate the documentation hardening slices and audit completion evidence per category.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-023-documentation-traceability-hardening/index.md
 epic: EP-023

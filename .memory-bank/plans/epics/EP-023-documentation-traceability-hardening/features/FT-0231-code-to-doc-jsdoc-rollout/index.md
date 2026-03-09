@@ -1,7 +1,7 @@
 ---
 description: FT-0231-code-to-doc-jsdoc-rollout feature plan for rolling out @docs and @see across key entrypoints.
 purpose: Read when implementing or auditing this slice so code-level navigation to SSoT is rolled out consistently.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-023-documentation-traceability-hardening/index.md
 epic: EP-023

@@ -12,3 +12,12 @@ UI в production вызывает серверные route handlers через H
 
 Правило: не должно быть расхождений поведения между HTTP и in-proc; HTTP — только адаптер транспорта.
 
+## Implementation entrypoints
+- `packages/client/src/index.ts`
+- `packages/client/src/http/`
+- `packages/client/src/inproc/`
+- `apps/web/src/app/api/`
+
+## Primary tests
+- `packages/client/src/ft-0142-client-layout.test.ts`
+- `packages/core/src/ft/ft-0013-questionnaires-no-db.test.ts`

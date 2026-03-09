@@ -18,6 +18,11 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 
+/**
+ * Shared results report surfaces used by employee, manager, and HR dashboards.
+ * @docs .memory-bank/spec/domain/results-visibility.md
+ * @see .memory-bank/spec/ui/screens/employee-results-dashboard.md
+ */
 const groupLabels: Record<string, string> = {
   manager: "Руководитель",
   peers: "Коллеги",

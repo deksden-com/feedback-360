@@ -1,7 +1,7 @@
 ---
 description: FT-0031-org-crud-history feature plan and evidence entry for EP-003-org-snapshots.
 purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-003-org-snapshots/index.md
 epic: EP-003

@@ -1,7 +1,7 @@
 ---
 description: Feature catalog for EP-017-models-matrix-ui.
 purpose: Read to see the slice breakdown inside the epic and navigate to individual feature plans.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-017-models-matrix-ui/index.md
 epic: EP-017

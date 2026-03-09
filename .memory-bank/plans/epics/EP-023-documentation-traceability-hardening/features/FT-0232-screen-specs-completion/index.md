@@ -1,7 +1,7 @@
 ---
 description: FT-0232-screen-specs-completion feature plan for completing and deepening route-level screen specs.
 purpose: Read to align screen contracts, routes, actions, domain states, and UI traceability under one consistent template.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-023-documentation-traceability-hardening/index.md
 epic: EP-023

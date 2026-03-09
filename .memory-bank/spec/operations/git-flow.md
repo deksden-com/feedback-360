@@ -94,3 +94,13 @@ Status: Draft (2026-03-04)
   1. ветка `hotfix/*` от `main`,
   2. merge в `main`,
   3. затем обязательный merge `main -> develop`, чтобы ветки не расходились.
+
+## Implementation entrypoints
+- `.github/workflows/ci.yml`
+- `.github/workflows/beta-smoke.yml`
+- `.memory-bank/spec/operations/deployment-architecture.md`
+
+## Primary tests
+- `pnpm docs:audit`
+- `gh run view <run-id>`
+- `PLAYWRIGHT_BASE_URL=https://beta.go360go.ru pnpm --filter @feedback-360/web test:smoke:beta`

@@ -14,3 +14,13 @@ Client API = набор типизированных операций v1 (reques
 - добавляет auth/tenancy контекст,
 - доставляет вызов (HTTP или in-proc).
 
+## Implementation entrypoints
+- `packages/api-contract/src/index.ts`
+- `packages/client/src/index.ts`
+- `packages/cli/src/index.ts`
+- `apps/web/src/features/identity-tenancy/lib/operation-context.ts`
+
+## Primary tests
+- `packages/client/src/ft-0142-client-layout.test.ts`
+- `packages/api-contract/src/ft-0142-contract-layout.test.ts`
+- `packages/cli/src/ft-0142-feature-area-cli-regression.test.ts`

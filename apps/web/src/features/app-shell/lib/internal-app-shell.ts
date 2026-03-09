@@ -3,6 +3,11 @@ import { createInprocClient } from "@feedback-360/client";
 
 import type { AppOperationContext } from "@/features/identity-tenancy/lib/operation-context";
 
+/**
+ * Workspace shell metadata and navigation composition.
+ * @docs .memory-bank/spec/ui/screens/internal-home.md
+ * @see .memory-bank/spec/ui/screen-registry.md
+ */
 export type InternalNavItem = {
   href: string;
   label: string;

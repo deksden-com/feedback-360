@@ -1,7 +1,7 @@
 ---
 description: FT-0142-backend-client-extraction feature plan and evidence entry for EP-014-feature-area-slices-refactor.
 purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-014-feature-area-slices-refactor/index.md
 epic: EP-014

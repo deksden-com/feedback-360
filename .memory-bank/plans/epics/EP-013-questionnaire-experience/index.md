@@ -1,7 +1,7 @@
 ---
 description: EP-013-questionnaire-experience epic plan, scope, progress, and evidence entrypoint.
 purpose: Read to understand the user value, feature map, and completion state of this epic.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/index.md
 epic: EP-013

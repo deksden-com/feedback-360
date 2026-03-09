@@ -1,7 +1,7 @@
 ---
 description: FT-0071-ai-run feature plan and evidence entry for EP-007-ai-webhooks.
 purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-007-ai-webhooks/index.md
 epic: EP-007
