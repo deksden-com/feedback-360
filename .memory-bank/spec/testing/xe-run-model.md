@@ -100,3 +100,13 @@ Assertions — единый механизм проверок.
 - финальная фаза обычно содержит полную проверку сценария целиком.
 
 Отдельную runtime-сущность для “global assertions” не вводим.
+
+## Implementation entrypoints
+- `packages/xe-runner/src/`
+- `packages/cli/src/legacy.ts`
+- `scenarios/XE-001/`
+
+## Primary tests
+- `packages/db/src/ft/ft-0201-xe-run-lifecycle.test.ts`
+- `packages/xe-runner/src/ft-0205-scenarios.test.ts`
+- `packages/cli/src/ft-0204-xe-cli.test.ts`

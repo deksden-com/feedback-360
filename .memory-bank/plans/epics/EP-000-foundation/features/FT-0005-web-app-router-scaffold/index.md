@@ -1,7 +1,7 @@
 ---
 description: FT-0005-web-app-router-scaffold feature plan and evidence entry for EP-000-foundation.
 purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-000-foundation/index.md
 epic: EP-000

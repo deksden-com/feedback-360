@@ -3,6 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
+/**
+ * Shared page-state surfaces for loading, empty, error, and inline feedback.
+ * @docs .memory-bank/spec/ui/design-system/component-usage.md
+ * @see .memory-bank/spec/testing/ui-automation-contract.md
+ */
 type PageStateAction = {
   href: string;
   label: string;

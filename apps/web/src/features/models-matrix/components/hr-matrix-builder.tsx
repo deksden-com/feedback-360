@@ -25,6 +25,11 @@ import {
   matrixRoleLabels,
 } from "../lib/models-matrix";
 
+/**
+ * HR campaign matrix builder and assignment editing surface.
+ * @docs .memory-bank/spec/ui/screens/hr-campaign-matrix.md
+ * @see .memory-bank/spec/domain/assignments-and-matrix.md
+ */
 type ActionResponse<T> =
   | {
       ok: true;

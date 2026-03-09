@@ -44,3 +44,14 @@ GUI login flow не является обязательным шагом для 
 - screen spec не дублирует POM-код, а описывает смысл и contract экрана;
 - POM mapping не дублирует доменные правила, а ссылается на screen spec и UI spec;
 - XE phases обращаются к GUI через POM/runtime API, а не через случайные CSS selectors.
+
+## Implementation entrypoints
+- `apps/web/playwright/tests/`
+- `apps/web/src/app/`
+- `apps/web/src/features/app-shell/components/internal-app-shell.tsx`
+- `apps/web/src/features/results/components/results-shared.tsx`
+
+## Primary tests
+- `apps/web/playwright/tests/ft-0212-testid-normalization.spec.ts`
+- `apps/web/playwright/tests/ft-0215-content-first-surfaces.spec.ts`
+- `packages/xe-runner/src/ft-0205-scenarios.test.ts`

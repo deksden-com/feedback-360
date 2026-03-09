@@ -1,7 +1,7 @@
 ---
 description: FT-0202-seed-subsystem feature plan and evidence entry for EP-020-cross-epic-scenarios.
 purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-020-cross-epic-scenarios/index.md
 epic: EP-020

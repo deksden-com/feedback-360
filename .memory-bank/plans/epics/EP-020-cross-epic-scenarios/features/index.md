@@ -1,7 +1,7 @@
 ---
 description: Feature catalog for EP-020-cross-epic-scenarios.
 purpose: Read to see the slice breakdown inside the epic and navigate to individual feature plans.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-020-cross-epic-scenarios/index.md
 epic: EP-020

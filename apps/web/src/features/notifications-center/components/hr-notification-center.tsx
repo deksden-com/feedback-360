@@ -28,6 +28,11 @@ import {
   weekdayOptions,
 } from "../lib/notifications-center";
 
+/**
+ * HR notification center for reminders, template previews, and delivery diagnostics.
+ * @docs .memory-bank/spec/ui/screens/hr-notifications.md
+ * @see .memory-bank/spec/notifications/notifications.md
+ */
 type ActionResponse<T> =
   | {
       ok: true;

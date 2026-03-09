@@ -172,6 +172,7 @@ const runEpicAudit = async (epicId) => {
 
 const runTraceabilityAudit = async () => {
   const errors = [];
+  const warnings = [];
 
   const pageFiles = (await collectFiles("apps/web/src/app", (entry) => entry.endsWith("page.tsx"))).sort();
   for (const relativePath of pageFiles) {
@@ -212,10 +213,34 @@ const runTraceabilityAudit = async () => {
     }
   }
 
+  const highValueUiComponents = [
+    "apps/web/src/features/app-shell/components/internal-app-shell.tsx",
+    "apps/web/src/features/app-shell/components/page-state.tsx",
+    "apps/web/src/features/app-shell/lib/internal-app-shell.ts",
+    "apps/web/src/features/app-shell/lib/home-dashboard.ts",
+    "apps/web/src/features/results/components/results-shared.tsx",
+    "apps/web/src/features/models-matrix/components/hr-model-editor.tsx",
+    "apps/web/src/features/models-matrix/components/hr-matrix-builder.tsx",
+    "apps/web/src/features/notifications-center/components/hr-notification-center.tsx",
+    "apps/web/src/features/ops/components/ops-console.tsx",
+  ];
+
+  for (const relativePath of highValueUiComponents) {
+    const contents = await readText(relativePath);
+    if (!contents.includes("@docs")) {
+      errors.push(`${relativePath} is missing @docs.`);
+    }
+  }
+
   const screenRegistry = await readText(".memory-bank/spec/ui/screen-registry.md");
   const registryRows = screenRegistry
     .split("\n")
     .filter((line) => line.startsWith("| `SCR-") && line.includes("|"));
+  const registryIds = new Set(
+    registryRows
+      .map((line) => line.match(/\|\s*`(SCR-[^`]+)`\s*\|/)?.[1])
+      .filter(Boolean),
+  );
 
   for (const row of registryRows) {
     if (row.includes("| planned |")) {
@@ -279,8 +304,8 @@ const runTraceabilityAudit = async () => {
   const referenceDocs = (
     await collectFiles(".memory-bank/guides/reference", (entry) => entry.endsWith(".md") && !entry.endsWith("index.md"))
   ).sort();
-  if (referenceDocs.length < 3) {
-    errors.push("guides/reference is still too thin; expected at least 3 reference docs.");
+  if (referenceDocs.length < 6) {
+    errors.push("guides/reference is still too thin; expected at least 6 reference docs.");
   }
 
   const governedFrontmatterDocs = [
@@ -299,6 +324,69 @@ const runTraceabilityAudit = async () => {
         errors.push(`${relativePath} is missing frontmatter field ${field}.`);
       }
     }
+
+    const linkedScreenIds = [];
+    if (frontmatter.screen_id) {
+      linkedScreenIds.push(frontmatter.screen_id);
+    }
+    if (Array.isArray(frontmatter.screen_ids)) {
+      linkedScreenIds.push(...frontmatter.screen_ids);
+    }
+
+    for (const screenId of linkedScreenIds) {
+      if (!registryIds.has(screenId)) {
+        errors.push(`${relativePath} references unknown screen id ${screenId}.`);
+      }
+    }
+  }
+
+  const guideAssets = (
+    await collectFiles(".memory-bank/guides/assets", (entry) =>
+      /\.(png|jpe?g|webp|gif)$/i.test(entry),
+    )
+  ).sort();
+
+  for (const relativePath of guideAssets) {
+    const base = path.basename(relativePath);
+    if (!base.includes("__(SCR-")) {
+      errors.push(`${relativePath} is missing __(SCR-...) screenshot suffix.`);
+      continue;
+    }
+
+    const match = base.match(/__\((SCR-[^)]+)\)\.[^.]+$/);
+    if (!match) {
+      errors.push(`${relativePath} has malformed screen-id screenshot suffix.`);
+      continue;
+    }
+
+    if (!registryIds.has(match[1])) {
+      errors.push(`${relativePath} references unknown screenshot screen id ${match[1]}.`);
+    }
+  }
+
+  const inlineStatusDocs = (
+    await collectFiles(".memory-bank", (entry) => entry.endsWith(".md"))
+  ).sort();
+  for (const relativePath of inlineStatusDocs) {
+    const contents = await readText(relativePath);
+    const frontmatter = parseFrontmatter(contents);
+    const inlineStatus = contents.match(/^Status:\s+(.+)$/m)?.[1];
+    if (!frontmatter.status || !inlineStatus) {
+      continue;
+    }
+
+    const normalizedFrontmatter = String(frontmatter.status).trim().toLowerCase();
+    const normalizedInline = inlineStatus.trim().toLowerCase();
+    const matches =
+      (normalizedFrontmatter === "active" && normalizedInline.startsWith("active")) ||
+      (normalizedFrontmatter === "draft" && normalizedInline.startsWith("draft")) ||
+      (normalizedFrontmatter === "completed" && normalizedInline.startsWith("completed"));
+
+    if (!matches) {
+      warnings.push(
+        `${relativePath} has frontmatter status "${frontmatter.status}" but inline status "${inlineStatus}".`,
+      );
+    }
   }
 
   if (errors.length > 0) {
@@ -313,6 +401,7 @@ const runTraceabilityAudit = async () => {
     routePages: pageFiles.length,
     screenSpecs: screenSpecFiles.length,
     referenceDocs: referenceDocs.length,
+    warnings,
   };
 };
 

@@ -4,6 +4,11 @@ import { createInprocClient } from "@feedback-360/client";
 import type { AppOperationContext } from "@/features/identity-tenancy/lib/operation-context";
 import { getRoleLabel } from "./internal-app-shell";
 
+/**
+ * Role-aware home dashboard composition and summary builders.
+ * @docs .memory-bank/spec/ui/screens/internal-home.md
+ * @see .memory-bank/spec/ui/redesign-screen-catalog.md
+ */
 export type HomeDashboardMetric = {
   title: string;
   value: string;

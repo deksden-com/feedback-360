@@ -1,7 +1,7 @@
 ---
 description: FT-0236-traceability-audit-automation feature plan for extending automated checks around documentation traceability and ownership links.
 purpose: Read to make documentation quality regressions detectable before merge.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-023-documentation-traceability-hardening/index.md
 epic: EP-023

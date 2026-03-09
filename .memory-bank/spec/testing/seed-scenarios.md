@@ -46,3 +46,13 @@ Status: Draft (2026-03-03)
 - `S9_campaign_completed_with_ai`: completed, есть AI-processed агрегаты текста.
 
 Подробное описание каждого seed: [Seed catalog](seeds/index.md) — какие данные создаются и какие handles возвращаются. Читать, чтобы тесты были детерминированными и не хардкодили id.
+
+## Implementation entrypoints
+- `packages/db/src/seeds.ts`
+- `packages/db/src/xe/`
+- `packages/cli/src/legacy.ts`
+- `scenarios/XE-001/fixtures/`
+
+## Primary tests
+- `packages/db/src/ft/ft-0201-xe-run-lifecycle.test.ts`
+- `packages/xe-runner/src/ft-0205-scenarios.test.ts`

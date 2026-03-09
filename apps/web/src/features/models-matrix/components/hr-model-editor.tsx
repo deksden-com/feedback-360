@@ -17,6 +17,11 @@ import {
   modelStatusLabels,
 } from "../lib/models-matrix";
 
+/**
+ * HR model editor for create, edit, and readonly model-version surfaces.
+ * @docs .memory-bank/spec/ui/screens/hr-model-detail.md
+ * @see .memory-bank/spec/domain/competency-models.md
+ */
 type SaveResponse = {
   ok: true;
   data: {

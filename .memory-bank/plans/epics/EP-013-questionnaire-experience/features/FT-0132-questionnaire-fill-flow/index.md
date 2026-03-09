@@ -1,7 +1,7 @@
 ---
 description: FT-0132-questionnaire-fill-flow feature plan and evidence entry for EP-013-questionnaire-experience.
 purpose: Read when implementing, verifying, or auditing this vertical slice so plan, acceptance, and evidence stay aligned.
-status: Active
+status: Completed
 date: 2026-03-09
 parent: .memory-bank/plans/epics/EP-013-questionnaire-experience/index.md
 epic: EP-013

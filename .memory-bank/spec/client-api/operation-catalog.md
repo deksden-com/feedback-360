@@ -316,3 +316,14 @@ Status: Draft (2026-03-03)
   - roles: any (including unauthenticated if we choose)
   - idempotent: yes
   - cli: `ping`
+
+## Implementation entrypoints
+- `packages/client/src/features/`
+- `packages/core/src/features/`
+- `packages/cli/src/legacy.ts`
+- `apps/web/src/app/api/`
+
+## Primary tests
+- `packages/cli/src/ft-0204-xe-cli.test.ts`
+- `apps/web/playwright/tests/ft-0171-model-catalog.spec.ts`
+- `apps/web/playwright/tests/ft-0181-reminder-schedule-editor.spec.ts`
